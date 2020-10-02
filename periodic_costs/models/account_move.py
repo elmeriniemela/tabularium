@@ -34,7 +34,8 @@ class AccountMove(models.Model):
                 ('cost_date_start', '>', record.cost_date_end),
                 # Latest date can't be before date_from (period start)
                 ('cost_date_end', '<', record.cost_date_start),
-                ('cost_tag_ids', 'in', record.cost_tag_ids.ids)
+                ('cost_tag_ids', 'in', record.cost_tag_ids.ids),
+                ('state', '!=', 'cancel'),
             ]
 
             overlapping = record.search(domain) - record
