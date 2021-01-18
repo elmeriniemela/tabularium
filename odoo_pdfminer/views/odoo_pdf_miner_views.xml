@@ -15,7 +15,7 @@
         <field name="arch" type="xml">
             <form string="odoo Data ">
                 <header>
-                    <button name="create_invoice" string="Create Invoice" type="object"/>
+                    <button name="%(action_account_pdfminer_import)d" string="Import Invoices" type="action"/>
                 </header>
                 <sheet>
                     <div class="oe_left" style="width: 500px;">
@@ -26,8 +26,8 @@
                     <notebook>
                         <page string="Details">
                             <group>
-                                <field name="pdf_source_filename" invisible="1"/>
-                                <field name="pdf_source" filename="pdf_source_filename"/>
+                                <field name="example_pdf_filename" invisible="1"/>
+                                <field name="example_pdf" filename="example_pdf_filename"/>
                                 <field name="source_text"/>
                                 <field name="re_amount_total"/>
                                 <field name="re_invoice_date"/>

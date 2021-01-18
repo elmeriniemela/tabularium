@@ -15,25 +15,21 @@ class AccountPDFminerImport(models.TransientModel):
     _name = 'account.pdfminer.import'
     _description = 'Import pdfminer'
 
+    pdfminer_id = fields.Many2one(
+        comodel_name='odoo.pdfminer',
+        readonly=True,
+        default=lambda self: self.env.context.get('active_model') == 'odoo.pdfminer' and  self.env.context.get('active_id'),
+        required=True,
+    )
+
     attachment_ids = fields.Many2many(
         comodel_name='ir.attachment',
         string='Files',
         required=True,
-         help='Get you eInvoices in electronic XML format and select them here.')
+    )
 
 
 
 
     def import_file(self):
-        invoices = self.env['account.move']
-        for i, data_file in enumerate(self.attachment_ids, start=1):
-            _logger.info("Importing (%d/%d): %s", i, len(self.attachment_ids), data_file.name)
-            data = base64.b64decode(data_file.datas)
-            invoices |= self.env['account.move'].parse_pdfminer(data)
-        return {
-            'type': 'ir.actions.act_window',
-            'name': "New invoices",
-            'res_model': 'account.move',
-            'domain': [('id', 'in', invoices.ids)],
-            'view_mode': 'tree,form',
-        }
+        return self.pdfminer_id.create_invoice(self.attachment_ids)

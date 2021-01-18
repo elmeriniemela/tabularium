@@ -19,7 +19,7 @@
     </record>
 
     <record id="action_account_pdfminer_import" model="ir.actions.act_window">
-        <field name="name">Import pdfminer</field>
+        <field name="name">Import Invoices</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">account.pdfminer.import</field>
         <field name="view_mode">form</field>

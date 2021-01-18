@@ -31,9 +31,9 @@ class OdooPDFMiner(models.Model):
 
     name = fields.Char(required=True)
 
-    pdf_source = fields.Binary()
+    example_pdf = fields.Binary()
 
-    pdf_source_filename = fields.Char()
+    example_pdf_filename = fields.Char()
 
     source_text = fields.Text(compute="_compute_source_text", store=True)
 
@@ -77,14 +77,19 @@ class OdooPDFMiner(models.Model):
             else:
                 record.result = False
 
-    def create_invoice(self):
-        vals = self._get_pdf_vals(record.text)
-        Move = self.env['account.move'].with_context(
-            default_journal_id=vals['journal_id'],
-            default_partner_id=vals['partner_id'],
-            default_type=vals['type'],
-        )
-        invoices = Move.create(vals)
+    def create_invoice(self, attachments):
+        invoices = self.env['account.move']
+        for attach in attachments:
+            vals = self._get_pdf_vals(self._pdf_to_text(attach.with_context(bin_size=False).datas))
+            Move = self.env['account.move'].with_context(
+                default_journal_id=vals['journal_id'],
+                default_partner_id=vals['partner_id'],
+                default_type=vals['type'],
+            )
+            move = Move.create(vals)
+            attach.res_id = move.id
+            attach.res_model = move._name
+            invoices += move
         return {
             'type': 'ir.actions.act_window',
             'name': "New invoices",
@@ -131,14 +136,14 @@ class OdooPDFMiner(models.Model):
         extract_text_to_fp(inf, outfp)
         outfp.seek(0)
         text = outfp.read()
-        return text
+        return text.decode()
 
 
-    @api.depends('pdf_source')
+    @api.depends('example_pdf')
     def _compute_source_text(self):
         for record in self:
             record.source_text = False
-            raw_data = record.with_context(bin_size=False).pdf_source
+            raw_data = record.with_context(bin_size=False).example_pdf
 
             if not raw_data:
                 continue

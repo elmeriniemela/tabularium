@@ -1,3 +1,3 @@
 # -*- coding: utf-8 -*-
 
-from . import account_import_finvoice
+from . import account_import_pdfminer

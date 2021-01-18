@@ -24,10 +24,12 @@
         'base',
         'account',
     ],
+    "external_dependencies": {"python": ["pdfminer"]},
 
     # always loaded
     'data': [
         'security/ir.model.access.csv',
+        'wizards/account_import_pdfminer_view.xml',
         'views/odoo_pdf_miner_views.xml',
     ],
 }
