@@ -70,7 +70,7 @@
 
     <!-- Top menu item -->
 
-    <menuitem name="Odoo PDF Miner" id="odoo_pdfminer.menu_root" action="odoo_pdfminer.action_window"/>
+    <menuitem name="Odoo PDF Miner" id="odoo_pdfminer.menu_root" action="odoo_pdfminer.action_window" web_icon="odoo_pdfminer,static/description/icon.png"/>
 
     <!-- menu categories -->
     <!--
