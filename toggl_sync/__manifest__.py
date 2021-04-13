@@ -1,0 +1,18 @@
+# -*- coding: utf-8 -*-
+{
+    'name': "Toggl Sync",
+    'summary': "Sync Toggl time entries with Odoo",
+    'author': "Elmeri Niemelä",
+    'website': "http://www.thecodebase.tech",
+    'category': 'Uncategorized',
+    'version': '1.0',
+    'depends': [
+        'base',
+    ],
+    'data': [
+        'security/ir.model.access.csv',
+        'wizards/toggl_export.xml',
+        'wizards/toggl_import.xml',
+        'views/toggl_entry.xml',
+    ],
+}
