@@ -1,2 +1,3 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_toggl_entry,access_toggl_entry.toggl_entry,model_toggl_entry,base.group_user,1,1,1,1
+access_toggl_task,access_toggl_task.toggl_task,model_toggl_task,base.group_user,1,1,1,1

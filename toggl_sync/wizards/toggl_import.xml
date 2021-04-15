@@ -9,7 +9,6 @@
         <field name="arch" type="xml">
             <form string="Toggl Import">
                 <group>
-                    <field name="api_token"/>
                     <field name="start_date"/>
                     <field name="end_date"/>
                 </group>

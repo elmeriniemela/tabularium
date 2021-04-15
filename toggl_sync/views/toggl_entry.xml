@@ -3,13 +3,13 @@
         <field name="name">toggl.entry.list</field>
         <field name="model">toggl.entry</field>
         <field name="arch" type="xml">
-            <tree>
+            <tree multi_edit="1" decoration-warning="dirty">
                 <field name="name"/>
                 <field name="description"/>
-                <field name="rounded_duration" widget="float_time"/>
-                <field name="duration" widget="float_time"/>
-                <field name="start"/>
-                <field name="stop"/>
+                <field name="rounded_duration" widget="float_time" sum="Rounded"/>
+                <field name="total_duration" widget="float_time" sum="Total"/>
+                <field name="date"/>
+                <field name="dirty" invisible="True"/>
             </tree>
         </field>
     </record>
@@ -21,6 +21,7 @@
             <form string="odoo Data ">
                 <header>
                     <button name="%(export_action)d" string="Export" type="action"/>
+                    <button name="push_toggl" string="Push to Toggl" type="object"/>
                 </header>
                 <sheet>
                     <div class="oe_left" style="width: 500px;">
@@ -32,10 +33,15 @@
                         <field name="description"/>
                         <field name="rounded_duration" widget="float_time"/>
                         <field name="duration" widget="float_time"/>
+                        <field name="date"/>
                         <field name="start"/>
                         <field name="stop"/>
+                        <field name="dirty"/>
                         <field name="toggl_id"/>
                         <field name="export_id"/>
+                        <field name="task_id"/>
+                        <field name="parent_id"/>
+                        <field name="child_ids"/>
                     </group>
                 </sheet>
             </form>
@@ -48,6 +54,7 @@
             <search string="Toggl Entry">
                 <field name="name"/>
                 <field name="description"/>
+                <field name="date"/>
                 <field name="start"/>
                 <field name="stop"/>
                 <field name="duration"/>
@@ -56,7 +63,20 @@
                 <separator/>
                 <filter string="Not Exported" name="not_exported" domain="['|', ('export_id', '=', False), ('export_id', '=', 0)]" />
                 <separator/>
+                <filter string="Hide Children" name="not_parent_id" domain="['|', ('parent_id', '=', False), ('parent_id', '=', 0)]" />
+                <separator/>
             </search>
+        </field>
+    </record>
+
+    <record id="push_toggl_action" model="ir.actions.server">
+        <field name="name">Push to Toggl</field>
+        <field name="model_id" ref="model_toggl_entry"/>
+        <field name="binding_model_id" ref="model_toggl_entry"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+records.push_toggl()
         </field>
     </record>
 
@@ -65,10 +85,12 @@
         <field name="name">Toggl Sync</field>
         <field name="res_model">toggl.entry</field>
         <field name="view_mode">tree,form</field>
-        <field name="context">{'search_default_not_exported': 1}</field>
+        <field name="context">{'search_default_not_exported': 1, 'search_default_not_parent_id': 1}</field>
     </record>
 
     <menuitem name="Toggl Sync" id="menu_root" action="entry_action" web_icon="toggl_sync,static/description/icon.png"/>
-    <menuitem name="Import" parent="menu_root" id="menu_import" action="import_action"/>
+    <menuitem name="Entries" parent="menu_root" id="menu_entries" action="entry_action"/>
+    <menuitem name="Import Entries" parent="menu_root" id="menu_import" action="import_action"/>
+    <menuitem name="Tasks" parent="menu_root" id="menu_tasks" action="task_action"/>
 
 </odoo>
