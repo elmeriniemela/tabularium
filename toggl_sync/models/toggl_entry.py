@@ -3,6 +3,10 @@
 import json
 from odoo import models, fields, api
 import re
+import xmlrpc.client
+import urllib.parse
+from odoo.exceptions import UserError
+import math
 
 
 class TogglTask(models.Model):
@@ -20,6 +24,54 @@ class TogglTask(models.Model):
         ('task_id_uniq', 'unique(task_id)', 'The task_id must be unique!'),
     ]
 
+    def update_invoicable(self):
+        url = self.env['ir.config_parameter'].sudo().get_param('toggl.export.url')
+        dbname = self.env['ir.config_parameter'].sudo().get_param('toggl.export.dbname')
+        username = self.env['ir.config_parameter'].sudo().get_param('toggl.export.username')
+        pwd = self.env['ir.config_parameter'].sudo().get_param('toggl.export.pwd')
+
+        if not all([url, dbname, username, pwd]):
+            raise UserError(_("Export credentials not configured."))
+
+
+        server_common = xmlrpc.client.ServerProxy(urllib.parse.urljoin(url, '/xmlrpc/common'))
+        uid = server_common.authenticate(dbname, username, pwd, {})
+        server_models = xmlrpc.client.ServerProxy(urllib.parse.urljoin(url, '/xmlrpc/object'))
+
+        for record in self:
+            task_res = server_models.execute_kw(dbname, uid, pwd,
+                'project.task', 'search_read',
+                [[
+                    ['id', '=', record.task_id]
+                ]],
+                {'fields': ['sale_line_id'], 'limit': 1}
+            )
+            if not task_res:
+                record.invoicable = False
+                continue
+
+            task_res = task_res[0]
+            if not task_res['sale_line_id']:
+                record.invoicable = False
+                continue
+
+            sale_line_id, name = task_res['sale_line_id']
+            sale_line_res = server_models.execute_kw(dbname, uid, pwd,
+                'sale.order.line', 'search_read',
+                [[
+                    ['id', '=', sale_line_id]
+                ]],
+                {'fields': ['price_unit'], 'limit': 1}
+            )
+
+            if not sale_line_res:
+                record.invoicable = False
+                continue
+
+            sale_line_res = sale_line_res[0]
+
+            record.invoicable = sale_line_res['price_unit'] > 0.0
+
 
 class TogglEntry(models.Model):
     _name = 'toggl.entry'
@@ -32,7 +84,7 @@ class TogglEntry(models.Model):
 
     description = fields.Char()
 
-    rounded_duration = fields.Float()
+    rounded_duration = fields.Float(compute='_compute_rounded_duration', store=True)
 
     dirty = fields.Boolean(compute='_compute_dirty')
 
@@ -46,9 +98,11 @@ class TogglEntry(models.Model):
 
     stop = fields.Datetime(required=True, readonly=True)
 
-    toggl_id = fields.Integer(required=True, readonly=True)
+    toggl_id = fields.Integer(string="Toggl ID", required=True, readonly=True)
 
-    export_id = fields.Integer(readonly=True)
+    export_id = fields.Integer(string="Export ID", readonly=True)
+
+    error = fields.Boolean(compute='_compute_error')
 
     task_id = fields.Many2one(
         comodel_name='toggl.task',
@@ -75,6 +129,32 @@ class TogglEntry(models.Model):
         ('export_id_uniq', 'unique(export_id)', 'The export_id must be unique!'),
         ('toggl_id_uniq', 'unique(toggl_id)', 'The toggl_id must be unique!'),
     ]
+
+
+    @api.depends('task_id.invoicable', 'description')
+    def _compute_error(self):
+        for record in self:
+            record.error = not record.description and record.task_id.invoicable
+
+
+    @api.depends('total_duration')
+    def _compute_rounded_duration(self):
+
+        def roundto(x, base):
+            return base * round(x/base)
+
+        def ceilto(x, base):
+            return base * math.ceil(x/base)
+
+        for record in self:
+            invoicable = record.task_id.invoicable
+            if invoicable:
+                # Round up to half hour.
+                record.rounded_duration = ceilto(record.total_duration, base=0.5)
+            else:
+                # Round to nearest 15min.
+                record.rounded_duration = roundto(record.total_duration, base=0.25)
+
 
     @api.depends('duration', 'child_ids.duration')
     def _compute_total_duration(self):

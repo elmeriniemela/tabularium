@@ -1,0 +1,62 @@
+<odoo>
+    <record id="task_list" model="ir.ui.view">
+        <field name="name">toggl.task.list</field>
+        <field name="model">toggl.task</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="invoicable"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="task_form" model="ir.ui.view">
+        <field name="name">toggl.task.form</field>
+        <field name="model">toggl.task</field>
+        <field name="arch" type="xml">
+            <form string="odoo Data ">
+                <header>
+                </header>
+                <sheet>
+                    <div class="oe_left" style="width: 500px;">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <field name="invoicable"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="task_search" model="ir.ui.view">
+        <field name="model">toggl.task</field>
+        <field name="arch" type="xml">
+            <search string="Toggl Task">
+                <field name="name"/>
+            </search>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="task_action">
+        <field name="name">Toggl Tasks</field>
+        <field name="res_model">toggl.task</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="update_invoicable_action" model="ir.actions.server">
+        <field name="name">Update Invoicable</field>
+        <field name="model_id" ref="model_toggl_task"/>
+        <field name="binding_model_id" ref="model_toggl_task"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+records.update_invoicable()
+        </field>
+    </record>
+
+    <menuitem name="Tasks" parent="menu_root" id="menu_tasks" action="task_action" sequence="3"/>
+
+</odoo>

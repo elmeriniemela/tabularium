@@ -3,13 +3,14 @@
         <field name="name">toggl.entry.list</field>
         <field name="model">toggl.entry</field>
         <field name="arch" type="xml">
-            <tree multi_edit="1" decoration-warning="dirty">
+            <tree multi_edit="1" decoration-warning="dirty" decoration-danger="error">
                 <field name="name"/>
                 <field name="description"/>
                 <field name="rounded_duration" widget="float_time" sum="Rounded"/>
                 <field name="total_duration" widget="float_time" sum="Total"/>
                 <field name="date"/>
                 <field name="dirty" invisible="True"/>
+                <field name="error" invisible="True"/>
             </tree>
         </field>
     </record>
@@ -65,6 +66,8 @@
                 <separator/>
                 <filter string="Hide Children" name="not_parent_id" domain="['|', ('parent_id', '=', False), ('parent_id', '=', 0)]" />
                 <separator/>
+                <filter string="Hide Zero" name="not_rounded_duration" domain="[('rounded_duration', '!=', False), ('rounded_duration', '!=', 0.0)]" />
+                <separator/>
             </search>
         </field>
     </record>
@@ -82,15 +85,21 @@ records.push_toggl()
 
 
     <record model="ir.actions.act_window" id="entry_action">
-        <field name="name">Toggl Sync</field>
+        <field name="name">Toggl Entries</field>
         <field name="res_model">toggl.entry</field>
         <field name="view_mode">tree,form</field>
-        <field name="context">{'search_default_not_exported': 1, 'search_default_not_parent_id': 1}</field>
+        <field name="context">
+            {
+                'search_default_not_exported': 1, 
+                'search_default_not_parent_id': 1,
+                'search_default_not_rounded_duration': 1,
+            }
+        </field>
     </record>
 
+
     <menuitem name="Toggl Sync" id="menu_root" action="entry_action" web_icon="toggl_sync,static/description/icon.png"/>
-    <menuitem name="Entries" parent="menu_root" id="menu_entries" action="entry_action"/>
-    <menuitem name="Import Entries" parent="menu_root" id="menu_import" action="import_action"/>
-    <menuitem name="Tasks" parent="menu_root" id="menu_tasks" action="task_action"/>
+    <menuitem name="Entries" parent="menu_root" id="menu_entries" action="entry_action" sequence="1"/>
+    <menuitem name="Import Entries" parent="menu_root" id="menu_import" action="import_action" sequence="2"/>
 
 </odoo>
