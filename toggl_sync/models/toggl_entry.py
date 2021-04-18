@@ -89,6 +89,16 @@ class TogglTask(models.Model):
             self.mapped('entry_ids')._compute_rounded_duration()
         return res
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        try:
+            with records.env.cr.savepoint():
+                records.fetch()
+        except Exception as error:
+            _logger.exception(error)
+        return records
+
 
 class TogglEntry(models.Model):
     _name = 'toggl.entry'
@@ -173,6 +183,12 @@ class TogglEntry(models.Model):
         server_models = xmlrpc.client.ServerProxy(urllib.parse.urljoin(url, '/xmlrpc/object'))
 
         for record in self:
+            export_id = record.export_id or record.parent_id.export_id
+            if export_id:
+                raise UserError(
+                    _("%s has already been exported! (Export ID: %s)") % (record.display_name, record.export_id)
+                )
+
             values = {
                 'date': record.date,
                 'name': ', '.join({e.description for e in (record | record.child_ids) if e.description} or '/'),
