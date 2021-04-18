@@ -6,6 +6,7 @@
             <tree multi_edit="1" decoration-warning="dirty" decoration-danger="error">
                 <field name="name"/>
                 <field name="description"/>
+                <field name="invoicable"/>
                 <field name="rounded_duration" widget="float_time" sum="Rounded"/>
                 <field name="total_duration" widget="float_time" sum="Total"/>
                 <field name="date"/>
@@ -32,6 +33,7 @@
                     </div>
                     <group>
                         <field name="description"/>
+                        <field name="invoicable"/>
                         <field name="rounded_duration" widget="float_time"/>
                         <field name="duration" widget="float_time"/>
                         <field name="date"/>

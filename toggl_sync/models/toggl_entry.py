@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import json
-from odoo import models, fields, api
+from odoo import models, fields, api, _
 import re
 import xmlrpc.client
 import urllib.parse
@@ -75,7 +75,7 @@ class TogglTask(models.Model):
 
 class TogglEntry(models.Model):
     _name = 'toggl.entry'
-    _description = 'Toggl Sync'
+    _description = 'Toggl Entry'
     _order = 'start desc'
 
     name = fields.Char(required=True)
@@ -111,6 +111,8 @@ class TogglEntry(models.Model):
         readonly=True,
     )
 
+    invoicable = fields.Boolean(related='task_id.invoicable', store=True)
+
     parent_id = fields.Many2one(
         comodel_name='toggl.entry',
         compute='_compute_parent_id',
@@ -131,10 +133,10 @@ class TogglEntry(models.Model):
     ]
 
 
-    @api.depends('task_id.invoicable', 'description')
+    @api.depends('invoicable', 'description')
     def _compute_error(self):
         for record in self:
-            record.error = not record.description and record.task_id.invoicable
+            record.error = not record.description and record.invoicable
 
 
     @api.depends('total_duration')
@@ -147,8 +149,7 @@ class TogglEntry(models.Model):
             return base * math.ceil(x/base)
 
         for record in self:
-            invoicable = record.task_id.invoicable
-            if invoicable:
+            if record.invoicable:
                 # Round up to half hour.
                 record.rounded_duration = ceilto(record.total_duration, base=0.5)
             else:
