@@ -20,6 +20,12 @@ class TogglTask(models.Model):
 
     invoicable = fields.Boolean()
 
+    entry_ids = fields.One2many(
+        comodel_name='toggl.entry',
+        inverse_name='task_id',
+        readonly=True,
+    )
+
     _sql_constraints = [
         ('task_id_uniq', 'unique(task_id)', 'The task_id must be unique!'),
     ]
@@ -71,6 +77,13 @@ class TogglTask(models.Model):
             sale_line_res = sale_line_res[0]
 
             record.invoicable = sale_line_res['price_unit'] > 0.0
+
+    def write(self, vals):
+        "TODO: for some reason the depends does not work."
+        res = super().write(vals)
+        if 'invoicable' in vals:
+            self.mapped('entry_ids')._compute_rounded_duration()
+        return res
 
 
 class TogglEntry(models.Model):
