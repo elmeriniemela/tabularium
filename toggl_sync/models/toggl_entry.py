@@ -186,6 +186,7 @@ class TogglEntry(models.Model):
                     values,
                 ],
             )
+            record.env.cr.commit() # we need to commit, since the export is committed in the target system.
 
 
     @api.depends('invoicable', 'description')
