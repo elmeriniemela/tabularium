@@ -16,6 +16,8 @@ class TogglTask(models.Model):
 
     task_id = fields.Integer(required=True, readonly=True)
 
+    project_id = fields.Integer(required=True, readonly=True)
+
     name = fields.Char(required=True, readonly=True)
 
     invoicable = fields.Boolean()
@@ -30,7 +32,7 @@ class TogglTask(models.Model):
         ('task_id_uniq', 'unique(task_id)', 'The task_id must be unique!'),
     ]
 
-    def update_invoicable(self):
+    def fetch(self):
         url = self.env['ir.config_parameter'].sudo().get_param('toggl.export.url')
         dbname = self.env['ir.config_parameter'].sudo().get_param('toggl.export.dbname')
         username = self.env['ir.config_parameter'].sudo().get_param('toggl.export.username')
@@ -50,13 +52,15 @@ class TogglTask(models.Model):
                 [[
                     ['id', '=', record.task_id]
                 ]],
-                {'fields': ['sale_line_id'], 'limit': 1}
+                {'fields': ['sale_line_id', 'project_id'], 'limit': 1}
             )
             if not task_res:
                 record.invoicable = False
                 continue
 
             task_res = task_res[0]
+            record.project_id, name = task_res['project_id']
+
             if not task_res['sale_line_id']:
                 record.invoicable = False
                 continue
@@ -152,6 +156,36 @@ class TogglEntry(models.Model):
             if children: # recursion condition
                 children.write({'name': vals['name']})
         return res
+
+
+    def export(self):
+        url = self.env['ir.config_parameter'].sudo().get_param('toggl.export.url')
+        dbname = self.env['ir.config_parameter'].sudo().get_param('toggl.export.dbname')
+        username = self.env['ir.config_parameter'].sudo().get_param('toggl.export.username')
+        pwd = self.env['ir.config_parameter'].sudo().get_param('toggl.export.pwd')
+
+        if not all([url, dbname, username, pwd]):
+            raise UserError(_("Export credentials not configured."))
+
+
+        server_common = xmlrpc.client.ServerProxy(urllib.parse.urljoin(url, '/xmlrpc/common'))
+        uid = server_common.authenticate(dbname, username, pwd, {})
+        server_models = xmlrpc.client.ServerProxy(urllib.parse.urljoin(url, '/xmlrpc/object'))
+
+        for record in self:
+            values = {
+                'date': record.date,
+                'name': ', '.join({e.description for e in (record | record.child_ids) if e.description} or '/'),
+                'task_id': record.task_id.task_id,
+                'project_id': record.task_id.project_id,
+                'unit_amount': record.rounded_duration,
+            }
+            record.export_id = server_models.execute_kw(dbname, uid, pwd,
+                'account.analytic.line', 'create',
+                [
+                    values,
+                ],
+            )
 
 
     @api.depends('invoicable', 'description')

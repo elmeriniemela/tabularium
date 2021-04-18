@@ -25,6 +25,7 @@
                     </div>
                     <group>
                         <field name="invoicable"/>
+                        <field name="project_id"/>
                         <field name="entry_ids"/>
                     </group>
                 </sheet>
@@ -47,14 +48,14 @@
         <field name="view_mode">tree,form</field>
     </record>
 
-    <record id="update_invoicable_action" model="ir.actions.server">
-        <field name="name">Update Invoicable</field>
+    <record id="fetch_action" model="ir.actions.server">
+        <field name="name">Update From External</field>
         <field name="model_id" ref="model_toggl_task"/>
         <field name="binding_model_id" ref="model_toggl_task"/>
         <field name="binding_view_types">list</field>
         <field name="state">code</field>
         <field name="code">
-records.update_invoicable()
+records.fetch()
         </field>
     </record>
 
