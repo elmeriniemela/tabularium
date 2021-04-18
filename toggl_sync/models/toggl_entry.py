@@ -145,6 +145,14 @@ class TogglEntry(models.Model):
         ('toggl_id_uniq', 'unique(toggl_id)', 'The toggl_id must be unique!'),
     ]
 
+    def write(self, vals):
+        res = super().write(vals)
+        if 'name' in vals:
+            children = self.mapped('child_ids')
+            if children: # recursion condition
+                children.write({'name': vals['name']})
+        return res
+
 
     @api.depends('invoicable', 'description')
     def _compute_error(self):
