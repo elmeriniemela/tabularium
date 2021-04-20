@@ -14,11 +14,11 @@ class TogglTask(models.Model):
     _description = 'Toggl Task'
     _order = 'task_id desc'
 
+    name = fields.Char(required=True, readonly=True)
+
     task_id = fields.Integer(required=True, readonly=True)
 
-    project_id = fields.Integer(required=True, readonly=True)
-
-    name = fields.Char(required=True, readonly=True)
+    project_id = fields.Integer(readonly=True)
 
     invoicable = fields.Boolean()
 
