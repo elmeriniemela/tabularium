@@ -31,6 +31,9 @@ class TogglImport(models.TransientModel):
         Entry = self.env['toggl.entry']
         existing = {e.toggl_id: e for e in Entry.search([])}
         for entry in entries:
+            if not entry.get('stop'):
+                continue # running entry
+
             toggl_id = entry['id']
             vals = {
                 'toggl_name': entry['description'],
