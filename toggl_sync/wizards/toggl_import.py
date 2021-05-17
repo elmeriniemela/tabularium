@@ -28,7 +28,7 @@ class TogglImport(models.TransientModel):
 
         date = lambda dt_str: dateutil.parser.parse(dt_str).astimezone(pytz.utc).replace(tzinfo=None)
 
-        Entry = self.env['toggl.entry']
+        Entry = self.env['toggl.entry'].with_context(active_test=False)
         existing = {e.toggl_id: e for e in Entry.search([])}
         for entry in entries:
             if not entry.get('stop'):

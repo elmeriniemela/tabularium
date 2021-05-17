@@ -107,6 +107,8 @@ class TogglEntry(models.Model):
 
     name = fields.Char(required=True)
 
+    active = fields.Boolean(default=True)
+
     toggl_name = fields.Char(required=True)
 
     description = fields.Char()
