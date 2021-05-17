@@ -259,6 +259,7 @@ class TogglEntry(models.Model):
                 continue
 
             record.parent_id = record.search([
+                ('parent_id', '=', False),
                 ('date', '=', record.date),
                 ('id', '!=', record._origin.id),
                 '|',
