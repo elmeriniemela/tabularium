@@ -232,6 +232,17 @@ class TogglEntry(models.Model):
         for record in self:
             record.total_duration = record.duration + sum(record.child_ids.mapped('duration'))
 
+
+    def recompute(self):
+        self._compute_task_id()
+        self._compute_error() # needs task_id.invoicable
+        self._compute_date()
+        self._compute_parent_id() # needs task_id, date,
+        self._compute_total_duration() # needs parent_id
+        self._compute_rounded_duration() # needs total_duration
+        self._compute_dirty()
+
+
     @api.depends('name')
     def _compute_task_id(self):
         Task = self.env['toggl.task']

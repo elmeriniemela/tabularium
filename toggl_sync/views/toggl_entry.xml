@@ -22,6 +22,7 @@
         <field name="arch" type="xml">
             <form string="odoo Data ">
                 <header>
+                    <button name="recompute" string="Re-compute" type="object"/>
                     <button name="export" string="Export" type="object"/>
                     <button name="push_toggl" string="Push to Toggl" type="object"/>
                 </header>
@@ -35,6 +36,7 @@
                         <field name="description"/>
                         <field name="invoicable"/>
                         <field name="rounded_duration" widget="float_time"/>
+                        <field name="total_duration" widget="float_time"/>
                         <field name="duration" widget="float_time"/>
                         <field name="date"/>
                         <field name="start"/>
@@ -70,6 +72,8 @@
                 <separator/>
                 <filter string="Hide Zero" name="not_rounded_duration" domain="[('rounded_duration', '!=', False), ('rounded_duration', '!=', 0.0)]" />
                 <separator/>
+                <filter string="No description" name="not_description" domain="[('description', '=', False)]" />
+                <separator/>
             </search>
         </field>
     </record>
@@ -96,6 +100,17 @@ records.export()
         </field>
     </record>
 
+    <record id="export_recompute" model="ir.actions.server">
+        <field name="name">Re-compute</field>
+        <field name="model_id" ref="model_toggl_entry"/>
+        <field name="binding_model_id" ref="model_toggl_entry"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+records.recompute()
+        </field>
+    </record>
+
 
 
     <record model="ir.actions.act_window" id="entry_action">
@@ -104,7 +119,7 @@ records.export()
         <field name="view_mode">tree,form</field>
         <field name="context">
             {
-                'search_default_not_exported': 1, 
+                'search_default_not_exported': 1,
                 'search_default_not_parent_id': 1,
                 'search_default_not_rounded_duration': 1,
             }
