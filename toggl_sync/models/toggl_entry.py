@@ -233,7 +233,7 @@ class TogglEntry(models.Model):
             record.total_duration = record.duration + sum(record.child_ids.mapped('duration'))
 
 
-    def recompute(self):
+    def recompute_depends(self):
         self._compute_task_id()
         self._compute_error() # needs task_id.invoicable
         self._compute_date()
