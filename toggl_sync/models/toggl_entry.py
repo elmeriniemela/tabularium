@@ -18,6 +18,7 @@ class TogglTask(models.Model):
 
     task_id = fields.Integer(required=True, readonly=True)
 
+    project_name = fields.Char(required=True, readonly=True)
     project_id = fields.Integer(readonly=True)
 
     invoicable = fields.Boolean()
@@ -46,41 +47,35 @@ class TogglTask(models.Model):
         uid = server_common.authenticate(dbname, username, pwd, {})
         server_models = xmlrpc.client.ServerProxy(urllib.parse.urljoin(url, '/xmlrpc/object'))
 
+        task_res = server_models.execute_kw(dbname, uid, pwd,
+            'project.task', 'search_read',
+            [[
+                ['id', 'in', self.mapped('task_id')]
+            ]],
+            {'fields': ['sale_line_id', 'project_id', 'id']}
+        )
+
+        project_map = {d['id']: d['project_id'] for d in task_res if d['project_id']}
+        sale_line_map = {d['id']: d['sale_line_id'][0] for d in task_res if d['sale_line_id']}
+
+        sale_line_res = server_models.execute_kw(dbname, uid, pwd,
+            'sale.order.line', 'search_read',
+            [[
+                ['id', 'in', list(sale_line_map.values())]
+            ]],
+            {'fields': ['price_unit', 'id']}
+        )
+
+        price_unit_map = {d['id']: d['price_unit'] for d in sale_line_res}
+
+
         for record in self:
-            task_res = server_models.execute_kw(dbname, uid, pwd,
-                'project.task', 'search_read',
-                [[
-                    ['id', '=', record.task_id]
-                ]],
-                {'fields': ['sale_line_id', 'project_id'], 'limit': 1}
-            )
-            if not task_res:
+            record.project_id, record.project_name = project_map.get(record.task_id, (False, False))
+            if price_unit_map.get(sale_line_map.get(record.task_id), 0.0) > 0.0:
+                record.invoicable = True
+            else:
                 record.invoicable = False
-                continue
 
-            task_res = task_res[0]
-            record.project_id, name = task_res['project_id']
-
-            if not task_res['sale_line_id']:
-                record.invoicable = False
-                continue
-
-            sale_line_id, name = task_res['sale_line_id']
-            sale_line_res = server_models.execute_kw(dbname, uid, pwd,
-                'sale.order.line', 'search_read',
-                [[
-                    ['id', '=', sale_line_id]
-                ]],
-                {'fields': ['price_unit'], 'limit': 1}
-            )
-
-            if not sale_line_res:
-                record.invoicable = False
-                continue
-
-            sale_line_res = sale_line_res[0]
-
-            record.invoicable = sale_line_res['price_unit'] > 0.0
 
     def write(self, vals):
         "TODO: for some reason the depends does not work."
@@ -95,6 +90,7 @@ class TogglTask(models.Model):
         try:
             with records.env.cr.savepoint():
                 records.fetch()
+                records.mapped('entry_ids')._compute_rounded_duration()
         except Exception as error:
             _logger.exception(error)
         return records
@@ -213,7 +209,7 @@ class TogglEntry(models.Model):
             record.error = not record.description and record.invoicable
 
 
-    @api.depends('total_duration')
+    @api.depends('total_duration', 'invoicable')
     def _compute_rounded_duration(self):
 
         def roundto(x, base):
@@ -224,8 +220,8 @@ class TogglEntry(models.Model):
 
         for record in self:
             if record.invoicable:
-                # Round up to half hour.
-                record.rounded_duration = ceilto(record.total_duration, base=0.5)
+                # At least 30min, and round to nearest 30 min, biased up by 3min. i.e 1h 12min rounds to 1h 30min
+                record.rounded_duration = roundto(3/60 + max(record.total_duration, 0.5), base=0.5)
             else:
                 # Round to nearest 15min.
                 record.rounded_duration = roundto(record.total_duration, base=0.25)
