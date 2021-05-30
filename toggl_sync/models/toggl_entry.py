@@ -18,7 +18,7 @@ class TogglTask(models.Model):
 
     task_id = fields.Integer(required=True, readonly=True)
 
-    project_name = fields.Char(required=True, readonly=True)
+    project_name = fields.Char(readonly=True)
     project_id = fields.Integer(readonly=True)
 
     invoicable = fields.Boolean()
