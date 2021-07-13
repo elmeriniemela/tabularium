@@ -90,7 +90,7 @@ class TogglTask(models.Model):
         try:
             with records.env.cr.savepoint():
                 records.fetch()
-                records.mapped('entry_ids')._compute_rounded_duration()
+                records.recompute_depends()
         except Exception as error:
             _logger.exception(error)
         return records
@@ -220,8 +220,8 @@ class TogglEntry(models.Model):
 
         for record in self:
             if record.invoicable:
-                # At least 30min, and round to nearest 30 min, biased up by 3min. i.e 1h 12min rounds to 1h 30min
-                record.rounded_duration = roundto(3/60 + max(record.total_duration, 0.5), base=0.5)
+                # At least 30min, and round to nearest 15 min, biased up by 3min. i.e 1h 6min rounds to 1h 15min
+                record.rounded_duration = roundto(3/60 + max(record.total_duration, 0.5), base=0.25)
             else:
                 # Round to nearest 15min.
                 record.rounded_duration = roundto(record.total_duration, base=0.25)
