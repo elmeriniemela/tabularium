@@ -7,6 +7,9 @@ import xmlrpc.client
 import urllib.parse
 from odoo.exceptions import UserError
 import math
+import logging
+
+_logger = logging.getLogger(__name__)
 
 
 class TogglTask(models.Model):
