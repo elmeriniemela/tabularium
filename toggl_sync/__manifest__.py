@@ -14,5 +14,6 @@
         'wizards/toggl_import.xml',
         'views/toggl_entry.xml',
         'views/toggl_task.xml',
+        'views/res_users.xml',
     ],
 }

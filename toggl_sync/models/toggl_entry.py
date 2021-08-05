@@ -1,12 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import json
 from odoo import models, fields, api, _
 import re
-import xmlrpc.client
-import urllib.parse
 from odoo.exceptions import UserError
-import math
 import logging
 
 _logger = logging.getLogger(__name__)
@@ -37,19 +33,7 @@ class TogglTask(models.Model):
     ]
 
     def fetch(self):
-        url = self.env['ir.config_parameter'].sudo().get_param('toggl.export.url')
-        dbname = self.env['ir.config_parameter'].sudo().get_param('toggl.export.dbname')
-        username = self.env['ir.config_parameter'].sudo().get_param('toggl.export.username')
-        pwd = self.env['ir.config_parameter'].sudo().get_param('toggl.export.pwd')
-
-        if not all([url, dbname, username, pwd]):
-            raise UserError(_("Export credentials not configured."))
-
-
-        server_common = xmlrpc.client.ServerProxy(urllib.parse.urljoin(url, '/xmlrpc/common'))
-        uid = server_common.authenticate(dbname, username, pwd, {})
-        server_models = xmlrpc.client.ServerProxy(urllib.parse.urljoin(url, '/xmlrpc/object'))
-
+        server_models, dbname, uid, pwd = self.env.user._get_toggl_export_proxy()
         task_res = server_models.execute_kw(dbname, uid, pwd,
             'project.task', 'search_read',
             [[
@@ -84,7 +68,7 @@ class TogglTask(models.Model):
         "TODO: for some reason the depends does not work."
         res = super().write(vals)
         if 'invoicable' in vals:
-            self.mapped('entry_ids')._compute_rounded_duration()
+            self.mapped('entry_ids').recompute_depends()
         return res
 
     @api.model_create_multi
@@ -93,7 +77,6 @@ class TogglTask(models.Model):
         try:
             with records.env.cr.savepoint():
                 records.fetch()
-                records.recompute_depends()
         except Exception as error:
             _logger.exception(error)
         return records
@@ -105,6 +88,8 @@ class TogglEntry(models.Model):
     _order = 'start desc'
 
     name = fields.Char(required=True)
+
+    export_task_url = fields.Char(compute='_compute_export_task_url')
 
     active = fields.Boolean(default=True)
 
@@ -160,6 +145,13 @@ class TogglEntry(models.Model):
         ('toggl_id_uniq', 'unique(toggl_id)', 'The toggl_id must be unique!'),
     ]
 
+    @api.depends('task_id.task_id')
+    def _compute_export_task_url(self):
+        url = self.env.user.toggl_export_url
+        for record in self:
+            record.export_task_url = '%sweb#id=%d&view_type=form&model=project.task' % (url, record.task_id.task_id or 0)
+
+
     def write(self, vals):
         res = super().write(vals)
         if 'name' in vals:
@@ -170,18 +162,7 @@ class TogglEntry(models.Model):
 
 
     def export(self):
-        url = self.env['ir.config_parameter'].sudo().get_param('toggl.export.url')
-        dbname = self.env['ir.config_parameter'].sudo().get_param('toggl.export.dbname')
-        username = self.env['ir.config_parameter'].sudo().get_param('toggl.export.username')
-        pwd = self.env['ir.config_parameter'].sudo().get_param('toggl.export.pwd')
-
-        if not all([url, dbname, username, pwd]):
-            raise UserError(_("Export credentials not configured."))
-
-
-        server_common = xmlrpc.client.ServerProxy(urllib.parse.urljoin(url, '/xmlrpc/common'))
-        uid = server_common.authenticate(dbname, username, pwd, {})
-        server_models = xmlrpc.client.ServerProxy(urllib.parse.urljoin(url, '/xmlrpc/object'))
+        server_models, dbname, uid, pwd = self.env.user._get_toggl_export_proxy()
 
         for record in self:
             export_id = record.export_id or record.parent_id.export_id
@@ -218,16 +199,9 @@ class TogglEntry(models.Model):
         def roundto(x, base):
             return base * round(x/base)
 
-        def ceilto(x, base):
-            return base * math.ceil(x/base)
-
         for record in self:
-            if record.invoicable:
-                # At least 30min, and round to nearest 15 min, biased up by 3min. i.e 1h 6min rounds to 1h 15min
-                record.rounded_duration = roundto(3/60 + max(record.total_duration, 0.5), base=0.25)
-            else:
-                # Round to nearest 15min.
-                record.rounded_duration = roundto(record.total_duration, base=0.25)
+            # Round to nearest 15min.
+            record.rounded_duration = roundto(record.total_duration, base=0.25)
 
 
     @api.depends('duration', 'child_ids.duration')
@@ -290,7 +264,7 @@ class TogglEntry(models.Model):
 
     def push_toggl(self):
         for record in self:
-            record.env['toggl'].update_time_entry(
+            record.env.user.toggl_update_time_entry(
                 time_entry_id=record.toggl_id,
                 json={'time_entry': {'description': record.name}}
             )

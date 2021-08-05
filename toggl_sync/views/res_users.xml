@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_users_form_simple_modif" model="ir.ui.view">
+        <field name="name">res.users.preferences.form</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form_simple_modif"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='email']" position="after">
+                <field name="toggl_api_token"/>
+                <field name="toggl_export_url"/>
+                <field name="toggl_export_dbname"/>
+                <field name="toggl_export_username"/>
+                <field name="toggl_export_pwd"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

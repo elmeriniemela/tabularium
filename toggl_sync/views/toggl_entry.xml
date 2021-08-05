@@ -45,6 +45,7 @@
                         <field name="dirty"/>
                         <field name="toggl_id"/>
                         <field name="export_id"/>
+                        <field name="export_task_url" widget="url"/>
                         <field name="task_id"/>
                         <field name="parent_id"/>
                         <field name="child_ids"/>

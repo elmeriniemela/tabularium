@@ -1,4 +1,4 @@
 # -*- coding: utf-8 -*-
 
-from . import toggl
+from . import res_users
 from . import toggl_entry

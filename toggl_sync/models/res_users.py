@@ -1,0 +1,71 @@
+# -*- coding: utf-8 -*-
+import xmlrpc.client
+import urllib.parse
+import requests
+from odoo import models, fields, api, _
+from odoo.exceptions import UserError
+
+class ResUsers(models.Model):
+    _inherit = 'res.users'
+
+    toggl_api_token = fields.Char()
+    toggl_export_url = fields.Char()
+    toggl_export_dbname = fields.Char()
+    toggl_export_username = fields.Char()
+    toggl_export_pwd = fields.Char()
+
+
+    def __init__(self, pool, cr):
+        init_res = super(ResUsers, self).__init__(pool, cr)
+        toggl_fields = [
+            'toggl_api_token',
+            'toggl_export_url',
+            'toggl_export_dbname',
+            'toggl_export_username',
+            'toggl_export_pwd',
+        ]
+        type(self).SELF_WRITEABLE_FIELDS = list(set(toggl_fields + self.SELF_WRITEABLE_FIELDS))
+        type(self).SELF_READABLE_FIELDS = list(set(toggl_fields + self.SELF_READABLE_FIELDS))
+        return init_res
+
+    def _get_toggl_export_proxy(self):
+        self.ensure_one()
+        url = self.toggl_export_url
+        dbname = self.toggl_export_dbname
+        username = self.toggl_export_username
+        pwd = self.toggl_export_pwd
+
+        if not all([url, dbname, username, pwd]):
+            raise UserError(_("Export credentials not configured."))
+
+
+        server_common = xmlrpc.client.ServerProxy(urllib.parse.urljoin(url, '/xmlrpc/common'))
+        uid = server_common.authenticate(dbname, username, pwd, {})
+        return xmlrpc.client.ServerProxy(urllib.parse.urljoin(url, '/xmlrpc/object')), dbname, uid, pwd
+
+    def toggl_api_call(self, method, endpoint, **kwargs):
+        api_token = self.toggl_api_token
+        response = getattr(requests, method)(
+            f'https://api.track.toggl.com/api/v8/{endpoint}',
+            headers={"content-type": "application/json"},
+            auth=(api_token, "api_token"),
+            timeout=10,
+            **kwargs
+        )
+        if response.status_code != 200:
+            raise UserError(
+                _("Error from toggl:\nURL=%s\nSTATUS=%s\nMESSAGE=%s") %
+                    (response.url, response.status_code, response.text)
+            )
+        return response.json()
+
+    def toggl_time_entries(self, start_date, end_date):
+        return self.toggl_api_call('get', 'time_entries', params={
+            'start_date': fields.Datetime.context_timestamp(self, start_date).isoformat(),
+            'end_date': fields.Datetime.context_timestamp(self, end_date).isoformat(),
+        })
+
+
+    def toggl_update_time_entry(self, time_entry_id, **kwargs):
+        return self.toggl_api_call('put', f'time_entries/{time_entry_id}', **kwargs)
+

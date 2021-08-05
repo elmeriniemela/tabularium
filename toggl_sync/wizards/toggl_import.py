@@ -24,7 +24,7 @@ class TogglImport(models.TransientModel):
     )
 
     def import_entries(self):
-        entries = self.env['toggl'].time_entries(self.start_date, self.end_date)
+        entries = self.env.user.toggl_time_entries(self.start_date, self.end_date)
 
         date = lambda dt_str: dateutil.parser.parse(dt_str).astimezone(pytz.utc).replace(tzinfo=None)
 
@@ -48,6 +48,9 @@ class TogglImport(models.TransientModel):
                 existing[toggl_id] = Entry.with_context(default_toggl_id=toggl_id).create(vals)
 
             Entry += existing[toggl_id]
+
+        for toggl_entries in existing.values():
+            toggl_entries.recompute_depends()
 
         [action] = self.env.ref('toggl_sync.entry_action').read()
         return action
