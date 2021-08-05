@@ -34,6 +34,7 @@
                     </div>
                     <group>
                         <field name="description"/>
+                        <field name="active"/>
                         <field name="invoicable"/>
                         <field name="rounded_duration" widget="float_time"/>
                         <field name="total_duration" widget="float_time"/>
