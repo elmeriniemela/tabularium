@@ -81,6 +81,8 @@ class TogglTask(models.Model):
             _logger.exception(error)
         return records
 
+class BigInteger(fields.Integer):
+    column_type = ('int8', 'int8')
 
 class TogglEntry(models.Model):
     _name = 'toggl.entry'
@@ -111,7 +113,7 @@ class TogglEntry(models.Model):
 
     stop = fields.Datetime(required=True, readonly=True)
 
-    toggl_id = fields.Integer(string="Toggl ID", required=True, readonly=True)
+    toggl_id = BigInteger(string="Toggl ID", required=True, readonly=True)
 
     export_id = fields.Integer(string="Export ID", readonly=True)
 
