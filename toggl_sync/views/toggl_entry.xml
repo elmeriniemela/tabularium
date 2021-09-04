@@ -3,15 +3,17 @@
         <field name="name">toggl.entry.list</field>
         <field name="model">toggl.entry</field>
         <field name="arch" type="xml">
-            <tree multi_edit="1" decoration-warning="dirty" decoration-danger="error">
-                <field name="name"/>
+            <tree editable="top" multi_edit="1" decoration-warning="dirty" decoration-danger="error">
                 <field name="description"/>
+                <field name="name"/>
                 <field name="invoicable"/>
                 <field name="rounded_duration" widget="float_time" sum="Rounded"/>
                 <field name="total_duration" widget="float_time" sum="Total"/>
                 <field name="date"/>
                 <field name="dirty" invisible="True"/>
                 <field name="error" invisible="True"/>
+                <button string="Task" name="action_view_task" type="object"/>
+                <button string="Open" name="action_open_form" type="object"/>
             </tree>
         </field>
     </record>

@@ -162,6 +162,21 @@ class TogglEntry(models.Model):
                 children.write({'name': vals['name']})
         return res
 
+    def action_open_form(self):
+        self.ensure_one()
+        [action] = self.env.ref('toggl_sync.entry_action').read()
+        action.update({
+            'views': [[False, 'form']],
+            'res_id': self.id
+        })
+        return action
+
+    def action_view_task(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_url',
+            'url': self.export_task_url,
+        }
 
     def export(self):
         server_models, dbname, uid, pwd = self.env.user._get_toggl_export_proxy()
