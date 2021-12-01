@@ -194,7 +194,10 @@ class TogglEntry(models.Model):
                 method_args = 'account.analytic.line', 'write', [export_id, values]
             else:
                 method_args = 'account.analytic.line', 'create', [values]
-            record.export_id = server_models.execute_kw(dbname, uid, pwd, *method_args)
+
+            result = server_models.execute_kw(dbname, uid, pwd, *method_args)
+            if not export_id:
+                record.export_id = result
             record.env.cr.commit() # we need to commit, since the export is committed in the target system.
 
 
