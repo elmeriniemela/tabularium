@@ -182,12 +182,6 @@ class TogglEntry(models.Model):
         server_models, dbname, uid, pwd = self.env.user._get_toggl_export_proxy()
 
         for record in self:
-            export_id = record.export_id or record.parent_id.export_id
-            if export_id:
-                raise UserError(
-                    _("%s has already been exported! (Export ID: %s)") % (record.display_name, record.export_id)
-                )
-
             values = {
                 'date': record.date,
                 'name': ', '.join({e.description for e in (record | record.child_ids) if e.description} or '/'),
@@ -195,12 +189,12 @@ class TogglEntry(models.Model):
                 'project_id': record.task_id.project_id,
                 'unit_amount': record.rounded_duration,
             }
-            record.export_id = server_models.execute_kw(dbname, uid, pwd,
-                'account.analytic.line', 'create',
-                [
-                    values,
-                ],
-            )
+            export_id = record.export_id or record.parent_id.export_id
+            if export_id:
+                method_args = 'account.analytic.line', 'write', [export_id, values]
+            else:
+                method_args = 'account.analytic.line', 'create', [values]
+            record.export_id = server_models.execute_kw(dbname, uid, pwd, *method_args)
             record.env.cr.commit() # we need to commit, since the export is committed in the target system.
 
 
