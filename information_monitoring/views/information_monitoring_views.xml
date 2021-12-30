@@ -1,0 +1,105 @@
+<odoo>
+    <record model="ir.ui.view" id="data_list">
+        <field name="name">information_monitoring_data list</field>
+        <field name="model">information.monitoring.data</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="data_form" model="ir.ui.view">
+        <field name="name">information.monitoring.data.form</field>
+        <field name="model">information.monitoring.data</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                </header>
+                <sheet>
+                    <div class="oe_left" style="width: 500px;">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <notebook>
+                        <page string="Details">
+                            <group>
+                                <field name="description"/>
+                                <field name="checksum"/>
+                            </group>
+                        </page>
+                        <page string="Copies">
+                            <field name="copy_ids" context="{'default_data_id': id}">
+                                <tree editable="bottom">
+                                    <field name="location_id"/>
+                                    <field name="medium"/>
+                                    <field name="dtype"/>
+                                    <field name="description"/>
+                                </tree>
+                            </field>
+                        </page>
+
+                    </notebook>
+                    <group>
+                    </group>
+
+                </sheet>
+                <!-- <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div> -->
+            </form>
+        </field>
+    </record>
+
+
+    <record id="copy_form" model="ir.ui.view">
+        <field name="name">information.monitoring.copy.form</field>
+        <field name="model">information.monitoring.copy</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet string="Information Monitoring Copy">
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="data_id"/>
+                        </group>
+                        <group>
+                            <field name="location_id"/>
+                            <field name="medium"/>
+                            <field name="dtype"/>
+                        </group>
+                        <label for="description"/>
+                        <field name="description" colspan="4"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <record model="ir.actions.act_window" id="data_action_window">
+        <field name="name">Data</field>
+        <field name="res_model">information.monitoring.data</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record model="ir.actions.act_window" id="copy_action_window">
+        <field name="name">Copies</field>
+        <field name="res_model">information.monitoring.copy</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record model="ir.actions.act_window" id="location_action_window">
+        <field name="name">Locations</field>
+        <field name="res_model">information.monitoring.location</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem name="Information Monitoring" id="root_menu" web_icon="information_monitoring,static/description/icon.png"/>
+    <menuitem name="Data" id="data_menu" action="data_action_window" parent="root_menu"/>
+    <menuitem name="Copies" id="copy_menu" action="copy_action_window" parent="root_menu"/>
+    <menuitem name="Locations" id="location_menu" action="location_action_window" parent="root_menu"/>
+
+</odoo>
