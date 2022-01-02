@@ -2,4 +2,5 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 
 access_information_monitoring_data,access_information_monitoring_data,model_information_monitoring_data,base.group_user,1,1,1,1
 access_information_monitoring_location,access_information_monitoring_location,model_information_monitoring_location,base.group_user,1,1,1,1
+access_information_monitoring_device,access_information_monitoring_device,model_information_monitoring_device,base.group_user,1,1,1,1
 access_information_monitoring_copy,access_information_monitoring_copy,model_information_monitoring_copy,base.group_user,1,1,1,1

@@ -42,6 +42,29 @@ class InformationMonitoringLocation(models.Model):
         string='Copies',
     )
 
+class InformationMonitoringDevice(models.Model):
+    _name = 'information.monitoring.device'
+    _description = 'Information Monitoring Device'
+
+    name = fields.Char(required=True)
+    description = fields.Text()
+    medium = fields.Selection(
+        selection=[
+            ('external-hard-drive', 'External Hard Drive'),
+            ('internal-hard-drive', 'Internal Hard Drive'),
+            ('usb-stick', 'USB Stick'),
+            ('paper', 'Paper'),
+        ],
+        required=True,
+        default='external-hard-drive',
+    )
+
+    copy_ids = fields.One2many(
+        comodel_name='information.monitoring.copy',
+        inverse_name='location_id',
+        string='Copies',
+    )
+
 class InformationMonitoringCopy(models.Model):
     _name = 'information.monitoring.copy'
     _description = 'Information Monitoring Copy'
@@ -57,18 +80,14 @@ class InformationMonitoringCopy(models.Model):
         required=True,
         ondelete="restrict",
     )
-    description = fields.Text()
 
-    medium = fields.Selection(
-        selection=[
-            ('external-hard-drive', 'External Hard Drive'),
-            ('internal-hard-drive', 'Internal Hard Drive'),
-            ('usb-stick', 'USB Stick'),
-            ('paper', 'Paper'),
-        ],
+    device_id = fields.Many2one(
+        comodel_name="information.monitoring.device",
         required=True,
-        default='external-hard-drive',
+        ondelete="restrict",
     )
+
+    description = fields.Text()
 
     dtype = fields.Selection(
         selection=[
@@ -79,7 +98,7 @@ class InformationMonitoringCopy(models.Model):
         default='directory',
     )
 
-    @api.depends('location_id.name', 'data_id.name', 'dtype', 'medium')
+    @api.depends('data_id.name', 'device_id.name', 'location_id.name', 'dtype', 'device_id.medium')
     def _compute_name(self):
         for record in self:
-            record.name = "%s - %s (%s/%s)" % (record.location_id.name, record.data_id.name, record.dtype, record.medium)
+            record.name = "%s - %s - %s (%s/%s)" % (record.data_id.name, record.device_id.name, record.location_id.name, record.dtype, record.device_id.medium)
