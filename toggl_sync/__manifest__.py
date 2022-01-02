@@ -9,6 +9,8 @@
     'depends': [
         'base', 'mail',
     ],
+    'installable': True,
+    'application': True,
     'data': [
         'security/ir.model.access.csv',
         'wizards/toggl_import.xml',

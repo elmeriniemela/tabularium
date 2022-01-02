@@ -9,6 +9,8 @@
         'base',
         'account',
     ],
+    'installable': True,
+    'application': True,
     "external_dependencies": {"python": ["pdfminer.six"]},
     'data': [
         'security/ir.model.access.csv',

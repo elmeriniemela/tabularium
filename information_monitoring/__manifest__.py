@@ -8,6 +8,8 @@
     'depends': [
         'base',
     ],
+    'installable': True,
+    'application': True,
     'data': [
         'security/ir.model.access.csv',
         'views/information_monitoring_views.xml',
