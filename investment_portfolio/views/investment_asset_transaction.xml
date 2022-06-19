@@ -1,0 +1,53 @@
+<odoo>
+    <record model="ir.ui.view" id="asset_transaction_tree">
+        <field name="name">investment.asset.transaction.tree</field>
+        <field name="model">investment.asset.transaction</field>
+        <field name="arch" type="xml">
+            <tree editable="top">
+                <field name="time"/>
+                <field name="quantity"/>
+                <field name="cash_flow"/>
+                <field name="exchange_rate"/>
+                <field name="fee"/>
+                <field name="currency_id" optional="hide"/>
+                <field name="asset_id" optional="hide"/>
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="asset_transaction_form">
+        <field name="name">investment.asset.transaction.form</field>
+        <field name="model">investment.asset.transaction</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="time"/>
+                            <field name="quantity"/>
+                            <field name="cash_flow"/>
+                            <field name="exchange_rate"/>
+                            <field name="fee"/>
+                        </group>
+                        <group>
+                            <field name="currency_id" invisible="not context.get('show_all')"/>
+                            <field name="asset_id" invisible="not context.get('show_all')"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+
+
+    <record model="ir.actions.act_window" id="asset_transaction_action_window">
+        <field name="name">Asset Transactions</field>
+        <field name="res_model">investment.asset.transaction</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="asset_transaction_menu" action="asset_transaction_action_window" parent="root_menu" sequence="1"/>
+
+</odoo>
