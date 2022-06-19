@@ -14,6 +14,7 @@
         'security/ir.model.access.csv',
         'data/decimal.xml',
         'views/investment_asset.xml',
+        'views/investment_category.xml',
         'views/investment_asset_price.xml',
         'views/investment_asset_transaction.xml',
     ],

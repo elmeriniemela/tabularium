@@ -1,5 +1,6 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 
 access_investment_asset,access_investment_asset,model_investment_asset,base.group_user,1,1,1,1
+access_investment_category,access_investment_category,model_investment_category,base.group_user,1,1,1,1
 access_investment_asset_price,access_investment_asset_price,model_investment_asset_price,base.group_user,1,1,1,1
 access_investment_asset_transaction,access_investment_asset_transaction,model_investment_asset_transaction,base.group_user,1,1,1,1

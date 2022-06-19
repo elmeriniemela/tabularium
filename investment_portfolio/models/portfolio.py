@@ -3,6 +3,13 @@
 from odoo import api, models, fields, _
 from odoo.exceptions import ValidationError
 
+class InvestmentGategory(models.Model):
+    _name = 'investment.category'
+    _description = 'Investment Category'
+
+    name = fields.Char(required=True)
+
+
 class InvestmentAsset(models.Model):
     _name = 'investment.asset'
     _description = 'Investment Asset'
@@ -15,6 +22,8 @@ class InvestmentAsset(models.Model):
 
 
     company_id = fields.Many2one(comodel_name='res.company', required=True, default=lambda self: self.env.company)
+
+    category_id = fields.Many2one(comodel_name='investment.category', required=True)
 
     company_currency_id = fields.Many2one(related='company_id.currency_id', string="Company Currency")
 

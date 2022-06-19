@@ -7,7 +7,7 @@
                 <field name="name" optional="show"/>
                 <field name="ticker" optional="show"/>
                 <field name="quantity" optional="show"/>
-                <field name="value" optional="show"/>
+                <field name="value" optional="show" sum="Total"/>
                 <field name="currency_id" optional="hide"/>
             </tree>
         </field>
@@ -44,6 +44,7 @@
                             <field name="currency_id"/>
                         </group>
                         <group>
+                            <field name="category_id"/>
                             <field name="quantity"/>
                             <field name="value"/>
                         </group>
@@ -62,6 +63,20 @@
         </field>
     </record>
 
+    <record id="asset_search" model="ir.ui.view">
+        <field name="name">investment.asset.search</field>
+        <field name="model">investment.asset</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <group expand="1" string="Group by">
+                    <filter string="Category" name="group_category_id" context="{'group_by': 'category_id'}"/>
+                    <filter string="Name" name="group_name" context="{'group_by': 'name'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
 
 
 
@@ -69,9 +84,10 @@
         <field name="name">Assets</field>
         <field name="res_model">investment.asset</field>
         <field name="view_mode">tree,form,graph</field>
+        <field name="context">{'search_default_group_category_id': 1}</field>
     </record>
 
-    <menuitem name="Investment Portfolio" id="root_menu" web_icon="information_monitoring,static/description/icon.png"/>
+    <menuitem name="Investment Portfolio" id="root_menu" web_icon="investment_portfolio,static/description/icon.png"/>
     <menuitem id="asset_menu" action="asset_action_window" parent="root_menu" sequence="1"/>
 
 </odoo>
