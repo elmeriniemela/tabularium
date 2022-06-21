@@ -87,16 +87,12 @@ class InvestmentAsset(models.Model):
             globals_dict = {
                 'requests': requests,
                 'datetime': datetime,
+                'self': asset,
             }
             code = (asset.price_update_code or '').strip()
             if not code:
                 raise ValidationError('Define update code first.')
             safe_eval(code, globals_dict=globals_dict, mode="exec", nocopy=True)
-            if 'vals' not in globals_dict:
-                raise ValidationError('The price update code should assign a dictionary of values to variable called vals')
-            vals = globals_dict['vals']
-            vals['asset_id'] = asset.id
-            asset.price_ids = [(0, 0, vals)]
 
     def cron_update_price(self):
         assets = self.search([('price_update_code', '!=', False)])
