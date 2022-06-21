@@ -1,0 +1,48 @@
+<odoo>
+    <record model="ir.ui.view" id="integration_tree">
+        <field name="name">investment.integration.tree</field>
+        <field name="model">investment.integration</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name" optional="show"/>
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="integration_form">
+        <field name="name">investment.integration.form</field>
+        <field name="model">investment.integration</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_left" style="width: 500px;">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <field name="code" widget="ace" options="{'mode': 'python'}"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="integration_search" model="ir.ui.view">
+        <field name="name">investment.integration.search</field>
+        <field name="model">investment.integration</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+            </search>
+        </field>
+    </record>
+
+
+    <record model="ir.actions.act_window" id="integration_action_window">
+        <field name="name">Integrations</field>
+        <field name="res_model">investment.integration</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="integration_menu" action="integration_action_window" parent="root_menu" sequence="1"/>
+
+</odoo>

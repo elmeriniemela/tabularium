@@ -2,7 +2,7 @@
 
 from odoo import api, models, fields, _
 from odoo.exceptions import ValidationError
-import requests, datetime, traceback, logging
+import requests, datetime, traceback, logging, dateutil
 from odoo.tools.safe_eval import safe_eval, test_python_expr
 
 
@@ -14,6 +14,30 @@ class InvestmentGategory(models.Model):
 
     name = fields.Char(required=True)
 
+class InvestmentGategory(models.Model):
+    _name = 'investment.integration'
+    _description = 'Investment Integration'
+
+    name = fields.Char(required=True)
+    code = fields.Text(required=True)
+
+    @api.constrains('code')
+    def _validate_code(self):
+        for record in self:
+            msg = test_python_expr(expr=record.code.strip(), mode="exec")
+            if msg:
+                raise ValidationError(msg)
+
+    def execute(self, asset):
+        self.ensure_one()
+        globals_dict = {
+            'ValidationError': ValidationError,
+            'requests': requests,
+            'datetime': datetime,
+            'dateutil': dateutil,
+            'self': asset,
+        }
+        safe_eval(self.code, globals_dict=globals_dict, mode="exec", nocopy=True)
 
 class InvestmentAsset(models.Model):
     _name = 'investment.asset'
@@ -52,15 +76,7 @@ class InvestmentAsset(models.Model):
     quantity = fields.Float(compute='_compute_quantity', digits='Investment Asset quantity')
     value = fields.Monetary(compute='_compute_value', currency_field='company_currency_id', store=True)
 
-    price_update_code = fields.Text(help="vals = {'price': 123.4, 'time': datetime.datetime(...)}")
-
-    @api.constrains('price_update_code')
-    def _validate_price_update_code(self):
-        for record in self:
-            msg = test_python_expr(expr=record.price_update_code.strip(), mode="exec")
-            if msg:
-                raise ValidationError(msg)
-
+    integration_id = fields.Many2one(comodel_name='investment.integration')
 
     @api.depends('transaction_ids.quantity')
     def _compute_quantity(self):
@@ -82,24 +98,20 @@ class InvestmentAsset(models.Model):
                 )
 
 
-    def update_price(self):
+    def run_integration(self):
         for asset in self:
-            globals_dict = {
-                'requests': requests,
-                'datetime': datetime,
-                'self': asset,
-            }
-            code = (asset.price_update_code or '').strip()
-            if not code:
-                raise ValidationError('Define update code first.')
-            safe_eval(code, globals_dict=globals_dict, mode="exec", nocopy=True)
+            integration = asset.integration_id
+            if not integration:
+                raise ValidationError('Define integration first.')
+            integration.execute(asset)
 
-    def cron_update_price(self):
-        assets = self.search([('price_update_code', '!=', False)])
+
+    def cron_run_integration(self):
+        assets = self.search([('integration_id', '!=', False)])
         for asset in assets:
             try:
                 with asset.env.cr.savepoint():
-                    asset.update_price()
+                    asset.run_integration()
             except Exception as error:
                 _logger.exception(error)
                 asset.message_post(
@@ -126,6 +138,11 @@ class InvestmentAssetPrice(models.Model):
     price = fields.Monetary(required=True)
 
     time = fields.Datetime(required=True, default=fields.Datetime.now)
+
+    _sql_constraints = [
+        ('unique_price', 'unique(asset_id, time)', 'Price for this time is already configured!'),
+    ]
+
 
 
 class InvestmentAssetPrice(models.Model):

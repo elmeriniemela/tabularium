@@ -29,7 +29,7 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <button name="update_price" type="object" string="Update Price"/>
+                    <button name="run_integration" type="object" string="Run Integration"/>
                 </header>
                 <sheet>
                     <div class="oe_left" style="width: 500px;">
@@ -46,6 +46,7 @@
                         </group>
                         <group>
                             <field name="category_id"/>
+                            <field name="integration_id"/>
                             <field name="quantity"/>
                             <field name="value"/>
                         </group>
@@ -57,9 +58,6 @@
                         </page>
                         <page string="Transactions">
                             <field name="transaction_ids" context="{'default_asset_id': id}"/>
-                        </page>
-                        <page string="Update Code">
-                            <field name="price_update_code" widget="ace" options="{'mode': 'python'}"/>
                         </page>
                     </notebook>
                 </sheet>
