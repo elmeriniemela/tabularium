@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="cron_update_price" model="ir.cron">
+        <field name="name">Investment Assets: Update Price</field>
+        <field name="model_id" ref="model_investment_asset"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_update_price()</field>
+        <field name="user_id" ref="base.user_root" />
+        <field name="interval_number">15</field>
+        <field name="interval_type">minutes</field>
+        <field name="numbercall">-1</field>
+    </record>
+</odoo>

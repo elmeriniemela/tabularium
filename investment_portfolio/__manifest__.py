@@ -6,13 +6,14 @@
     'category': 'Uncategorized',
     'version': '0.1',
     'depends': [
-        'base',
+        'mail',
     ],
     'installable': True,
     'application': True,
     'data': [
         'security/ir.model.access.csv',
         'data/decimal.xml',
+        'data/ir_cron_data.xml',
         'views/investment_asset.xml',
         'views/investment_category.xml',
         'views/investment_asset_price.xml',

@@ -2,6 +2,11 @@
 
 from odoo import api, models, fields, _
 from odoo.exceptions import ValidationError
+import requests, datetime, traceback, logging
+from odoo.tools.safe_eval import safe_eval, test_python_expr
+
+
+_logger = logging.getLogger(__name__)
 
 class InvestmentGategory(models.Model):
     _name = 'investment.category'
@@ -13,6 +18,7 @@ class InvestmentGategory(models.Model):
 class InvestmentAsset(models.Model):
     _name = 'investment.asset'
     _description = 'Investment Asset'
+    _inherit = ['mail.thread']
 
     name = fields.Char(required=True)
 
@@ -46,6 +52,15 @@ class InvestmentAsset(models.Model):
     quantity = fields.Float(compute='_compute_quantity', digits='Investment Asset quantity')
     value = fields.Monetary(compute='_compute_value', currency_field='company_currency_id', store=True)
 
+    price_update_code = fields.Text(help="vals = {'price': 123.4, 'time': datetime.datetime(...)}")
+
+    @api.constrains('price_update_code')
+    def _validate_price_update_code(self):
+        for record in self:
+            msg = test_python_expr(expr=record.price_update_code.strip(), mode="exec")
+            if msg:
+                raise ValidationError(msg)
+
 
     @api.depends('transaction_ids.quantity')
     def _compute_quantity(self):
@@ -66,6 +81,35 @@ class InvestmentAsset(models.Model):
                     date=last.time,
                 )
 
+
+    def update_price(self):
+        for asset in self:
+            globals_dict = {
+                'requests': requests,
+                'datetime': datetime,
+            }
+            code = (asset.price_update_code or '').strip()
+            if not code:
+                raise ValidationError('Define update code first.')
+            safe_eval(code, globals_dict=globals_dict, mode="exec", nocopy=True)
+            if 'vals' not in globals_dict:
+                raise ValidationError('The price update code should assign a dictionary of values to variable called vals')
+            vals = globals_dict['vals']
+            vals['asset_id'] = asset.id
+            asset.price_ids = [(0, 0, vals)]
+
+    def cron_update_price(self):
+        assets = self.search([('price_update_code', '!=', False)])
+        for asset in assets:
+            try:
+                with asset.env.cr.savepoint():
+                    asset.update_price()
+            except Exception as error:
+                _logger.exception(error)
+                asset.message_post(
+                    body=traceback.format_exc().replace('\n', '<br/>'),
+                    subtype='mail.mt_comment',
+                )
 
 
 
