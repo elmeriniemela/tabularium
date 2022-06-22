@@ -116,7 +116,7 @@ class InvestmentAsset(models.Model):
         for record in self:
             record.quantity = sum(record.transaction_ids.mapped('quantity'))
 
-    @api.depends('price_ids.price', 'quantity', 'currency_id', 'company_currency_id')
+    @api.depends('price_ids', 'price_ids.price', 'quantity', 'currency_id', 'company_currency_id')
     def _compute_value(self):
         for record in self:
             last = record.price_ids[:1]
@@ -168,7 +168,7 @@ class InvestmentAssetPrice(models.Model):
     )
     currency_id = fields.Many2one(related='asset_id.currency_id')
 
-    price = fields.Monetary(required=True)
+    price = fields.Monetary(required=True, group_operator='avg')
 
     time = fields.Datetime(required=True, default=fields.Datetime.now)
 

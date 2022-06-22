@@ -33,13 +33,37 @@
         </field>
     </record>
 
+    <record id="asset_price_search" model="ir.ui.view">
+        <field name="name">investment.asset.price.search</field>
+        <field name="model">investment.asset.price</field>
+        <field name="arch" type="xml">
+            <search>
+                <filter name="time" date="time"/>
+                <group expand="1" string="Group by">
+                    <filter string="Time" name="group_time" context="{'group_by': 'time'}"/>
+                    <filter string="Asset" name="group_asset_id" context="{'group_by': 'asset_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="asset_price_graph">
+         <field name="name">investment.asset.price.graph</field>
+         <field name="model">investment.asset.price</field>
+         <field name="arch" type="xml">
+             <graph type="line">
+                 <field name="price" type="measure"/>
+             </graph>
+         </field>
+    </record>
+
 
 
 
     <record model="ir.actions.act_window" id="asset_price_action_window">
         <field name="name">Asset Prices</field>
         <field name="res_model">investment.asset.price</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">tree,graph,form</field>
     </record>
 
     <menuitem id="asset_price_menu" action="asset_price_action_window" parent="root_menu" sequence="1"/>
