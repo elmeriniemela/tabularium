@@ -2,7 +2,7 @@
 
 from odoo import api, models, fields, _
 from odoo.exceptions import ValidationError
-import requests, datetime, traceback, logging, dateutil
+import requests, datetime, traceback, logging, dateutil, lxml, io
 from odoo.tools.safe_eval import safe_eval, test_python_expr
 
 
@@ -35,6 +35,8 @@ class InvestmentGategory(models.Model):
             'requests': requests,
             'datetime': datetime,
             'dateutil': dateutil,
+            'lxml': lxml,
+            'io': io,
             'self': asset,
         }
         safe_eval(self.code, globals_dict=globals_dict, mode="exec", nocopy=True)
