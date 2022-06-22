@@ -137,6 +137,7 @@ class InvestmentAsset(models.Model):
             if not integration:
                 raise ValidationError('Define integration first.')
             integration.execute(asset)
+            asset._compute_value() # For some reason, the depends on price_ids does not work...
 
 
     def cron_run_integration(self):
