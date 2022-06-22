@@ -13,30 +13,29 @@ class Currency(models.Model):
 
     def cron_update_rate(self):
         Rate = self.env['res.currency.rate']
-        active = {c.name: c for c in self.search([])}
-        resp = requests.get('https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml')
-        root = lxml.etree.fromstring(resp.content)
+        currencies = {c.name: c for c in self.search([])}
+        from_currency = self.env.company.currency_id.name
+        api_key = self.env['ir.config_parameter'].sudo().get_param('alpha.vantage.api.key')
+        for to_currency, currency_id in currencies.items():
+            resp = requests.get(f'https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency={from_currency}&to_currency={to_currency}&apikey={api_key}')
 
-        date = datetime.date.today()
-        for cube in root.xpath("//*[local-name() = 'Cube']"):
-            date_str = cube.attrib.get('time')
-            currency = cube.attrib.get('currency')
-            rate = cube.attrib.get('rate')
-            if date_str:
-                date = dateutil.parser.parse(date_str)
-            elif currency in active:
-                rate_record = Rate.search([
-                    ('currency_id', '=', active[currency].id),
-                    ('name', '=', date),
-                ])
-                if rate_record:
-                    rate_record.rate = rate
-                else:
-                    Rate.create({
-                        'name': date,
-                        'currency_id': active[currency].id,
-                        'rate': rate,
-                    })
+
+            vals = resp.json()["Realtime Currency Exchange Rate"]
+
+            date = dateutil.parser.parse(vals['6. Last Refreshed']).date()
+            rate = float(vals['5. Exchange Rate'])
+            rate_record = Rate.search([
+                ('currency_id', '=', currency_id.id),
+                ('name', '=', date),
+            ])
+            if rate_record:
+                rate_record.rate = rate
+            else:
+                Rate.create({
+                    'name': date,
+                    'currency_id': currency_id.id,
+                    'rate': rate,
+                })
 
 
 class InvestmentGategory(models.Model):
