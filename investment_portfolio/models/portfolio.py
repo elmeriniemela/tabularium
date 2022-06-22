@@ -2,11 +2,42 @@
 
 from odoo import api, models, fields, _
 from odoo.exceptions import ValidationError
-import requests, datetime, traceback, logging, dateutil, lxml, io
+import requests, datetime, traceback, logging, dateutil, lxml.etree, io
 from odoo.tools.safe_eval import safe_eval, test_python_expr
 
 
 _logger = logging.getLogger(__name__)
+
+class Currency(models.Model):
+    _inherit = 'res.currency'
+
+    def cron_update_rate(self):
+        Rate = self.env['res.currency.rate']
+        active = {c.name: c for c in self.search([])}
+        resp = requests.get('https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml')
+        root = lxml.etree.fromstring(resp.content)
+
+        date = datetime.date.today()
+        for cube in root.xpath("//*[local-name() = 'Cube']"):
+            date_str = cube.attrib.get('time')
+            currency = cube.attrib.get('currency')
+            rate = cube.attrib.get('rate')
+            if date_str:
+                date = dateutil.parser.parse(date_str)
+            elif currency in active:
+                rate_record = Rate.search([
+                    ('currency_id', '=', active[currency].id),
+                    ('name', '=', date),
+                ])
+                if rate_record:
+                    rate_record.rate = rate
+                else:
+                    Rate.create({
+                        'name': date,
+                        'currency_id': active[currency].id,
+                        'rate': rate,
+                    })
+
 
 class InvestmentGategory(models.Model):
     _name = 'investment.category'
