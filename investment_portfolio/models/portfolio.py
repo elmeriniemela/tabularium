@@ -13,12 +13,12 @@ class Currency(models.Model):
 
     def cron_update_rate(self):
         Rate = self.env['res.currency.rate']
+        Asset = self.env['investment.asset']
         currencies = {c.name: c for c in self.search([])}
         from_currency = self.env.company.currency_id.name
         api_key = self.env['ir.config_parameter'].sudo().get_param('alpha.vantage.api.key')
         for to_currency, currency_id in currencies.items():
             resp = requests.get(f'https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency={from_currency}&to_currency={to_currency}&apikey={api_key}')
-
 
             vals = resp.json()["Realtime Currency Exchange Rate"]
 
@@ -36,6 +36,9 @@ class Currency(models.Model):
                     'currency_id': currency_id.id,
                     'rate': rate,
                 })
+
+            Asset.search([('currency_id', '=', currency_id.id)])._compute_value()
+
 
 
 class InvestmentGategory(models.Model):
