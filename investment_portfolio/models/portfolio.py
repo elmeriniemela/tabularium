@@ -121,7 +121,8 @@ class InvestmentAsset(models.Model):
     @api.depends('price_ids', 'price_ids.price', 'quantity', 'currency_id', 'company_currency_id')
     def _compute_value(self):
         for record in self:
-            last = record.price_ids[:1]
+            prices = record.price_ids.sorted()
+            last = prices[:1]
             if not last:
                 record.value = 0.0
             else:
