@@ -108,21 +108,43 @@ class InvestmentAsset(models.Model):
     )
 
 
-    quantity = fields.Float(compute='_compute_quantity', digits='Investment Asset quantity')
+    quantity = fields.Float(compute='_compute_aggegate_transactions', digits='Investment Asset quantity')
+    total_cost = fields.Monetary(compute='_compute_aggegate_transactions', currency_field='company_currency_id', store=True)
+    avg_cost = fields.Monetary(compute='_compute_aggegate_transactions', currency_field='company_currency_id', store=True)
+
+
     value = fields.Monetary(compute='_compute_value', currency_field='company_currency_id', store=True)
+    last_price = fields.Monetary(compute='_compute_value', currency_field='company_currency_id', store=True)
+    profit = fields.Monetary(compute='_compute_value', currency_field='company_currency_id', store=True)
+    profit_percent = fields.Float(compute='_compute_value', currency_field='company_currency_id', store=True)
 
     integration_id = fields.Many2one(comodel_name='investment.integration')
 
-    @api.depends('transaction_ids.quantity')
-    def _compute_quantity(self):
-        for record in self:
-            record.quantity = sum(record.transaction_ids.mapped('quantity'))
 
-    @api.depends('price_ids', 'price_ids.price', 'quantity', 'currency_id', 'company_currency_id')
+    @api.depends('transaction_ids', 'transaction_ids.quantity', 'transaction_ids.cash_flow')
+    def _compute_aggegate_transactions(self):
+        for record in self:
+            quantity = 0.0
+            total_cost = 0.0
+            for tx in record.transaction_ids:
+                quantity += tx.quantity
+                if tx.quantity > 0:
+                    total_cost += tx.cash_flow
+                else:
+                    total_cost -= tx.cash_flow
+
+            record.quantity = quantity
+            record.total_cost = total_cost
+            record.avg_cost = total_cost / quantity if quantity else 0.0
+
+
+
+    @api.depends('price_ids', 'price_ids.price', 'quantity', 'total_cost', 'currency_id', 'company_currency_id')
     def _compute_value(self):
         for record in self:
             prices = record.price_ids.sorted()
             last = prices[:1]
+            record.last_price = last.price or 0.0
             if not last:
                 record.value = 0.0
             else:
@@ -133,6 +155,8 @@ class InvestmentAsset(models.Model):
                     date=last.time,
                 )
 
+            record.profit = record.value - record.total_cost
+            record.profit_percent = record.profit / record.total_cost if record.total_cost else 0.0
 
     def run_integration(self):
         for asset in self:
@@ -203,8 +227,18 @@ class InvestmentAssetPrice(models.Model):
 
     time = fields.Datetime(required=True, default=fields.Datetime.now)
 
+    cost = fields.Monetary(compute='_compute_cost')
+
+    last_price = fields.Monetary(related='asset_id.last_price')
+
+    @api.depends('cash_flow', 'quantity')
+    def _compute_cost(self):
+        for tx in self:
+            tx.cost = tx.cash_flow / tx.quantity
+
     _sql_constraints = [
         ('cash_flow_positive', 'CHECK (cash_flow > 0)', 'Cash flow must be greater than zero! Use negative quantity if needed.'),
+        ('quantity_non_zero', 'CHECK (quantity != 0)', "Quantity can't be zero."),
     ]
 
 

@@ -19,5 +19,6 @@
         'views/investment_integration.xml',
         'views/investment_asset_price.xml',
         'views/investment_asset_transaction.xml',
+        'views/templates.xml',
     ],
 }

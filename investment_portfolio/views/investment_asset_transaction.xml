@@ -3,12 +3,14 @@
         <field name="name">investment.asset.transaction.tree</field>
         <field name="model">investment.asset.transaction</field>
         <field name="arch" type="xml">
-            <tree editable="top">
+            <tree editable="top" decoration-success="cost &lt; last_price" decoration-danger="cost &gt; last_price">
                 <field name="time"/>
                 <field name="quantity"/>
                 <field name="cash_flow"/>
                 <field name="exchange_rate"/>
                 <field name="fee"/>
+                <field name="cost" optional="hide"/>
+                <field name="last_price" optional="hide"/>
                 <field name="currency_id" optional="hide"/>
                 <field name="asset_id" optional="hide"/>
             </tree>
