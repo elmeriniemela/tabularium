@@ -4,6 +4,7 @@ from odoo import api, models, fields, _
 from odoo.exceptions import ValidationError
 import requests, datetime, traceback, logging, dateutil, lxml.etree, io
 from odoo.tools.safe_eval import safe_eval, test_python_expr
+from odoo.tools import float_is_zero, float_compare
 
 
 _logger = logging.getLogger(__name__)
@@ -118,44 +119,59 @@ class InvestmentAsset(models.Model):
 
 
     quantity = fields.Float(compute='_compute_aggegate_transactions', digits='Investment Asset quantity')
-    total_cost = fields.Monetary(compute='_compute_aggegate_transactions', currency_field='company_currency_id', store=True)
-    avg_cost = fields.Monetary(compute='_compute_aggegate_transactions', currency_field='company_currency_id', store=True)
+
+    buy_total = fields.Monetary(compute='_compute_aggegate_transactions', currency_field='company_currency_id', store=True)
+    sell_total = fields.Monetary(compute='_compute_aggegate_transactions', currency_field='company_currency_id', store=True)
+
+    avg_buy_price = fields.Monetary(compute='_compute_aggegate_transactions', currency_field='company_currency_id', store=True)
+    avg_sell_price = fields.Monetary(compute='_compute_aggegate_transactions', currency_field='company_currency_id', store=True)
 
 
     value = fields.Monetary(compute='_compute_value', currency_field='company_currency_id', store=True)
     last_price = fields.Monetary(compute='_compute_value', currency_field='company_currency_id', store=True)
-    profit = fields.Monetary(compute='_compute_value', currency_field='company_currency_id', store=True)
-    profit_percent = fields.Float(compute='_compute_value', currency_field='company_currency_id', store=True)
+    profit = fields.Monetary(compute='_compute_value', currency_field='company_currency_id', store=True, group_operator='sum')
+    profit_percent = fields.Float(compute='_compute_value', currency_field='company_currency_id', store=True, group_operator='avg')
 
     integration_id = fields.Many2one(comodel_name='investment.integration')
 
+    _sql_constraints = [
+        ('ticker_unique', 'unique(ticker)', 'Ticker already exists!'),
+    ]
+
+
+    def recompute_value(self):
+        self._compute_aggegate_transactions()
+        self._compute_value()
 
     @api.depends('transaction_ids', 'transaction_ids.quantity', 'transaction_ids.cash_flow')
     def _compute_aggegate_transactions(self):
         for record in self:
             quantity = 0.0
-            total_cost = 0.0
+            buy_total = 0.0
+            sell_total = 0.0
+
+            buy_volume = 0
+            sell_volume = 0
+
             for tx in record.transaction_ids:
                 quantity += tx.quantity
-                cash_flow = record.currency_id._convert(
-                    from_amount=tx.cash_flow,
-                    to_currency=record.company_currency_id,
-                    company=self.env.company,
-                    date=tx.time,
-                )
+                cash_flow = tx.cash_flow
                 if tx.quantity > 0:
-                    total_cost += cash_flow
+                    buy_total += cash_flow
+                    buy_volume += abs(tx.quantity)
                 else:
-                    total_cost -= cash_flow
+                    sell_total += cash_flow
+                    sell_volume += abs(tx.quantity)
 
             record.quantity = quantity
-            record.total_cost = total_cost
-            record.avg_cost = total_cost / quantity if quantity else 0.0
+            record.buy_total = buy_total
+            record.sell_total = sell_total
+            record.avg_buy_price = buy_total/buy_volume if buy_volume else 0.0
+            record.avg_sell_price = sell_total/sell_volume if sell_volume else 0.0
 
-
-
-    @api.depends('price_ids', 'price_ids.price', 'quantity', 'total_cost', 'currency_id', 'company_currency_id')
+    @api.depends('price_ids', 'price_ids.price', 'quantity', 'buy_total', 'sell_total', 'avg_buy_price', 'currency_id', 'company_currency_id')
     def _compute_value(self):
+        precision = self.env['decimal.precision'].precision_get('Investment Asset quantity')
         for record in self:
             prices = record.price_ids.sorted()
             last = prices[:1]
@@ -170,8 +186,14 @@ class InvestmentAsset(models.Model):
                     date=last.time,
                 )
 
-            record.profit = record.value - record.total_cost
-            record.profit_percent = record.profit / record.total_cost if record.total_cost else 0.0
+            record.profit = record.value - record.buy_total + record.sell_total
+
+            cost = (record.buy_total - record.sell_total)
+            if float_is_zero(record.quantity, precision_digits=precision):
+                record.profit_percent = 0.0
+            else:
+                record.profit_percent = record.profit / cost if cost else 0.0
+
 
     def run_integration(self):
         for asset in self:
@@ -231,53 +253,71 @@ class InvestmentAssetPrice(models.Model):
         required=True,
         ondelete='cascade',
     )
-    currency_id = fields.Many2one(related='asset_id.currency_id')
+
+    currency_id = fields.Many2one(related='asset_id.company_currency_id')
 
     cash_flow = fields.Monetary(required=True)
 
     exchange_rate = fields.Monetary()
+
     fee = fields.Monetary(store=True, readonly=False,  compute='_compute_fee', inverse='_inverse_fee')
+
+    cash_balance = fields.Boolean(default=True)
 
     quantity = fields.Float(digits='Investment Asset quantity')
 
     time = fields.Datetime(required=True, default=fields.Datetime.now)
 
-    cost = fields.Monetary(compute='_compute_cost')
-
-    last_price = fields.Monetary(related='asset_id.last_price')
-
+    profit = fields.Monetary(compute='_compute_profit')
 
     _sql_constraints = [
         ('cash_flow_positive', 'CHECK (cash_flow > 0)', 'Cash flow must be greater than zero! Use negative quantity if needed.'),
         ('quantity_non_zero', 'CHECK (quantity != 0)', "Quantity can't be zero."),
     ]
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        cash_asset = self.env['investment.asset'].search([('ticker', '=', self.env.company.currency_id.name)])
+        for record in records:
+            if record.cash_balance and cash_asset and record.asset_id != cash_asset:
+                # Opposite sign for cash asset flow
+                quantity = record.cash_flow if record.quantity < 0 else record.cash_flow * -1
+                cash_asset.transaction_ids = [(0, 0, {
+                    'quantity': quantity,
+                    'cash_flow': record.cash_flow,
+                    'exchange_rate': 1.0,
+                    'fee': 0.0,
+                })]
+        return records
+
+
     @api.depends('cash_flow', 'quantity')
-    def _compute_cost(self):
+    def _compute_profit(self):
         for tx in self:
-            tx.cost = tx.cash_flow / tx.quantity if tx.quantity else 0.0
+            quantity = tx.quantity
+            tx.profit = (tx.asset_id.last_price - (tx.cash_flow / abs(quantity) if quantity else 0.0))*quantity
 
     @api.onchange('cash_flow', 'quantity')
     def _onchange_amount(self):
-        for record in self:
-            quantity = abs(record.quantity)
-            if not (record.exchange_rate and record.fee):
-                record.exchange_rate = (record.cash_flow / quantity if quantity else 0.0)
+        for tx in self:
+            if not (tx.exchange_rate and tx.fee):
+                tx.fee = 0.0
 
 
     @api.depends('exchange_rate')
     def _compute_fee(self):
-        for record in self:
-            quantity = abs(record.quantity)
+        for tx in self:
+            quantity = abs(tx.quantity)
             if not quantity:
-                record.fee = 0.0
+                tx.fee = 0.0
             else:
-                record.fee = (record.cash_flow/quantity - record.exchange_rate) * quantity
+                tx.fee = (tx.cash_flow/quantity - tx.exchange_rate) * quantity
 
     def _inverse_fee(self):
-        for record in self:
-            quantity = abs(record.quantity)
+        for tx in self:
+            quantity = abs(tx.quantity)
             if not quantity:
-                record.exchange_rate = 0.0
+                tx.exchange_rate = 0.0
             else:
-                record.exchange_rate = (record.cash_flow/quantity - record.fee/quantity)
+                tx.exchange_rate = (tx.cash_flow/quantity - tx.fee/quantity)

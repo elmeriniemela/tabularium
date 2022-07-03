@@ -8,13 +8,17 @@
                 <field name="ticker" optional="show"/>
                 <field name="quantity" optional="show"/>
                 <field name="value" optional="show" sum="Total"/>
-                <field name="profit" options="{'is_profit': 1}" optional="show"/>
+                <field name="profit" widget="monetary" options="{'is_profit': 1}" optional="show"/>
                 <field name="profit_percent" widget="percentage" options="{'is_profit': 1}" optional="show"/>
                 <field name="currency_id" optional="hide"/>
-                <field name="total_cost" optional="hide"/>
-                <field name="avg_cost" optional="hide"/>
                 <field name="integration_id" optional="hide"/>
                 <field name="company_currency_id" invisible="1"/>
+
+                <field name="buy_total" optional="hide" />
+                <field name="avg_buy_price" optional="hide"/>
+                <field name="sell_total" optional="hide"/>
+                <field name="avg_sell_price" optional="hide"/>
+                <field name="last_price" optional="hide"/>
             </tree>
         </field>
     </record>
@@ -57,8 +61,11 @@
                             <field name="category_id"/>
                             <field name="integration_id"/>
                             <field name="quantity"/>
-                            <field name="total_cost"/>
-                            <field name="avg_cost"/>
+                            <field name="buy_total" />
+                            <field name="avg_buy_price" />
+                            <field name="sell_total" attrs="{'invisible': [('sell_total', '=', 0.0)]}"/>
+                            <field name="avg_sell_price" attrs="{'invisible': [('sell_total', '=', 0.0)]}"/>
+                            <field name="last_price"/>
                         </group>
                         <field name="notes"/>
                     </group>
@@ -94,8 +101,13 @@
         </field>
     </record>
 
-
-
+    <record id="action_recompute_value" model="ir.actions.server">
+        <field name="name">Re-compute Value</field>
+        <field name="model_id" ref="model_investment_asset"/>
+        <field name="binding_model_id" ref="model_investment_asset"/>
+        <field name="state">code</field>
+        <field name="code">records.recompute_value()</field>
+    </record>
 
     <record model="ir.actions.act_window" id="asset_action_window">
         <field name="name">Assets</field>
