@@ -234,7 +234,7 @@ class InvestmentAssetPrice(models.Model):
     @api.depends('cash_flow', 'quantity')
     def _compute_cost(self):
         for tx in self:
-            tx.cost = tx.cash_flow / tx.quantity
+            tx.cost = tx.cash_flow / tx.quantity if tx.quantity else 0.0
 
     _sql_constraints = [
         ('cash_flow_positive', 'CHECK (cash_flow > 0)', 'Cash flow must be greater than zero! Use negative quantity if needed.'),
