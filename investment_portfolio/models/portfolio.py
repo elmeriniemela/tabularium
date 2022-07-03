@@ -128,10 +128,16 @@ class InvestmentAsset(models.Model):
             total_cost = 0.0
             for tx in record.transaction_ids:
                 quantity += tx.quantity
+                cash_flow = record.currency_id._convert(
+                    from_amount=tx.cash_flow,
+                    to_currency=record.company_currency_id,
+                    company=self.env.company,
+                    date=tx.time,
+                )
                 if tx.quantity > 0:
-                    total_cost += tx.cash_flow
+                    total_cost += cash_flow
                 else:
-                    total_cost -= tx.cash_flow
+                    total_cost -= cash_flow
 
             record.quantity = quantity
             record.total_cost = total_cost
