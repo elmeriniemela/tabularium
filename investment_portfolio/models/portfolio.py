@@ -47,7 +47,7 @@ class Currency(models.Model):
                         'rate': rate,
                     })
 
-            Asset.search([('currency_id', '=', currency_id.id)])._compute_value()
+            Asset.search([('currency_id', '=', currency_id.id)])._compute_aggregate()
 
 
 
@@ -118,19 +118,20 @@ class InvestmentAsset(models.Model):
     )
 
 
-    quantity = fields.Float(compute='_compute_aggegate_transactions', digits='Investment Asset quantity')
+    quantity = fields.Float(compute='_compute_aggregate', store=True, digits='Investment Asset quantity')
+    is_closed = fields.Boolean(compute='_compute_aggregate', store=True)
 
-    buy_total = fields.Monetary(compute='_compute_aggegate_transactions', currency_field='company_currency_id', store=True)
-    sell_total = fields.Monetary(compute='_compute_aggegate_transactions', currency_field='company_currency_id', store=True)
+    buy_total = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
+    sell_total = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
+    position = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
 
-    avg_buy_price = fields.Monetary(compute='_compute_aggegate_transactions', currency_field='company_currency_id', store=True)
-    avg_sell_price = fields.Monetary(compute='_compute_aggegate_transactions', currency_field='company_currency_id', store=True)
+    avg_buy_price = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
+    avg_sell_price = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
 
 
-    value = fields.Monetary(compute='_compute_value', currency_field='company_currency_id', store=True)
-    last_price = fields.Monetary(compute='_compute_value', currency_field='company_currency_id', store=True)
-    profit = fields.Monetary(compute='_compute_value', currency_field='company_currency_id', store=True, group_operator='sum')
-    profit_percent = fields.Float(compute='_compute_value', currency_field='company_currency_id', store=True, group_operator='avg')
+    last_price = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
+    profit = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id', group_operator='sum')
+    profit_percent = fields.Float(compute='_compute_aggregate', store=True, currency_field='company_currency_id', group_operator='avg')
 
     integration_id = fields.Many2one(comodel_name='investment.integration')
 
@@ -139,13 +140,28 @@ class InvestmentAsset(models.Model):
     ]
 
 
-    def recompute_value(self):
-        self._compute_aggegate_transactions()
-        self._compute_value()
-
-    @api.depends('transaction_ids', 'transaction_ids.quantity', 'transaction_ids.cash_flow')
-    def _compute_aggegate_transactions(self):
+    @api.depends(
+        'transaction_ids',
+        'transaction_ids.quantity',
+        'transaction_ids.cash_flow',
+        'price_ids',
+        'price_ids.price',
+        'currency_id',
+        'company_currency_id',
+    )
+    def _compute_aggregate(self):
+        precision = self.env['decimal.precision'].precision_get('Investment Asset quantity')
         for record in self:
+            prices = record.price_ids.sorted()
+            last = prices[:1]
+            record.last_price = record.currency_id._convert(
+                from_amount=last.price or 0.0,
+                to_currency=record.company_currency_id,
+                company=self.env.company,
+                date=last.time or fields.Datetime.now(),
+            )
+
+
             quantity = 0.0
             buy_total = 0.0
             sell_total = 0.0
@@ -163,36 +179,18 @@ class InvestmentAsset(models.Model):
                     sell_total += cash_flow
                     sell_volume += abs(tx.quantity)
 
+            sell_total += quantity * record.last_price
+            sell_volume += quantity
+
+            record.is_closed = float_is_zero(quantity, precision_digits=precision)
+            record.position = quantity * record.last_price
             record.quantity = quantity
             record.buy_total = buy_total
             record.sell_total = sell_total
             record.avg_buy_price = buy_total/buy_volume if buy_volume else 0.0
             record.avg_sell_price = sell_total/sell_volume if sell_volume else 0.0
-
-    @api.depends('price_ids', 'price_ids.price', 'quantity', 'buy_total', 'sell_total', 'avg_buy_price', 'currency_id', 'company_currency_id')
-    def _compute_value(self):
-        precision = self.env['decimal.precision'].precision_get('Investment Asset quantity')
-        for record in self:
-            prices = record.price_ids.sorted()
-            last = prices[:1]
-            record.last_price = last.price or 0.0
-            if not last:
-                record.value = 0.0
-            else:
-                record.value = record.quantity * record.currency_id._convert(
-                    from_amount=last.price,
-                    to_currency=record.company_currency_id,
-                    company=self.env.company,
-                    date=last.time,
-                )
-
-            record.profit = record.value - record.buy_total + record.sell_total
-
-            cost = (record.buy_total - record.sell_total)
-            if float_is_zero(record.quantity, precision_digits=precision):
-                record.profit_percent = 0.0
-            else:
-                record.profit_percent = record.profit / cost if cost else 0.0
+            record.profit = record.sell_total - record.buy_total
+            record.profit_percent = (record.avg_sell_price-record.avg_buy_price) / record.avg_buy_price if record.avg_buy_price else 0.0
 
 
     def run_integration(self):
@@ -201,7 +199,7 @@ class InvestmentAsset(models.Model):
             if not integration:
                 raise ValidationError('Define integration first.')
             integration.execute(asset)
-            asset._compute_value() # For some reason, the depends on price_ids does not work...
+            asset._compute_aggregate() # For some reason, the depends on price_ids does not work...
 
 
     def cron_run_integration(self):
@@ -263,6 +261,7 @@ class InvestmentAssetPrice(models.Model):
     fee = fields.Monetary(store=True, readonly=False,  compute='_compute_fee', inverse='_inverse_fee')
 
     cash_balance = fields.Boolean(default=True)
+    cash_balance_id = fields.Many2one(comodel_name='investment.asset.transaction', ondelete='cascade')
 
     quantity = fields.Float(digits='Investment Asset quantity')
 
@@ -287,6 +286,7 @@ class InvestmentAssetPrice(models.Model):
                     'quantity': quantity,
                     'cash_flow': record.cash_flow,
                     'exchange_rate': 1.0,
+                    'cash_balance_id': record.id,
                     'fee': 0.0,
                 })]
         return records
