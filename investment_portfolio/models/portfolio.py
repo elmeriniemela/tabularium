@@ -231,16 +231,16 @@ class InvestmentAssetPrice(models.Model):
 
     last_price = fields.Monetary(related='asset_id.last_price')
 
-    @api.depends('cash_flow', 'quantity')
-    def _compute_cost(self):
-        for tx in self:
-            tx.cost = tx.cash_flow / tx.quantity if tx.quantity else 0.0
 
     _sql_constraints = [
         ('cash_flow_positive', 'CHECK (cash_flow > 0)', 'Cash flow must be greater than zero! Use negative quantity if needed.'),
         ('quantity_non_zero', 'CHECK (quantity != 0)', "Quantity can't be zero."),
     ]
 
+    @api.depends('cash_flow', 'quantity')
+    def _compute_cost(self):
+        for tx in self:
+            tx.cost = tx.cash_flow / tx.quantity if tx.quantity else 0.0
 
     @api.onchange('cash_flow', 'quantity')
     def _onchange_amount(self):

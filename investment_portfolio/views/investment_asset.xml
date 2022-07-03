@@ -8,7 +8,12 @@
                 <field name="ticker" optional="show"/>
                 <field name="quantity" optional="show"/>
                 <field name="value" optional="show" sum="Total"/>
+                <field name="profit" options="{'is_profit': 1}" optional="show"/>
+                <field name="profit_percent" widget="percentage" options="{'is_profit': 1}" optional="show"/>
                 <field name="currency_id" optional="hide"/>
+                <field name="total_cost" optional="hide"/>
+                <field name="avg_cost" optional="hide"/>
+                <field name="integration_id" optional="hide"/>
             </tree>
         </field>
     </record>
