@@ -175,7 +175,7 @@ class InvestmentAsset(models.Model):
                 if tx.quantity > 0:
                     buy_total += cash_flow
                     buy_volume += abs(tx.quantity)
-                else:
+                else: # Dividends should have 0.0 quantity and they fall here, increasing profit.
                     sell_total += cash_flow
                     sell_volume += abs(tx.quantity)
 
@@ -271,7 +271,7 @@ class InvestmentAssetPrice(models.Model):
 
     _sql_constraints = [
         ('cash_flow_positive', 'CHECK (cash_flow > 0)', 'Cash flow must be greater than zero! Use negative quantity if needed.'),
-        ('quantity_non_zero', 'CHECK (quantity != 0)', "Quantity can't be zero."),
+        ('quantity_non_zero', 'CHECK (1 != 0)', "Deprecated"),
     ]
 
     @api.model_create_multi
@@ -296,7 +296,10 @@ class InvestmentAssetPrice(models.Model):
     def _compute_profit(self):
         for tx in self:
             quantity = tx.quantity
-            tx.profit = (tx.asset_id.last_price - (tx.cash_flow / abs(quantity) if quantity else 0.0))*quantity
+            if not quantity: # if quantity is 0, the cash flow will be profit.
+                tx.profit = tx.cash_flow
+            else:
+                tx.profit = (tx.asset_id.last_price - (tx.cash_flow / abs(quantity))) * quantity
 
     @api.onchange('cash_flow', 'quantity')
     def _onchange_amount(self):
