@@ -269,11 +269,6 @@ class InvestmentAssetPrice(models.Model):
 
     profit = fields.Monetary(compute='_compute_profit')
 
-    _sql_constraints = [
-        ('cash_flow_positive', 'CHECK (cash_flow > 0)', 'Cash flow must be greater than zero! Use negative quantity if needed.'),
-        ('quantity_non_zero', 'CHECK (1 != 0)', "Deprecated"),
-    ]
-
     @api.model_create_multi
     def create(self, vals_list):
         records = super().create(vals_list)
