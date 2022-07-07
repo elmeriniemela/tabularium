@@ -16,7 +16,7 @@
 
                 <field name="buy_total" optional="hide" />
                 <field name="avg_buy_price" optional="hide"/>
-                <field name="sell_total" optional="show" sum="Total"/>
+                <field name="sell_total" optional="hide" sum="Total"/>
                 <field name="avg_sell_price" optional="hide"/>
                 <field name="last_price" optional="hide"/>
             </tree>
@@ -54,33 +54,34 @@
                             <field name="company_currency_id"/>
                             <field name="currency_id"/>
                             <field name="position"/>
-                            <field name="profit" options="{'is_profit': 1}"/>
-                            <field name="profit_percent" widget="percentage" options="{'is_profit': 1}"/>
+                            <field name="buy_total" />
                         </group>
                         <group>
                             <field name="category_id"/>
                             <field name="integration_id"/>
                             <field name="quantity"/>
-                            <field name="buy_total" />
-                            <field name="avg_buy_price" />
-                            <field name="sell_total"/>
-                            <field name="avg_sell_price" attrs="{'invisible': [('quantity', '!=', 0.0)]}"/>
                             <field name="last_price"/>
+                            <field name="avg_buy_price" />
+                            <field name="sell_total"  attrs="{'invisible': [('quantity', '!=', 0.0)]}"/>
+                            <field name="avg_sell_price" attrs="{'invisible': [('quantity', '!=', 0.0)]}"/>
+                            <field name="profit" options="{'is_profit': 1}"/>
+                            <field name="profit_percent" widget="percentage" options="{'is_profit': 1}"/>
                         </group>
                         <field name="notes"/>
                     </group>
                     <notebook>
-                        <page string="Prices">
-                            <field name="price_ids" context="{'default_asset_id': id}"/>
-                        </page>
                         <page string="Transactions">
                             <field name="transaction_ids" context="{'default_asset_id': id}"/>
+                        </page>
+                        <page string="Prices">
+                            <field name="price_ids" context="{'default_asset_id': id}"/>
                         </page>
                     </notebook>
                 </sheet>
                 <div class="o_attachment_preview"/>
                 <div class="oe_chatter">
                     <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
+                    <field name="activity_ids" widget="mail_activity"/>
                     <field name="message_ids" widget="mail_thread"/>
                 </div>
             </form>

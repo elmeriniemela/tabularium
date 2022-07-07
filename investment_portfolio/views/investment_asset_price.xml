@@ -6,7 +6,7 @@
             <tree editable="top">
                 <field name="time"/>
                 <field name="price"/>
-                <field name="currency_id" optional="hide"/>
+                <field name="currency_id" optional="show"/>
                 <field name="asset_id" optional="hide"/>
             </tree>
         </field>

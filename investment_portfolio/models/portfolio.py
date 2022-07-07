@@ -87,7 +87,7 @@ class InvestmentGategory(models.Model):
 class InvestmentAsset(models.Model):
     _name = 'investment.asset'
     _description = 'Investment Asset'
-    _inherit = ['mail.thread']
+    _inherit = ['mail.thread', 'mail.activity.mixin']
 
     name = fields.Char(required=True)
 
@@ -134,6 +134,11 @@ class InvestmentAsset(models.Model):
     profit_percent = fields.Float(compute='_compute_aggregate', store=True, currency_field='company_currency_id', group_operator='avg')
 
     integration_id = fields.Many2one(comodel_name='investment.integration')
+
+    integration_error_id = fields.Many2one(
+        comodel_name='mail.activity',
+        copy=False,
+    )
 
     _sql_constraints = [
         ('ticker_unique', 'unique(ticker)', 'Ticker already exists!'),
@@ -210,10 +215,17 @@ class InvestmentAsset(models.Model):
                     asset.run_integration()
             except Exception as error:
                 _logger.exception(error)
-                asset.message_post(
-                    body=traceback.format_exc().replace('\n', '<br/>'),
-                    subtype='mail.mt_comment',
-                )
+                asset.integration_error_id = asset.env['mail.activity'].create({
+                    'res_model_id': asset.env['ir.model']._get(asset._name).id,
+                    'res_id': asset.id,
+                    'activity_type_id': asset.env.ref('mail.mail_activity_data_todo').id,
+                    'summary': _('Integration issue'),
+                    'date_deadline': datetime.date.today(),
+                    'user_id': asset.create_uid.id,
+                    'note': traceback.format_exc().replace('\n', '<br/>'),
+                })
+            else:
+                asset.integration_error_id.unlink()
 
 
 
