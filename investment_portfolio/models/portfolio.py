@@ -144,6 +144,26 @@ class InvestmentAsset(models.Model):
         ('ticker_unique', 'unique(ticker)', 'Ticker already exists!'),
     ]
 
+    @api.model
+    def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
+        """
+            Override read_group to calculate the sum of the non-stored fields that depend on the user context
+        """
+        res = super().read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
+
+        if 'profit_percent' in fields:
+            for line in res:
+                domain = line.get('__domain') or []
+                assets = self.search(line['__domain'])
+                num = 0.0
+                denom = 0.0
+                for asset in assets:
+                    num += (asset.sell_total-asset.buy_total)
+                    denom += asset.buy_total
+                if denom:
+                    line['profit_percent'] = num / denom
+        return res
+
 
     @api.depends(
         'transaction_ids',
@@ -195,7 +215,7 @@ class InvestmentAsset(models.Model):
             record.avg_buy_price = buy_total/buy_volume if buy_volume else 0.0
             record.avg_sell_price = sell_total/sell_volume if sell_volume else 0.0
             record.profit = record.sell_total - record.buy_total
-            record.profit_percent = (record.avg_sell_price-record.avg_buy_price) / record.avg_buy_price if record.avg_buy_price else 0.0
+            record.profit_percent = (record.sell_total-record.buy_total) / record.buy_total if record.buy_total else 0.0
 
 
     def run_integration(self):
