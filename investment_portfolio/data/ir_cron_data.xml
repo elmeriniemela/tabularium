@@ -20,4 +20,14 @@
         <field name="interval_type">hours</field>
         <field name="numbercall">-1</field>
     </record>
+    <record id="cron_create_dates" model="ir.cron">
+        <field name="name">Create Investment Dates</field>
+        <field name="model_id" ref="model_investment_date"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_create_dates()</field>
+        <field name="user_id" ref="base.user_root" />
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
+    </record>
 </odoo>

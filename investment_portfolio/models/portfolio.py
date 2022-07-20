@@ -49,15 +49,67 @@ class Currency(models.Model):
 
             Asset.search([('currency_id', '=', currency_id.id)])._compute_aggregate()
 
+class InvestmentDate(models.Model):
+    _name = 'investment.date'
+    _description = 'Investment Date'
+    _rec_name = 'date'
+
+    date = fields.Date(required=True)
+
+    position_ids = fields.One2many(
+        comodel_name='investment.position',
+        inverse_name='date_id',
+    )
+
+    _sql_constraints = [
+        ('date_unique', 'unique(date)', 'This date already exists!'),
+    ]
+
+    def cron_create_dates(self):
+        first = self.env['investment.asset.transaction'].search([], order='time asc', limit=1)
+        date = first.time.date()
+        existing = {r.date for r in self.search([])}
+        while date < (datetime.date.today() + datetime.timedelta(days=3650)):
+            if date not in existing:
+                self.create({'date': date})
+            date += datetime.timedelta(days=1)
+
+class InvestmentDate(models.Model):
+    _name = 'investment.position'
+    _description = 'Investment Position'
+    _rec_name = 'asset_id'
+
+    position = fields.Monetary(compute='_compute_position', store=True, currency_field='company_currency_id')
+
+    date_id = fields.Many2one(
+        comodel_name='investment.date',
+        required=True,
+        ondelete='cascade'
+    )
+
+    company_currency_id = fields.Many2one(related='asset_id.company_currency_id', string="Company Currency")
 
 
-class InvestmentGategory(models.Model):
+    asset_id = fields.Many2one(
+        comodel_name='investment.asset',
+        required=True,
+        ondelete='cascade',
+    )
+
+    _sql_constraints = [
+        ('date_position_unique', 'unique(date_id, asset_id)', 'This position already exists!'),
+    ]
+
+
+
+
+class InvestmentCategory(models.Model):
     _name = 'investment.category'
     _description = 'Investment Category'
 
     name = fields.Char(required=True)
 
-class InvestmentGategory(models.Model):
+class InvestmentIntegration(models.Model):
     _name = 'investment.integration'
     _description = 'Investment Integration'
 
@@ -141,7 +193,7 @@ class InvestmentAsset(models.Model):
     )
 
     _sql_constraints = [
-        ('ticker_unique', 'unique(ticker)', 'Ticker already exists!'),
+        ('ticker_unique', 'CHECK(1==1)', 'Deprecated'),
     ]
 
     @api.model
