@@ -287,15 +287,19 @@ class InvestmentAsset(models.Model):
                     asset.run_integration()
             except Exception as error:
                 _logger.exception(error)
-                asset.integration_error_id = asset.env['mail.activity'].create({
-                    'res_model_id': asset.env['ir.model']._get(asset._name).id,
-                    'res_id': asset.id,
-                    'activity_type_id': asset.env.ref('mail.mail_activity_data_todo').id,
-                    'summary': _('Integration issue'),
-                    'date_deadline': datetime.date.today(),
-                    'user_id': asset.create_uid.id,
-                    'note': traceback.format_exc().replace('\n', '<br/>'),
-                })
+                note = traceback.format_exc().replace('\n', '<br/>')
+                if asset.integration_error_id:
+                    asset.integration_error_id.note = note
+                else:
+                    asset.integration_error_id = asset.env['mail.activity'].create({
+                        'res_model_id': asset.env['ir.model']._get(asset._name).id,
+                        'res_id': asset.id,
+                        'activity_type_id': asset.env.ref('mail.mail_activity_data_todo').id,
+                        'summary': _('Integration issue'),
+                        'date_deadline': datetime.date.today(),
+                        'user_id': asset.create_uid.id,
+                        'note': note,
+                    })
             else:
                 asset.integration_error_id.unlink()
 
