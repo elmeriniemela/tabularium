@@ -95,6 +95,8 @@
             <search>
                 <field name="name"/>
                 <filter string="Open Position" name="open_position" domain="[('is_closed', '=', False)]"/>
+                <separator/>
+                <filter string="Liquid Assets" name="liquid" domain="[('liquid', '=', True)]"/>
                 <group expand="1" string="Group by">
                     <filter string="Category" name="group_category_id" context="{'group_by': 'category_id'}"/>
                     <filter string="Name" name="group_name" context="{'group_by': 'name'}"/>
@@ -115,7 +117,7 @@
         <field name="name">Assets</field>
         <field name="res_model">investment.asset</field>
         <field name="view_mode">tree,form,graph</field>
-        <field name="context">{'search_default_group_category_id': 1, 'search_default_open_position': 1}</field>
+        <field name="context">{'search_default_group_category_id': 1, 'search_default_open_position': 1, 'search_default_liquid': 1,}</field>
     </record>
 
     <menuitem name="Investment Portfolio" id="root_menu" web_icon="investment_portfolio,static/description/icon.png"/>

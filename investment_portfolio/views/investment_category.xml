@@ -5,6 +5,7 @@
         <field name="arch" type="xml">
             <tree>
                 <field name="name" optional="show"/>
+                <field name="liquid" optional="show"/>
             </tree>
         </field>
     </record>
@@ -20,6 +21,9 @@
                             <field name="name"/>
                         </h1>
                     </div>
+                    <group>
+                        <field name="liquid"/>
+                    </group>
                 </sheet>
             </form>
         </field>
