@@ -5,16 +5,25 @@ from odoo.exceptions import ValidationError
 import requests, datetime, traceback, logging, dateutil, lxml.etree, io
 from odoo.tools.safe_eval import safe_eval, test_python_expr
 from odoo.tools import float_is_zero, float_compare
-
+import pandas
+import base64
 
 _logger = logging.getLogger(__name__)
 
 
-class CashflowCategory(models.Model):
-    _name = 'cashflow.category'
-    _description = 'Cash Flow Category'
 
-    name = fields.Char(required=True)
+class CashflowImport(models.TransientModel):
+    _name = 'cashflow.import'
+    _description = 'Cash Flow Import'
+
+    parser_id = fields.Many2one(comodel_name='cashflow.parser', required=True, default=lambda self: self.env.context.get('active_id'))
+    attachment_ids = fields.Many2many('ir.attachment', string='Files', required=True)
+
+    def import_file(self):
+        for data_file in self.attachment_ids:
+            data = base64.b64decode(data_file.datas)
+            fp = io.BytesIO(data)
+            self.parser_id.parse(fp)
 
 
 class Cashflowparser(models.Model):
@@ -37,7 +46,7 @@ class Cashflowparser(models.Model):
             if msg:
                 raise ValidationError(msg)
 
-    def execute(self):
+    def parse(self, fp):
         self.ensure_one()
         globals_dict = {
             'ValidationError': ValidationError,
@@ -47,8 +56,17 @@ class Cashflowparser(models.Model):
             'lxml': lxml,
             'io': io,
             'self': self,
+            'fp': fp,
+            'pandas': pandas,
         }
         safe_eval(self.code, globals_dict=globals_dict, mode="exec", nocopy=True)
+
+
+class CashflowCategory(models.Model):
+    _name = 'cashflow.category'
+    _description = 'Cash Flow Category'
+
+    name = fields.Char(required=True)
 
 class CashflowEntry(models.Model):
     _name = 'cashflow.entry'
