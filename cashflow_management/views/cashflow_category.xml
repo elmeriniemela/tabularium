@@ -1,0 +1,47 @@
+<odoo>
+    <record model="ir.ui.view" id="category_tree">
+        <field name="name">cashflow.category.tree</field>
+        <field name="model">cashflow.category</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name" optional="show"/>
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="category_form">
+        <field name="name">cashflow.category.form</field>
+        <field name="model">cashflow.category</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_left" style="width: 500px;">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="category_search" model="ir.ui.view">
+        <field name="name">cashflow.category.search</field>
+        <field name="model">cashflow.category</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+            </search>
+        </field>
+    </record>
+
+
+    <record model="ir.actions.act_window" id="category_action_window">
+        <field name="name">Categories</field>
+        <field name="res_model">cashflow.category</field>
+        <field name="view_mode">tree,form,graph</field>
+    </record>
+
+    <menuitem id="category_menu" action="category_action_window" parent="root_menu" sequence="1"/>
+
+</odoo>

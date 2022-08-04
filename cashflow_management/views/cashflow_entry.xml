@@ -1,0 +1,87 @@
+<odoo>
+    <record model="ir.ui.view" id="entry_tree">
+        <field name="name">cashflow.entry.tree</field>
+        <field name="model">cashflow.entry</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name" optional="show"/>
+                <field name="date"  optional="show"/>
+                <field name="amount"  optional="show"/>
+                <field name="company_id"  optional="show"/>
+                <field name="company_currency_id"  optional="show"/>
+                <field name="category_id" optional="show"/>
+                <field name="parser_id"  optional="show"/>
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="entry_graph">
+         <field name="name">cashflow.entry.graph</field>
+         <field name="model">cashflow.entry</field>
+         <field name="arch" type="xml">
+             <graph type="bar">
+                <field name="amount" type="measure"/>
+             </graph>
+         </field>
+    </record>
+
+    <record model="ir.ui.view" id="entry_form">
+        <field name="name">cashflow.entry.form</field>
+        <field name="model">cashflow.entry</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_left" style="width: 500px;">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="date"/>
+                            <field name="amount"/>
+                        </group>
+                        <group>
+                            <field name="company_id"/>
+                            <field name="company_currency_id"/>
+                            <field name="category_id"/>
+                            <field name="parser_id" />
+                        </group>
+                    </group>
+                </sheet>
+                <div class="o_attachment_preview"/>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="entry_search" model="ir.ui.view">
+        <field name="name">cashflow.entry.search</field>
+        <field name="model">cashflow.entry</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="date"/>
+                <group expand="1" string="Group by">
+                    <filter string="Date" name="group_date" context="{'group_by': 'date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+
+    <record model="ir.actions.act_window" id="entry_action_window">
+        <field name="name">Entrys</field>
+        <field name="res_model">cashflow.entry</field>
+        <field name="view_mode">tree,form,graph</field>
+        <field name="context">{'search_default_group_date': 1,}</field>
+    </record>
+
+    <menuitem name="Cash Flow Management" id="root_menu" web_icon="cashflow_management,static/description/icon.png"/>
+    <menuitem id="entry_menu" action="entry_action_window" parent="root_menu" sequence="1"/>
+
+</odoo>
