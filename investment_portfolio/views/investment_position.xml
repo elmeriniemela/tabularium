@@ -1,0 +1,105 @@
+<odoo>
+    <record model="ir.ui.view" id="position_tree">
+        <field name="name">investment.position.tree</field>
+        <field name="model">investment.position</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="asset_id" optional="show"/>
+                <field name="position" optional="show" sum="Total"/>
+                <field name="profit" widget="monetary" options="{'is_profit': 1}" optional="show"/>
+                <field name="profit_percent" widget="percentage" options="{'is_profit': 1}" optional="show"/>
+                <field name="company_currency_id" invisible="1"/>
+
+                <field name="buy_total" optional="hide" />
+                <field name="avg_buy_price" optional="hide"/>
+                <field name="sell_total" optional="hide" sum="Total"/>
+                <field name="avg_sell_price" optional="hide"/>
+                <field name="last_price" optional="hide"/>
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="position_graph">
+         <field name="name">investment.position.graph</field>
+         <field name="model">investment.position</field>
+         <field name="arch" type="xml">
+             <graph type="bar">
+                 <field name="position" type="measure"/>
+             </graph>
+         </field>
+    </record>
+
+    <record model="ir.ui.view" id="position_form">
+        <field name="name">investment.position.form</field>
+        <field name="model">investment.position</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="asset_id"/>
+                            <field name="date"/>
+                            <field name="price_id"/>
+                            <field name="company_currency_id"/>
+                            <field name="position"/>
+                            <field name="buy_total" />
+                        </group>
+                        <group>
+                            <field name="category_id"/>
+                            <field name="quantity"/>
+                            <field name="last_price"/>
+                            <field name="avg_buy_price" />
+                            <field name="sell_total"  attrs="{'invisible': [('quantity', '!=', 0.0)]}"/>
+                            <field name="avg_sell_price" attrs="{'invisible': [('quantity', '!=', 0.0)]}"/>
+                            <field name="profit" options="{'is_profit': 1}"/>
+                            <field name="profit_percent" widget="percentage" options="{'is_profit': 1}"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Transactions">
+                            <field name="transaction_ids" context="{'default_asset_id': id}"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="position_search" model="ir.ui.view">
+        <field name="name">investment.position.search</field>
+        <field name="model">investment.position</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="asset_id"/>
+                <separator/>
+                <filter string="Open Position" name="open_position" domain="[('is_closed', '=', False)]"/>
+                <separator/>
+                <field name="date"/>
+                <filter string="Liquid positions" name="liquid" domain="[('liquid', '=', True)]"/>
+                <group expand="1" string="Group by">
+                    <filter string="Date" name="group_date" context="{'group_by': 'date:day'}"/>
+                    <filter string="Category" name="group_category_id" context="{'group_by': 'category_id'}"/>
+                    <filter string="Asset" name="group_asset_id" context="{'group_by': 'asset_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_compute_aggregate" model="ir.actions.server">
+        <field name="name">Re-compute Value</field>
+        <field name="model_id" ref="model_investment_position"/>
+        <field name="binding_model_id" ref="model_investment_position"/>
+        <field name="state">code</field>
+        <field name="code">records._compute_aggregate()</field>
+    </record>
+
+    <record model="ir.actions.act_window" id="position_action_window">
+        <field name="name">Positions</field>
+        <field name="res_model">investment.position</field>
+        <field name="view_mode">tree,form,graph</field>
+        <field name="context">{'search_default_group_date': 1, 'search_default_open_position': 1, 'search_default_liquid': 1,}</field>
+    </record>
+
+    <menuitem id="position_menu" action="position_action_window" parent="root_menu" sequence="1"/>
+
+</odoo>

@@ -49,43 +49,32 @@ class Currency(models.Model):
 
             Asset.search([('currency_id', '=', currency_id.id)])._compute_aggregate()
 
-class InvestmentDate(models.Model):
-    _name = 'investment.date'
-    _description = 'Investment Date'
-    _rec_name = 'date'
 
-    date = fields.Date(required=True)
-
-    position_ids = fields.One2many(
-        comodel_name='investment.position',
-        inverse_name='date_id',
-    )
-
-    _sql_constraints = [
-        ('date_unique', 'unique(date)', 'This date already exists!'),
-    ]
-
-    def cron_create_dates(self):
-        first = self.env['investment.asset.transaction'].search([], order='time asc', limit=1)
-        date = first.time.date()
-        existing = {r.date for r in self.search([])}
-        while date < (datetime.date.today() + datetime.timedelta(days=3650)):
-            if date not in existing:
-                self.create({'date': date})
-            date += datetime.timedelta(days=1)
-
-class InvestmentDate(models.Model):
+class InvestmentPosition(models.Model):
     _name = 'investment.position'
     _description = 'Investment Position'
     _rec_name = 'asset_id'
 
-    position = fields.Monetary(compute='_compute_position', store=True, currency_field='company_currency_id')
+    position = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
+    quantity = fields.Float(compute='_compute_aggregate', store=True, digits='Investment Asset quantity')
+    is_closed = fields.Boolean(compute='_compute_aggregate', store=True)
 
-    date_id = fields.Many2one(
-        comodel_name='investment.date',
-        required=True,
-        ondelete='cascade'
-    )
+    buy_total = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
+    sell_total = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
+    position = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
+
+    avg_buy_price = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
+    avg_sell_price = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
+
+
+    last_price = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
+    profit = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id', group_operator='sum')
+    profit_percent = fields.Float(compute='_compute_aggregate', store=True, currency_field='company_currency_id', group_operator='avg')
+    transaction_ids = fields.Many2many(comodel_name='investment.asset.transaction', compute='_compute_aggregate', store=True)
+    price_id = fields.Many2one(comodel_name='investment.asset.price',compute='_compute_aggregate', store=True)
+
+    date = fields.Date(store=True, required=True)
+
 
     company_currency_id = fields.Many2one(related='asset_id.company_currency_id', string="Company Currency")
 
@@ -96,9 +85,44 @@ class InvestmentDate(models.Model):
         ondelete='cascade',
     )
 
+    category_id = fields.Many2one(related='asset_id.category_id', store=True, readonly=True)
+    liquid = fields.Boolean(related='category_id.liquid', store=True, readonly=True)
+
     _sql_constraints = [
-        ('date_position_unique', 'unique(date_id, asset_id)', 'This position already exists!'),
+        ('date_position_unique', 'unique(date, asset_id)', 'This position already exists!'),
     ]
+
+    @api.depends('asset_id', 'date')
+    def _compute_aggregate(self):
+        for record in self:
+            if not record.asset_id:
+                continue
+            domain = [
+                ('time', '<=', record.date),
+                ('asset_id', '=', record.asset_id.id),
+            ]
+            record.transaction_ids = record.env['investment.asset.transaction'].search(domain) # latest but before date
+            record.price_id = record.env['investment.asset.price'].search(domain, limit=1) # latest but before date
+            record.update(record.asset_id._get_position(record.price_id, record.transaction_ids))
+
+
+
+
+    @api.model
+    def cron_create_position(self):
+        existing = {(p.asset_id.id, p.date) for p in self.search([])}
+        for asset_id in self.env['investment.asset'].search([]):
+            first = self.env['investment.asset.transaction'].search([('asset_id', '=', asset_id.id)], order='time asc', limit=1)
+            date = first.time.date()
+            while date < (datetime.date.today() + datetime.timedelta(days=365)):
+                if (asset_id.id, date) not in existing:
+                    self.create({
+                        'asset_id': asset_id.id,
+                        'date': date,
+                    })
+                date += datetime.timedelta(days=1)
+
+
 
 
 
@@ -230,47 +254,53 @@ class InvestmentAsset(models.Model):
         'company_currency_id',
     )
     def _compute_aggregate(self):
-        precision = self.env['decimal.precision'].precision_get('Investment Asset quantity')
         for record in self:
-            prices = record.price_ids.sorted()
-            last = prices[:1]
-            record.last_price = record.currency_id._convert(
-                from_amount=last.price or 0.0,
-                to_currency=record.company_currency_id,
-                company=self.env.company,
-                date=last.time or fields.Datetime.now(),
-            )
+            price_id = record.price_ids.sorted()[:1]
+            record.update(record._get_position(price_id, record.transaction_ids))
+
+    def _get_position(self, price_id, transaction_ids):
+        self.ensure_one()
+        precision = self.env['decimal.precision'].precision_get('Investment Asset quantity')
+        last_price = self.currency_id._convert(
+            from_amount=price_id.price or 0.0,
+            to_currency=self.company_currency_id,
+            company=self.env.company,
+            date=price_id.time or fields.Datetime.now(),
+        )
+
+        quantity = 0.0
+        buy_total = 0.0
+        sell_total = 0.0
+
+        buy_volume = 0
+        sell_volume = 0
+
+        for tx in transaction_ids:
+            quantity += tx.quantity
+            cash_flow = tx.cash_flow
+            if tx.quantity > 0:
+                buy_total += cash_flow
+                buy_volume += abs(tx.quantity)
+            else: # Dividends should have 0.0 quantity and they fall here, increasing profit.
+                sell_total += cash_flow
+                sell_volume += abs(tx.quantity)
+
+        sell_total += quantity * last_price
+        sell_volume += quantity
+        return {
+            'last_price': last_price,
+            'is_closed': float_is_zero(quantity, precision_digits=precision),
+            'position': quantity * last_price,
+            'quantity': quantity,
+            'buy_total': buy_total,
+            'sell_total': sell_total,
+            'avg_buy_price': buy_total/buy_volume if buy_volume else 0.0,
+            'avg_sell_price': sell_total/sell_volume if sell_volume else 0.0,
+            'profit': sell_total - buy_total,
+            'profit_percent': (sell_total-buy_total) / buy_total if buy_total else 0.0,
+        }
 
 
-            quantity = 0.0
-            buy_total = 0.0
-            sell_total = 0.0
-
-            buy_volume = 0
-            sell_volume = 0
-
-            for tx in record.transaction_ids:
-                quantity += tx.quantity
-                cash_flow = tx.cash_flow
-                if tx.quantity > 0:
-                    buy_total += cash_flow
-                    buy_volume += abs(tx.quantity)
-                else: # Dividends should have 0.0 quantity and they fall here, increasing profit.
-                    sell_total += cash_flow
-                    sell_volume += abs(tx.quantity)
-
-            sell_total += quantity * record.last_price
-            sell_volume += quantity
-
-            record.is_closed = float_is_zero(quantity, precision_digits=precision)
-            record.position = quantity * record.last_price
-            record.quantity = quantity
-            record.buy_total = buy_total
-            record.sell_total = sell_total
-            record.avg_buy_price = buy_total/buy_volume if buy_volume else 0.0
-            record.avg_sell_price = sell_total/sell_volume if sell_volume else 0.0
-            record.profit = record.sell_total - record.buy_total
-            record.profit_percent = (record.sell_total-record.buy_total) / record.buy_total if record.buy_total else 0.0
 
 
     def run_integration(self):
@@ -314,6 +344,8 @@ class InvestmentAssetPrice(models.Model):
     _name = 'investment.asset.price'
     _description = 'Investment Asset Price'
     _order = 'time desc'
+    _rec_name = 'price'
+
 
     asset_id = fields.Many2one(
         comodel_name='investment.asset',
