@@ -8,7 +8,7 @@
             <form>
                 <h2>Import cash flow entries</h2>
                 <field name="parser_id" invisible="1"/>
-                <field name="attachment_ids"  widget="many2many_binary" colspan="2" string="Select Files" nolabel="1"/>
+                <field name="attachment_ids"  widget="many2many_binary" colspan="2" string="Select Files" nolabel="1" style="width: 100%"/>
                 <footer>
                     <button name="import_file" string="Upload" type="object" class="btn-primary" />
                     <button string="Cancel" class="btn-secondary" special="cancel"/>
@@ -60,6 +60,7 @@
                         </page>
                         <page string="Imported Files">
                             <field name="attachment_ids"/>
+                            <button name="delete_files" type="object" string="Delete files"/>
                         </page>
                     </notebook>
                 </sheet>

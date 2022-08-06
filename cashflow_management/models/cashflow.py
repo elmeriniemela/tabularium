@@ -7,6 +7,8 @@ from odoo.tools.safe_eval import safe_eval, test_python_expr
 from odoo.tools import float_is_zero, float_compare
 import pandas
 import base64
+import pdfminer
+import re
 
 _logger = logging.getLogger(__name__)
 
@@ -51,6 +53,10 @@ class Cashflowparser(models.Model):
         string='Imported Files'
     )
 
+    def delete_files(self):
+        for parser in self:
+            parser.attachment_ids.unlink()
+
     @api.constrains('code')
     def _validate_code(self):
         for record in self:
@@ -72,6 +78,8 @@ class Cashflowparser(models.Model):
             'attachment_id': attachment_id,
             'pandas': pandas,
             '_logger': _logger,
+            'pdfminer': pdfminer,
+            're': re,
         }
         safe_eval(self.code, globals_dict=globals_dict, mode="exec", nocopy=True)
 

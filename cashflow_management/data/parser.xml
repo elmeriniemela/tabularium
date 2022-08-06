@@ -58,4 +58,58 @@ for index, row in df.iterrows():
         </field>
     </record>
 
+    <record id="sprintit_maventa_palkka" model="cashflow.parser">
+        <field name="name">SprintIT Maventa Palkka</field>
+        <field name="code">
+outfp = io.BytesIO()
+pdfminer.high_level.extract_text_to_fp(fp, outfp)
+outfp.seek(0)
+text = outfp.read().decode()
+_logger.info(text)
+
+category = self.env['cashflow.category'].getsert('PALKKA')
+
+def find(patterns, text):
+    for command in patterns:
+        index = command['index']
+        pattern = command['pattern']
+        matches = re.findall(pattern, text)
+        if len(matches) > index:
+            return matches[index]
+    raise ValidationError("Patterns not found (%s): %s" % (attachment_id.name, patterns))
+
+amount_str = find(
+    patterns=[
+        {'pattern': 'Maksettu([\d\.,]+)', 'index':0},
+        {'pattern': 'Maksettu EUR ([\d\ ]+,\d\d)', 'index': 1},
+    ],
+    text=text,
+).replace(',', '.').replace(' ', '')
+
+
+date_str = find(
+    patterns=[
+        {'pattern': 'MAKSUPÄIVÄ([\d\.,]+)', 'index': 0},
+        {'pattern': 'Palkkakausi([\d\.]+)', 'index': 0},
+    ],
+    text=text,
+)
+
+date = dateutil.parser.parse(date_str).date()
+
+vals = {
+    'name': 'SprintIT Palkka %s' % date_str,
+    'amount': float(amount_str),
+    'date': date,
+    'parser_id': self.id,
+    'category_id': category.id,
+    'raw': text,
+    'attachment_id': attachment_id.id,
+}
+self.env['cashflow.entry'].create(vals)
+
+        </field>
+    </record>
+
+
 </odoo>
