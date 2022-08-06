@@ -28,6 +28,35 @@ for index, row in df.iterrows():
         </field>
     </record>
 
+    <record id="danske_csv" model="cashflow.parser">
+        <field name="name">Danske CSV</field>
+        <field name="code">
+
+df = pandas.read_csv(fp, sep=';', decimal=",", thousands=' ', encoding='iso-8859-1')
+
+Category = self.env['cashflow.category']
+for index, row in df.iterrows():
+    category_name = row['Alaluokka']
+    if category_name:
+        category = Category.getsert(category_name)
+    else:
+        raise ValidationError("Category missing")
+
+    vals = {
+        'name': row['Saaja/Maksaja'],
+        'amount': row['Määrä'],
+        'date': datetime.datetime.strptime(row['Pvm'], '%d.%m.%Y').date(),
+        'parser_id': self.id,
+        'category_id': category.id,
+        'raw': str(dict(row)),
+        'attachment_id': attachment_id.id
+    }
+    self.env['cashflow.entry'].create(vals)
+
+
+        </field>
+    </record>
+
     <record id="banknorwegian_xlsx" model="cashflow.parser">
         <field name="name">BankNorwegian XLSX</field>
         <field name="code">

@@ -70,6 +70,8 @@
         <field name="arch" type="xml">
             <search>
                 <field name="name"/>
+                <field name="parser_id"/>
+                <field name="category_id"/>
                 <field name="date"/>
                 <group expand="1" string="Group by">
                     <filter string="Parser" name="group_parser" context="{'group_by': 'parser_id'}"/>

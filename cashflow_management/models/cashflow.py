@@ -114,7 +114,7 @@ class CashflowEntry(models.Model):
     category_id = fields.Many2one(comodel_name='cashflow.category', required=True)
     company_currency_id = fields.Many2one(related='company_id.currency_id', string="Company Currency", readonly=True)
 
-    parser_id = fields.Many2one(comodel_name='cashflow.parser', readonly=True)
+    parser_id = fields.Many2one(comodel_name='cashflow.parser')
     raw = fields.Text(readonly=True)
     identifier = fields.Char(readonly=True)
     attachment_id = fields.Many2one(comodel_name='ir.attachment', ondelete='cascade', readonly=True)
