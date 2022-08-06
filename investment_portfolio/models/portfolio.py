@@ -379,6 +379,8 @@ class InvestmentAssetPrice(models.Model):
 
     cash_flow = fields.Monetary(required=True)
 
+    description = fields.Char()
+
     exchange_rate = fields.Monetary()
 
     fee = fields.Monetary(store=True, readonly=False,  compute='_compute_fee', inverse='_inverse_fee')

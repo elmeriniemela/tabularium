@@ -7,6 +7,7 @@
                 <field name="time"/>
                 <field name="quantity"/>
                 <field name="cash_flow"/>
+                <field name="description"/>
                 <field name="exchange_rate"/>
                 <field name="fee"/>
                 <field name="cash_balance" optional="hide"/>
@@ -34,6 +35,7 @@
                         <group>
                             <field name="currency_id" invisible="not context.get('show_all')"/>
                             <field name="asset_id" invisible="not context.get('show_all')"/>
+                            <field name="description"/>
                         </group>
                     </group>
                 </sheet>
