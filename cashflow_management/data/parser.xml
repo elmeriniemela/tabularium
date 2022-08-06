@@ -1,0 +1,61 @@
+<odoo noupdate="1">
+    <record id="op_csv" model="cashflow.parser">
+        <field name="name">OP CSV</field>
+        <field name="code">
+df = pandas.read_csv(fp, sep=';', decimal=',')
+
+Category = self.env['cashflow.category']
+for index, row in df.iterrows():
+    category_name = row['Selitys']
+
+    if category_name:
+        category = Category.getsert(category_name)
+    else:
+        raise ValidationError("Category missing")
+
+    vals = {
+        'name': '%s: %s' % (row['Selitys'], row['Saaja/Maksaja']),
+        'amount': row['Määrä EUROA'],
+        'date': row['Kirjauspäivä'],
+        'parser_id': self.id,
+        'category_id': category.id,
+        'raw': str(dict(row)),
+        'identifier': row['Arkistointitunnus'],
+        'attachment_id': attachment_id.id
+    }
+    self.env['cashflow.entry'].create(vals)
+
+        </field>
+    </record>
+
+    <record id="banknorwegian_xlsx" model="cashflow.parser">
+        <field name="name">BankNorwegian XLSX</field>
+        <field name="code">
+dfs = pandas.read_excel(fp, sheet_name=None)
+df = list(dfs.values())[0]
+
+Category = self.env['cashflow.category']
+null_category = Category.getsert('Credit Card Payment')
+for index, row in df.iterrows():
+    category_name = row['Merchant Category']
+
+    if category_name:
+        category = Category.getsert(category_name)
+    else:
+        category = null_category
+
+    vals = {
+        'name': row['Text'],
+        'amount': row['Amount'],
+        'date': row['BookDate'],
+        'parser_id': self.id,
+        'category_id': category.id,
+        'raw': str(dict(row)),
+        'attachment_id': attachment_id.id,
+    }
+    self.env['cashflow.entry'].create(vals)
+
+        </field>
+    </record>
+
+</odoo>

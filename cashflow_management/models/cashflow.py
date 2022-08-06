@@ -20,10 +20,15 @@ class CashflowImport(models.TransientModel):
     attachment_ids = fields.Many2many('ir.attachment', string='Files', required=True)
 
     def import_file(self):
-        for data_file in self.attachment_ids:
-            data = base64.b64decode(data_file.datas)
+        for attachment_id in self.attachment_ids:
+            data = base64.b64decode(attachment_id.datas)
             fp = io.BytesIO(data)
-            self.parser_id.parse(fp)
+            self.parser_id.parse(fp, attachment_id)
+
+        self.attachment_ids.write({
+            'res_model': self.parser_id._name,
+            'res_id': self.parser_id.id,
+        })
 
 
 class Cashflowparser(models.Model):
@@ -39,6 +44,13 @@ class Cashflowparser(models.Model):
         readonly=True,
     )
 
+    attachment_ids = fields.One2many(
+        comodel_name='ir.attachment',
+        inverse_name='res_id',
+        domain=[('res_model', '=', _name)],
+        string='Imported Files'
+    )
+
     @api.constrains('code')
     def _validate_code(self):
         for record in self:
@@ -46,7 +58,7 @@ class Cashflowparser(models.Model):
             if msg:
                 raise ValidationError(msg)
 
-    def parse(self, fp):
+    def parse(self, fp, attachment_id):
         self.ensure_one()
         globals_dict = {
             'ValidationError': ValidationError,
@@ -57,7 +69,9 @@ class Cashflowparser(models.Model):
             'io': io,
             'self': self,
             'fp': fp,
+            'attachment_id': attachment_id,
             'pandas': pandas,
+            '_logger': _logger,
         }
         safe_eval(self.code, globals_dict=globals_dict, mode="exec", nocopy=True)
 
@@ -68,16 +82,31 @@ class CashflowCategory(models.Model):
 
     name = fields.Char(required=True)
 
+    _sql_constraints = [
+        ('unique_name', 'unique(name)', 'This category already exists!'),
+    ]
+
+    def getsert(self, name):
+        category = self.search([('name', '=', name)], limit=1)
+        if not category:
+            category = self.create({'name': name})
+        return category
+
 class CashflowEntry(models.Model):
     _name = 'cashflow.entry'
     _description = 'Cash Flow Entry'
     _inherit = ['mail.thread', 'mail.activity.mixin']
+    _order = 'date desc'
 
     name = fields.Char(required=True)
     date = fields.Date(required=True, default=fields.Date.today)
     amount = fields.Monetary(required=True, currency_field='company_currency_id')
+
     company_id = fields.Many2one(comodel_name='res.company', required=True, default=lambda self: self.env.company)
     category_id = fields.Many2one(comodel_name='cashflow.category', required=True)
-    company_currency_id = fields.Many2one(related='company_id.currency_id', string="Company Currency")
-    parser_id = fields.Many2one(comodel_name='cashflow.parser')
+    company_currency_id = fields.Many2one(related='company_id.currency_id', string="Company Currency", readonly=True)
 
+    parser_id = fields.Many2one(comodel_name='cashflow.parser', readonly=True)
+    raw = fields.Text(readonly=True)
+    identifier = fields.Char(readonly=True)
+    attachment_id = fields.Many2one(comodel_name='ir.attachment', ondelete='cascade', readonly=True)

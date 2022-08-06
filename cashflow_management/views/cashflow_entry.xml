@@ -6,7 +6,7 @@
             <tree>
                 <field name="name" optional="show"/>
                 <field name="date"  optional="show"/>
-                <field name="amount"  optional="show"/>
+                <field name="amount"  optional="show" sum="Total"/>
                 <field name="company_id"  optional="show"/>
                 <field name="company_currency_id"  optional="show"/>
                 <field name="category_id" optional="show"/>
@@ -45,7 +45,12 @@
                             <field name="company_id"/>
                             <field name="company_currency_id"/>
                             <field name="category_id"/>
+                        </group>
+                        <group>
                             <field name="parser_id" />
+                            <field name="raw"/>
+                            <field name="identifier"/>
+                            <field name="attachment_id"/>
                         </group>
                     </group>
                 </sheet>
@@ -67,6 +72,7 @@
                 <field name="name"/>
                 <field name="date"/>
                 <group expand="1" string="Group by">
+                    <filter string="Parser" name="group_parser" context="{'group_by': 'parser_id'}"/>
                     <filter string="Date" name="group_date" context="{'group_by': 'date:month'}"/>
                 </group>
             </search>
@@ -78,7 +84,7 @@
         <field name="name">Entrys</field>
         <field name="res_model">cashflow.entry</field>
         <field name="view_mode">tree,form,graph</field>
-        <field name="context">{'search_default_group_date': 1,}</field>
+        <field name="context">{'search_default_group_parser': 1,'search_default_group_date': 1,}</field>
     </record>
 
     <menuitem name="Cash Flow Management" id="root_menu" web_icon="cashflow_management,static/description/icon.png"/>

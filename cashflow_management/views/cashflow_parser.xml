@@ -58,6 +58,9 @@
                         <page string="Parsed Entries">
                             <field name="entry_ids"/>
                         </page>
+                        <page string="Imported Files">
+                            <field name="attachment_ids"/>
+                        </page>
                     </notebook>
                 </sheet>
             </form>
