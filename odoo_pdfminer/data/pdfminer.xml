@@ -1,7 +1,0 @@
-<odoo>
-    <record model="odoo.pdfminer" id="salary_model">
-        <field name="name">Palkka PDF</field>
-        <field name="re_amount_total">Maksettu([\d\.,]+)</field>
-        <field name="re_invoice_date">MAKSUPÄIVÄ([\d\.,]+)</field>
-    </record>
-</odoo>
