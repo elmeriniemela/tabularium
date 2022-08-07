@@ -178,7 +178,7 @@ class CashflowEntry(models.Model):
     )
     company_currency_id = fields.Many2one(related='company_id.currency_id', string="Company Currency", readonly=True)
 
-    parser_id = fields.Many2one(comodel_name='cashflow.parser')
+    parser_id = fields.Many2one(comodel_name='cashflow.parser', readonly=True)
     raw = fields.Text(readonly=True)
     identifier = fields.Char(readonly=True)
     attachment_id = fields.Many2one(comodel_name='ir.attachment', ondelete='cascade', readonly=True)
