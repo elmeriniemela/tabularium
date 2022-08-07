@@ -40,6 +40,7 @@
                         <group>
                             <field name="date"/>
                             <field name="amount"/>
+                            <field name="account_id"/>
                         </group>
                         <group>
                             <field name="company_id"/>
@@ -70,10 +71,13 @@
         <field name="arch" type="xml">
             <search>
                 <field name="name"/>
-                <field name="parser_id"/>
+                <field name="account_id"/>
                 <field name="category_id"/>
+                <field name="parser_id"/>
                 <field name="date"/>
                 <group expand="1" string="Group by">
+                    <filter string="Account" name="group_account" context="{'group_by': 'account_id'}"/>
+                    <filter string="Category" name="group_category" context="{'group_by': 'category_id'}"/>
                     <filter string="Parser" name="group_parser" context="{'group_by': 'parser_id'}"/>
                     <filter string="Date" name="group_date" context="{'group_by': 'date:month'}"/>
                 </group>
@@ -86,7 +90,7 @@
         <field name="name">Entrys</field>
         <field name="res_model">cashflow.entry</field>
         <field name="view_mode">tree,form,graph</field>
-        <field name="context">{'search_default_group_parser': 1,'search_default_group_date': 1,}</field>
+        <field name="context">{'search_default_group_account': 1,'search_default_group_date': 1,}</field>
     </record>
 
     <menuitem name="Cash Flow Management" id="root_menu" web_icon="cashflow_management,static/description/icon.png"/>

@@ -8,10 +8,26 @@ from odoo.tools import float_is_zero, float_compare
 import pandas
 import base64
 import pdfminer
+import pdfminer.high_level
 import re
+import tempfile
+import subprocess
+
+
+def pdftotext(fp):
+    pdfData = fp.read()
+    tf = tempfile.NamedTemporaryFile()
+    tf.write(pdfData)
+    tf.seek(0)
+    outputTf = tempfile.NamedTemporaryFile()
+
+    if (len(pdfData) > 0) :
+        out, err = subprocess.Popen(["pdftotext", "-layout", tf.name, outputTf.name ]).communicate()
+        return outputTf.read()
+    else:
+        return b""
 
 _logger = logging.getLogger(__name__)
-
 
 
 class CashflowImport(models.TransientModel):
@@ -31,6 +47,7 @@ class CashflowImport(models.TransientModel):
             'res_model': self.parser_id._name,
             'res_id': self.parser_id.id,
         })
+        self.parser_id.apply_account()
 
 
 class Cashflowparser(models.Model):
@@ -52,6 +69,20 @@ class Cashflowparser(models.Model):
         domain=[('res_model', '=', _name)],
         string='Imported Files'
     )
+
+    account_id = fields.Many2one(
+        comodel_name='cashflow.account',
+        required=True,
+        ondelete='restrict',
+    )
+
+    def apply_account(self):
+        for record in self:
+            to_update = record.env['cashflow.entry'].search([
+                ('parser_id', '=', record.id),
+                ('account_id', '!=', record.account_id.id)
+            ])
+            to_update.write({'account_id': record.account_id.id})
 
     def delete_files(self):
         for parser in self:
@@ -79,9 +110,22 @@ class Cashflowparser(models.Model):
             'pandas': pandas,
             '_logger': _logger,
             'pdfminer': pdfminer,
+            'pdftotext': pdftotext,
             're': re,
+            'print': print,
         }
         safe_eval(self.code, globals_dict=globals_dict, mode="exec", nocopy=True)
+
+
+class CashflowCategory(models.Model):
+    _name = 'cashflow.account'
+    _description = 'Cash Flow Account'
+
+    name = fields.Char(required=True)
+
+    _sql_constraints = [
+        ('unique_name', 'unique(name)', 'This account already exists!'),
+    ]
 
 
 class CashflowCategory(models.Model):
@@ -112,9 +156,31 @@ class CashflowEntry(models.Model):
 
     company_id = fields.Many2one(comodel_name='res.company', required=True, default=lambda self: self.env.company)
     category_id = fields.Many2one(comodel_name='cashflow.category', required=True)
+    account_id = fields.Many2one(
+        comodel_name='cashflow.account',
+        required=False,
+        ondelete='set null',
+    )
     company_currency_id = fields.Many2one(related='company_id.currency_id', string="Company Currency", readonly=True)
 
     parser_id = fields.Many2one(comodel_name='cashflow.parser')
     raw = fields.Text(readonly=True)
     identifier = fields.Char(readonly=True)
     attachment_id = fields.Many2one(comodel_name='ir.attachment', ondelete='cascade', readonly=True)
+    entry_type = fields.Selection(
+        selection=[
+            ('deposit', 'Deposit'),
+            ('withdrawal', 'Withdrawal'),
+        ],
+        compute='_compute_entry_type',
+        store=True,
+    )
+
+    _sql_constraints = [
+        ('zero_amount', 'CHECK(amount != 0)', 'Amount can not be zero!'),
+    ]
+
+    @api.depends('amount')
+    def _compute_entry_type(self):
+        for record in self:
+            record.entry_type = 'deposit' if record.amount > 0 else 'withdrawal'

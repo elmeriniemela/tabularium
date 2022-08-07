@@ -51,6 +51,18 @@
                             <field name="name"/>
                         </h1>
                     </div>
+                    <group>
+                        <label for="account_id"/>
+                        <div>
+                            <field name="account_id"/>
+                            <button name="apply_account"
+                                    string="Apply Account"
+                                    class="oe_link"
+                                    icon="fa-long-arrow-right"
+                                    type="object"
+                                />
+                        </div>
+                    </group>
                     <notebook>
                         <page string="Code">
                             <field name="code" widget="ace" options="{'mode': 'python'}"/>

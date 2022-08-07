@@ -140,5 +140,55 @@ self.env['cashflow.entry'].create(vals)
         </field>
     </record>
 
+    <record id="danske_pdf" model="cashflow.parser">
+        <field name="name">Danske PDF</field>
+        <field name="code">
+
+text = pdftotext(fp).decode()
+lines = [[t.strip() for t in l.split('  ') if t.strip()] for l in text.split('\n')]
+
+year = None
+Category = self.env['cashflow.category']
+
+for i, line in enumerate(lines):
+    if not year and len(line) == 1:
+        [token] = line
+        year_list = re.findall('Ajalta \d\d\.\d\d\.(\d\d\d\d)', token)
+        if year_list:
+            [year] = year_list
+        else:
+            continue
+    elif not year:
+        continue # year not found yet
+
+    if len(line) == 4:
+        # line = ['26.07.', '25.07.', 'VERKKOMAKSU', '1.500,00 -'],
+        book_date, value_date, category_name, amount_str = line
+        try:
+            amount = float(amount_str[-1] + amount_str[:-2].replace('.', '').replace(',', '.'))
+        except:
+            continue # not a correct line
+
+        date = datetime.datetime.strptime(book_date+year, '%d.%m.%Y').date()
+        next_line = lines[i+1]
+        if len(next_line) == 1:
+            name = '%s: %s' % (category_name, next_line[0])
+        else:
+            name = category_name
+
+
+        vals = {
+            'name':name ,
+            'amount': amount,
+            'date': date,
+            'parser_id': self.id,
+            'category_id': Category.getsert(category_name).id,
+            'raw': [line, next_line],
+            'attachment_id': attachment_id.id
+        }
+        self.env['cashflow.entry'].create(vals)
+
+        </field>
+    </record>
 
 </odoo>
