@@ -5,6 +5,7 @@
         <field name="arch" type="xml">
             <tree>
                 <field name="name" optional="show"/>
+                <field name="entry_ids" widget="many2many_tags" optional="hide"/>
             </tree>
         </field>
     </record>
@@ -20,6 +21,7 @@
                             <field name="name"/>
                         </h1>
                     </div>
+                    <field name="entry_ids"/>
                 </sheet>
             </form>
         </field>
@@ -40,6 +42,14 @@
         <field name="name">Categories</field>
         <field name="res_model">cashflow.category</field>
         <field name="view_mode">tree,form,graph</field>
+    </record>
+
+    <record model="ir.actions.server" id="action_sanitize">
+        <field name="name">Sanitize</field>
+        <field name="model_id" ref="model_cashflow_category"/>
+        <field name="binding_model_id" ref="model_cashflow_category"/>
+        <field name="state">code</field>
+        <field name="code">records.sanitize()</field>
     </record>
 
     <menuitem id="category_menu" action="category_action_window" parent="root_menu" sequence="1"/>
