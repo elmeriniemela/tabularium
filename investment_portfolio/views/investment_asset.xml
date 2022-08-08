@@ -7,8 +7,8 @@
                 <field name="name" optional="show"/>
                 <field name="ticker" optional="show"/>
                 <field name="quantity" optional="show"/>
-                <field name="position" optional="show" sum="Total"/>
-                <field name="profit" widget="monetary" options="{'is_profit': 1}" optional="show"/>
+                <field name="position" optional="show" sum="Total Position"/>
+                <field name="profit" widget="monetary" options="{'is_profit': 1}" optional="show" sum="Total Profit"/>
                 <field name="profit_percent" widget="percentage" options="{'is_profit': 1}" optional="show"/>
                 <field name="currency_id" optional="hide"/>
                 <field name="integration_id" optional="hide"/>
