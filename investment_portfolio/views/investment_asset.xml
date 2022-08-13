@@ -94,9 +94,13 @@
         <field name="arch" type="xml">
             <search>
                 <field name="name"/>
+                <separator/>
                 <filter string="Open Position" name="open_position" domain="[('is_closed', '=', False)]"/>
+                <filter string="Closed Position" name="open_position" domain="[('is_closed', '=', True)]"/>
                 <separator/>
                 <filter string="Liquid Assets" name="liquid" domain="[('liquid', '=', True)]"/>
+                <filter string="Illiquid Assets" name="liquid" domain="[('liquid', '=', False)]"/>
+                <separator/>
                 <group expand="1" string="Group by">
                     <filter string="Category" name="group_category_id" context="{'group_by': 'category_id'}"/>
                     <filter string="Name" name="group_name" context="{'group_by': 'name'}"/>

@@ -219,10 +219,6 @@ class InvestmentAsset(models.Model):
         copy=False,
     )
 
-    _sql_constraints = [
-        ('ticker_unique', 'CHECK(1==1)', 'Deprecated'),
-    ]
-
     @api.model
     def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
         """
@@ -394,6 +390,21 @@ class InvestmentAssetPrice(models.Model):
 
     profit = fields.Monetary(compute='_compute_profit')
 
+    category_id = fields.Many2one(related='asset_id.category_id', store=True, readonly=True)
+    liquid = fields.Boolean(related='category_id.liquid', store=True, readonly=True)
+
+    ttype = fields.Selection(
+        selection=[
+            ('buy', 'Buy'),
+            ('sell', 'Sell'),
+            ('yield', 'Yield'),
+            ('cost', 'Cost'),
+        ],
+        string='Type',
+        compute='_compute_ttype',
+        store=True,
+    )
+
     @api.model_create_multi
     def create(self, vals_list):
         records = super().create(vals_list)
@@ -410,6 +421,24 @@ class InvestmentAssetPrice(models.Model):
                     'fee': 0.0,
                 })]
         return records
+
+
+    @api.depends('cash_flow', 'quantity')
+    def _compute_ttype(self):
+        for record in self:
+            if record.quantity < 0:
+                record.ttype = 'sell'
+            elif record.quantity > 0:
+                record.ttype = 'buy'
+            elif record.cash_flow > 0:
+                record.ttype = 'yield'
+            elif record.cash_flow < 0:
+                record.ttype = 'cost'
+            else:
+                record.ttype = False
+                _logger.error("Invalid type: %s", record)
+
+
 
 
     @api.depends('cash_flow', 'quantity')

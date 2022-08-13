@@ -14,6 +14,8 @@
                 <field name="profit" optional="hide"/>
                 <field name="currency_id" optional="hide"/>
                 <field name="asset_id" optional="hide"/>
+                <field name="liquid" optional="hide"/>
+                <field name="category_id" optional="hide"/>
             </tree>
         </field>
     </record>
@@ -40,6 +42,25 @@
                     </group>
                 </sheet>
             </form>
+        </field>
+    </record>
+
+    <record id="asset_transaction_search" model="ir.ui.view">
+        <field name="name">investment.asset.transaction.search</field>
+        <field name="model">investment.asset.transaction</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="asset_id"/>
+                <separator/>
+                <filter string="Liquid Assets" name="liquid" domain="[('liquid', '=', True)]"/>
+                <filter string="Illiquid Assets" name="liquid" domain="[('liquid', '=', False)]"/>
+                <separator/>
+                <group expand="1" string="Group by">
+                    <filter string="Category" name="group_category_id" context="{'group_by': 'category_id'}"/>
+                    <filter string="Type" name="group_ttype" context="{'group_by': 'ttype'}"/>
+                    <filter string="Asset" name="group_asset_id" context="{'group_by': 'asset_id'}"/>
+                </group>
+            </search>
         </field>
     </record>
 
