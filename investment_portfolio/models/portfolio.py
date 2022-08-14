@@ -64,9 +64,9 @@ class Currency(models.Model):
             Asset.search([('currency_id', '=', currency_id.id)])._compute_aggregate()
 
 
-class InvestmentPosition(models.Model):
-    _name = 'investment.position'
-    _description = 'Investment Position'
+class InvestmentTimeseries(models.Model):
+    _name = 'investment.timeseries'
+    _description = 'Investment Time Series'
     _rec_name = 'asset_id'
 
     position = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
@@ -108,27 +108,61 @@ class InvestmentPosition(models.Model):
 
     @api.depends('asset_id', 'date')
     def _compute_aggregate(self):
+        _logger.info(f"Compute time series aggregate on {self.mapped('asset_id.name')} for {len(self)} records.")
         for record in self:
             if not record.asset_id:
                 continue
+
+            t = record.date
+            time_cutoff = datetime.datetime(t.year, t.month, t.day, 20, 0, 0)
             domain = [
-                ('time', '<=', record.date),
+                ('time', '<=', time_cutoff),
                 ('asset_id', '=', record.asset_id.id),
             ]
+            price_id = record.env['investment.asset.price'].search(domain, limit=1, order='time desc') # latest but before time_cutoff
+            record.price_id = price_id
+            if not price_id:
+                _logger.warning("No price: %s", domain)
+                market_price = 0.0
+            elif price_id.time.date() == t:
+                market_price = price_id.price
+            else:
+                next_price_id = record.env['investment.asset.price'].search([
+                    ('time', '>=', time_cutoff),
+                    ('asset_id', '=', record.asset_id.id),
+                ], limit=1, order='time asc') # earliest but after time_cutoff
+                if next_price_id:
+                    # Linear Interpolation
+                    slope = (next_price_id.price - price_id.price) / (next_price_id.time - price_id.time).days
+                    market_price = price_id.price + slope*(time_cutoff-price_id.time).days
+                else:
+                    market_price = price_id.price
+
+
+            record.last_price = price_id.currency_id._convert(
+                from_amount=market_price,
+                to_currency=self.company_currency_id,
+                company=self.env.company,
+                date=price_id.time or fields.Datetime.now(),
+            )
+
             record.transaction_ids = record.env['investment.asset.transaction'].search(domain) # latest but before date
-            record.price_id = record.env['investment.asset.price'].search(domain, limit=1) # latest but before date
-            record.update(record.asset_id._get_position(record.price_id, record.transaction_ids))
+            record.update(record.asset_id._get_position(record.last_price, record.transaction_ids))
 
 
 
 
     @api.model
-    def cron_create_position(self):
+    def cron_create_time_series(self):
         existing = {(p.asset_id.id, p.date) for p in self.search([])}
         for asset_id in self.env['investment.asset'].search([]):
             first = self.env['investment.asset.transaction'].search([('asset_id', '=', asset_id.id)], order='time asc', limit=1)
+            if not first:
+                _logger.info(f"No transactions on {asset_id.name}")
+                continue
             date = first.time.date()
-            while date < (datetime.date.today() + datetime.timedelta(days=365)):
+            _logger.info(f"Make time series for {asset_id.name} starting from {date}")
+            while date <= (datetime.date.today()):
                 if (asset_id.id, date) not in existing:
                     self.create({
                         'asset_id': asset_id.id,
@@ -277,17 +311,17 @@ class InvestmentAsset(models.Model):
     def _compute_aggregate(self):
         for record in self:
             price_id = record.price_ids.sorted()[:1]
-            record.update(record._get_position(price_id, record.transaction_ids))
+            record.last_price = self.currency_id._convert(
+                from_amount=price_id.price or 0.0,
+                to_currency=self.company_currency_id,
+                company=self.env.company,
+                date=price_id.time or fields.Datetime.now(),
+            )
+            record.update(record._get_position(record.last_price, record.transaction_ids))
 
-    def _get_position(self, price_id, transaction_ids):
+    def _get_position(self, market_price, transaction_ids):
         self.ensure_one()
         precision = self.env['decimal.precision'].precision_get('Investment Asset quantity')
-        last_price = self.currency_id._convert(
-            from_amount=price_id.price or 0.0,
-            to_currency=self.company_currency_id,
-            company=self.env.company,
-            date=price_id.time or fields.Datetime.now(),
-        )
 
         quantity = 0.0
         buy_total = 0.0
@@ -306,12 +340,11 @@ class InvestmentAsset(models.Model):
                 sell_total += cash_flow
                 sell_volume += abs(tx.quantity)
 
-        sell_total += quantity * last_price
+        sell_total += quantity * market_price
         sell_volume += quantity
         return {
-            'last_price': last_price,
             'is_closed': float_is_zero(quantity, precision_digits=precision),
-            'position': quantity * last_price,
+            'position': quantity * market_price,
             'quantity': quantity,
             'buy_total': buy_total,
             'sell_total': sell_total,
@@ -379,6 +412,10 @@ class InvestmentAssetPrice(models.Model):
 
     time = fields.Datetime(required=True, default=fields.Datetime.now)
 
+    transaction_id = fields.Many2one(
+        comodel_name='investment.asset.transaction',
+    )
+
     _sql_constraints = [
         ('unique_price', 'unique(asset_id, time)', 'Price for this time is already configured!'),
     ]
@@ -426,6 +463,23 @@ class InvestmentAssetPrice(models.Model):
         compute='_compute_ttype',
         store=True,
     )
+
+    def _fill_daily_price(self):
+        Price = self.env['investment.asset.price']
+        for transaction in self:
+            start_time = transaction.time.replace(hour=0, minute=0, microsecond=0)
+            stop_time = transaction.time.replace(hour=23, minute=59, microsecond=0)
+            exists = Price.search([('time', '>=', start_time),('time', '<=', stop_time),('asset_id', '=', transaction.asset_id.id)])
+            if transaction.exchange_rate and transaction.quantity and not exists:
+                Price.create({
+                    'time': start_time.replace(hour=12),
+                    'asset_id': transaction.asset_id.id,
+                    'price': transaction.exchange_rate,
+                    'transaction_id': transaction.id,
+                })
+                _logger.info("%s (%s): %s", transaction.asset_id.name, transaction.time, transaction.exchange_rate)
+
+
 
     @api.depends('cash_flow', 'quantity')
     def _compute_ttype(self):

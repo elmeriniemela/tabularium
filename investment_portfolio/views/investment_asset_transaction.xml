@@ -64,7 +64,13 @@
     </record>
 
 
-
+    <record id="action_fill_daily_price" model="ir.actions.server">
+        <field name="name">Fill daily price</field>
+        <field name="model_id" ref="model_investment_asset_transaction"/>
+        <field name="binding_model_id" ref="model_investment_asset_transaction"/>
+        <field name="state">code</field>
+        <field name="code">records._fill_daily_price()</field>
+    </record>
 
     <record model="ir.actions.act_window" id="asset_transaction_action_window">
         <field name="name">Asset Transactions</field>
