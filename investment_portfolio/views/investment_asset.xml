@@ -3,7 +3,7 @@
         <field name="name">investment.asset.tree</field>
         <field name="model">investment.asset</field>
         <field name="arch" type="xml">
-            <tree>
+            <tree expand="1">
                 <field name="name" optional="show"/>
                 <field name="ticker" optional="show"/>
                 <field name="quantity" optional="show"/>
