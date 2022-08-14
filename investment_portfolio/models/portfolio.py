@@ -69,7 +69,7 @@ class InvestmentPosition(models.Model):
 
     last_price = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
     profit = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id', group_operator='sum')
-    profit_percent = fields.Float(compute='_compute_aggregate', store=True, currency_field='company_currency_id', group_operator='avg')
+    profit_percent = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg')
     transaction_ids = fields.Many2many(comodel_name='investment.asset.transaction', compute='_compute_aggregate', store=True)
     price_id = fields.Many2one(comodel_name='investment.asset.price',compute='_compute_aggregate', store=True)
 
@@ -210,7 +210,7 @@ class InvestmentAsset(models.Model):
 
     last_price = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
     profit = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id', group_operator='sum')
-    profit_percent = fields.Float(compute='_compute_aggregate', store=True, currency_field='company_currency_id', group_operator='avg')
+    profit_percent = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg')
 
     integration_id = fields.Many2one(comodel_name='investment.integration')
 
