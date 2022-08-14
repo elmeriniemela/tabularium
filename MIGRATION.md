@@ -10,5 +10,4 @@
 * git checkout 15.0
 * activate odoo15
 * pip install git+https://github.com/OCA/openupgradelib.git@master#egg=openupgradelib
-* `delete from mail_channel_partner where id=1;`
 * odoo -d eniemela_13 --update all --stop-after-init --load=base,web,openupgrade_framework
