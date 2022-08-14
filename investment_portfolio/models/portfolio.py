@@ -2,9 +2,19 @@
 
 from odoo import api, models, fields, _
 from odoo.exceptions import ValidationError
-import requests, datetime, traceback, logging, dateutil, lxml.etree, io
-from odoo.tools.safe_eval import safe_eval, test_python_expr
 from odoo.tools import float_is_zero, float_compare
+import traceback, logging
+
+from odoo.tools.safe_eval import safe_eval, test_python_expr, wrap_module, datetime, dateutil
+
+import lxml
+lxml_mods = ['etree']
+for mod in lxml_mods:
+    __import__('lxml.%s' % mod)
+lxml = wrap_module(__import__('lxml'), {mod: getattr(lxml, mod).__all__ for mod in lxml_mods})
+
+requests = wrap_module(__import__('requests'), ['get', 'post'])
+io = wrap_module(__import__('io'), ['StringIO', 'BytesIO'])
 
 
 _logger = logging.getLogger(__name__)
@@ -24,7 +34,11 @@ class Currency(models.Model):
             rates = {}
             if mode == 'realtime':
                 resp = requests.get(f'https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency={from_currency}&to_currency={to_currency}&apikey={api_key}')
-                vals = resp.json()["Realtime Currency Exchange Rate"]
+                json_data = resp.json()
+                key = "Realtime Currency Exchange Rate"
+                if key not in json_data:
+                    raise ValidationError(str(json_data))
+                vals = json_data[key]
                 rates = {dateutil.parser.parse(vals['6. Last Refreshed']).date(): float(vals['5. Exchange Rate'])}
             elif mode == 'weekly':
                 resp = requests.get(f'https://www.alphavantage.co/query?function=FX_WEEKLY&from_symbol={from_currency}&to_symbol={to_currency}&apikey={api_key}')

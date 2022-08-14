@@ -1,17 +1,33 @@
 # -*- coding: utf-8 -*-
+import base64, traceback, logging
+import tempfile
+import subprocess
 
 from odoo import api, models, fields, _
 from odoo.exceptions import ValidationError
-import requests, datetime, traceback, logging, dateutil, lxml.etree, io
-from odoo.tools.safe_eval import safe_eval, test_python_expr
 from odoo.tools import float_is_zero, float_compare
-import pandas
-import base64
+
+from odoo.tools.safe_eval import safe_eval, test_python_expr, wrap_module, datetime, dateutil
+requests = wrap_module(__import__('requests'), ['get', 'post'])
+io = wrap_module(__import__('io'), ['StringIO', 'BytesIO'])
+pandas = wrap_module(__import__('pandas'), ['read_csv', 'read_excel'])
+re = wrap_module(__import__('re'), ['findall',])
+
+
+import lxml
+lxml_mods = ['etree']
+for mod in lxml_mods:
+    __import__('lxml.%s' % mod)
+lxml = wrap_module(__import__('lxml'), {mod: getattr(lxml, mod).__all__ for mod in lxml_mods})
+
+
+
 import pdfminer
-import pdfminer.high_level
-import re
-import tempfile
-import subprocess
+pdfminer_mods = {'high_level': ['extract_text_to_fp']}
+for mod in pdfminer_mods:
+    __import__('pdfminer.%s' % mod)
+pdfminer = wrap_module(__import__('pdfminer'), {mod: pdfminer_mods[mod] for mod in pdfminer_mods})
+
 
 
 def pdftotext(fp):
@@ -112,7 +128,6 @@ class Cashflowparser(models.Model):
             'pdfminer': pdfminer,
             'pdftotext': pdftotext,
             're': re,
-            'print': print,
         }
         safe_eval(self.code, globals_dict=globals_dict, mode="exec", nocopy=True)
 
