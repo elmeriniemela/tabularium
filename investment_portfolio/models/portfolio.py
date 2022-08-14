@@ -219,10 +219,16 @@ class InvestmentAsset(models.Model):
         copy=False,
     )
 
+    is_cash = fields.Boolean(
+        compute='_compute_is_cash',
+    )
+
+
+
     @api.model
     def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
         """
-            Override read_group to calculate the sum of the non-stored fields that depend on the user context
+            Override read_group to calculate percentages properly.
         """
         res = super().read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
 
@@ -239,6 +245,11 @@ class InvestmentAsset(models.Model):
                     line['profit_percent'] = num / denom
         return res
 
+
+    def _compute_is_cash(self):
+        currency_ticker = self.env.company.currency_id.name
+        for record in self:
+            record.is_cash = record.ticker == currency_ticker
 
     @api.depends(
         'transaction_ids',
@@ -381,9 +392,6 @@ class InvestmentAssetPrice(models.Model):
 
     fee = fields.Monetary(store=True, readonly=False,  compute='_compute_fee', inverse='_inverse_fee')
 
-    cash_balance = fields.Boolean(default=True)
-    cash_balance_id = fields.Many2one(comodel_name='investment.asset.transaction', ondelete='cascade')
-
     quantity = fields.Float(digits='Investment Asset quantity')
 
     time = fields.Datetime(required=True, default=fields.Datetime.now)
@@ -404,24 +412,6 @@ class InvestmentAssetPrice(models.Model):
         compute='_compute_ttype',
         store=True,
     )
-
-    @api.model_create_multi
-    def create(self, vals_list):
-        records = super().create(vals_list)
-        cash_asset = self.env['investment.asset'].search([('ticker', '=', self.env.company.currency_id.name)])
-        for record in records:
-            if record.cash_balance and cash_asset and record.asset_id != cash_asset:
-                # Opposite sign for cash asset flow
-                quantity = record.cash_flow if record.quantity < 0 else record.cash_flow * -1
-                cash_asset.transaction_ids = [(0, 0, {
-                    'quantity': quantity,
-                    'cash_flow': record.cash_flow,
-                    'exchange_rate': 1.0,
-                    'cash_balance_id': record.id,
-                    'fee': 0.0,
-                })]
-        return records
-
 
     @api.depends('cash_flow', 'quantity')
     def _compute_ttype(self):

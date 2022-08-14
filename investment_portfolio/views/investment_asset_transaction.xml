@@ -10,7 +10,6 @@
                 <field name="description"/>
                 <field name="exchange_rate"/>
                 <field name="fee"/>
-                <field name="cash_balance" optional="hide"/>
                 <field name="profit" optional="hide"/>
                 <field name="currency_id" optional="hide"/>
                 <field name="asset_id" optional="hide"/>
