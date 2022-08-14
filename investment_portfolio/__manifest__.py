@@ -21,6 +21,10 @@
         'views/investment_integration.xml',
         'views/investment_asset_price.xml',
         'views/investment_asset_transaction.xml',
-        'views/templates.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'investment_portfolio/static/src/js/widget.js',
+        ],
+    }
 }

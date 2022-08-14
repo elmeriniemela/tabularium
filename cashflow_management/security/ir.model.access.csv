@@ -1,6 +1,7 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 
 access_cashflow_entry,access_cashflow_entry,model_cashflow_entry,base.group_user,1,1,1,1
+access_cashflow_import,access_cashflow_import,model_cashflow_import,base.group_user,1,1,1,1
 access_cashflow_category,access_cashflow_category,model_cashflow_category,base.group_user,1,1,1,1
 access_cashflow_account,access_cashflow_account,model_cashflow_account,base.group_user,1,1,1,1
 access_cashflow_parser,access_cashflow_parser,model_cashflow_parser,base.group_user,1,1,1,1
