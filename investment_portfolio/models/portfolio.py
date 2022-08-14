@@ -311,7 +311,7 @@ class InvestmentAsset(models.Model):
     def _compute_aggregate(self):
         for record in self:
             price_id = record.price_ids.sorted()[:1]
-            record.last_price = self.currency_id._convert(
+            record.last_price = price_id.currency_id._convert(
                 from_amount=price_id.price or 0.0,
                 to_currency=self.company_currency_id,
                 company=self.env.company,
