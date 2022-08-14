@@ -1,3 +1,6 @@
 pdfminer.six
 pandas
 openpyxl
+pysftp
+cryptography
+paramiko
