@@ -3,7 +3,8 @@
     'name': "Toggl Sync",
     'summary': "Sync Toggl time entries with Odoo",
     'author': "Elmeri Niemelä",
-    'website': "http://www.thecodebase.tech",
+    'website': "https://eniemela.fi",
+    'license': 'LGPL-3',
     'category': 'Uncategorized',
     'version': '1.0',
     'depends': [

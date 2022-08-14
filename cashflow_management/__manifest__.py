@@ -2,7 +2,8 @@
 {
     'name': "Cash Flow Management",
     'author': "Elmeri Niemelä",
-    'website': "https://eniemala.fi",
+    'website': "https://eniemela.fi",
+    'license': 'LGPL-3',
     'category': 'Uncategorized',
     'version': '0.1',
     'depends': [
