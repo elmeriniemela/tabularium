@@ -95,6 +95,10 @@
             <search>
                 <field name="name"/>
                 <separator/>
+                <filter string="Long" name="long" domain="[('quantity', '>', 0.0)]"/>
+                <filter string="Short" name="short" domain="[('quantity', '&lt;', 0.0)]"/>
+                <separator/>
+                <separator/>
                 <filter string="Open Position" name="open_position" domain="[('is_closed', '=', False)]"/>
                 <filter string="Closed Position" name="closed_position" domain="[('is_closed', '=', True)]"/>
                 <separator/>
@@ -121,7 +125,7 @@
         <field name="name">Assets</field>
         <field name="res_model">investment.asset</field>
         <field name="view_mode">tree,form,graph</field>
-        <field name="context">{'search_default_group_category_id': 1, 'search_default_open_position': 1, 'search_default_liquid': 1,}</field>
+        <field name="context">{'search_default_group_category_id': 1, 'search_default_open_position': 1, 'search_default_long': 1, 'search_default_liquid': 1,}</field>
     </record>
 
     <menuitem name="Investment Portfolio" id="root_menu" web_icon="investment_portfolio,static/description/icon.png"/>
