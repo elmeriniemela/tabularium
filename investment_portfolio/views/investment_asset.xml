@@ -8,6 +8,10 @@
                 <field name="ticker" optional="show"/>
                 <field name="quantity" optional="show"/>
                 <field name="position" optional="show" sum="Total Position"/>
+                <field name="daily_price" widget="percentage" options="{'is_profit': 1}" optional="show"/>
+                <field name="weekly_price" widget="percentage" options="{'is_profit': 1}" optional="show"/>
+                <field name="monthly_price" widget="percentage" options="{'is_profit': 1}" optional="show"/>
+                <field name="ytd_price" widget="percentage" options="{'is_profit': 1}"/>
                 <field name="profit" widget="monetary" options="{'is_profit': 1}" optional="show" sum="Total Profit"/>
                 <field name="profit_percent" widget="percentage" options="{'is_profit': 1}" optional="show"/>
                 <field name="currency_id" optional="hide"/>
@@ -64,6 +68,10 @@
                             <field name="avg_buy_price" />
                             <field name="sell_total"  attrs="{'invisible': [('quantity', '!=', 0.0)]}"/>
                             <field name="avg_sell_price" attrs="{'invisible': [('quantity', '!=', 0.0)]}"/>
+                            <field name="daily_price" widget="percentage" options="{'is_profit': 1}"/>
+                            <field name="weekly_price" widget="percentage" options="{'is_profit': 1}"/>
+                            <field name="monthly_price" widget="percentage" options="{'is_profit': 1}"/>
+                            <field name="ytd_price" widget="percentage" options="{'is_profit': 1}"/>
                             <field name="profit" options="{'is_profit': 1}"/>
                             <field name="profit_percent" widget="percentage" options="{'is_profit': 1}"/>
                         </group>

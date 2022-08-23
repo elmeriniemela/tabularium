@@ -4,6 +4,7 @@ from odoo import api, models, fields, _
 from odoo.exceptions import ValidationError
 from odoo.tools import float_is_zero, float_compare
 import traceback, logging
+from dateutil.relativedelta import relativedelta
 
 from odoo.tools.safe_eval import safe_eval, test_python_expr, wrap_module, datetime, dateutil
 
@@ -267,6 +268,10 @@ class InvestmentAsset(models.Model):
     last_price = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
     profit = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id', group_operator='sum')
     profit_percent = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg')
+    daily_price = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg')
+    weekly_price = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg')
+    monthly_price = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg')
+    ytd_price = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg')
 
     integration_id = fields.Many2one(comodel_name='investment.integration')
 
@@ -274,6 +279,7 @@ class InvestmentAsset(models.Model):
         comodel_name='mail.activity',
         copy=False,
     )
+
 
     is_cash = fields.Boolean(
         compute='_compute_is_cash',
@@ -317,6 +323,22 @@ class InvestmentAsset(models.Model):
         'company_currency_id',
     )
     def _compute_aggregate(self):
+
+        def percent_change(record, time, market_price):
+            closing_price_id = record.env['investment.asset.price'].search([
+                ('asset_id', '=', record.id),
+                ('time', '<', time),
+            ], limit=1)
+
+            closing_price = closing_price_id.currency_id._convert(
+                from_amount=closing_price_id.price or 0.0,
+                to_currency=record.company_currency_id,
+                company=record.env.company,
+                date=closing_price_id.time or fields.Datetime.now(),
+            )
+            return (market_price-closing_price)/closing_price if closing_price else 0.0
+
+
         for record in self:
             price_id = record.price_ids.sorted()[:1]
             record.last_price = price_id.currency_id._convert(
@@ -326,6 +348,13 @@ class InvestmentAsset(models.Model):
                 date=price_id.time or fields.Datetime.now(),
             )
             record.update(record._get_position(record.last_price, record.transaction_ids))
+
+
+            record.daily_price = percent_change(record, fields.Datetime.now().replace(hour=0, minute=0, second=0), record.last_price)
+            record.weekly_price = percent_change(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(weeks=1), record.last_price)
+            record.monthly_price = percent_change(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(months=1), record.last_price)
+            record.ytd_price = percent_change(record, fields.Datetime.now().replace(day=1, month=1, hour=0, minute=0, second=0), record.last_price)
+
 
     def _get_position(self, market_price, transaction_ids):
         self.ensure_one()
