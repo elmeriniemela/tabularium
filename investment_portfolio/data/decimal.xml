@@ -2,6 +2,6 @@
 <odoo noupdate="True">
     <record forcecreate="True" id="decimal_quantity" model="decimal.precision">
         <field name="name">Investment Asset quantity</field>
-        <field name="digits">10</field>
+        <field name="digits">8</field>
     </record>
 </odoo>
