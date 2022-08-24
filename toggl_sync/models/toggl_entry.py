@@ -37,7 +37,8 @@ class TogglTask(models.Model):
         task_res = server_models.execute_kw(dbname, uid, pwd,
             'project.task', 'search_read',
             [[
-                ['id', 'in', self.mapped('task_id')]
+                ['id', 'in', self.mapped('task_id')],
+                ['active', 'in', [True, False]],
             ]],
             {'fields': ['sale_line_id', 'project_id', 'id']}
         )
