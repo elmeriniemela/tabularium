@@ -163,7 +163,7 @@ class InvestmentTimeseries(models.Model):
 
     @api.model
     def cron_create_time_series(self):
-        existing = {(p.asset_id.id, p.date) for p in self.search([])}
+        existing = {(p.asset_id.id, p.date): p for p in self.search([])}
         for asset_id in self.env['investment.asset'].search([]):
             first = self.env['investment.asset.transaction'].search([('asset_id', '=', asset_id.id)], order='time asc', limit=1)
             if not first:
