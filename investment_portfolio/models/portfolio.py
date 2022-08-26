@@ -182,8 +182,7 @@ class InvestmentTimeseries(models.Model):
 
             yesterday = datetime.date.today() - relativedelta(days=1)
 
-            existing[(asset_id.id, today)]._compute_aggregate()
-            existing[(asset_id.id, yesterday)]._compute_aggregate()
+            (existing[(asset_id.id, yesterday)] | existing[(asset_id.id, today)])._compute_aggregate()
 
 
 
