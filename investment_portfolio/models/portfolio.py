@@ -171,13 +171,19 @@ class InvestmentTimeseries(models.Model):
                 continue
             date = first.time.date()
             _logger.info(f"Make time series for {asset_id.name} starting from {date}")
-            while date <= (datetime.date.today()):
+            today = datetime.date.today()
+            while date <= today:
                 if (asset_id.id, date) not in existing:
-                    self.create({
+                    existing[(asset_id.id, d)] = self.create({
                         'asset_id': asset_id.id,
                         'date': date,
                     })
                 date += datetime.timedelta(days=1)
+
+            yesterday = datetime.date.today() - relativedelta(days=1)
+
+            existing[(asset_id.id, today)]._compute_aggregate()
+            existing[(asset_id.id, yesterday)]._compute_aggregate()
 
 
 
