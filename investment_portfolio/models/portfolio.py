@@ -401,6 +401,7 @@ class InvestmentAsset(models.Model):
 
     def run_integration(self):
         for asset in self:
+            _logger.info("Run integration on %s", asset.name)
             integration = asset.integration_id
             if not integration:
                 raise ValidationError('Define integration first.')
