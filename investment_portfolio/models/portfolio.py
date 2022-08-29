@@ -174,7 +174,7 @@ class InvestmentTimeseries(models.Model):
             today = datetime.date.today()
             while date <= today:
                 if (asset_id.id, date) not in existing:
-                    existing[(asset_id.id, d)] = self.create({
+                    existing[(asset_id.id, date)] = self.create({
                         'asset_id': asset_id.id,
                         'date': date,
                     })
