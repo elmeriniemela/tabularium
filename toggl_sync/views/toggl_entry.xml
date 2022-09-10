@@ -4,8 +4,8 @@
         <field name="model">toggl.entry</field>
         <field name="arch" type="xml">
             <tree editable="top" multi_edit="1" decoration-info="not description" decoration-muted="not active" decoration-success="not invoicable" decoration-warning="dirty" decoration-danger="rounded_duration &lt; total_duration">
-                <field name="description" width="500px"/>
-                <field name="name"/>
+                <field name="description" width="450px"/>
+                <field name="name" width="400px"/>
                 <field name="invoicable"/>
                 <field name="rounded_duration" widget="float_time" sum="Rounded"/>
                 <field name="total_duration" widget="float_time" sum="Total"/>
