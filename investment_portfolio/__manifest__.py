@@ -8,6 +8,7 @@
     'version': '0.1',
     'depends': [
         'mail',
+        'timeago_widget',
     ],
     'installable': True,
     'application': True,

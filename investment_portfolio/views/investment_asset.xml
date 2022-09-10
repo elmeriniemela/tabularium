@@ -8,6 +8,7 @@
                 <field name="ticker" optional="show"/>
                 <field name="quantity" optional="show"/>
                 <field name="position" optional="show" sum="Total Position"/>
+                <field name="last_update" optional="show" widget="timeago"/>
                 <field name="last_price" optional="show"/>
                 <field name="daily_price" widget="percentage" options="{'is_profit': 1}" optional="show"/>
                 <field name="weekly_price" widget="percentage" options="{'is_profit': 1}" optional="show"/>
@@ -64,6 +65,7 @@
                             <field name="category_id"/>
                             <field name="integration_id"/>
                             <field name="quantity"/>
+                            <field name="last_update" widget="timeago"/>
                             <field name="last_price"/>
                             <field name="avg_buy_price" />
                             <field name="sell_total"  attrs="{'invisible': [('quantity', '!=', 0.0)]}"/>

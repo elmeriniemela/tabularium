@@ -270,6 +270,7 @@ class InvestmentAsset(models.Model):
     avg_sell_price = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
 
 
+    last_update = fields.Datetime(compute='_compute_aggregate', store=True)
     last_price = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
     profit = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id', group_operator='sum')
     profit_percent = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg')
@@ -354,7 +355,7 @@ class InvestmentAsset(models.Model):
             )
             record.update(record._get_position(record.last_price, record.transaction_ids))
 
-
+            record.last_update = price_id.time
             record.daily_price = percent_change(record, fields.Datetime.now().replace(hour=0, minute=0, second=0), record.last_price)
             record.weekly_price = percent_change(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(weeks=1), record.last_price)
             record.monthly_price = percent_change(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(months=1), record.last_price)
