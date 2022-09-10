@@ -33,10 +33,8 @@ odoo.define('timeago_widget.timeago_widget', function (require) {
             $timeago.attr("disabled", this.mode === 'readonly');
 
 
-            const nowUTC = moment().utc();
-            const nowUserTZ = nowUTC.clone().add(session.getTZOffset(nowUTC), 'minutes');
-            const fieldValue = this.value.clone().add(session.getTZOffset(this.value), 'minutes');
-            const diffMins = fieldValue.diff(nowUserTZ, 'minutes')
+            const milliseconds = (date - new Date());
+            const diffMins = Math.floor((milliseconds/1000)/60);
             // this.$el.toggleClass('font-weight-bold', diffMins <= 0);
             this.$el.toggleClass('text-danger', diffMins < -(2*24*60));
             this.$el.toggleClass('text-warning', diffMins <= -15);
