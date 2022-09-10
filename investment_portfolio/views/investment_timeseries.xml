@@ -74,8 +74,7 @@
                 <separator/>
                 <filter string="Long" name="long" domain="[('quantity', '>', 0.0)]"/>
                 <filter string="Short" name="short" domain="[('quantity', '&lt;', 0.0)]"/>
-                <separator/>
-                <filter string="Open Position" name="open_position" domain="[('is_closed', '=', False)]"/>
+                <filter string="Closed" name="closed" domain="[('quantity', '=', 0.0)]"/>
                 <separator/>
                 <filter name="date_filter" date="date"/>
                 <separator/>

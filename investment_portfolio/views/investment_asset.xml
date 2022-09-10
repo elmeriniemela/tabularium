@@ -107,13 +107,10 @@
                 <separator/>
                 <filter string="Long" name="long" domain="[('quantity', '>', 0.0)]"/>
                 <filter string="Short" name="short" domain="[('quantity', '&lt;', 0.0)]"/>
+                <filter string="Closed" name="closed" domain="[('quantity', '=', 0.0)]"/>
                 <separator/>
-                <separator/>
-                <filter string="Open Position" name="open_position" domain="[('is_closed', '=', False)]"/>
-                <filter string="Closed Position" name="closed_position" domain="[('is_closed', '=', True)]"/>
-                <separator/>
-                <filter string="Liquid Assets" name="liquid" domain="[('liquid', '=', True)]"/>
-                <filter string="Illiquid Assets" name="illiquid" domain="[('liquid', '=', False)]"/>
+                <filter string="Liquid" name="liquid" domain="[('liquid', '=', True)]"/>
+                <filter string="Illiquid" name="illiquid" domain="[('liquid', '=', False)]"/>
                 <separator/>
                 <group expand="1" string="Group by">
                     <filter string="Category" name="group_category_id" context="{'group_by': 'category_id'}"/>
@@ -135,7 +132,7 @@
         <field name="name">Assets</field>
         <field name="res_model">investment.asset</field>
         <field name="view_mode">tree,form,graph</field>
-        <field name="context">{'search_default_group_category_id': 1, 'search_default_open_position': 1, 'search_default_long': 1, 'search_default_liquid': 1,}</field>
+        <field name="context">{'search_default_group_category_id': 1, 'search_default_long': 1, 'search_default_liquid': 1,}</field>
     </record>
 
     <menuitem name="Investment Portfolio" id="root_menu" web_icon="investment_portfolio,static/description/icon.png"/>

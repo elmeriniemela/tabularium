@@ -80,7 +80,6 @@ class InvestmentTimeseries(models.Model):
 
     position = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
     quantity = fields.Float(compute='_compute_aggregate', store=True, digits='Investment Asset quantity')
-    is_closed = fields.Boolean(compute='_compute_aggregate', store=True)
 
     buy_total = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
     sell_total = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
@@ -260,7 +259,6 @@ class InvestmentAsset(models.Model):
 
 
     quantity = fields.Float(compute='_compute_aggregate', store=True, digits='Investment Asset quantity')
-    is_closed = fields.Boolean(compute='_compute_aggregate', store=True)
 
     buy_total = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
     sell_total = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
@@ -386,7 +384,6 @@ class InvestmentAsset(models.Model):
         sell_total += quantity * market_price
         sell_volume += quantity
         return {
-            'is_closed': float_is_zero(quantity, precision_digits=precision),
             'position': quantity * market_price,
             'quantity': quantity,
             'buy_total': buy_total,
