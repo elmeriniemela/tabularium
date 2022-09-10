@@ -7,6 +7,8 @@ import logging
 
 _logger = logging.getLogger(__name__)
 
+def roundto(x, base):
+    return base * round(x/base)
 
 class TogglTask(models.Model):
     _name = 'toggl.task'
@@ -89,16 +91,17 @@ class TogglEntry(models.Model):
     _name = 'toggl.entry'
     _description = 'Toggl Entry'
     _order = 'start desc'
+    _inherit = ['mail.thread']
 
     name = fields.Char(required=True)
 
     export_task_url = fields.Char(compute='_compute_export_task_url')
 
-    active = fields.Boolean(default=True)
+    active = fields.Boolean(default=True, tracking=True)
 
     toggl_name = fields.Char(required=True)
 
-    description = fields.Char()
+    description = fields.Char(tracking=True)
 
     rounded_duration = fields.Float(compute='_compute_rounded_duration', store=True)
 
@@ -106,8 +109,9 @@ class TogglEntry(models.Model):
 
     date = fields.Date(compute='_compute_date', store=True)
 
-    total_duration = fields.Float(compute='_compute_total_duration', store=True)
+    total_duration = fields.Float(compute='_compute_total_duration', store=True, recursive=True)
 
+    extra_duration = fields.Float(tracking=True)
     duration = fields.Float(required=True, readonly=True)
 
     start = fields.Datetime(required=True, readonly=True)
@@ -117,8 +121,6 @@ class TogglEntry(models.Model):
     toggl_id = BigInteger(string="Toggl ID", required=True, readonly=True)
 
     export_id = fields.Integer(string="Export ID", readonly=True)
-
-    error = fields.Boolean(compute='_compute_error')
 
     task_id = fields.Many2one(
         comodel_name='toggl.task',
@@ -179,6 +181,14 @@ class TogglEntry(models.Model):
             'url': self.export_task_url,
         }
 
+    def action_round_up(self):
+        self.ensure_one()
+        self.extra_duration = 7.5/60
+
+    def action_round_down(self):
+        self.ensure_one()
+        self.extra_duration = -7.5/60
+
     def export(self):
         server_models, dbname, uid, pwd = self.env.user._get_toggl_export_proxy()
 
@@ -202,32 +212,21 @@ class TogglEntry(models.Model):
             record.env.cr.commit() # we need to commit, since the export is committed in the target system.
 
 
-    @api.depends('invoicable', 'description')
-    def _compute_error(self):
-        for record in self:
-            record.error = not record.description and record.invoicable
-
-
-    @api.depends('total_duration', 'invoicable')
+    @api.depends('total_duration', 'extra_duration')
     def _compute_rounded_duration(self):
-
-        def roundto(x, base):
-            return base * round(x/base)
-
         for record in self:
             # Round to nearest 15min.
-            record.rounded_duration = roundto(record.total_duration, base=0.25)
+            record.rounded_duration = roundto(record.total_duration + record.extra_duration or 0.0, base=0.25)
 
 
-    @api.depends('duration', 'child_ids.duration')
+    @api.depends('duration', 'child_ids.duration', 'child_ids.total_duration')
     def _compute_total_duration(self):
         for record in self:
-            record.total_duration = record.duration + sum(record.child_ids.mapped('duration'))
+            record.total_duration = record.duration + sum(record.child_ids.mapped('total_duration'))
 
 
     def recompute_depends(self):
         self._compute_task_id()
-        self._compute_error() # needs task_id.invoicable
         self._compute_date()
         self._compute_parent_id() # needs task_id, date,
         self._compute_total_duration() # needs parent_id
@@ -239,7 +238,7 @@ class TogglEntry(models.Model):
     def _compute_task_id(self):
         Task = self.env['toggl.task']
         for record in self:
-            ids = [int(m) for m in re.findall('\[(\d+)\]', record.name)]
+            ids = [int(m) for m in re.findall('\[(\d+)\]', record.name or '')]
             if ids:
                 [task_id] = ids
                 record.task_id = Task.search([('task_id', '=', task_id)], limit=1) \

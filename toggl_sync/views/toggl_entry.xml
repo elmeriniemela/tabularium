@@ -3,17 +3,22 @@
         <field name="name">toggl.entry.list</field>
         <field name="model">toggl.entry</field>
         <field name="arch" type="xml">
-            <tree editable="top" multi_edit="1" decoration-warning="dirty" decoration-danger="error">
-                <field name="description"/>
+            <tree editable="top" multi_edit="1" decoration-info="not description" decoration-muted="not active" decoration-success="not invoicable" decoration-warning="dirty" decoration-danger="rounded_duration &lt; total_duration">
+                <field name="description" width="500px"/>
                 <field name="name"/>
                 <field name="invoicable"/>
                 <field name="rounded_duration" widget="float_time" sum="Rounded"/>
                 <field name="total_duration" widget="float_time" sum="Total"/>
                 <field name="date"/>
-                <field name="dirty" invisible="True"/>
-                <field name="error" invisible="True"/>
-                <button string="Task" name="action_view_task" type="object"/>
-                <button string="Open" name="action_open_form" type="object"/>
+                <field name="dirty" optional="hide"/>
+                <field name="active" optional="hide"/>
+                <field name="task_id" optional="hide"/>
+                <field name="toggl_id" optional="hide"/>
+                <field name="export_id" optional="hide"/>
+                <button string="Round-up" name="action_round_up" type="object"/>
+                <button string="Round-down" name="action_round_down" type="object"/>
+                <button string="External Task" name="action_view_task" type="object"/>
+                <button string="Toggl Entry" name="action_open_form" type="object"/>
             </tree>
         </field>
     </record>
@@ -38,9 +43,10 @@
                         <field name="description"/>
                         <field name="active"/>
                         <field name="invoicable"/>
+                        <field name="extra_duration" widget="float_time"/>
+                        <field name="duration" widget="float_time"/>
                         <field name="rounded_duration" widget="float_time"/>
                         <field name="total_duration" widget="float_time"/>
-                        <field name="duration" widget="float_time"/>
                         <field name="date"/>
                         <field name="start"/>
                         <field name="stop"/>
@@ -53,6 +59,10 @@
                         <field name="child_ids"/>
                     </group>
                 </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
             </form>
         </field>
     </record>
@@ -70,6 +80,9 @@
                 <field name="toggl_id"/>
                 <field name="export_id"/>
                 <separator/>
+                <filter string="Active" name="active" domain="[('active', '=', True)]" />
+                <filter string="Archived" name="not_active" domain="[('active', '=', False)]" />
+                <separator/>
                 <filter string="Not Exported" name="not_exported" domain="['|', ('export_id', '=', False), ('export_id', '=', 0)]" />
                 <separator/>
                 <filter string="Hide Children" name="not_parent_id" domain="['|', ('parent_id', '=', False), ('parent_id', '=', 0)]" />
@@ -78,6 +91,10 @@
                 <separator/>
                 <filter string="No description" name="not_description" domain="[('description', '=', False)]" />
                 <separator/>
+                <group expand="1" string="Group by">
+                    <filter string="Date" name="group_date" context="{'group_by': 'date:month'}"/>
+                    <filter string="Task" name="group_task_id" context="{'group_by': 'task_id'}"/>
+                </group>
             </search>
         </field>
     </record>
@@ -125,7 +142,6 @@ records.recompute_depends()
             {
                 'search_default_not_exported': 1,
                 'search_default_not_parent_id': 1,
-                'search_default_not_rounded_duration': 1,
             }
         </field>
     </record>
