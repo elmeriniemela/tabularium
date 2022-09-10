@@ -26,6 +26,7 @@ odoo.define('timeago_widget.timeago_widget', function (require) {
             }
         },
         _render: function () {
+            jQuery.timeago.settings.allowFuture = true;
             var $timeago = this.$('time.timeago');
             var date = new Date(this.value);
             $timeago.attr("datetime", date.toISOString());
@@ -35,10 +36,10 @@ odoo.define('timeago_widget.timeago_widget', function (require) {
 
             const milliseconds = (date - new Date());
             const diffMins = Math.floor((milliseconds/1000)/60);
-            // this.$el.toggleClass('font-weight-bold', diffMins <= 0);
             this.$el.toggleClass('text-danger', diffMins < -(2*24*60));
             this.$el.toggleClass('text-warning', diffMins <= -15);
             this.$el.toggleClass('text-success', diffMins > -15);
+
         },
     });
 
