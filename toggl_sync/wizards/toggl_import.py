@@ -3,7 +3,7 @@
 import logging
 import dateutil
 import pytz
-
+import datetime
 from odoo import api, fields, models, _
 
 _logger = logging.getLogger(__name__)
@@ -15,12 +15,12 @@ class TogglImport(models.TransientModel):
 
     start_date = fields.Datetime(
         required=True,
-        default=lambda self: self.env['toggl.entry'].search([], limit=1).stop
+        default=lambda self: self.env['toggl.entry'].search([], limit=1).stop - datetime.timedelta(days=1)
     )
 
     end_date = fields.Datetime(
         required=True,
-        default=fields.Datetime.now
+        default=lambda self: fields.Datetime.now() + datetime.timedelta(days=1)
     )
 
     def import_entries(self):
@@ -29,7 +29,8 @@ class TogglImport(models.TransientModel):
         date = lambda dt_str: dateutil.parser.parse(dt_str).astimezone(pytz.utc).replace(tzinfo=None)
 
         Entry = self.env['toggl.entry'].with_context(active_test=False)
-        existing = {e.toggl_id: e for e in Entry.search([])}
+        existing = {e.toggl_id: e for e in Entry.search([('start', '>=', self.start_date),('stop', '<=', self.end_date)])}
+        _logger.info("Found %s existing toggl entries.", len(existing))
         for entry in entries:
             if not entry.get('stop'):
                 continue # running entry
