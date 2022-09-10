@@ -83,6 +83,8 @@
                 <filter string="Active" name="active" domain="[('active', '=', True)]" />
                 <filter string="Archived" name="not_active" domain="[('active', '=', False)]" />
                 <separator/>
+                <filter string="Before Today" name="not_today" domain="[('date', '&lt;', context_today().strftime('%Y-%m-%d'))]" />
+                <separator/>
                 <filter string="Not Exported" name="not_exported" domain="['|', ('export_id', '=', False), ('export_id', '=', 0)]" />
                 <separator/>
                 <filter string="Hide Children" name="not_parent_id" domain="['|', ('parent_id', '=', False), ('parent_id', '=', 0)]" />
