@@ -3,6 +3,7 @@
 from odoo import api, models, fields, _
 from odoo.exceptions import ValidationError
 from odoo.tools import float_is_zero, float_compare
+from odoo.osv import expression
 import traceback, logging
 from dateutil.relativedelta import relativedelta
 import random
@@ -96,7 +97,11 @@ class InvestmentTimeseries(models.Model):
     transaction_ids = fields.Many2many(comodel_name='investment.asset.transaction', compute='_compute_aggregate', store=True)
     price_id = fields.Many2one(comodel_name='investment.asset.price',compute='_compute_aggregate', store=True)
 
-    date = fields.Date(store=True, required=True)
+    date = fields.Date(
+        store=True,
+        required=True,
+        index=True,
+    )
 
 
     company_currency_id = fields.Many2one(related='asset_id.company_currency_id', string="Company Currency")
@@ -108,12 +113,94 @@ class InvestmentTimeseries(models.Model):
         ondelete='cascade',
     )
 
-    category_id = fields.Many2one(related='asset_id.category_id', store=True, readonly=True)
-    liquid = fields.Boolean(related='category_id.liquid', store=True, readonly=True)
+    category_id = fields.Many2one(
+        related='asset_id.category_id',
+        store=True,
+        readonly=True,
+        index=True,
+    )
+    liquid = fields.Boolean(
+        related='category_id.liquid',
+        store=True,
+        readonly=True,
+        index=True,
+    )
+
+    granularity = fields.Selection(
+        selection=[
+            ('1_yearly', 'Yearly'),
+            ('2_quaterly', 'Quaterly'),
+            ('3_monthly', 'Monthly'),
+            ('4_daily', 'Daily'),
+        ],
+        compute='_compute_granularity',
+        store=True,
+        index=True,
+    )
+
+    is_monday = fields.Boolean(
+        compute='_compute_granularity',
+        store=True,
+        index=True,
+    )
 
     _sql_constraints = [
         ('date_position_unique', 'unique(date, asset_id)', 'This position already exists!'),
     ]
+
+    @api.depends('date')
+    def _compute_granularity(self):
+        for record in self:
+            if record.date.month == 1 and record.date.day == 1:
+                record.granularity = '1_yearly'
+            elif record.date.month % 4 == 0 and record.date.day == 1:
+                record.granularity = '2_quaterly'
+            elif record.date.day == 1:
+                record.granularity = '3_monthly'
+            else:
+                record.granularity = '4_daily'
+
+            record.is_monday = record.date.isoweekday() == 1
+
+
+    @api.model
+    def web_read_group(self, domain, fields, groupby, limit=None, offset=0, orderby=False,
+                       lazy=True, expand=False, expand_limit=None, expand_orderby=False):
+        """
+        Returns the result of a read_group (and optionally search for and read records inside each
+        group), and the total number of groups matching the search domain.
+
+        :param domain: search domain
+        :param fields: list of fields to read (see ``fields``` param of ``read_group``)
+        :param groupby: list of fields to group on (see ``groupby``` param of ``read_group``)
+        :param limit: see ``limit`` param of ``read_group``
+        :param offset: see ``offset`` param of ``read_group``
+        :param orderby: see ``orderby`` param of ``read_group``
+        :param lazy: see ``lazy`` param of ``read_group``
+        :param expand: if true, and groupby only contains one field, read records inside each group
+        :param expand_limit: maximum number of records to read in each group
+        :param expand_orderby: order to apply when reading records in each group
+        :return: {
+            'groups': array of read groups
+            'length': total number of groups
+        }
+        """
+        map_group = {
+            'day': [('granularity', 'in', ['4_daily', '3_monthly', '2_quaterly', '1_yearly'])],
+            'week': [('is_monday', '=', True)],
+            'month': [('granularity', 'in', ['3_monthly', '2_quaterly', '1_yearly'])],
+            'quarter': [('granularity', 'in', ['2_quaterly', '1_yearly'])],
+            'year': [('granularity', 'in', ['1_yearly'])],
+        }
+        for group in groupby:
+            match = 'date:'
+            if group.startswith(match):
+                domain = expression.AND([domain, map_group[group[len(match):]]])
+                break
+
+        return super().web_read_group(domain, fields, groupby, limit=limit, offset=offset, orderby=orderby,
+                       lazy=lazy, expand=expand, expand_limit=expand_limit, expand_orderby=expand_orderby)
+
 
     @api.depends('asset_id', 'date')
     def _compute_aggregate(self):

@@ -64,16 +64,6 @@
                 <separator/>
                 <filter name="date_filter" date="time"/>
                 <separator/>
-                <filter string="1 year" name="1_year" domain="[('time','&gt;',(context_today() + relativedelta(days=-365)).strftime('%Y-%m-%d'))]"/>
-                <filter string="2 years" name="2_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-2*365)).strftime('%Y-%m-%d'))]"/>
-                <filter string="3 years" name="3_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-3*365)).strftime('%Y-%m-%d'))]"/>
-                <filter string="4 years" name="4_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-4*365)).strftime('%Y-%m-%d'))]"/>
-                <filter string="5 years" name="5_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-5*365)).strftime('%Y-%m-%d'))]"/>
-                <filter string="6 years" name="6_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-6*365)).strftime('%Y-%m-%d'))]"/>
-                <filter string="7 years" name="7_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-7*365)).strftime('%Y-%m-%d'))]"/>
-                <filter string="8 years" name="8_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-8*365)).strftime('%Y-%m-%d'))]"/>
-                <filter string="9 years" name="9_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-9*365)).strftime('%Y-%m-%d'))]"/>
-                <filter string="10 years" name="10_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-10*365)).strftime('%Y-%m-%d'))]"/>
                 <separator/>
                 <filter string="Long" name="long" domain="[('quantity', '>', 0.0)]"/>
                 <filter string="Short" name="short" domain="[('quantity', '&lt;', 0.0)]"/>
@@ -87,9 +77,19 @@
                 <filter string="Liquid Assets" name="liquid" domain="[('liquid', '=', True)]"/>
                 <filter string="Illiquid Assets" name="illiquid" domain="[('liquid', '=', False)]"/>
                 <separator/>
+                <filter string="1 year" name="1_year" domain="[('time','&gt;',(context_today() + relativedelta(days=-365)).strftime('%Y-%m-%d'))]"/>
+                <filter string="2 years" name="2_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-2*365)).strftime('%Y-%m-%d'))]"/>
+                <filter string="3 years" name="3_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-3*365)).strftime('%Y-%m-%d'))]"/>
+                <filter string="4 years" name="4_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-4*365)).strftime('%Y-%m-%d'))]"/>
+                <filter string="5 years" name="5_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-5*365)).strftime('%Y-%m-%d'))]"/>
+                <filter string="6 years" name="6_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-6*365)).strftime('%Y-%m-%d'))]"/>
+                <filter string="7 years" name="7_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-7*365)).strftime('%Y-%m-%d'))]"/>
+                <filter string="8 years" name="8_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-8*365)).strftime('%Y-%m-%d'))]"/>
+                <filter string="9 years" name="9_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-9*365)).strftime('%Y-%m-%d'))]"/>
+                <filter string="10 years" name="10_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-10*365)).strftime('%Y-%m-%d'))]"/>
                 <group expand="1" string="Group by">
-                    <filter string="Month" name="group_date" context="{'group_by': 'time:month'}"/>
-                    <filter string="Year" name="group_year" context="{'group_by': 'time:year'}"/>
+                    <filter string="Date" name="group_month" context="{'group_by': 'time:month'}" invisible="not context.get('search_default_group_month')"/>
+                    <filter string="Date" name="group_year" context="{'group_by': 'time:year'}" invisible="not context.get('search_default_group_year')"/>
                     <filter string="Category" name="group_category_id" context="{'group_by': 'category_id'}"/>
                     <filter string="Type" name="group_ttype" context="{'group_by': 'ttype'}"/>
                     <filter string="Asset" name="group_asset_id" context="{'group_by': 'asset_id'}"/>
@@ -111,7 +111,7 @@
         <field name="name">Transactions per month</field>
         <field name="res_model">investment.asset.transaction</field>
         <field name="view_mode">graph,tree,form</field>
-        <field name="context">{'search_default_group_date': 1, 'search_default_group_asset_id': 1, 'search_default_liquid': 1, 'search_default_1_year': 1}</field>
+        <field name="context">{'search_default_group_month': 1, 'search_default_group_asset_id': 1, 'search_default_liquid': 1, 'search_default_1_year': 1}</field>
     </record>
 
     <record model="ir.actions.act_window" id="action_yearly_savings">

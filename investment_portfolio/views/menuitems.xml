@@ -15,7 +15,9 @@
 
         <menuitem name="Timeseries" id="menu_timeseries">
             <menuitem id="menu_profits" action="action_profits" sequence="10"/>
-            <menuitem id="menu_profits_per_asset" action="action_profits_per_asset" sequence="10"/>
+            <menuitem id="menu_positions" action="action_positions" sequence="20"/>
+            <menuitem id="menu_profits_per_asset" action="action_profits_per_asset" sequence="30"/>
+            <menuitem id="menu_positions_per_asset" action="action_positions_per_asset" sequence="40"/>
         </menuitem>
 
         <menuitem name="Configuration" id="configuration_menu" sequence="40">

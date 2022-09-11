@@ -31,7 +31,8 @@
     <record model="ir.ui.view" id="asset_pie_graph">
          <field name="name">investment.asset.graph</field>
          <field name="model">investment.asset</field>
-         <field name="arch" type="xml">
+        <field name="priority" eval="1" />
+        <field name="arch" type="xml">
              <graph type="pie">
                  <field name="position" type="measure"/>
              </graph>
@@ -41,6 +42,7 @@
     <record model="ir.ui.view" id="asset_bar_graph">
         <field name="name">investment.asset.graph</field>
         <field name="model">investment.asset</field>
+        <field name="priority" eval="2" />
         <field name="arch" type="xml">
             <graph type="bar">
                 <field name="position" type="measure"/>
@@ -173,7 +175,6 @@
             name="view_ids"
             eval="[
                 (5, 0, 0),
-                (0, 0, {'view_mode': 'graph', 'view_id': ref('asset_pie_graph')}),
             ]"
         />
     </record>
