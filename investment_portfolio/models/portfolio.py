@@ -528,18 +528,18 @@ class InvestmentAssetPrice(models.Model):
     @api.depends('cash_flow', 'quantity')
     def _compute_report(self):
         for record in self:
-            if record.quantity < 0:
-                record.ttype = 'sell'
-                record.payment_or_refund = -record.cash_flow
-            elif record.quantity > 0:
+            if record.quantity > 0:
                 record.ttype = 'buy'
                 record.payment_or_refund = record.cash_flow
+            elif record.quantity < 0:
+                record.ttype = 'sell'
+                record.payment_or_refund = -record.cash_flow
             elif record.cash_flow > 0:
                 record.ttype = 'yield'
                 record.payment_or_refund = -record.cash_flow
             elif record.cash_flow < 0:
                 record.ttype = 'cost'
-                record.payment_or_refund = -record.cash_flow
+                record.payment_or_refund = -record.cash_flow # cost has a negative cashflow which needs to be flipped to positive as payment.
             else:
                 record.ttype = False
                 record.payment_or_refund = False
