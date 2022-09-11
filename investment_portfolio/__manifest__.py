@@ -9,6 +9,7 @@
     'depends': [
         'mail',
         'timeago_widget',
+        'web_widget_colorpicker',
     ],
     'installable': True,
     'application': True,

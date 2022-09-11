@@ -5,6 +5,7 @@ from odoo.exceptions import ValidationError
 from odoo.tools import float_is_zero, float_compare
 import traceback, logging
 from dateutil.relativedelta import relativedelta
+import random
 
 from odoo.tools.safe_eval import safe_eval, test_python_expr, wrap_module, datetime, dateutil
 
@@ -234,6 +235,7 @@ class InvestmentAsset(models.Model):
 
     notes = fields.Text()
 
+    color = fields.Char(required=True, default=lambda self: self._get_random_color())
 
     company_id = fields.Many2one(comodel_name='res.company', required=True, default=lambda self: self.env.company)
 
@@ -290,6 +292,13 @@ class InvestmentAsset(models.Model):
     )
 
 
+    def _get_random_color(self):
+        rgb = lambda: random.randint(0,255)
+        return f'rgba({rgb()},{rgb()},{rgb()},1)'
+
+    def random_color(self):
+        for record in self:
+            record.color = record._get_random_color()
 
     @api.model
     def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
