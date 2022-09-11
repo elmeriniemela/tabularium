@@ -503,8 +503,7 @@ class InvestmentAssetPrice(models.Model):
         store=True,
     )
 
-    signed_cash_flow = fields.Monetary(
-        string="Position Movement",
+    payment_or_refund = fields.Monetary(
         compute='_compute_report',
         store=True,
     )
@@ -531,19 +530,19 @@ class InvestmentAssetPrice(models.Model):
         for record in self:
             if record.quantity < 0:
                 record.ttype = 'sell'
-                record.signed_cash_flow = -record.cash_flow
+                record.payment_or_refund = -record.cash_flow
             elif record.quantity > 0:
                 record.ttype = 'buy'
-                record.signed_cash_flow = record.cash_flow
+                record.payment_or_refund = record.cash_flow
             elif record.cash_flow > 0:
                 record.ttype = 'yield'
-                record.signed_cash_flow = record.cash_flow
+                record.payment_or_refund = -record.cash_flow
             elif record.cash_flow < 0:
                 record.ttype = 'cost'
-                record.signed_cash_flow = -record.cash_flow
+                record.payment_or_refund = -record.cash_flow
             else:
                 record.ttype = False
-                record.signed_cash_flow = False
+                record.payment_or_refund = False
                 _logger.error("Invalid type: %s", record)
 
 

@@ -7,6 +7,7 @@
                 <field name="time"/>
                 <field name="quantity"/>
                 <field name="cash_flow"/>
+                <field name="payment_or_refund" optional="hide" sum="Total"/>
                 <field name="description"/>
                 <field name="exchange_rate"/>
                 <field name="fee"/>
@@ -24,7 +25,7 @@
         <field name="model">investment.asset.transaction</field>
         <field name="arch" type="xml">
             <graph type="bar" stacked="1">
-                <field name="signed_cash_flow" type="measure"/>
+                <field name="payment_or_refund" type="measure"/>
             </graph>
         </field>
    </record>
@@ -77,6 +78,11 @@
                 <filter string="Long" name="long" domain="[('quantity', '>', 0.0)]"/>
                 <filter string="Short" name="short" domain="[('quantity', '&lt;', 0.0)]"/>
                 <filter string="Closed" name="closed" domain="[('quantity', '=', 0.0)]"/>
+                <separator/>
+                <filter string="Buy" name="buy" domain="[('ttype', '=', 'buy')]"/>
+                <filter string="Sell" name="sell" domain="[('ttype', '=', 'sell')]"/>
+                <filter string="Cost" name="cost" domain="[('ttype', '=', 'cost')]"/>
+                <filter string="Yield" name="yield" domain="[('ttype', '=', 'yield')]"/>
                 <separator/>
                 <filter string="Liquid Assets" name="liquid" domain="[('liquid', '=', True)]"/>
                 <filter string="Illiquid Assets" name="illiquid" domain="[('liquid', '=', False)]"/>
