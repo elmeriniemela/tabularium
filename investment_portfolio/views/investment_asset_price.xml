@@ -60,12 +60,10 @@
 
 
 
-    <record model="ir.actions.act_window" id="asset_price_action_window">
+    <record model="ir.actions.act_window" id="action_prices">
         <field name="name">Asset Prices</field>
         <field name="res_model">investment.asset.price</field>
         <field name="view_mode">tree,graph,form</field>
     </record>
-
-    <menuitem id="asset_price_menu" action="asset_price_action_window" parent="configuration_menu" sequence="1"/>
 
 </odoo>

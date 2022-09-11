@@ -1,0 +1,29 @@
+<odoo>
+
+    <menuitem name="Investment Portfolio" id="root_menu" web_icon="investment_portfolio,static/description/icon.png">
+
+        <menuitem name="Assets" id="menu_assets" sequence="10">
+            <menuitem id="menu_current_positions" action="action_current_positions" sequence="10"/>
+            <menuitem id="menu_liquid_allocations" action="action_liquid_allocations" sequence="20"/>
+            <menuitem id="menu_allocations_by_asset_class" action="action_allocations_by_asset_class" sequence="30"/>
+        </menuitem>
+
+        <menuitem name="Transactions" id="menu_transactions" sequence="20">
+            <menuitem id="menu_transactions_per_month" action="action_transactions_per_month" sequence="10"/>
+            <menuitem id="menu_yearly_savings" action="action_yearly_savings" sequence="20"/>
+        </menuitem>
+
+        <menuitem name="Timeseries" id="menu_timeseries">
+            <menuitem id="menu_profits" action="action_profits" sequence="10"/>
+            <menuitem id="menu_profits_per_asset" action="action_profits_per_asset" sequence="10"/>
+        </menuitem>
+
+        <menuitem name="Configuration" id="configuration_menu" sequence="40">
+            <menuitem id="menu_categories" action="action_categories" sequence="10"/>
+            <menuitem id="menu_integrations" action="action_integrations" sequence="20"/>
+            <menuitem id="menu_prices" action="action_prices" sequence="30"/>
+            <menuitem id="menu_currencies" action="base.action_currency_form" sequence="40"/>
+        </menuitem>
+
+    </menuitem>
+</odoo>

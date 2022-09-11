@@ -88,7 +88,8 @@
                 <filter string="Illiquid Assets" name="illiquid" domain="[('liquid', '=', False)]"/>
                 <separator/>
                 <group expand="1" string="Group by">
-                    <filter string="Date" name="group_date" context="{'group_by': 'time:month'}"/>
+                    <filter string="Month" name="group_date" context="{'group_by': 'time:month'}"/>
+                    <filter string="Year" name="group_year" context="{'group_by': 'time:year'}"/>
                     <filter string="Category" name="group_category_id" context="{'group_by': 'category_id'}"/>
                     <filter string="Type" name="group_ttype" context="{'group_by': 'ttype'}"/>
                     <filter string="Asset" name="group_asset_id" context="{'group_by': 'asset_id'}"/>
@@ -106,13 +107,19 @@
         <field name="code">records._fill_daily_price()</field>
     </record>
 
-    <record model="ir.actions.act_window" id="asset_transaction_action_window">
-        <field name="name">Transactions</field>
+    <record model="ir.actions.act_window" id="action_transactions_per_month">
+        <field name="name">Transactions per month</field>
         <field name="res_model">investment.asset.transaction</field>
         <field name="view_mode">graph,tree,form</field>
         <field name="context">{'search_default_group_date': 1, 'search_default_group_asset_id': 1, 'search_default_liquid': 1, 'search_default_1_year': 1}</field>
     </record>
 
-    <menuitem id="asset_transaction_menu" action="asset_transaction_action_window" parent="root_menu" sequence="1"/>
+    <record model="ir.actions.act_window" id="action_yearly_savings">
+        <field name="name">Yearly savings</field>
+        <field name="res_model">investment.asset.transaction</field>
+        <field name="view_mode">graph,tree,form</field>
+        <field name="context">{'search_default_liquid': 1, 'search_default_group_year': 1}</field>
+    </record>
+
 
 </odoo>

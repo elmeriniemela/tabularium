@@ -40,13 +40,11 @@
     </record>
 
 
-    <record model="ir.actions.act_window" id="category_action_window">
+    <record model="ir.actions.act_window" id="action_categories">
         <field name="name">Categories</field>
         <field name="res_model">investment.category</field>
         <field name="view_mode">tree,form,graph</field>
         <field name="context">{'search_default_group_category_id': 1}</field>
     </record>
-
-    <menuitem id="category_menu" action="category_action_window" parent="configuration_menu" sequence="1"/>
 
 </odoo>

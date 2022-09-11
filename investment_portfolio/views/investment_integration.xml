@@ -37,12 +37,10 @@
     </record>
 
 
-    <record model="ir.actions.act_window" id="integration_action_window">
+    <record model="ir.actions.act_window" id="action_integrations">
         <field name="name">Integrations</field>
         <field name="res_model">investment.integration</field>
         <field name="view_mode">tree,form</field>
     </record>
-
-    <menuitem id="integration_menu" action="integration_action_window" parent="configuration_menu" sequence="1"/>
 
 </odoo>
