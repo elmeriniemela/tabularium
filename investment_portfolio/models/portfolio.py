@@ -499,7 +499,13 @@ class InvestmentAssetPrice(models.Model):
             ('cost', 'Cost'),
         ],
         string='Type',
-        compute='_compute_ttype',
+        compute='_compute_report',
+        store=True,
+    )
+
+    signed_cash_flow = fields.Monetary(
+        string="Position Movement",
+        compute='_compute_report',
         store=True,
     )
 
@@ -521,18 +527,23 @@ class InvestmentAssetPrice(models.Model):
 
 
     @api.depends('cash_flow', 'quantity')
-    def _compute_ttype(self):
+    def _compute_report(self):
         for record in self:
             if record.quantity < 0:
                 record.ttype = 'sell'
+                record.signed_cash_flow = -record.cash_flow
             elif record.quantity > 0:
                 record.ttype = 'buy'
+                record.signed_cash_flow = record.cash_flow
             elif record.cash_flow > 0:
                 record.ttype = 'yield'
+                record.signed_cash_flow = record.cash_flow
             elif record.cash_flow < 0:
                 record.ttype = 'cost'
+                record.signed_cash_flow = -record.cash_flow
             else:
                 record.ttype = False
+                record.signed_cash_flow = False
                 _logger.error("Invalid type: %s", record)
 
 

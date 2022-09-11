@@ -24,7 +24,7 @@
         <field name="model">investment.asset.transaction</field>
         <field name="arch" type="xml">
             <graph type="bar" stacked="1">
-                <field name="cash_flow" type="measure"/>
+                <field name="signed_cash_flow" type="measure"/>
             </graph>
         </field>
    </record>
