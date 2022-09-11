@@ -19,6 +19,16 @@
         </field>
     </record>
 
+    <record model="ir.ui.view" id="asset_transaction_graph">
+        <field name="name">investment.asset.transaction.graph</field>
+        <field name="model">investment.asset.transaction</field>
+        <field name="arch" type="xml">
+            <graph type="bar" stacked="1">
+                <field name="cash_flow" type="measure"/>
+            </graph>
+        </field>
+   </record>
+
     <record model="ir.ui.view" id="asset_transaction_form">
         <field name="name">investment.asset.transaction.form</field>
         <field name="model">investment.asset.transaction</field>
@@ -51,10 +61,28 @@
             <search>
                 <field name="asset_id"/>
                 <separator/>
+                <filter name="date_filter" date="time"/>
+                <separator/>
+                <filter string="1 year" name="1_year" domain="[('time','&gt;',(context_today() + relativedelta(days=-365)).strftime('%Y-%m-%d'))]"/>
+                <filter string="2 years" name="2_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-2*365)).strftime('%Y-%m-%d'))]"/>
+                <filter string="3 years" name="3_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-3*365)).strftime('%Y-%m-%d'))]"/>
+                <filter string="4 years" name="4_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-4*365)).strftime('%Y-%m-%d'))]"/>
+                <filter string="5 years" name="5_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-5*365)).strftime('%Y-%m-%d'))]"/>
+                <filter string="6 years" name="6_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-6*365)).strftime('%Y-%m-%d'))]"/>
+                <filter string="7 years" name="7_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-7*365)).strftime('%Y-%m-%d'))]"/>
+                <filter string="8 years" name="8_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-8*365)).strftime('%Y-%m-%d'))]"/>
+                <filter string="9 years" name="9_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-9*365)).strftime('%Y-%m-%d'))]"/>
+                <filter string="10 years" name="10_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-10*365)).strftime('%Y-%m-%d'))]"/>
+                <separator/>
+                <filter string="Long" name="long" domain="[('quantity', '>', 0.0)]"/>
+                <filter string="Short" name="short" domain="[('quantity', '&lt;', 0.0)]"/>
+                <filter string="Closed" name="closed" domain="[('quantity', '=', 0.0)]"/>
+                <separator/>
                 <filter string="Liquid Assets" name="liquid" domain="[('liquid', '=', True)]"/>
-                <filter string="Illiquid Assets" name="liquid" domain="[('liquid', '=', False)]"/>
+                <filter string="Illiquid Assets" name="illiquid" domain="[('liquid', '=', False)]"/>
                 <separator/>
                 <group expand="1" string="Group by">
+                    <filter string="Date" name="group_date" context="{'group_by': 'time:month'}"/>
                     <filter string="Category" name="group_category_id" context="{'group_by': 'category_id'}"/>
                     <filter string="Type" name="group_ttype" context="{'group_by': 'ttype'}"/>
                     <filter string="Asset" name="group_asset_id" context="{'group_by': 'asset_id'}"/>
@@ -73,9 +101,10 @@
     </record>
 
     <record model="ir.actions.act_window" id="asset_transaction_action_window">
-        <field name="name">Asset Transactions</field>
+        <field name="name">Transactions</field>
         <field name="res_model">investment.asset.transaction</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">graph,tree,form</field>
+        <field name="context">{'search_default_group_date': 1, 'search_default_group_asset_id': 1, 'search_default_liquid': 1, 'search_default_1_year': 1}</field>
     </record>
 
     <menuitem id="asset_transaction_menu" action="asset_transaction_action_window" parent="root_menu" sequence="1"/>

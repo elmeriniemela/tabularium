@@ -43,6 +43,6 @@
         <field name="view_mode">tree,form</field>
     </record>
 
-    <menuitem id="integration_menu" action="integration_action_window" parent="root_menu" sequence="1"/>
+    <menuitem id="integration_menu" action="integration_action_window" parent="configuration_menu" sequence="1"/>
 
 </odoo>

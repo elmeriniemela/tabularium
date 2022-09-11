@@ -362,8 +362,6 @@ class InvestmentAsset(models.Model):
 
     def _get_position(self, market_price, transaction_ids):
         self.ensure_one()
-        precision = self.env['decimal.precision'].precision_get('Investment Asset quantity')
-
         quantity = 0.0
         buy_total = 0.0
         sell_total = 0.0
@@ -437,7 +435,7 @@ class InvestmentAsset(models.Model):
 
 class InvestmentAssetPrice(models.Model):
     _name = 'investment.asset.price'
-    _description = 'Investment Asset Price'
+    _description = 'Asset Price'
     _order = 'time desc'
     _rec_name = 'price'
 
@@ -465,7 +463,7 @@ class InvestmentAssetPrice(models.Model):
 
 class InvestmentAssetPrice(models.Model):
     _name = 'investment.asset.transaction'
-    _description = 'Investment Asset Price'
+    _description = 'Asset Transaction'
     _order = 'time desc'
 
     asset_id = fields.Many2one(

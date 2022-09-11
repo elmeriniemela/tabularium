@@ -47,6 +47,6 @@
         <field name="context">{'search_default_group_category_id': 1}</field>
     </record>
 
-    <menuitem id="category_menu" action="category_action_window" parent="root_menu" sequence="1"/>
+    <menuitem id="category_menu" action="category_action_window" parent="configuration_menu" sequence="1"/>
 
 </odoo>

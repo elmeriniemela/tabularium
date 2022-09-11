@@ -137,6 +137,8 @@
 
     <menuitem name="Investment Portfolio" id="root_menu" web_icon="investment_portfolio,static/description/icon.png"/>
     <menuitem id="asset_menu" action="asset_action_window" parent="root_menu" sequence="1"/>
-    <menuitem id="currency_menu" action="base.action_currency_form" parent="root_menu" sequence="100"/>
+
+    <menuitem name="Configuration" id="configuration_menu" parent="root_menu" sequence="1000"/>
+    <menuitem id="currency_menu" action="base.action_currency_form" parent="configuration_menu" sequence="100"/>
 
 </odoo>
