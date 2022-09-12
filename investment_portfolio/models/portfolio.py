@@ -95,7 +95,15 @@ class InvestmentTimeseries(models.Model):
     profit = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id', group_operator='sum')
     profit_percent = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg')
     transaction_ids = fields.Many2many(comodel_name='investment.asset.transaction', compute='_compute_aggregate', store=True)
-    price_id = fields.Many2one(comodel_name='investment.asset.price',compute='_compute_aggregate', store=True)
+    price_id = fields.Many2one(
+        comodel_name='investment.asset.price',
+        compute='_compute_aggregate',
+        store=True,
+        ondelete='cascade',
+        index=True,
+    )
+
+    prediction = fields.Boolean(related='price_id.prediction')
 
     date = fields.Date(
         store=True,
@@ -111,6 +119,7 @@ class InvestmentTimeseries(models.Model):
         comodel_name='investment.asset',
         required=True,
         ondelete='cascade',
+        index=True,
     )
 
     category_id = fields.Many2one(
@@ -210,12 +219,16 @@ class InvestmentTimeseries(models.Model):
                 continue
 
             t = record.date
+            prediction = [('prediction', '=', record.date > fields.Date.today())]
             time_cutoff = datetime.datetime(t.year, t.month, t.day, 20, 0, 0)
             domain = [
                 ('time', '<=', time_cutoff),
                 ('asset_id', '=', record.asset_id.id),
             ]
-            price_id = record.env['investment.asset.price'].search(domain, limit=1, order='time desc') # latest but before time_cutoff
+            price_id = record.env['investment.asset.price'].search(domain+prediction, limit=1, order='time desc') # latest but before time_cutoff
+            if not price_id:
+                _logger.warning("No price: %s", domain+prediction)
+                price_id = record.env['investment.asset.price'].search(domain, limit=1, order='time desc') # latest but before time_cutoff
             record.price_id = price_id
             if not price_id:
                 _logger.warning("No price: %s", domain)
@@ -226,7 +239,7 @@ class InvestmentTimeseries(models.Model):
                 next_price_id = record.env['investment.asset.price'].search([
                     ('time', '>=', time_cutoff),
                     ('asset_id', '=', record.asset_id.id),
-                ], limit=1, order='time asc') # earliest but after time_cutoff
+                ]+prediction, limit=1, order='time asc') # earliest but after time_cutoff
                 if next_price_id:
                     # Linear Interpolation
                     slope = (next_price_id.price - price_id.price) / (next_price_id.time - price_id.time).days
@@ -250,7 +263,12 @@ class InvestmentTimeseries(models.Model):
 
     @api.model
     def cron_create_time_series(self):
+        Price = self.env['investment.asset.price']
+        precision = self.env['decimal.precision'].precision_get('Investment Asset quantity')
+
         existing = {(p.asset_id.id, p.date): p for p in self.search([])}
+
+        recompute = self.browse()
         for asset_id in self.env['investment.asset'].search([]):
             first = self.env['investment.asset.transaction'].search([('asset_id', '=', asset_id.id)], order='time asc', limit=1)
             if not first:
@@ -259,19 +277,54 @@ class InvestmentTimeseries(models.Model):
             date = first.time.date()
             _logger.info(f"Make time series for {asset_id.name} starting from {date}")
             today = datetime.date.today()
-            while date <= today:
+
+            while date <= today + relativedelta(years=10):
+                prediction = bool(date > today)
+                if prediction and float_is_zero(asset_id.quantity, precision_digits=precision):
+                    break
+                if prediction:
+                    _logger.info(f"Predict {asset_id.name} on {date}")
+                    previous_price *= (1+asset_id.expected_yearly_return)
+                    price_id = Price.search([
+                        ('prediction', '=', True),
+                        ('asset_id', '=', asset_id.id),
+                        ('time', '=', date),
+                    ])
+                    if not price_id:
+                        price_id = Price.create({
+                            'prediction': True,
+                            'asset_id': asset_id.id,
+                            'time': date,
+                            'price': previous_price,
+                        })
+                    else:
+                        price_id.price = previous_price
+
                 if (asset_id.id, date) not in existing:
                     existing[(asset_id.id, date)] = self.create({
                         'asset_id': asset_id.id,
                         'date': date,
                     })
-                date += datetime.timedelta(days=1)
+                    recompute += existing[(asset_id.id, date)]
+
+                if prediction:
+                    recompute += existing[(asset_id.id, date)]
+
+                if date == today:
+                    serie_today = existing[(asset_id.id, today)]
+                    serie_today._compute_aggregate()
+                    previous_price = serie_today.price_id.price
+
+                if prediction or date == today:
+                    date += relativedelta(years=1)
+                    date = date.replace(month=1, day=1)
+                else:
+                    date += datetime.timedelta(days=1)
 
             yesterday = datetime.date.today() - relativedelta(days=1)
+            recompute += existing[(asset_id.id, yesterday)]
 
-            (existing[(asset_id.id, yesterday)] | existing[(asset_id.id, today)])._compute_aggregate()
-
-
+        recompute._compute_aggregate()
 
 
 
@@ -322,6 +375,8 @@ class InvestmentAsset(models.Model):
 
     notes = fields.Text()
 
+    expected_yearly_return = fields.Float(default=0.1, group_operator='avg')
+
     color = fields.Char(required=True, default=lambda self: self._get_random_color())
 
     company_id = fields.Many2one(comodel_name='res.company', required=True, default=lambda self: self.env.company)
@@ -339,6 +394,7 @@ class InvestmentAsset(models.Model):
     price_ids = fields.One2many(
         comodel_name='investment.asset.price',
         inverse_name='asset_id',
+        domain=[('prediction', '=', False)],
     )
 
     transaction_ids = fields.One2many(
@@ -428,6 +484,7 @@ class InvestmentAsset(models.Model):
             closing_price_id = record.env['investment.asset.price'].search([
                 ('asset_id', '=', record.id),
                 ('time', '<', time),
+                ('prediction', '=', False),
             ], limit=1)
 
             closing_price = closing_price_id.currency_id._convert(
@@ -547,6 +604,8 @@ class InvestmentAssetPrice(models.Model):
 
     time = fields.Datetime(required=True, default=fields.Datetime.now)
 
+    prediction = fields.Boolean()
+
     transaction_id = fields.Many2one(
         comodel_name='investment.asset.transaction',
     )
@@ -609,7 +668,7 @@ class InvestmentAssetPrice(models.Model):
         for transaction in self:
             start_time = transaction.time.replace(hour=0, minute=0, microsecond=0)
             stop_time = transaction.time.replace(hour=23, minute=59, microsecond=0)
-            exists = Price.search([('time', '>=', start_time),('time', '<=', stop_time),('asset_id', '=', transaction.asset_id.id)])
+            exists = Price.search([('time', '>=', start_time),('time', '<=', stop_time),('asset_id', '=', transaction.asset_id.id),('prediction', '=', False)])
             if transaction.exchange_rate and transaction.quantity and not exists:
                 Price.create({
                     'time': start_time.replace(hour=12),

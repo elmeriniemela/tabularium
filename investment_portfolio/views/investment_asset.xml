@@ -8,6 +8,7 @@
                 <field name="ticker" optional="show"/>
                 <field name="quantity" optional="show"/>
                 <field name="position" optional="show" sum="Total Position"/>
+                <field name="expected_yearly_return" widget="percentage" optional="hide"/>
                 <field name="last_update" optional="show" widget="timeago"/>
                 <field name="last_price" optional="show"/>
                 <field name="daily_price" widget="percentage" options="{'is_profit': 1}" optional="show"/>
@@ -68,10 +69,14 @@
                         <group>
                             <field name="ticker"/>
                             <field name="company_id"/>
-                            <field name="company_currency_id"/>
                             <field name="currency_id"/>
-                            <field name="position"/>
-                            <field name="buy_total" />
+                            <field name="category_id"/>
+                            <field name="integration_id"/>
+                            <field name="expected_yearly_return" widget="percentage"/>
+                            <field name="ytd_price" widget="percentage" options="{'is_profit': 1}"/>
+                            <field name="monthly_price" widget="percentage" options="{'is_profit': 1}"/>
+                            <field name="weekly_price" widget="percentage" options="{'is_profit': 1}"/>
+                            <field name="daily_price" widget="percentage" options="{'is_profit': 1}"/>
                             <label for="color"/>
                             <div>
                                 <field name="color" widget="colorpicker"/>
@@ -84,18 +89,15 @@
                             </div>
                         </group>
                         <group>
-                            <field name="category_id"/>
-                            <field name="integration_id"/>
                             <field name="quantity"/>
                             <field name="last_update" widget="timeago"/>
+                            <field name="company_currency_id"/>
+                            <field name="position"/>
                             <field name="last_price"/>
                             <field name="avg_buy_price" />
                             <field name="sell_total"  attrs="{'invisible': [('quantity', '!=', 0.0)]}"/>
+                            <field name="buy_total"/>
                             <field name="avg_sell_price" attrs="{'invisible': [('quantity', '!=', 0.0)]}"/>
-                            <field name="daily_price" widget="percentage" options="{'is_profit': 1}"/>
-                            <field name="weekly_price" widget="percentage" options="{'is_profit': 1}"/>
-                            <field name="monthly_price" widget="percentage" options="{'is_profit': 1}"/>
-                            <field name="ytd_price" widget="percentage" options="{'is_profit': 1}"/>
                             <field name="profit" options="{'is_profit': 1}"/>
                             <field name="profit_percent" widget="percentage" options="{'is_profit': 1}"/>
                         </group>
