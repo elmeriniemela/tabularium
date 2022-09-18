@@ -293,10 +293,10 @@ class InvestmentTimeseries(models.Model):
                 if prediction and float_is_zero(asset_id.quantity, precision_digits=precision):
                     break
                 if prediction:
-                    _logger.info(f"Predict {asset_id.name} on {date}")
                     expectation = asset_id._get_expectation(date)
                     if not expectation:
                         _logger.info("No expectations for %s %s", asset_id.name, date)
+                        break
                     previous_price *= (1+expectation.yearly_return)
                     base_vals = {
                         'prediction': True,
@@ -306,7 +306,12 @@ class InvestmentTimeseries(models.Model):
                     if expectation.savings:
                         transaction_id = Transaction.search([(key, '=', value) for key, value in base_vals.items()])
                         quantity = expectation.savings/previous_price
-                        update = {'quantity': quantity*12, 'cash_flow': expectation.savings*12, 'exchange_rate': previous_price}
+                        if date.year-1 == today.year:
+                            months = 12-today.month
+                            _logger.info("Only %s months of %s left to predict.", months, today.year)
+                        else:
+                            months = 12
+                        update = {'quantity': quantity*months, 'cash_flow': expectation.savings*months, 'exchange_rate': previous_price}
                         if not transaction_id:
                             transaction_id = Transaction.create({**base_vals, **update})
                         else:
