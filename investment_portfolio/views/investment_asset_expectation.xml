@@ -1,0 +1,57 @@
+<odoo>
+    <record model="ir.ui.view" id="asset_expectation_tree">
+        <field name="name">investment.asset.expectation.tree</field>
+        <field name="model">investment.asset.expectation</field>
+        <field name="arch" type="xml">
+            <tree editable="top">
+                <field name="year" />
+                <field name="yearly_return" widget="percentage" />
+                <field name="savings" />
+                <field name="currency_id" optional="show" />
+                <field name="asset_id" optional="hide" />
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="asset_expectation_form">
+        <field name="name">investment.asset.expectation.form</field>
+        <field name="model">investment.asset.expectation</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="year" />
+                            <field name="yearly_return" widget="percentage" />
+                            <field name="savings" />
+                        </group>
+                        <group>
+                            <field name="currency_id" invisible="not context.get('show_all')" />
+                            <field name="asset_id" invisible="not context.get('show_all')" />
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="asset_expectation_search" model="ir.ui.view">
+        <field name="name">investment.asset.expectation.search</field>
+        <field name="model">investment.asset.expectation</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="asset_id" />
+                <group expand="1" string="Group by">
+                    <filter string="Asset" name="group_asset_id" context="{'group_by': 'asset_id'}" />
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="action_expectations">
+        <field name="name">Asset Expectations</field>
+        <field name="res_model">investment.asset.expectation</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+</odoo>

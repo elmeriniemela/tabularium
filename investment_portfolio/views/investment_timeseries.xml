@@ -96,18 +96,18 @@
                 <filter string="Illiquid Assets" name="illiquid" domain="[('liquid', '=', False)]" />
                 <separator />
                 <filter string="Realized" name="realized" domain="[('prediction', '=', False)]" />
-                <filter string="prediction" name="prediction" domain="[('prediction', '=', True)]" />
+                <filter string="Prediction" name="prediction" domain="[('prediction', '=', True)]" />
                 <separator />
-                <filter string="1 year" name="1_year" domain="[('date','&gt;',(context_today() + relativedelta(days=-365)).strftime('%Y-%m-%d'))]" />
-                <filter string="2 years" name="2_years" domain="[('date','&gt;',(context_today() + relativedelta(days=-2*365)).strftime('%Y-%m-%d'))]" />
-                <filter string="3 years" name="3_years" domain="[('date','&gt;',(context_today() + relativedelta(days=-3*365)).strftime('%Y-%m-%d'))]" />
-                <filter string="4 years" name="4_years" domain="[('date','&gt;',(context_today() + relativedelta(days=-4*365)).strftime('%Y-%m-%d'))]" />
-                <filter string="5 years" name="5_years" domain="[('date','&gt;',(context_today() + relativedelta(days=-5*365)).strftime('%Y-%m-%d'))]" />
-                <filter string="6 years" name="6_years" domain="[('date','&gt;',(context_today() + relativedelta(days=-6*365)).strftime('%Y-%m-%d'))]" />
-                <filter string="7 years" name="7_years" domain="[('date','&gt;',(context_today() + relativedelta(days=-7*365)).strftime('%Y-%m-%d'))]" />
-                <filter string="8 years" name="8_years" domain="[('date','&gt;',(context_today() + relativedelta(days=-8*365)).strftime('%Y-%m-%d'))]" />
-                <filter string="9 years" name="9_years" domain="[('date','&gt;',(context_today() + relativedelta(days=-9*365)).strftime('%Y-%m-%d'))]" />
-                <filter string="10 years" name="10_years" domain="[('date','&gt;',(context_today() + relativedelta(days=-10*365)).strftime('%Y-%m-%d'))]" />
+                <filter string="1 year" name="1_year" domain="[('date','&gt;',(context_today() + relativedelta(days=-365)).strftime('%Y-%m-%d')),('date','&lt;',(context_today() + relativedelta(days=365)).strftime('%Y-%m-%d'))]" />
+                <filter string="2 years" name="2_years" domain="[('date','&gt;',(context_today() + relativedelta(days=-2*365)).strftime('%Y-%m-%d')),('date','&lt;',(context_today() + relativedelta(days=2*365)).strftime('%Y-%m-%d'))]" />
+                <filter string="3 years" name="3_years" domain="[('date','&gt;',(context_today() + relativedelta(days=-3*365)).strftime('%Y-%m-%d')),('date','&lt;',(context_today() + relativedelta(days=3*365)).strftime('%Y-%m-%d'))]" />
+                <filter string="4 years" name="4_years" domain="[('date','&gt;',(context_today() + relativedelta(days=-4*365)).strftime('%Y-%m-%d')),('date','&lt;',(context_today() + relativedelta(days=4*365)).strftime('%Y-%m-%d'))]" />
+                <filter string="5 years" name="5_years" domain="[('date','&gt;',(context_today() + relativedelta(days=-5*365)).strftime('%Y-%m-%d')),('date','&lt;',(context_today() + relativedelta(days=5*365)).strftime('%Y-%m-%d'))]" />
+                <filter string="6 years" name="6_years" domain="[('date','&gt;',(context_today() + relativedelta(days=-6*365)).strftime('%Y-%m-%d')),('date','&lt;',(context_today() + relativedelta(days=6*365)).strftime('%Y-%m-%d'))]" />
+                <filter string="7 years" name="7_years" domain="[('date','&gt;',(context_today() + relativedelta(days=-7*365)).strftime('%Y-%m-%d')),('date','&lt;',(context_today() + relativedelta(days=7*365)).strftime('%Y-%m-%d'))]" />
+                <filter string="8 years" name="8_years" domain="[('date','&gt;',(context_today() + relativedelta(days=-8*365)).strftime('%Y-%m-%d')),('date','&lt;',(context_today() + relativedelta(days=8*365)).strftime('%Y-%m-%d'))]" />
+                <filter string="9 years" name="9_years" domain="[('date','&gt;',(context_today() + relativedelta(days=-9*365)).strftime('%Y-%m-%d')),('date','&lt;',(context_today() + relativedelta(days=9*365)).strftime('%Y-%m-%d'))]" />
+                <filter string="10 years" name="10_years" domain="[('date','&gt;',(context_today() + relativedelta(days=-10*365)).strftime('%Y-%m-%d')),('date','&lt;',(context_today() + relativedelta(days=10*365)).strftime('%Y-%m-%d'))]" />
                 <group expand="1" string="Group by">
                     <filter string="Date" name="group_day" context="{'group_by': 'date:day'}" invisible="not context.get('search_default_group_day')" />
                     <filter string="Date" name="group_week" context="{'group_by': 'date:week'}" invisible="not context.get('search_default_group_week')" />

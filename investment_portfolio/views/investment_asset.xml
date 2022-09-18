@@ -6,10 +6,9 @@
             <tree expand="1">
                 <field name="name" optional="show"/>
                 <field name="ticker" optional="show"/>
-                <field name="quantity" optional="show"/>
-                <field name="position" optional="show" sum="Total Position"/>
-                <field name="expected_yearly_return" widget="percentage" optional="hide"/>
                 <field name="last_update" optional="show" widget="timeago"/>
+                <field name="position" optional="show" sum="Total Position"/>
+                <field name="quantity" optional="show"/>
                 <field name="last_price" optional="show"/>
                 <field name="daily_price" widget="percentage" options="{'is_profit': 1}" optional="show"/>
                 <field name="weekly_price" widget="percentage" options="{'is_profit': 1}" optional="show"/>
@@ -72,7 +71,6 @@
                             <field name="currency_id"/>
                             <field name="category_id"/>
                             <field name="integration_id"/>
-                            <field name="expected_yearly_return" widget="percentage"/>
                             <field name="ytd_price" widget="percentage" options="{'is_profit': 1}"/>
                             <field name="monthly_price" widget="percentage" options="{'is_profit': 1}"/>
                             <field name="weekly_price" widget="percentage" options="{'is_profit': 1}"/>
@@ -109,6 +107,9 @@
                         </page>
                         <page string="Prices">
                             <field name="price_ids" context="{'default_asset_id': id}"/>
+                        </page>
+                        <page string="Expectations">
+                            <field name="expectation_ids" context="{'default_asset_id': id}"/>
                         </page>
                     </notebook>
                 </sheet>

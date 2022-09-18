@@ -225,6 +225,7 @@ class InvestmentTimeseries(models.Model):
                 ('time', '<=', time_cutoff),
                 ('asset_id', '=', record.asset_id.id),
             ]
+            record.transaction_ids = record.env['investment.asset.transaction'].search(domain) # latest but before date
             price_id = record.env['investment.asset.price'].search(domain+prediction, limit=1, order='time desc') # latest but before time_cutoff
             if not price_id:
                 _logger.warning("No price: %s", domain+prediction)
@@ -255,7 +256,6 @@ class InvestmentTimeseries(models.Model):
                 date=price_id.time or fields.Datetime.now(),
             )
 
-            record.transaction_ids = record.env['investment.asset.transaction'].search(domain) # latest but before date
             record.update(record.asset_id._get_position(record.last_price, record.transaction_ids))
 
 
@@ -264,11 +264,20 @@ class InvestmentTimeseries(models.Model):
     @api.model
     def cron_create_time_series(self):
         Price = self.env['investment.asset.price']
+        today = datetime.date.today()
+
+        # Remove old predictions.
+        Price.search([('prediction', '=', True),('time', '<', today)]).unlink()
+
+
         precision = self.env['decimal.precision'].precision_get('Investment Asset quantity')
+        predict_years = int(self.env['ir.config_parameter'].sudo().get_param('investment_portfolio.predict_years', '25'))
 
         existing = {(p.asset_id.id, p.date): p for p in self.search([])}
 
         recompute = self.browse()
+
+
         for asset_id in self.env['investment.asset'].search([]):
             first = self.env['investment.asset.transaction'].search([('asset_id', '=', asset_id.id)], order='time asc', limit=1)
             if not first:
@@ -276,15 +285,17 @@ class InvestmentTimeseries(models.Model):
                 continue
             date = first.time.date()
             _logger.info(f"Make time series for {asset_id.name} starting from {date}")
-            today = datetime.date.today()
 
-            while date <= today + relativedelta(years=10):
+            while date <= today + relativedelta(years=predict_years):
                 prediction = bool(date > today)
                 if prediction and float_is_zero(asset_id.quantity, precision_digits=precision):
                     break
                 if prediction:
                     _logger.info(f"Predict {asset_id.name} on {date}")
-                    previous_price *= (1+asset_id.expected_yearly_return)
+                    expectation = asset_id._get_expectation(date)
+                    if not expectation:
+                        _logger.info("No expectations for %s %s", asset_id.name, date)
+                    previous_price *= (1+expectation.yearly_return)
                     price_id = Price.search([
                         ('prediction', '=', True),
                         ('asset_id', '=', asset_id.id),
@@ -364,6 +375,26 @@ class InvestmentIntegration(models.Model):
         }
         safe_eval(self.code, globals_dict=globals_dict, mode="exec", nocopy=True)
 
+
+class InvestmentAssetExpectation(models.Model):
+    _name = 'investment.asset.expectation'
+    _description = 'Investment Expectation'
+
+    asset_id = fields.Many2one(
+        comodel_name='investment.asset',
+        required=True,
+        ondelete='cascade',
+    )
+    currency_id = fields.Many2one(related='asset_id.company_currency_id')
+
+    yearly_return = fields.Float(group_operator='avg')
+
+    savings = fields.Monetary()
+
+    year = fields.Integer()
+
+
+
 class InvestmentAsset(models.Model):
     _name = 'investment.asset'
     _description = 'Investment Asset'
@@ -374,8 +405,6 @@ class InvestmentAsset(models.Model):
     ticker = fields.Char(required=True)
 
     notes = fields.Text()
-
-    expected_yearly_return = fields.Float(default=0.1, group_operator='avg')
 
     color = fields.Char(required=True, default=lambda self: self._get_random_color())
 
@@ -403,7 +432,7 @@ class InvestmentAsset(models.Model):
     )
 
 
-    quantity = fields.Float(compute='_compute_aggregate', store=True, digits='Investment Asset quantity')
+    quantity = fields.Float(compute='_compute_aggregate', store=True, digits='Investment Asset quantity', group_operator=None)
 
     buy_total = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
     sell_total = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
@@ -414,7 +443,7 @@ class InvestmentAsset(models.Model):
 
 
     last_update = fields.Datetime(compute='_compute_aggregate', store=True)
-    last_price = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
+    last_price = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id', group_operator=None)
     profit = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id', group_operator='sum')
     profit_percent = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg')
     daily_price = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg')
@@ -433,6 +462,17 @@ class InvestmentAsset(models.Model):
     is_cash = fields.Boolean(
         compute='_compute_is_cash',
     )
+
+    expectation_ids = fields.One2many(
+        comodel_name='investment.asset.expectation',
+        inverse_name='asset_id',
+        default=lambda self: [(0, 0, {'yearly_return': 0.1})]
+    )
+
+
+    def _get_expectation(self, date):
+        self.ensure_one()
+        return self.expectation_ids.filtered(lambda e: e.year == date.year) or self.expectation_ids.filtered(lambda e: not e.year)
 
 
     def _get_random_color(self):

@@ -25,7 +25,8 @@
             <menuitem id="menu_categories" action="action_categories" sequence="10"/>
             <menuitem id="menu_integrations" action="action_integrations" sequence="20"/>
             <menuitem id="menu_prices" action="action_prices" sequence="30"/>
-            <menuitem id="menu_currencies" action="base.action_currency_form" sequence="40"/>
+            <menuitem id="menu_expectations" action="action_expectations" sequence="40"/>
+            <menuitem id="menu_currencies" action="base.action_currency_form" sequence="50"/>
         </menuitem>
 
     </menuitem>

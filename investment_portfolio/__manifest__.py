@@ -22,6 +22,7 @@
         'views/investment_category.xml',
         'views/investment_integration.xml',
         'views/investment_asset_price.xml',
+        'views/investment_asset_expectation.xml',
         'views/investment_asset_transaction.xml',
         'views/menuitems.xml',
     ],
