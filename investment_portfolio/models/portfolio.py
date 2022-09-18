@@ -355,6 +355,7 @@ class InvestmentTimeseries(models.Model):
 class InvestmentMilestone(models.Model):
     _name = 'investment.milestone'
     _description = 'Investment Milestone'
+    _order = 'date desc'
 
     name = fields.Char(required=True)
 
