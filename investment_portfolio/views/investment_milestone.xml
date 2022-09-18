@@ -1,0 +1,58 @@
+<odoo>
+    <record model="ir.ui.view" id="milestone_tree">
+        <field name="name">investment.milestone.tree</field>
+        <field name="model">investment.milestone</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="date"/>
+                <field name="position"/>
+                <field name="company_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="milestone_form">
+        <field name="name">investment.milestone.form</field>
+        <field name="model">investment.milestone</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_left" style="width: 500px;">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <field name="date"/>
+                        <field name="position"/>
+                        <field name="company_id"/>
+                        <field name="company_currency_id" invisible="1"/>
+                        <field name="domain" widget="domain" options="{'model': 'investment.asset'}"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="milestone_search" model="ir.ui.view">
+        <field name="name">investment.milestone.search</field>
+        <field name="model">investment.milestone</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="date"/>
+                <field name="position"/>
+                <field name="company_id"/>
+            </search>
+        </field>
+    </record>
+
+
+    <record model="ir.actions.act_window" id="action_milestones">
+        <field name="name">Milestones</field>
+        <field name="res_model">investment.milestone</field>
+        <field name="view_mode">tree,form,graph</field>
+    </record>
+
+</odoo>

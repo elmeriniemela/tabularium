@@ -4,6 +4,7 @@
         <field name="model">investment.asset.expectation</field>
         <field name="arch" type="xml">
             <tree editable="top">
+                <button name="copy_button" class="oe_edit_only" type="object" icon="fa-files-o" help="Copy"/>
                 <field name="year" />
                 <field name="yearly_return" widget="percentage" />
                 <field name="savings" />

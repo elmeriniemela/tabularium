@@ -264,10 +264,12 @@ class InvestmentTimeseries(models.Model):
     @api.model
     def cron_create_time_series(self):
         Price = self.env['investment.asset.price']
+        Transaction = self.env['investment.asset.transaction']
         today = datetime.date.today()
 
         # Remove old predictions.
         Price.search([('prediction', '=', True),('time', '<', today)]).unlink()
+        Transaction.search([('prediction', '=', True)]).unlink()
 
 
         precision = self.env['decimal.precision'].precision_get('Investment Asset quantity')
@@ -296,18 +298,23 @@ class InvestmentTimeseries(models.Model):
                     if not expectation:
                         _logger.info("No expectations for %s %s", asset_id.name, date)
                     previous_price *= (1+expectation.yearly_return)
-                    price_id = Price.search([
-                        ('prediction', '=', True),
-                        ('asset_id', '=', asset_id.id),
-                        ('time', '=', date),
-                    ])
+                    base_vals = {
+                        'prediction': True,
+                        'asset_id': asset_id.id,
+                        'time': date,
+                    }
+                    if expectation.savings:
+                        transaction_id = Transaction.search([(key, '=', value) for key, value in base_vals.items()])
+                        quantity = expectation.savings/previous_price
+                        update = {'quantity': quantity*12, 'cash_flow': expectation.savings*12, 'exchange_rate': previous_price}
+                        if not transaction_id:
+                            transaction_id = Transaction.create({**base_vals, **update})
+                        else:
+                            transaction_id.update(update)
+
+                    price_id = Price.search([(key, '=', value) for key, value in base_vals.items()])
                     if not price_id:
-                        price_id = Price.create({
-                            'prediction': True,
-                            'asset_id': asset_id.id,
-                            'time': date,
-                            'price': previous_price,
-                        })
+                        price_id = Price.create({**base_vals, **{'price': previous_price}})
                     else:
                         price_id.price = previous_price
 
@@ -336,6 +343,26 @@ class InvestmentTimeseries(models.Model):
             recompute += existing[(asset_id.id, yesterday)]
 
         recompute._compute_aggregate()
+
+
+
+
+class InvestmentMilestone(models.Model):
+    _name = 'investment.milestone'
+    _description = 'Investment Milestone'
+
+    name = fields.Char(required=True)
+
+    date = fields.Date(required=True)
+
+    domain = fields.Text(default="[('liquid', '=', True)]", required=True)
+
+    position = fields.Monetary(required=True, currency_field='company_currency_id')
+
+    company_id = fields.Many2one(comodel_name='res.company', required=True, default=lambda self: self.env.company)
+
+    company_currency_id = fields.Many2one(related='company_id.currency_id', string="Company Currency")
+
 
 
 
@@ -393,6 +420,17 @@ class InvestmentAssetExpectation(models.Model):
 
     year = fields.Integer()
 
+    _sql_constraints = [
+        ('unique_expectation', 'unique(asset_id, year)', 'Expectation for this year is already configured!'),
+    ]
+
+    def copy(self, default=None):
+        default = default or {'year': self.year+1}
+        return super().copy(default)
+
+    def copy_button(self):
+        self.ensure_one()
+        self.copy()
 
 
 class InvestmentAsset(models.Model):
@@ -429,6 +467,7 @@ class InvestmentAsset(models.Model):
     transaction_ids = fields.One2many(
         comodel_name='investment.asset.transaction',
         inverse_name='asset_id',
+        domain=[('prediction', '=', False)],
     )
 
 
@@ -682,6 +721,8 @@ class InvestmentAssetPrice(models.Model):
     time = fields.Datetime(required=True, default=fields.Datetime.now)
 
     profit = fields.Monetary(compute='_compute_profit')
+
+    prediction = fields.Boolean()
 
     category_id = fields.Many2one(related='asset_id.category_id', store=True, readonly=True)
     liquid = fields.Boolean(related='category_id.liquid', store=True, readonly=True)
