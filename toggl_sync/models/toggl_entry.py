@@ -190,6 +190,8 @@ class TogglEntry(models.Model):
         self.extra_duration = -7.5/60
 
     def export(self):
+        self.mapped('task_id').fetch()
+
         server_models, dbname, uid, pwd = self.env.user._get_toggl_export_proxy()
 
         for record in self:
