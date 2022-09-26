@@ -25,7 +25,6 @@ class TogglImport(models.TransientModel):
 
     def import_entries(self):
         entries = self.env.user.toggl_time_entries(self.start_date, self.end_date)
-        entries.mapped('task_id').fetch()
 
         date = lambda dt_str: dateutil.parser.parse(dt_str).astimezone(pytz.utc).replace(tzinfo=None)
 
