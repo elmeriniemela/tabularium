@@ -46,7 +46,7 @@ class TogglImport(models.TransientModel):
             if toggl_id in existing:
                 existing[toggl_id].write(vals)
             else:
-                existing[toggl_id] = Entry.with_context(default_toggl_id=toggl_id).create(vals)
+                existing[toggl_id] = Entry.with_context(default_toggl_id=toggl_id, default_description=entry['description']).create(vals)
 
             Entry += existing[toggl_id]
 
