@@ -197,7 +197,7 @@ class TogglEntry(models.Model):
         for record in self:
             values = {
                 'date': record.date,
-                'name': ', '.join({e.description for e in (record | record.child_ids) if e.description} or '/'),
+                'name': ', '.join({e.description for e in (record | record.child_ids) if e.description and e.description != e.name} or '/'),
                 'task_id': record.task_id.task_id,
                 'project_id': record.task_id.project_id,
                 'unit_amount': record.rounded_duration,
