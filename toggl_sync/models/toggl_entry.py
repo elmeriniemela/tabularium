@@ -253,7 +253,7 @@ class TogglEntry(models.Model):
 
     @api.depends('date', 'task_id', 'name')
     def _compute_parent_id(self):
-        for record in self:
+        for record in self.sorted(key=lambda r: r.id, reverse=True): # id desc
             if record.child_ids:
                 record.parent_id = False
                 continue
@@ -265,7 +265,7 @@ class TogglEntry(models.Model):
                 '|',
                 ('task_id', '=', record.task_id.id),
                 ('name', '=', record.name),
-            ], limit=1)
+            ], limit=1, order='id asc')
 
 
     @api.depends('name', 'toggl_name')
