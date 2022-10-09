@@ -3,10 +3,13 @@
         <field name="name">investment.milestone.tree</field>
         <field name="model">investment.milestone</field>
         <field name="arch" type="xml">
-            <tree>
+            <tree decoration-info="state == 'ahead'" decoration-muted="state == 'behind'" decoration-danger="state == 'missed'" decoration-success="state == 'reached'">
                 <field name="name"/>
                 <field name="date"/>
                 <field name="position"/>
+                <field name="inflation_rate" widget="percentage"/>
+                <field name="real_position"/>
+                <field name="state"/>
                 <field name="company_id"/>
             </tree>
         </field>
@@ -26,10 +29,14 @@
                     <group>
                         <field name="date"/>
                         <field name="position"/>
+                        <field name="inflation_rate" widget="percentage"/>
+                        <field name="real_position"/>
                         <field name="company_id"/>
                         <field name="company_currency_id" invisible="1"/>
                         <field name="domain" widget="domain" options="{'model': 'investment.asset'}"/>
+                        <field name="state"/>
                     </group>
+                    <field name="timeseries_ids"/>
                 </sheet>
             </form>
         </field>

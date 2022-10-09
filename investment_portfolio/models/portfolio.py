@@ -365,11 +365,49 @@ class InvestmentMilestone(models.Model):
 
     position = fields.Monetary(required=True, currency_field='company_currency_id')
 
+    inflation_rate = fields.Float(default=0.07)
+
+    real_position = fields.Monetary(compute='_compute_real_position', currency_field='company_currency_id')
+
     company_id = fields.Many2one(comodel_name='res.company', required=True, default=lambda self: self.env.company)
 
     company_currency_id = fields.Many2one(related='company_id.currency_id', string="Company Currency")
 
+    state = fields.Selection(
+        selection=[
+            ('ahead', 'Ahead'),
+            ('behind', 'Behind'),
+            ('missed', 'Missed'),
+            ('reached', 'Reached'),
+        ],
+        compute='_compute_state',
+    )
 
+    timeseries_ids = fields.Many2many(
+        comodel_name='investment.timeseries',
+        compute='_compute_state',
+    )
+
+    @api.depends('position', 'date')
+    def _compute_state(self):
+        today = fields.Date.today()
+        for record in self:
+            domain = safe_eval(record.domain)
+            record.timeseries_ids = record.env['investment.timeseries'].search(domain+[('date', '=', record.date)])
+            if sum(record.timeseries_ids.mapped('position')) < record.position:
+                record.state = 'behind' if (record.date or today) > today else 'missed'
+            else:
+                record.state = 'ahead' if (record.date or today) > today else 'reached'
+
+
+    @api.depends('position', 'inflation_rate', 'date')
+    def _compute_real_position(self):
+        reference = self.search([], limit=1)
+        for record in self:
+            if record.date:
+                record.real_position = record.position * (1 - record.inflation_rate)**((record.date-reference.date).days/365)
+            else:
+                record.real_position = record.position
 
 
 
@@ -422,7 +460,7 @@ class InvestmentAssetExpectation(models.Model):
 
     yearly_return = fields.Float(group_operator='avg')
 
-    savings = fields.Monetary()
+    savings = fields.Monetary(string="Monthly savings")
 
     year = fields.Integer()
 
