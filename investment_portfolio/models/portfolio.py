@@ -363,7 +363,7 @@ class InvestmentMilestone(models.Model):
 
     domain = fields.Text(default="[('liquid', '=', True)]", required=True)
 
-    position = fields.Monetary(required=True, currency_field='company_currency_id')
+    position = fields.Monetary(string="Target Position", required=True, currency_field='company_currency_id')
 
     inflation_rate = fields.Float(default=0.07)
 
@@ -383,6 +383,17 @@ class InvestmentMilestone(models.Model):
         compute='_compute_state',
     )
 
+    predicted_position = fields.Monetary(
+        string="Predicted/Actual Position",
+        compute='_compute_state',
+        currency_field='company_currency_id',
+    )
+
+    difference = fields.Monetary(
+        compute='_compute_state',
+        currency_field='company_currency_id',
+    )
+
     timeseries_ids = fields.Many2many(
         comodel_name='investment.timeseries',
         compute='_compute_state',
@@ -394,7 +405,9 @@ class InvestmentMilestone(models.Model):
         for record in self:
             domain = safe_eval(record.domain)
             record.timeseries_ids = record.env['investment.timeseries'].search(domain+[('date', '=', record.date)])
-            if sum(record.timeseries_ids.mapped('position')) < record.position:
+            record.predicted_position = sum(record.timeseries_ids.mapped('position'))
+            record.difference = record.predicted_position - record.position
+            if record.difference < 0:
                 record.state = 'behind' if (record.date or today) > today else 'missed'
             else:
                 record.state = 'ahead' if (record.date or today) > today else 'reached'
