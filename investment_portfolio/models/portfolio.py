@@ -345,7 +345,8 @@ class InvestmentTimeseries(models.Model):
                     date += datetime.timedelta(days=1)
 
             yesterday = datetime.date.today() - relativedelta(days=1)
-            recompute += existing[(asset_id.id, yesterday)]
+            if first.time.date() <= yesterday:
+                recompute += existing[(asset_id.id, yesterday)]
 
         recompute._compute_aggregate()
 
@@ -398,6 +399,17 @@ class InvestmentMilestone(models.Model):
         comodel_name='investment.timeseries',
         compute='_compute_state',
     )
+
+    def copy(self, default=None):
+        default = default or {
+            'date': self.date+relativedelta(years=1),
+            'name': self.name + ' (copy)',
+        }
+        return super().copy(default)
+
+    def copy_button(self):
+        self.ensure_one()
+        self.copy()
 
     @api.depends('position', 'date')
     def _compute_state(self):
