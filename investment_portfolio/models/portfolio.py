@@ -355,22 +355,23 @@ class InvestmentTimeseries(models.Model):
 
 class InvestmentMilestone(models.Model):
     _name = 'investment.milestone'
+    _inherit = ['mail.thread']
     _description = 'Investment Milestone'
     _order = 'date asc'
 
     name = fields.Char(required=True)
 
-    date = fields.Date(required=True)
+    date = fields.Date(required=True, tracking=True)
 
-    domain = fields.Text(default="[('liquid', '=', True)]", required=True)
+    domain = fields.Text(default="[('liquid', '=', True)]", required=True, tracking=True)
 
-    position = fields.Monetary(string="Target Position", required=True, currency_field='company_currency_id')
+    position = fields.Monetary(string="Target Position", required=True, currency_field='company_currency_id', tracking=True)
 
-    inflation_rate = fields.Float(default=0.07)
+    inflation_rate = fields.Float(default=0.07, tracking=True)
 
     real_position = fields.Monetary(compute='_compute_real_position', currency_field='company_currency_id')
 
-    company_id = fields.Many2one(comodel_name='res.company', required=True, default=lambda self: self.env.company)
+    company_id = fields.Many2one(comodel_name='res.company', required=True, default=lambda self: self.env.company, tracking=True)
 
     company_currency_id = fields.Many2one(related='company_id.currency_id', string="Company Currency")
 
