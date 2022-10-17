@@ -7,6 +7,7 @@ from odoo.osv import expression
 import traceback, logging
 from dateutil.relativedelta import relativedelta
 import random
+import pytz
 
 from odoo.tools.safe_eval import safe_eval, test_python_expr, wrap_module, datetime, dateutil
 
@@ -732,6 +733,7 @@ class InvestmentAsset(models.Model):
         "Used by investment integrations."
         self.ensure_one()
         Price = self.env['investment.asset.price']
+        time = time.astimezone(pytz.utc).replace(tzinfo=None)
         price_id = Price.search([
             ('asset_id', '=', self.id),
             ('time', '=', time),
