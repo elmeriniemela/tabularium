@@ -351,8 +351,6 @@ class InvestmentTimeseries(models.Model):
         recompute._compute_aggregate()
 
 
-
-
 class InvestmentMilestone(models.Model):
     _name = 'investment.milestone'
     _inherit = ['mail.thread']
@@ -434,7 +432,6 @@ class InvestmentMilestone(models.Model):
                 record.real_position = record.position * (1 - record.inflation_rate)**((record.date-reference.date).days/365)
             else:
                 record.real_position = record.position
-
 
 
 class InvestmentCategory(models.Model):
@@ -731,8 +728,23 @@ class InvestmentAsset(models.Model):
             else:
                 asset.integration_error_id.unlink()
 
-
-
+    def price_upsert(self, time, price):
+        "Used by investment integrations."
+        self.ensure_one()
+        Price = self.env['investment.asset.price']
+        price_id = Price.search([
+            ('asset_id', '=', self.id),
+            ('time', '=', time),
+        ], limit=1)
+        if price_id:
+            price_id.price = price
+        else:
+            price_id = Price.create({
+                'asset_id': self.id,
+                'time': time,
+                'price': price,
+            })
+        return price_id
 
 
 class InvestmentAssetPrice(models.Model):
@@ -762,7 +774,6 @@ class InvestmentAssetPrice(models.Model):
     _sql_constraints = [
         ('unique_price', 'unique(asset_id, time)', 'Price for this time is already configured!'),
     ]
-
 
 
 class InvestmentAssetPrice(models.Model):
