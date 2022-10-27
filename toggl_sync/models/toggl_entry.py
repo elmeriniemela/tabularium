@@ -161,7 +161,7 @@ class TogglEntry(models.Model):
                 record.export_id = False
                 record.flush(['export_id'])
                 record.parent_id.export_id = export_id
-                record.parent_id.export_id.flush(['export_id'])
+                record.parent_id.flush(['export_id'])
 
     @api.depends('task_id.task_id')
     def _compute_export_task_url(self):
