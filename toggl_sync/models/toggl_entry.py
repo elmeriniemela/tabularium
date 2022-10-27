@@ -156,7 +156,7 @@ class TogglEntry(models.Model):
     def _inverse_export_id(self):
         for record in self:
             export_id = record.export_id
-            if record.parent_id:
+            if export_id and record.parent_id and not record.parent_id.export_id:
                 # Move to parent
                 record.export_id = False
                 record.parent_id.export_id = export_id
