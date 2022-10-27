@@ -244,7 +244,7 @@ class TogglEntry(models.Model):
         self._compute_total_duration() # needs parent_id
         self._compute_rounded_duration() # needs total_duration
         self._compute_dirty()
-        (self | self.child_ids).filtered(lambda e: e.export_id)._inverse_export_id()
+        # (self | self.child_ids).filtered(lambda e: e.export_id)._inverse_export_id()
 
 
     @api.depends('name')
