@@ -150,6 +150,7 @@ class TogglEntry(models.Model):
 
     _sql_constraints = [
         ('export_id_uniq', 'unique(export_id)', 'The export_id must be unique!'),
+        ('export_id_non_zero', 'CHECK(export_id <> 0)', 'The export_id can not be zero!'),
         ('toggl_id_uniq', 'unique(toggl_id)', 'The toggl_id must be unique!'),
     ]
 
