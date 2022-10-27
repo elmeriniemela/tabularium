@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoo import models, fields, api, _
+from odoo import models, tools, fields, api, _
 import re
 from odoo.exceptions import UserError
 import logging
@@ -120,7 +120,10 @@ class TogglEntry(models.Model):
 
     toggl_id = BigInteger(string="Toggl ID", required=True, readonly=True)
 
-    export_id = fields.Integer(string="Export ID", readonly=True)
+    export_id = fields.Integer(
+        string="Export ID", readonly=True,
+        inverse='_inverse_export_id',
+    )
 
     task_id = fields.Many2one(
         comodel_name='toggl.task',
@@ -149,6 +152,14 @@ class TogglEntry(models.Model):
         ('export_id_uniq', 'unique(export_id)', 'The export_id must be unique!'),
         ('toggl_id_uniq', 'unique(toggl_id)', 'The toggl_id must be unique!'),
     ]
+
+    def _inverse_export_id(self):
+        for record in self:
+            export_id = record.export_id
+            if record.parent_id:
+                # Move to parent
+                record.export_id = False
+                record.parent_id.export_id = export_id
 
     @api.depends('task_id.task_id')
     def _compute_export_task_url(self):
@@ -234,6 +245,7 @@ class TogglEntry(models.Model):
         self._compute_total_duration() # needs parent_id
         self._compute_rounded_duration() # needs total_duration
         self._compute_dirty()
+        (self | self.child_ids).filtered(lambda e: e.export_id)._inverse_export_id()
 
 
     @api.depends('name')
@@ -253,19 +265,11 @@ class TogglEntry(models.Model):
 
     @api.depends('date', 'task_id', 'name')
     def _compute_parent_id(self):
-        for record in self.sorted(key=lambda r: r.id, reverse=True): # id desc
-            if record.child_ids:
-                record.parent_id = False
-                continue
-
-            record.parent_id = record.search([
-                ('parent_id', '=', False),
-                ('date', '=', record.date),
-                ('id', '!=', record._origin.id),
-                '|',
-                ('task_id', '=', record.task_id.id),
-                ('name', '=', record.name),
-            ], limit=1, order='id asc')
+        records_and_children = self | self.search([('date', 'in', self.mapped('date'))])
+        for key, same_tasks in tools.groupby(records_and_children, lambda e: (e['task_id'] or e['name'], e['date'])):
+            parent = same_tasks[0]
+            for entry in same_tasks[1:]:
+                entry.parent_id = parent
 
 
     @api.depends('name', 'toggl_name')

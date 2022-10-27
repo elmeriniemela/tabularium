@@ -75,16 +75,6 @@
                             <field name="monthly_price" widget="percentage" options="{'is_profit': 1}"/>
                             <field name="weekly_price" widget="percentage" options="{'is_profit': 1}"/>
                             <field name="daily_price" widget="percentage" options="{'is_profit': 1}"/>
-                            <label for="color"/>
-                            <div>
-                                <field name="color" widget="colorpicker"/>
-                                <button name="random_color"
-                                        string="Random"
-                                        class="oe_link"
-                                        icon="fa-long-arrow-right"
-                                        type="object"
-                                        />
-                            </div>
                         </group>
                         <group>
                             <field name="quantity"/>
@@ -152,15 +142,6 @@
         <field name="state">code</field>
         <field name="code">records._compute_aggregate()</field>
     </record>
-
-    <record id="action_random_color" model="ir.actions.server">
-        <field name="name">Random Color</field>
-        <field name="model_id" ref="model_investment_asset"/>
-        <field name="binding_model_id" ref="model_investment_asset"/>
-        <field name="state">code</field>
-        <field name="code">records.random_color()</field>
-    </record>
-
 
     <record model="ir.actions.act_window" id="action_current_positions">
         <field name="name">Current positions</field>
