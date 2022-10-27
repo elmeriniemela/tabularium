@@ -159,10 +159,9 @@ class TogglEntry(models.Model):
             export_id = record.export_id or False
             if export_id and record.parent_id and not record.parent_id.export_id:
                 # Move to parent
-                record.export_id = False
-                record.flush(['export_id'])
-                record.parent_id.export_id = export_id
-                record.parent_id.flush(['export_id'])
+                (record | record.parent_id).flush()
+                record.env.cr.execute(f"UPDATE {record._table} SET export_id=NULL WHERE id={record.id}")
+                record.env.cr.execute(f"UPDATE {record._table} SET export_id={export_id} WHERE id={record.parent_id.id}")
 
     @api.depends('task_id.task_id')
     def _compute_export_task_url(self):
