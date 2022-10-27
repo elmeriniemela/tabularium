@@ -267,6 +267,7 @@ class TogglEntry(models.Model):
         records_and_children = self | self.search([('date', 'in', self.mapped('date'))])
         for key, same_tasks in tools.groupby(records_and_children, lambda e: (e['task_id'] or e['name'], e['date'])):
             parent = same_tasks[0]
+            parent.parent_id = False
             for entry in same_tasks[1:]:
                 entry.parent_id = parent
 
