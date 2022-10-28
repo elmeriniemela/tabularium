@@ -267,7 +267,7 @@ class TogglEntry(models.Model):
 
     @api.depends('date', 'task_id', 'name')
     def _compute_parent_id(self):
-        records_and_children = self | self.search([('date', 'in', self.mapped('date'))])
+        records_and_children = self | self.search([('date', 'in', self.mapped('date'))]).sorted('id')
         for key, same_tasks in tools.groupby(records_and_children, lambda e: (e['task_id'] or e['name'], e['date'])):
             parent = same_tasks[0]
             parent.parent_id = False
