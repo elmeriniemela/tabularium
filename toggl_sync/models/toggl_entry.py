@@ -90,7 +90,7 @@ class BigInteger(fields.Integer):
 class TogglEntry(models.Model):
     _name = 'toggl.entry'
     _description = 'Toggl Entry'
-    _order = 'start desc'
+    _order = 'start desc, id asc'
     _inherit = ['mail.thread']
 
     name = fields.Char(required=True)
@@ -103,13 +103,13 @@ class TogglEntry(models.Model):
 
     description = fields.Char(tracking=True)
 
-    rounded_duration = fields.Float(compute='_compute_rounded_duration', store=True)
+    rounded_duration = fields.Float(compute='_compute_toggl_fields', store=True)
 
     dirty = fields.Boolean(compute='_compute_dirty')
 
-    date = fields.Date(compute='_compute_date', store=True)
+    date = fields.Date(compute='_compute_toggl_fields', store=True)
 
-    total_duration = fields.Float(compute='_compute_total_duration', store=True, recursive=True)
+    total_duration = fields.Float(compute='_compute_toggl_fields', store=True, recursive=True)
 
     extra_duration = fields.Float(tracking=True)
     duration = fields.Float(required=True, readonly=True)
@@ -127,7 +127,7 @@ class TogglEntry(models.Model):
 
     task_id = fields.Many2one(
         comodel_name='toggl.task',
-        compute='_compute_task_id',
+        compute='_compute_toggl_fields',
         store=True,
         readonly=True,
     )
@@ -136,7 +136,7 @@ class TogglEntry(models.Model):
 
     parent_id = fields.Many2one(
         comodel_name='toggl.entry',
-        compute='_compute_parent_id',
+        compute='_compute_toggl_fields',
         store=True,
         readonly=True,
     )
@@ -227,33 +227,19 @@ class TogglEntry(models.Model):
             record.env.cr.commit() # we need to commit, since the export is committed in the target system.
 
 
-    @api.depends('total_duration', 'extra_duration')
-    def _compute_rounded_duration(self):
-        for record in self:
-            # Round to nearest 15min.
-            record.rounded_duration = roundto(record.total_duration + record.extra_duration or 0.0, base=0.25)
-
-
-    @api.depends('duration', 'child_ids.duration', 'child_ids.total_duration')
-    def _compute_total_duration(self):
-        for record in self:
-            record.total_duration = record.duration + sum(record.child_ids.mapped('total_duration'))
-
 
     def recompute_depends(self):
-        self._compute_task_id()
-        self._compute_date()
-        self._compute_parent_id() # needs task_id, date,
-        self._compute_total_duration() # needs parent_id
-        self._compute_rounded_duration() # needs total_duration
+        self._compute_toggl_fields()
         self._compute_dirty()
         (self | self.child_ids).filtered(lambda e: e.export_id)._inverse_export_id()
 
 
-    @api.depends('name')
-    def _compute_task_id(self):
+    @api.depends('name', 'start', 'toggl_name', 'duration', 'duration', 'extra_duration')
+    def _compute_toggl_fields(self):
         Task = self.env['toggl.task']
-        for record in self:
+        daily_entries = (self | self.search([('date', 'in', [False]+self.mapped('date'))])).sorted('id')
+
+        for record in daily_entries:
             ids = [int(m) for m in re.findall('\[(\d+)\]', record.name or '')]
             if ids:
                 [task_id] = ids
@@ -265,25 +251,30 @@ class TogglEntry(models.Model):
             else:
                 record.task_id = False
 
-    @api.depends('date', 'task_id', 'name')
-    def _compute_parent_id(self):
-        records_and_children = (self | self.search([('date', 'in', self.mapped('date'))])).sorted('id')
-        for key, same_tasks in tools.groupby(records_and_children, lambda e: (e['task_id'] or e['name'], e['date'])):
+            record.date = record.start.date()
+
+
+        for key, same_tasks in tools.groupby(daily_entries, lambda e: (e['task_id'] or e['name'], e['date'])):
             parent = same_tasks[0]
             parent.parent_id = False
-            for entry in same_tasks[1:]:
-                entry.parent_id = parent
+
+            total_duration = parent.duration
+            extra_duration = parent.extra_duration
+            for child in same_tasks[1:]:
+                child.parent_id = parent
+                child.total_duration = child.duration
+                child.rounded_duration = roundto(child.duration or 0.0, base=0.25)
+                total_duration += child.duration
+                extra_duration += child.extra_duration
+
+            parent.total_duration = total_duration + extra_duration
+            parent.rounded_duration = roundto(parent.total_duration or 0.0, base=0.25)
 
 
     @api.depends('name', 'toggl_name')
     def _compute_dirty(self):
         for record in self:
             record.dirty = record.name != record.toggl_name
-
-    @api.depends('start')
-    def _compute_date(self):
-        for record in self:
-            record.date = record.start.date()
 
     def push_toggl(self):
         for record in self:
