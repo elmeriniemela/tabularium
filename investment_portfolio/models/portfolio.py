@@ -857,7 +857,7 @@ class InvestmentAssetPrice(models.Model):
 
 
 
-    @api.depends('cash_flow', 'quantity')
+    @api.depends('cash_flow', 'quantity', 'asset_id.last_price')
     def _compute_profit(self):
         for tx in self:
             quantity = tx.quantity

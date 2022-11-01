@@ -237,7 +237,7 @@ class TogglEntry(models.Model):
     @api.depends('name', 'start', 'toggl_name', 'duration', 'duration', 'extra_duration')
     def _compute_toggl_fields(self):
         Task = self.env['toggl.task']
-        daily_entries = (self | self.search([('date', 'in', [False]+self.mapped('date'))])).sorted('id')
+        daily_entries = (self._origin | self.search([('date', 'in', [False]+self.mapped('date'))])).sorted('id')
 
         for record in daily_entries:
             ids = [int(m) for m in re.findall('\[(\d+)\]', record.name or '')]
