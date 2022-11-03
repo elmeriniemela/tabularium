@@ -42,22 +42,25 @@
                         </h1>
                     </div>
                     <group>
-                        <field name="description"/>
-                        <field name="active"/>
-                        <field name="invoicable"/>
-                        <field name="extra_duration" widget="float_time"/>
-                        <field name="duration" widget="float_time"/>
-                        <field name="rounded_duration" widget="float_time"/>
-                        <field name="total_duration" widget="float_time"/>
-                        <field name="date"/>
-                        <field name="start"/>
-                        <field name="stop"/>
-                        <field name="dirty"/>
-                        <field name="toggl_id"/>
-                        <field name="export_id"/>
-                        <field name="export_task_url" widget="url"/>
-                        <field name="task_id"/>
-                        <field name="parent_id"/>
+                        <group>
+                            <field name="description"/>
+                            <field name="active"/>
+                            <field name="invoicable"/>
+                            <field name="dirty"/>
+                            <field name="toggl_id"/>
+                            <field name="export_id"/>
+                            <field name="task_id"/>
+                            <field name="parent_id" attrs="{'invisible': [('parent_id', '=', False)]}"/>
+                        </group>
+                        <group>
+                            <field name="date"/>
+                            <field name="time_period"/>
+                            <field name="duration" widget="float_time"/>
+                            <field name="extra_duration" widget="float_time"/>
+                            <field name="rounded_duration" widget="float_time"/>
+                            <field name="total_duration" widget="float_time"/>
+                            <field name="export_task_url" widget="url"/>
+                        </group>
                     </group>
                     <field name="child_ids"/>
                 </sheet>

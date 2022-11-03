@@ -147,6 +147,7 @@ class TogglEntry(models.Model):
         readonly=True,
     )
 
+    time_period = fields.Char(compute='_compute_time_period')
 
     _sql_constraints = [
         ('export_id_uniq', 'unique(export_id)', 'The export_id must be unique!'),
@@ -169,6 +170,10 @@ class TogglEntry(models.Model):
         for record in self:
             record.export_task_url = '%sweb#id=%d&view_type=form&model=project.task' % (url, record.task_id.task_id or 0)
 
+    def _compute_time_period(self):
+        time_str = lambda dt: fields.Datetime.context_timestamp(self, dt).strftime('%H:%M:%S')
+        for record in self:
+            record.time_period = f"{time_str(record.start)} - {time_str(record.stop)}"
 
     def write(self, vals):
         res = super().write(vals)

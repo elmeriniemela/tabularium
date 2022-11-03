@@ -27,8 +27,8 @@
                         <field name="invoicable"/>
                         <field name="project_name"/>
                         <field name="project_id"/>
-                        <field name="entry_ids"/>
                     </group>
+                    <field name="entry_ids"/>
                 </sheet>
             </form>
         </field>
