@@ -556,6 +556,8 @@ class InvestmentAsset(models.Model):
     monthly_price = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg')
     ytd_price = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg')
 
+    thesis = fields.Html(sanitize=False, translate=False)
+
     integration_id = fields.Many2one(comodel_name='investment.integration')
 
     integration_error_id = fields.Many2one(
