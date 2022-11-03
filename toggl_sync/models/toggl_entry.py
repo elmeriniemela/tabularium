@@ -198,6 +198,10 @@ class TogglEntry(models.Model):
         self.ensure_one()
         self.extra_duration = 7.5/60
 
+    def action_reset_rounding(self):
+        self.ensure_one()
+        self.extra_duration = 0
+
     def action_round_down(self):
         self.ensure_one()
         self.extra_duration = -7.5/60
