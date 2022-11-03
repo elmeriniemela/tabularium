@@ -90,7 +90,7 @@ class BigInteger(fields.Integer):
 class TogglEntry(models.Model):
     _name = 'toggl.entry'
     _description = 'Toggl Entry'
-    _order = 'start desc, id asc'
+    _order = 'date desc, id asc'
     _inherit = ['mail.thread']
 
     name = fields.Char(required=True)

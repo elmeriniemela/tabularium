@@ -3,7 +3,7 @@
         <field name="name">toggl.entry.list</field>
         <field name="model">toggl.entry</field>
         <field name="arch" type="xml">
-            <tree default_order="date desc" editable="top" multi_edit="1" decoration-info="not description" decoration-muted="not active" decoration-success="invoicable" decoration-warning="dirty" decoration-danger="rounded_duration &lt; total_duration">
+            <tree default_order="date desc, id asc" editable="top" multi_edit="1" decoration-info="not description" decoration-muted="not active" decoration-success="invoicable" decoration-warning="dirty" decoration-danger="rounded_duration &lt; total_duration">
                 <field name="description" width="450px"/>
                 <field name="name" width="400px"/>
                 <field name="invoicable"/>
