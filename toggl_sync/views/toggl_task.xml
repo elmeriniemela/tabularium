@@ -5,7 +5,7 @@
         <field name="arch" type="xml">
             <tree>
                 <field name="name"/>
-                <field name="invoicable"/>
+                <field name="project_name"/>
             </tree>
         </field>
     </record>
@@ -16,6 +16,7 @@
         <field name="arch" type="xml">
             <form string="odoo Data ">
                 <header>
+                    <button name="fetch" string="Fetch" type="object"/>
                 </header>
                 <sheet>
                     <div class="oe_left" style="width: 500px;">
@@ -24,9 +25,12 @@
                         </h1>
                     </div>
                     <group>
-                        <field name="invoicable"/>
-                        <field name="project_name"/>
-                        <field name="project_id"/>
+                        <group>
+                            <field name="project_name"/>
+                        </group>
+                        <group>
+                            <field name="project_id"/>
+                        </group>
                     </group>
                     <field name="entry_ids"/>
                 </sheet>
@@ -55,9 +59,7 @@
         <field name="binding_model_id" ref="model_toggl_task"/>
         <field name="binding_view_types">list</field>
         <field name="state">code</field>
-        <field name="code">
-records.fetch()
-        </field>
+        <field name="code">records.fetch()</field>
     </record>
 
     <menuitem name="Tasks" parent="menu_root" id="menu_tasks" action="task_action" sequence="3"/>

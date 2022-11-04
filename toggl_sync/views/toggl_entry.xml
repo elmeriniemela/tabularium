@@ -3,13 +3,14 @@
         <field name="name">toggl.entry.list</field>
         <field name="model">toggl.entry</field>
         <field name="arch" type="xml">
-            <tree default_order="date desc, id asc" editable="top" multi_edit="1" decoration-info="not description" decoration-muted="not active" decoration-success="invoicable" decoration-warning="dirty" decoration-danger="rounded_duration &lt; total_duration">
+            <tree default_order="date desc, id asc" editable="top" multi_edit="1" decoration-info="not description" decoration-muted="not active" decoration-warning="dirty" decoration-danger="rounded_duration &lt; total_duration">
                 <field name="description" width="450px"/>
                 <field name="name" width="400px"/>
-                <field name="invoicable"/>
                 <field name="rounded_duration" widget="float_time" sum="Rounded"/>
                 <field name="total_duration" widget="float_time" sum="Total"/>
                 <field name="date"/>
+                <field name="original_price" optional="hide"/>
+                <field name="timesheet_price" optional="hide"/>
                 <field name="dirty" optional="hide"/>
                 <field name="active" optional="hide"/>
                 <field name="task_id" optional="hide"/>
@@ -32,6 +33,7 @@
             <form string="odoo Data ">
                 <header>
                     <button name="recompute_depends" string="Re-compute" type="object"/>
+                    <button name="update_timesheet_price" string="Update Timesheet Price" type="object"/>
                     <button name="export" string="Export" type="object"/>
                     <button name="push_toggl" string="Push to Toggl" type="object"/>
                 </header>
@@ -45,7 +47,8 @@
                         <group>
                             <field name="description"/>
                             <field name="active"/>
-                            <field name="invoicable"/>
+                            <field name="original_price"/>
+                            <field name="timesheet_price"/>
                             <field name="dirty"/>
                             <field name="toggl_id"/>
                             <field name="export_id"/>
@@ -88,14 +91,19 @@
                 <filter string="Active" name="active" domain="[('active', '=', True)]" />
                 <filter string="Archived" name="not_active" domain="[('active', '=', False)]" />
                 <separator/>
+                <filter string="Today" name="not_today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]" />
                 <filter string="Before Today" name="not_today" domain="[('date', '&lt;', context_today().strftime('%Y-%m-%d'))]" />
                 <separator/>
-                <filter string="Not Exported" name="not_exported" domain="['|', ('export_id', '=', False), ('export_id', '=', 0)]" />
+                <filter string="Exported" name="exported" domain="[('export_id', '!=', False)]" />
+                <filter string="Not Exported" name="not_exported" domain="[('export_id', '=', False)]" />
                 <separator/>
-                <filter string="Hide Children" name="not_parent_id" domain="['|', ('parent_id', '=', False), ('parent_id', '=', 0)]" />
+                <filter string="Show Children" name="parent_id" domain="[('parent_id', '!=', False)]" />
+                <filter string="Hide Children" name="not_parent_id" domain="[('parent_id', '=', False)]" />
                 <separator/>
-                <filter string="Hide Zero" name="not_rounded_duration" domain="[('rounded_duration', '!=', False), ('rounded_duration', '!=', 0.0)]" />
+                <filter string="Zero" name="zero" domain="[('rounded_duration', '=', 0.0)]" />
+                <filter string="Hide Zero" name="not_zero" domain="[('rounded_duration', '!=', 0.0)]" />
                 <separator/>
+                <filter string="Description" name="not_description" domain="[('description', '!=', False)]" />
                 <filter string="No description" name="not_description" domain="[('description', '=', False)]" />
                 <separator/>
                 <group expand="1" string="Group by">
@@ -112,9 +120,7 @@
         <field name="binding_model_id" ref="model_toggl_entry"/>
         <field name="binding_view_types">list</field>
         <field name="state">code</field>
-        <field name="code">
-records.push_toggl()
-        </field>
+        <field name="code">records.push_toggl()</field>
     </record>
 
     <record id="export_action" model="ir.actions.server">
@@ -123,9 +129,16 @@ records.push_toggl()
         <field name="binding_model_id" ref="model_toggl_entry"/>
         <field name="binding_view_types">list</field>
         <field name="state">code</field>
-        <field name="code">
-records.export()
-        </field>
+        <field name="code">records.export()</field>
+    </record>
+
+    <record id="update_timesheet_price_action" model="ir.actions.server">
+        <field name="name">Update Timesheet Price</field>
+        <field name="model_id" ref="model_toggl_entry"/>
+        <field name="binding_model_id" ref="model_toggl_entry"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">records.update_timesheet_price()</field>
     </record>
 
     <record id="recompute_depends_action" model="ir.actions.server">
@@ -134,9 +147,7 @@ records.export()
         <field name="binding_model_id" ref="model_toggl_entry"/>
         <field name="binding_view_types">list</field>
         <field name="state">code</field>
-        <field name="code">
-records.recompute_depends()
-        </field>
+        <field name="code">records.recompute_depends()</field>
     </record>
 
 

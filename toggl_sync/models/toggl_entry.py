@@ -21,8 +21,9 @@ class TogglTask(models.Model):
 
     project_name = fields.Char(readonly=True)
     project_id = fields.Integer(readonly=True)
-
-    invoicable = fields.Boolean()
+    price = fields.Monetary(currency_field='company_currency_id')
+    company_id = fields.Many2one(comodel_name='res.company', required=True, default=lambda self: self.env.company, tracking=True)
+    company_currency_id = fields.Many2one(related='company_id.currency_id', string="Company Currency")
 
     entry_ids = fields.One2many(
         comodel_name='toggl.entry',
@@ -46,33 +47,10 @@ class TogglTask(models.Model):
         )
 
         project_map = {d['id']: d['project_id'] for d in task_res if d['project_id']}
-        sale_line_map = {d['id']: d['sale_line_id'][0] for d in task_res if d['sale_line_id']}
-
-        sale_line_res = server_models.execute_kw(dbname, uid, pwd,
-            'sale.order.line', 'search_read',
-            [[
-                ['id', 'in', list(sale_line_map.values())]
-            ]],
-            {'fields': ['price_unit', 'id']}
-        )
-
-        price_unit_map = {d['id']: d['price_unit'] for d in sale_line_res}
-
 
         for record in self:
             record.project_id, record.project_name = project_map.get(record.task_id, (False, False))
-            if price_unit_map.get(sale_line_map.get(record.task_id), 0.0) > 0.0:
-                record.invoicable = True
-            else:
-                record.invoicable = False
 
-
-    def write(self, vals):
-        "TODO: for some reason the depends does not work."
-        res = super().write(vals)
-        if 'invoicable' in vals:
-            self.mapped('entry_ids').recompute_depends()
-        return res
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -114,6 +92,12 @@ class TogglEntry(models.Model):
     extra_duration = fields.Float(tracking=True)
     duration = fields.Float(required=True, readonly=True)
 
+    original_price = fields.Monetary(currency_field='company_currency_id')
+    timesheet_price = fields.Monetary(currency_field='company_currency_id')
+    price_initialized = fields.Boolean()
+    company_id = fields.Many2one(comodel_name='res.company', required=True, default=lambda self: self.env.company, tracking=True)
+    company_currency_id = fields.Many2one(related='company_id.currency_id', string="Company Currency")
+
     start = fields.Datetime(required=True, readonly=True)
 
     stop = fields.Datetime(required=True, readonly=True)
@@ -131,8 +115,6 @@ class TogglEntry(models.Model):
         store=True,
         readonly=True,
     )
-
-    invoicable = fields.Boolean(related='task_id.invoicable', store=True)
 
     parent_id = fields.Many2one(
         comodel_name='toggl.entry',
@@ -230,10 +212,30 @@ class TogglEntry(models.Model):
             else:
                 method_args = 'account.analytic.line', 'create', [values]
 
+
             result = server_models.execute_kw(dbname, uid, pwd, *method_args)
             if not export_id:
                 record.export_id = result
             record.env.cr.commit() # we need to commit, since the export is committed in the target system.
+
+    def update_timesheet_price(self):
+        server_models, dbname, uid, pwd = self.env.user._get_toggl_export_proxy()
+
+        timesheet_res = server_models.execute_kw(dbname, uid, pwd,
+            'account.analytic.line', 'search_read',
+            [[
+                ['id', 'in', self.mapped('export_id')],
+            ]],
+            {'fields': ['invoice_estimate_unit_price', 'id']}
+        )
+        price_unit_map = {d['id']: d['invoice_estimate_unit_price'] for d in timesheet_res}
+
+        for record in self:
+            price = price_unit_map.get(record.export_id) or 0.0
+            record.timesheet_price = price
+            if not record.price_initialized:
+                record.original_price = price
+                record.price_initialized = True
 
 
 
