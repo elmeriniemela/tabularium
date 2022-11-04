@@ -12,6 +12,7 @@
                 <field name="original_price" optional="hide"/>
                 <field name="timesheet_price" optional="hide"/>
                 <field name="revenue" optional="show" sum="Total"/>
+                <field name="company_currency_id" optional="hide"/>
                 <field name="dirty" optional="hide"/>
                 <field name="active" optional="hide"/>
                 <field name="task_id" optional="hide"/>
@@ -44,6 +45,7 @@
                             <field name="name"/>
                         </h1>
                     </div>
+                    <field name="company_currency_id" invisible="1"/>
                     <group>
                         <group>
                             <field name="description"/>
