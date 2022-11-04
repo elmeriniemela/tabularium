@@ -11,6 +11,7 @@
                 <field name="date"/>
                 <field name="original_price" optional="hide"/>
                 <field name="timesheet_price" optional="hide"/>
+                <field name="revenue" optional="show" sum="Total"/>
                 <field name="dirty" optional="hide"/>
                 <field name="active" optional="hide"/>
                 <field name="task_id" optional="hide"/>

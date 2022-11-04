@@ -92,8 +92,12 @@ class TogglEntry(models.Model):
     extra_duration = fields.Float(tracking=True)
     duration = fields.Float(required=True, readonly=True)
 
-    original_price = fields.Monetary(currency_field='company_currency_id')
-    timesheet_price = fields.Monetary(currency_field='company_currency_id')
+    original_price = fields.Monetary(currency_field='company_currency_id', group_operator="avg")
+    timesheet_price = fields.Monetary(currency_field='company_currency_id', group_operator="avg")
+    revenue = fields.Monetary(
+        compute='_compute_revenue',
+        store=True,
+        currency_field='company_currency_id')
     price_initialized = fields.Boolean()
     company_id = fields.Many2one(comodel_name='res.company', required=True, default=lambda self: self.env.company, tracking=True)
     company_currency_id = fields.Many2one(related='company_id.currency_id', string="Company Currency")
@@ -281,6 +285,10 @@ class TogglEntry(models.Model):
             parent.total_duration = total_duration + extra_duration
             parent.rounded_duration = roundto(parent.total_duration or 0.0, base=0.25)
 
+    @api.depends('rounded_duration', 'timesheet_price')
+    def _compute_revenue(self):
+        for record in self:
+            record.revenue = record.rounded_duration * record.timesheet_price
 
     @api.depends('name', 'toggl_name')
     def _compute_dirty(self):
