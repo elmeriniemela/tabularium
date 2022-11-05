@@ -5,6 +5,14 @@ import requests
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 
+TOGGL_SELF = [
+    'toggl_api_token',
+    'toggl_export_url',
+    'toggl_export_dbname',
+    'toggl_export_username',
+    'toggl_export_pwd',
+]
+
 class ResUsers(models.Model):
     _inherit = 'res.users'
 
@@ -14,19 +22,14 @@ class ResUsers(models.Model):
     toggl_export_username = fields.Char()
     toggl_export_pwd = fields.Char()
 
+    @property
+    def SELF_READABLE_FIELDS(self):
+        return super().SELF_READABLE_FIELDS + list(TOGGL_SELF)
 
-    def __init__(self, pool, cr):
-        init_res = super(ResUsers, self).__init__(pool, cr)
-        toggl_fields = [
-            'toggl_api_token',
-            'toggl_export_url',
-            'toggl_export_dbname',
-            'toggl_export_username',
-            'toggl_export_pwd',
-        ]
-        type(self).SELF_WRITEABLE_FIELDS = list(set(toggl_fields + self.SELF_WRITEABLE_FIELDS))
-        type(self).SELF_READABLE_FIELDS = list(set(toggl_fields + self.SELF_READABLE_FIELDS))
-        return init_res
+    @property
+    def SELF_WRITEABLE_FIELDS(self):
+        return super().SELF_WRITEABLE_FIELDS + list(TOGGL_SELF)
+
 
     def _get_toggl_export_proxy(self):
         self.ensure_one()
