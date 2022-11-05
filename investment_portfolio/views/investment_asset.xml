@@ -59,7 +59,7 @@
                     <button name="run_integration" type="object" string="Run Integration"/>
                 </header>
                 <sheet>
-                    <div class="oe_left" style="width: 500px;">
+                    <div class="oe_title">
                         <h1>
                             <field name="name"/>
                         </h1>

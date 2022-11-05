@@ -40,7 +40,7 @@
                     <button name="push_toggl" string="Push to Toggl" type="object"/>
                 </header>
                 <sheet>
-                    <div class="oe_left" style="width: 500px;">
+                    <div class="oe_title">
                         <h1>
                             <field name="name"/>
                         </h1>
