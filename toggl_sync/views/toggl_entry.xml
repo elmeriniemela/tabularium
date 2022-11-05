@@ -168,7 +168,7 @@
     </record>
 
 
-    <menuitem name="Toggl Sync" id="menu_root" action="entry_action" web_icon="toggl_sync,static/description/icon.png"/>
+    <menuitem name="Toggl Sync" id="menu_root" action="entry_action" web_icon="toggl_sync,static/description/icon.png"  sequence="2"/>
     <menuitem name="Entries" parent="menu_root" id="menu_entries" action="entry_action" sequence="1"/>
     <menuitem name="Import Entries" parent="menu_root" id="menu_import" action="import_action" sequence="2"/>
 

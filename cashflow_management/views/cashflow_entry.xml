@@ -93,7 +93,7 @@
         <field name="context">{'search_default_group_account': 1,'search_default_group_date': 1,}</field>
     </record>
 
-    <menuitem name="Cash Flow Management" id="root_menu" web_icon="cashflow_management,static/description/icon.png"/>
+    <menuitem name="Cash Flow Management" id="root_menu" web_icon="cashflow_management,static/description/icon.png" sequence="3"/>
     <menuitem id="entry_menu" action="entry_action_window" parent="root_menu" sequence="1"/>
 
 </odoo>
