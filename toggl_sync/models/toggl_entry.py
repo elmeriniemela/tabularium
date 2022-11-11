@@ -4,6 +4,7 @@ from odoo import models, tools, fields, api, _
 import re
 from odoo.exceptions import UserError
 import logging
+from odoo.tools import float_is_zero, float_compare
 
 _logger = logging.getLogger(__name__)
 
@@ -133,6 +134,8 @@ class TogglEntry(models.Model):
         readonly=True,
     )
 
+    price_changed = fields.Boolean()
+
     time_period = fields.Char(compute='_compute_time_period')
 
     _sql_constraints = [
@@ -221,6 +224,8 @@ class TogglEntry(models.Model):
             if not export_id:
                 record.export_id = result
             record.env.cr.commit() # we need to commit, since the export is committed in the target system.
+        self.update_timesheet_price()
+
 
     def update_timesheet_price(self):
         server_models, dbname, uid, pwd = self.env.user._get_toggl_export_proxy()
@@ -240,6 +245,7 @@ class TogglEntry(models.Model):
             if not record.price_initialized:
                 record.original_price = price
                 record.price_initialized = True
+            record.price_changed = not float_is_zero(record.original_price - record.timesheet_price, precision_digits=2)
 
 
 
