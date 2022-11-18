@@ -227,6 +227,7 @@ class TogglEntry(models.Model):
                 record.export_id = result
             record.env.cr.commit() # we need to commit, since the export is committed in the target system.
         self.update_timesheet_price()
+        self.lock()
 
 
     def update_timesheet_price(self):
