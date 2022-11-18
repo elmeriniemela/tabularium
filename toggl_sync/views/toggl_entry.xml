@@ -19,6 +19,7 @@
                 <field name="toggl_id" optional="hide"/>
                 <field name="export_id" optional="hide"/>
                 <field name="parent_id" optional="hide"/>
+                <field name="locked" optional="hide"/>
                 <button icon="fa-arrow-up" name="action_round_up" type="object" attrs="{'invisible': [('parent_id', '!=', False)]}"/>
                 <button icon="fa-bullseye" name="action_reset_rounding" type="object" attrs="{'invisible': [('parent_id', '!=', False)]}"/>
                 <button icon="fa-arrow-down" name="action_round_down" type="object" attrs="{'invisible': [('parent_id', '!=', False)]}"/>
@@ -56,6 +57,7 @@
                             <field name="toggl_id"/>
                             <field name="export_id"/>
                             <field name="task_id"/>
+                            <field name="locked" attrs="{'invisible': [('locked', '=', False)]}"/>
                             <field name="parent_id" attrs="{'invisible': [('parent_id', '=', False)]}"/>
                         </group>
                         <group>
@@ -144,6 +146,24 @@
         <field name="binding_view_types">list</field>
         <field name="state">code</field>
         <field name="code">records.update_timesheet_price()</field>
+    </record>
+
+    <record id="lock_action" model="ir.actions.server">
+        <field name="name">Lock</field>
+        <field name="model_id" ref="model_toggl_entry"/>
+        <field name="binding_model_id" ref="model_toggl_entry"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">records.lock()</field>
+    </record>
+
+    <record id="unlock_action" model="ir.actions.server">
+        <field name="name">Unlock</field>
+        <field name="model_id" ref="model_toggl_entry"/>
+        <field name="binding_model_id" ref="model_toggl_entry"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">records.unlock()</field>
     </record>
 
     <record id="recompute_depends_action" model="ir.actions.server">

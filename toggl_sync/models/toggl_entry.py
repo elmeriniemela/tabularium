@@ -134,6 +134,8 @@ class TogglEntry(models.Model):
         readonly=True,
     )
 
+    locked = fields.Datetime()
+
     price_changed = fields.Boolean()
 
     time_period = fields.Char(compute='_compute_time_period')
@@ -254,11 +256,21 @@ class TogglEntry(models.Model):
         self._compute_dirty()
         (self | self.child_ids).filtered(lambda e: e.export_id)._inverse_export_id()
 
+    def lock(self):
+        for record in self:
+            (record | record.child_ids).locked = fields.Datetime.now()
+
+    def unlock(self):
+        for record in self:
+            (record | record.child_ids).locked = False
+
 
     @api.depends('name', 'start', 'toggl_name', 'duration', 'duration', 'extra_duration')
     def _compute_toggl_fields(self):
         Task = self.env['toggl.task']
         daily_entries = (self._origin | self.search([('date', 'in', [False]+self.mapped('date'))])).sorted('id')
+        daily_entries = daily_entries.filtered(lambda e: not e.locked)
+
 
         for record in daily_entries:
             ids = [int(m) for m in re.findall('\[(\d+)\]', record.name or '')]
@@ -275,7 +287,7 @@ class TogglEntry(models.Model):
             record.date = record.start.date()
 
 
-        for key, same_tasks in tools.groupby(daily_entries, lambda e: (e['task_id'] or e['name'], e['date'])):
+        for key, same_tasks in tools.groupby(daily_entries, lambda e: (e['name'], e['date'])):
             parent = same_tasks[0]
             parent.parent_id = False
 
