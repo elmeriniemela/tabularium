@@ -22,6 +22,7 @@
         'views/investment_milestone.xml',
         'views/investment_integration.xml',
         'views/investment_asset_price.xml',
+        'views/investment_asset_realized.xml',
         'views/investment_asset_expectation.xml',
         'views/investment_asset_transaction.xml',
         'views/menuitems.xml',

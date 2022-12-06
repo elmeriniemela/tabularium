@@ -1,0 +1,84 @@
+<odoo>
+    <record model="ir.ui.view" id="asset_realized_tree">
+        <field name="name">investment.asset.realized.tree</field>
+        <field name="model">investment.asset.realized</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="asset_id" optional="hide"/>
+                <field name="currency_id" optional="hide"/>
+                <field name="quantity" sum="Total Volume"/>
+                <field name="profit" sum="Total Profit"/>
+                <field name="sell_batch_id" optional="hide"/>
+                <field name="sell_date"/>
+                <field name="sell_price"/>
+                <field name="sell_fee"/>
+                <field name="buy_batch_id" optional="hide"/>
+                <field name="buy_date"/>
+                <field name="buy_price"/>
+                <field name="buy_fee"/>
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="asset_realized_form">
+        <field name="name">investment.asset.realized.form</field>
+        <field name="model">investment.asset.realized</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="quantity"/>
+                            <field name="profit"/>
+                            <field name="sell_batch_id"/>
+                            <field name="sell_date"/>
+                            <field name="sell_price"/>
+                            <field name="sell_fee"/>
+                        </group>
+                        <group>
+                            <field name="asset_id"/>
+                            <field name="currency_id"/>
+                            <field name="buy_batch_id"/>
+                            <field name="buy_date"/>
+                            <field name="buy_price"/>
+                            <field name="buy_fee"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="asset_realized_search" model="ir.ui.view">
+        <field name="name">investment.asset.realized.search</field>
+        <field name="model">investment.asset.realized</field>
+        <field name="arch" type="xml">
+            <search>
+                <filter name="sell_date" date="sell_date"/>
+                <group expand="1" string="Group by">
+                    <filter string="Sell Date" name="group_sell_date" context="{'group_by': 'sell_date'}"/>
+                    <filter string="Asset" name="group_asset_id" context="{'group_by': 'asset_id'}"/>
+                    <filter string="Category" name="group_category_id" context="{'group_by': 'category_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="asset_realized_graph">
+        <field name="name">investment.asset.realized.graph</field>
+        <field name="model">investment.asset.realized</field>
+        <field name="arch" type="xml">
+            <graph type="line">
+                <field name="profit" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+
+    <record model="ir.actions.act_window" id="action_realized">
+        <field name="name">Assets Realized</field>
+        <field name="res_model">investment.asset.realized</field>
+        <field name="view_mode">tree,graph,form</field>
+    </record>
+
+</odoo>

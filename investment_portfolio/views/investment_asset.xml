@@ -95,6 +95,9 @@
                         <page string="Transactions">
                             <field name="transaction_ids" context="{'default_asset_id': id}"/>
                         </page>
+                        <page string="Realized Gains/Losses">
+                            <field name="realized_ids" context="{'default_asset_id': id}"/>
+                        </page>
                         <page string="Prices">
                             <field name="price_ids" context="{'default_asset_id': id}"/>
                         </page>
@@ -138,13 +141,22 @@
         </field>
     </record>
 
-    <record id="action_compute_aggregate" model="ir.actions.server">
+    <record id="action_compute_aggregate_asset" model="ir.actions.server">
         <field name="name">Re-compute Value</field>
         <field name="model_id" ref="model_investment_asset"/>
         <field name="binding_model_id" ref="model_investment_asset"/>
         <field name="state">code</field>
         <field name="code">records._compute_aggregate()</field>
     </record>
+
+    <record id="action_update_realized_asset" model="ir.actions.server">
+        <field name="name">Update Realized Gains/Losses</field>
+        <field name="model_id" ref="model_investment_asset"/>
+        <field name="binding_model_id" ref="model_investment_asset"/>
+        <field name="state">code</field>
+        <field name="code">records.update_realized()</field>
+    </record>
+
 
     <record model="ir.actions.act_window" id="action_current_positions">
         <field name="name">Current positions</field>

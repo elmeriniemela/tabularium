@@ -547,6 +547,11 @@ class InvestmentAsset(models.Model):
         domain=[('prediction', '=', False)],
     )
 
+    realized_ids = fields.One2many(
+        comodel_name='investment.asset.realized',
+        inverse_name='asset_id',
+        readonly=True,
+    )
 
     quantity = fields.Float(compute='_compute_aggregate', store=True, digits='Investment Asset quantity', group_operator=None)
 
@@ -752,6 +757,62 @@ class InvestmentAsset(models.Model):
         return price_id
 
 
+    def update_realized(self):
+        qty_precision = self.env['decimal.precision'].precision_get('Investment Asset quantity')
+        for asset in self:
+            valid = self.env['investment.asset.realized'].browse()
+
+            existing = {(r.sell_batch_id, r.buy_batch_id): r for r in asset.realized_ids}
+            transactions = asset.transaction_ids.sorted(key=lambda s: s.time)
+            sells = transactions.filtered(lambda t: t.ttype == 'sell')
+            buys = transactions.filtered(lambda t: t.ttype == 'buy')
+            if buys and sells:
+                buy_idx = 0
+                sell_idx = 0
+                sell_qtys = {i: abs(sell.quantity) for i, sell in enumerate(sells)}
+                buy_qtys = {i: abs(buy.quantity) for i, buy in enumerate(buys)}
+                while sum(sell_qtys.values()) > 0:
+                    try:
+                        compare = float_compare(buy_qtys[buy_idx], sell_qtys[sell_idx], precision_digits=qty_precision)
+                    except KeyError:
+                        raise ValidationError("Invalid transactions on %s" % asset.name)
+                    key = (sells[sell_idx], buys[buy_idx])
+                    vals = {
+                        'asset_id': asset.id,
+                        'sell_batch_id': sells[sell_idx].id,
+                        'buy_batch_id': buys[buy_idx].id
+                    }
+
+                    if compare == 0: # Equal
+                        vals['quantity'] = buy_qtys[buy_idx]
+                        buy_qtys[buy_idx] -= vals['quantity']
+                        sell_qtys[sell_idx] -= vals['quantity']
+                        buy_idx +=1
+                        sell_idx +=1
+                    elif compare == -1: # Buy quantity was smaller
+                        vals['quantity'] = buy_qtys[buy_idx]
+                        buy_qtys[buy_idx] -= vals['quantity']
+                        sell_qtys[sell_idx] -= vals['quantity']
+                        buy_idx +=1
+                    elif compare: # Sell quantity was smaller
+                        vals['quantity'] = sell_qtys[sell_idx]
+                        buy_qtys[buy_idx] -= vals['quantity']
+                        sell_qtys[sell_idx] -= vals['quantity']
+                        sell_idx +=1
+                    else:
+                        raise ValueError(f"Invalid float_compare {compare}")
+
+                    if key in existing:
+                        existing[key].write(vals)
+                    else:
+                        existing[key] = asset.realized_ids.create(vals)
+
+                    existing[key]._compute_profit()
+                    valid |= existing[key]
+
+            (asset.realized_ids - valid).unlink()
+
+
 class InvestmentAssetPrice(models.Model):
     _name = 'investment.asset.price'
     _description = 'Asset Price'
@@ -781,7 +842,7 @@ class InvestmentAssetPrice(models.Model):
     ]
 
 
-class InvestmentAssetPrice(models.Model):
+class InvestmentAssetTransaction(models.Model):
     _name = 'investment.asset.transaction'
     _description = 'Asset Transaction'
     _order = 'time desc'
@@ -902,3 +963,58 @@ class InvestmentAssetPrice(models.Model):
                 tx.exchange_rate = 0.0
             else:
                 tx.exchange_rate = (tx.cash_flow/quantity - tx.fee/quantity)
+
+
+class InvestmentAssetRealized(models.Model):
+    _name = 'investment.asset.realized'
+    _description = 'Asset Realized'
+    _order = 'sell_date desc, buy_date desc'
+
+    asset_id = fields.Many2one(
+        comodel_name='investment.asset',
+        required=True,
+        ondelete='cascade',
+    )
+
+    currency_id = fields.Many2one(related='asset_id.company_currency_id')
+    category_id = fields.Many2one(related='asset_id.category_id', store=True)
+
+    sell_batch_id = fields.Many2one(
+        comodel_name='investment.asset.transaction',
+        required=True,
+        ondelete='cascade',
+    )
+
+    buy_batch_id = fields.Many2one(
+        comodel_name='investment.asset.transaction',
+        required=True,
+        ondelete='cascade',
+    )
+
+    quantity = fields.Float(digits='Investment Asset quantity')
+
+    sell_price = fields.Monetary(compute='_compute_profit', store=True)
+    sell_date = fields.Date(compute='_compute_profit', store=True)
+    sell_fee = fields.Monetary(compute='_compute_profit', store=True)
+    buy_price = fields.Monetary(compute='_compute_profit', store=True)
+    buy_date = fields.Date(compute='_compute_profit', store=True)
+    buy_fee = fields.Monetary(compute='_compute_profit', store=True)
+    profit = fields.Monetary(string='Profit/Loss', compute='_compute_profit', store=True)
+
+
+    def _compute_profit(self):
+        for record in self:
+            record.sell_date = record.sell_batch_id.time.date()
+            record.sell_fee = record.sell_batch_id.fee * (record.quantity / abs(record.sell_batch_id.quantity))
+            record.sell_price = (record.sell_batch_id.exchange_rate) * record.quantity
+
+            record.buy_date = record.buy_batch_id.time.date()
+            record.buy_fee = record.buy_batch_id.fee * (record.quantity / abs(record.buy_batch_id.quantity))
+            record.buy_price = (record.buy_batch_id.exchange_rate) * record.quantity
+
+            record.profit = record.sell_price - record.sell_fee - record.buy_price - record.buy_fee
+
+
+    _sql_constraints = [
+        ('unique_realized', 'UNIQUE(sell_batch_id, buy_batch_id)', 'A realization for this aquisition/sell link already exists!'),
+    ]

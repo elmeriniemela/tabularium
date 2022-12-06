@@ -16,6 +16,7 @@
                 <field name="asset_id" optional="hide"/>
                 <field name="liquid" optional="hide"/>
                 <field name="category_id" optional="hide"/>
+                <field name="ttype" optional="hide"/>
             </tree>
         </field>
     </record>
