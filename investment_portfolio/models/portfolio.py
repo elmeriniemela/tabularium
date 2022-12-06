@@ -757,8 +757,19 @@ class InvestmentAsset(models.Model):
         return price_id
 
 
-    def update_realized(self):
+    def update_realized_fifo(self):
         qty_precision = self.env['decimal.precision'].precision_get('Investment Asset quantity')
+
+        def fill(s, filled):
+            quantity = s[filled[0]]['remaining_qty']
+            s['sell']['remaining_qty'] -= quantity
+            s['buy']['remaining_qty'] -= quantity
+            for op in filled:
+                assert float_is_zero(s[op]['remaining_qty'], precision_digits=qty_precision), f"Not filled: {s[op]['remaining_qty']}"
+                next_tx = next(s[op]['tx_iter'])
+                s[op]['tx'] = next_tx
+                s[op]['remaining_qty'] = abs(next_tx.quantity)
+
         for asset in self:
             valid = self.env['investment.asset.realized'].browse()
 
@@ -767,41 +778,29 @@ class InvestmentAsset(models.Model):
             sells = transactions.filtered(lambda t: t.ttype == 'sell')
             buys = transactions.filtered(lambda t: t.ttype == 'buy')
             if buys and sells:
-                buy_idx = 0
-                sell_idx = 0
-                sell_qtys = {i: abs(sell.quantity) for i, sell in enumerate(sells)}
-                buy_qtys = {i: abs(buy.quantity) for i, buy in enumerate(buys)}
-                while sum(sell_qtys.values()) > 0:
-                    try:
-                        compare = float_compare(buy_qtys[buy_idx], sell_qtys[sell_idx], precision_digits=qty_precision)
-                    except KeyError:
-                        raise ValidationError("Invalid transactions on %s" % asset.name)
-                    key = (sells[sell_idx], buys[buy_idx])
+                state = {
+                    'buy': {'tx_iter': iter(buys), 'tx': False, 'remaining_qty': 0},
+                    'sell': {'tx_iter': iter(sells), 'tx': False, 'remaining_qty': 0},
+                }
+                fill(state, ['buy', 'sell']) # Initial assignment of the 'tx' and 'remaining_qty' keys.
+                while True:
+                    key = (state['sell']['tx'], state['buy']['tx'])
                     vals = {
                         'asset_id': asset.id,
-                        'sell_batch_id': sells[sell_idx].id,
-                        'buy_batch_id': buys[buy_idx].id
+                        'sell_batch_id': state['sell']['tx'].id,
+                        'buy_batch_id': state['buy']['tx'].id,
                     }
-
+                    compare = float_compare(state['buy']['remaining_qty'], state['sell']['remaining_qty'], precision_digits=qty_precision)
                     if compare == 0: # Equal
-                        vals['quantity'] = buy_qtys[buy_idx]
-                        buy_qtys[buy_idx] -= vals['quantity']
-                        sell_qtys[sell_idx] -= vals['quantity']
-                        buy_idx +=1
-                        sell_idx +=1
+                        filled = ['buy', 'sell']
                     elif compare == -1: # Buy quantity was smaller
-                        vals['quantity'] = buy_qtys[buy_idx]
-                        buy_qtys[buy_idx] -= vals['quantity']
-                        sell_qtys[sell_idx] -= vals['quantity']
-                        buy_idx +=1
+                        filled = ['buy']
                     elif compare: # Sell quantity was smaller
-                        vals['quantity'] = sell_qtys[sell_idx]
-                        buy_qtys[buy_idx] -= vals['quantity']
-                        sell_qtys[sell_idx] -= vals['quantity']
-                        sell_idx +=1
+                        filled = ['sell']
                     else:
                         raise ValueError(f"Invalid float_compare {compare}")
 
+                    vals['quantity'] = state[filled[0]]['remaining_qty']
                     if key in existing:
                         existing[key].write(vals)
                     else:
@@ -809,6 +808,11 @@ class InvestmentAsset(models.Model):
 
                     existing[key]._compute_profit()
                     valid |= existing[key]
+
+                    try:
+                        fill(state, filled)
+                    except StopIteration:
+                        break # no more buy or sell transactions left.
 
             (asset.realized_ids - valid).unlink()
 
@@ -940,18 +944,12 @@ class InvestmentAssetTransaction(models.Model):
             else:
                 tx.profit = (tx.asset_id.last_price - (tx.cash_flow / abs(quantity))) * quantity
 
-    @api.onchange('cash_flow', 'quantity')
-    def _onchange_amount(self):
-        for tx in self:
-            if not (tx.exchange_rate and tx.fee):
-                tx.fee = 0.0
 
-
-    @api.depends('exchange_rate')
+    @api.depends('exchange_rate', 'cash_flow', 'quantity')
     def _compute_fee(self):
         for tx in self:
             quantity = abs(tx.quantity)
-            if not quantity:
+            if not (quantity and tx.cash_flow and tx.exchange_rate):
                 tx.fee = 0.0
             else:
                 tx.fee = (tx.cash_flow/quantity - tx.exchange_rate) * quantity
@@ -959,7 +957,7 @@ class InvestmentAssetTransaction(models.Model):
     def _inverse_fee(self):
         for tx in self:
             quantity = abs(tx.quantity)
-            if not quantity:
+            if not (quantity and tx.cash_flow and tx.exchange_rate):
                 tx.exchange_rate = 0.0
             else:
                 tx.exchange_rate = (tx.cash_flow/quantity - tx.fee/quantity)
