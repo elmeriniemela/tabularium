@@ -19,6 +19,7 @@ lxml = wrap_module(__import__('lxml'), {mod: getattr(lxml, mod).__all__ for mod 
 
 requests = wrap_module(__import__('requests'), ['get', 'post'])
 io = wrap_module(__import__('io'), ['StringIO', 'BytesIO'])
+pandas = wrap_module(__import__('pandas'), ['read_csv', 'read_excel'])
 
 
 _logger = logging.getLogger(__name__)
@@ -268,7 +269,10 @@ class InvestmentTimeseries(models.Model):
                 date=price_id.time or fields.Datetime.now(),
             )
 
-            record.update(record.asset_id._get_position(record.last_price, record.transaction_ids))
+            vals = record.asset_id._get_position(record.last_price, record.transaction_ids).items()
+            vals = {k: v for k, v in vals if k in record._fields}
+            assert vals, "Filtering with record._fields failed."
+            record.update(vals)
 
 
 
@@ -477,6 +481,7 @@ class InvestmentIntegration(models.Model):
             'dateutil': dateutil,
             'lxml': lxml,
             'io': io,
+            'pandas': pandas,
             'self': asset,
         }
         safe_eval(self.code, globals_dict=globals_dict, mode="exec", nocopy=True)
