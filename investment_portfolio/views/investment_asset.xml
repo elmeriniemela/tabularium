@@ -6,10 +6,8 @@
             <tree expand="1">
                 <field name="name" optional="show"/>
                 <field name="ticker" optional="show"/>
-                <field name="last_update" optional="show" widget="timeago"/>
-                <field name="position" optional="show" sum="Total Position"/>
-                <field name="quantity" optional="show"/>
                 <field name="last_price" optional="show"/>
+                <field name="last_update" optional="show" widget="timeago"/>
                 <field name="daily_price" widget="percentage" options="{'is_profit': 1}" optional="show"/>
                 <field name="weekly_price" widget="percentage" options="{'is_profit': 1}" optional="show"/>
                 <field name="monthly_price" widget="percentage" options="{'is_profit': 1}" optional="show"/>
@@ -19,6 +17,10 @@
                 <field name="one_year_price" widget="percentage" options="{'is_profit': 1}"/>
                 <field name="three_year_price" widget="percentage" options="{'is_profit': 1}"/>
                 <field name="five_year_price" widget="percentage" options="{'is_profit': 1}"/>
+
+                <field name="quantity" optional="show"/>
+                <field name="position" optional="show" sum="Total Position"/>
+
                 <field name="profit" widget="monetary" options="{'is_profit': 1}" optional="show" sum="Total Profit"/>
                 <field name="profit_percent" widget="percentage" options="{'is_profit': 1}" optional="show"/>
 
