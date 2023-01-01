@@ -571,7 +571,7 @@ class InvestmentAsset(models.Model):
     daily_price = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg')
     weekly_price = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg')
     monthly_price = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg')
-    three_month_price = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg', string="6 Months")
+    three_month_price = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg', string="3 Months")
     six_month_price = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg', string="6 Months")
     ytd_price = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg')
     one_year_price = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg', string="1 Year")
@@ -647,6 +647,11 @@ class InvestmentAsset(models.Model):
                 ('time', '<', time),
                 ('prediction', '=', False),
             ], limit=1)
+            if not closing_price_id:
+                closing_price_id = record.env['investment.asset.price'].search([
+                    ('asset_id', '=', record.id),
+                    ('prediction', '=', False),
+                ], limit=1, order='time asc') # oldest possible.
 
             closing_price = closing_price_id.currency_id._convert(
                 from_amount=closing_price_id.price or 0.0,
