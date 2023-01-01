@@ -38,7 +38,12 @@
         <field name="model">investment.asset.price</field>
         <field name="arch" type="xml">
             <search>
+                <field name="asset_id"/>
                 <filter name="time" date="time"/>
+                <separator/>
+                <filter string="Realized" name="realized" domain="[('prediction', '=', False)]"/>
+                <filter string="Predicion" name="prediction" domain="[('prediction', '=', True)]"/>
+                <separator/>
                 <group expand="1" string="Group by">
                     <filter string="Time" name="group_time" context="{'group_by': 'time'}"/>
                     <filter string="Asset" name="group_asset_id" context="{'group_by': 'asset_id'}"/>

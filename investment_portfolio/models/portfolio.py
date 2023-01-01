@@ -558,6 +558,7 @@ class InvestmentAsset(models.Model):
     buy_total = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
     sell_total = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
     position = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
+    investment = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
 
     avg_buy_price = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
     avg_sell_price = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
@@ -570,7 +571,12 @@ class InvestmentAsset(models.Model):
     daily_price = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg')
     weekly_price = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg')
     monthly_price = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg')
+    three_month_price = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg', string="6 Months")
+    six_month_price = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg', string="6 Months")
     ytd_price = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg')
+    one_year_price = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg', string="1 Year")
+    three_year_price = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg', string="3 Year")
+    five_year_price = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg', string="5 Year")
 
     thesis = fields.Html(sanitize=False, translate=False)
 
@@ -652,7 +658,7 @@ class InvestmentAsset(models.Model):
 
 
         for record in self:
-            price_id = record.price_ids.sorted()[:1]
+            price_id = record.price_ids[:1]
             record.last_price = price_id.currency_id._convert(
                 from_amount=price_id.price or 0.0,
                 to_currency=self.company_currency_id,
@@ -665,7 +671,12 @@ class InvestmentAsset(models.Model):
             record.daily_price = percent_change(record, fields.Datetime.now().replace(hour=0, minute=0, second=0), record.last_price)
             record.weekly_price = percent_change(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(weeks=1), record.last_price)
             record.monthly_price = percent_change(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(months=1), record.last_price)
+            record.three_month_price = percent_change(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(months=3), record.last_price)
+            record.six_month_price = percent_change(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(months=6), record.last_price)
             record.ytd_price = percent_change(record, fields.Datetime.now().replace(day=1, month=1, hour=0, minute=0, second=0), record.last_price)
+            record.one_year_price = percent_change(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(years=1), record.last_price)
+            record.three_year_price = percent_change(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(years=3), record.last_price)
+            record.five_year_price = percent_change(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(years=5), record.last_price)
 
 
     def _get_position(self, market_price, transaction_ids):
@@ -697,6 +708,7 @@ class InvestmentAsset(models.Model):
             'avg_buy_price': buy_total/buy_volume if buy_volume else 0.0,
             'avg_sell_price': sell_total/sell_volume if sell_volume else 0.0,
             'profit': sell_total - buy_total,
+            'investment': abs(sell_total - buy_total) + (quantity * market_price),
             'profit_percent': (sell_total-buy_total) / buy_total if buy_total else 0.0,
         }
 

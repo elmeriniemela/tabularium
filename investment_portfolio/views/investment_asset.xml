@@ -13,7 +13,12 @@
                 <field name="daily_price" widget="percentage" options="{'is_profit': 1}" optional="show"/>
                 <field name="weekly_price" widget="percentage" options="{'is_profit': 1}" optional="show"/>
                 <field name="monthly_price" widget="percentage" options="{'is_profit': 1}" optional="show"/>
+                <field name="three_month_price" widget="percentage" options="{'is_profit': 1}"/>
+                <field name="six_month_price" widget="percentage" options="{'is_profit': 1}"/>
                 <field name="ytd_price" widget="percentage" options="{'is_profit': 1}"/>
+                <field name="one_year_price" widget="percentage" options="{'is_profit': 1}"/>
+                <field name="three_year_price" widget="percentage" options="{'is_profit': 1}"/>
+                <field name="five_year_price" widget="percentage" options="{'is_profit': 1}"/>
                 <field name="profit" widget="monetary" options="{'is_profit': 1}" optional="show" sum="Total Profit"/>
                 <field name="profit_percent" widget="percentage" options="{'is_profit': 1}" optional="show"/>
 
@@ -56,7 +61,14 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <button name="run_integration" type="object" string="Run Integration"/>
+                    <button name="run_integration" type="object" string="Run Integration" icon="fa-cogs"/>
+                    <button name="%(action_prices)d"
+                        string="Prices"
+                        type="action"
+                        context="{'search_default_asset_id': id, 'search_default_realized': 1}"
+                        class="oe_stat_button"
+                        icon="fa-usd">
+                    </button>
                 </header>
                 <sheet>
                     <div class="oe_title">
@@ -71,21 +83,30 @@
                             <field name="currency_id"/>
                             <field name="category_id"/>
                             <field name="integration_id"/>
-                            <field name="ytd_price" widget="percentage" options="{'is_profit': 1}"/>
-                            <field name="monthly_price" widget="percentage" options="{'is_profit': 1}"/>
-                            <field name="weekly_price" widget="percentage" options="{'is_profit': 1}"/>
                             <field name="daily_price" widget="percentage" options="{'is_profit': 1}"/>
+                            <field name="weekly_price" widget="percentage" options="{'is_profit': 1}"/>
+                            <field name="monthly_price" widget="percentage" options="{'is_profit': 1}"/>
+                            <field name="three_month_price" widget="percentage" options="{'is_profit': 1}"/>
+                            <field name="six_month_price" widget="percentage" options="{'is_profit': 1}"/>
+                            <field name="ytd_price" widget="percentage" options="{'is_profit': 1}"/>
+                            <field name="one_year_price" widget="percentage" options="{'is_profit': 1}"/>
+                            <field name="three_year_price" widget="percentage" options="{'is_profit': 1}"/>
+                            <field name="five_year_price" widget="percentage" options="{'is_profit': 1}"/>
                         </group>
                         <group>
-                            <field name="quantity"/>
-                            <field name="last_update" widget="timeago"/>
-                            <field name="company_currency_id"/>
-                            <field name="position"/>
-                            <field name="last_price"/>
+                            <field name="company_currency_id" invisible="1"/>
+                            <label for="last_price"/>
+                            <div>
+                                <field name="last_price"  class="oe_inline"/>
+                                <span>
+                                    (<field name="last_update" widget="timeago"  class="oe_inline"/>)
+                                </span>
+                            </div>
                             <field name="avg_buy_price" />
-                            <field name="sell_total"  attrs="{'invisible': [('quantity', '!=', 0.0)]}"/>
-                            <field name="buy_total"/>
                             <field name="avg_sell_price" attrs="{'invisible': [('quantity', '!=', 0.0)]}"/>
+                            <field name="quantity"/>
+                            <field name="position"/>
+                            <field name="investment"/>
                             <field name="profit" options="{'is_profit': 1}"/>
                             <field name="profit_percent" widget="percentage" options="{'is_profit': 1}"/>
                         </group>
@@ -97,9 +118,6 @@
                         </page>
                         <page string="Realized Gains/Losses">
                             <field name="realized_ids" context="{'default_asset_id': id}"/>
-                        </page>
-                        <page string="Prices">
-                            <field name="price_ids" context="{'default_asset_id': id}"/>
                         </page>
                         <page string="Expectations">
                             <field name="expectation_ids" context="{'default_asset_id': id}"/>
