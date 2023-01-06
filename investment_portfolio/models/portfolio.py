@@ -524,6 +524,8 @@ class InvestmentAsset(models.Model):
 
     name = fields.Char(required=True)
 
+    active = fields.Boolean(default=True)
+
     ticker = fields.Char(required=True)
 
     notes = fields.Text()
