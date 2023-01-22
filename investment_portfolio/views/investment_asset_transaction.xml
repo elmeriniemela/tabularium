@@ -43,6 +43,7 @@
                             <field name="quantity"/>
                             <field name="cash_flow"/>
                             <field name="exchange_rate"/>
+                            <field name="profit" options="{'is_profit': 1}"/>
                             <field name="fee"/>
                         </group>
                         <group>
@@ -53,6 +54,46 @@
                     </group>
                 </sheet>
             </form>
+        </field>
+    </record>
+
+    <record id="asset_transaction_kanban" model="ir.ui.view">
+        <field name="name">investment.asset.transaction.kanban</field>
+        <field name="model">investment.asset.transaction</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile" sample="1">
+                <field name="currency_id"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_global_click">
+                            <div class="row">
+                                <div class="col-4">
+                                    Time
+                                </div>
+                                <div class="col-8 text-right">
+                                    <span><field name="time"/></span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-4">
+                                    Quantity
+                                </div>
+                                <div class="col-8 text-right">
+                                    <field name="quantity"/> @ <field name="exchange_rate"/>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-4">
+                                    Profit
+                                </div>
+                                <div class="col-8 text-right">
+                                    <field name="profit" options="{'is_profit': 1}"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
         </field>
     </record>
 
@@ -114,14 +155,14 @@
     <record model="ir.actions.act_window" id="action_transactions_per_month">
         <field name="name">Transactions per month</field>
         <field name="res_model">investment.asset.transaction</field>
-        <field name="view_mode">graph,tree,form</field>
+        <field name="view_mode">graph,tree,kanban,form</field>
         <field name="context">{'search_default_group_month': 1, 'search_default_group_asset_id': 1, 'search_default_liquid': 1, 'search_default_1_year': 1, 'search_default_realized': 1}</field>
     </record>
 
     <record model="ir.actions.act_window" id="action_yearly_savings">
         <field name="name">Yearly savings</field>
         <field name="res_model">investment.asset.transaction</field>
-        <field name="view_mode">graph,tree,form</field>
+        <field name="view_mode">graph,tree,kanban,form</field>
         <field name="context">{'search_default_liquid': 1, 'search_default_group_year': 1, 'search_default_realized': 1}</field>
     </record>
 
