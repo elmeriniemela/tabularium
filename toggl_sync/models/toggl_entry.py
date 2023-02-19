@@ -71,6 +71,7 @@ class TogglEntry(models.Model):
     _description = 'Toggl Entry'
     _order = 'date desc, id asc'
     _inherit = ['mail.thread']
+    _check_company_auto = True
 
     name = fields.Char(required=True)
 
@@ -119,6 +120,7 @@ class TogglEntry(models.Model):
         compute='_compute_toggl_fields',
         store=True,
         readonly=True,
+        check_company=True,
     )
 
     parent_id = fields.Many2one(
@@ -126,6 +128,7 @@ class TogglEntry(models.Model):
         compute='_compute_toggl_fields',
         store=True,
         readonly=True,
+        check_company=True,
     )
 
     child_ids = fields.One2many(
@@ -277,7 +280,7 @@ class TogglEntry(models.Model):
             ids = [int(m) for m in re.findall('\[(\d+)\]', record.name or '')]
             if ids:
                 [task_id] = ids
-                record.task_id = Task.search([('task_id', '=', task_id)], limit=1) \
+                record.task_id = Task.search([('task_id', '=', task_id),('company_id', '=', record.company_id.id)], limit=1) \
                     or Task.create({
                         'name': record.name,
                         'task_id': task_id
