@@ -573,12 +573,12 @@ class InvestmentAsset(models.Model):
         required=True,
     )
     plan_start_date = fields.Date()
-    plan_months = fields.Integer()
+    plan_months = fields.Integer(default=300)
     plan_cash_flow = fields.Monetary()
     plan_fee = fields.Monetary()
     plan_yearly_appreciation = fields.Float(group_operator='avg', default=0.0)
     plan_yearly_interest = fields.Float(group_operator='avg', default=0.0)
-    plan_all_cash_flows = fields.Monetary(readonly=True)
+    plan_payment_or_refund = fields.Monetary(readonly=True)
 
 
 
@@ -593,30 +593,24 @@ class InvestmentAsset(models.Model):
         today = datetime.date.today()
 
         # Remove old predictions.
-        Price.search([('prediction', '=', True),('time', '<', today), ('asset_id', 'in', self.ids)]).unlink()
+        Price.search([('prediction', '=', True), ('asset_id', 'in', self.ids)]).unlink()
         Transaction.search([('prediction', '=', True), ('asset_id', 'in', self.ids)]).unlink()
 
         for asset_id in self:
-
-            n = asset_id.plan_months
-            date = asset_id.plan_start_date
+            n = asset_id.plan_months or 0
+            date = asset_id.plan_start_date or today
             end = date + relativedelta(months=n)
-
-            if not (date and n):
-                _logger.info("No plans for %s %s", asset_id.name, date)
-                continue
-
-
-            r = asset_id.plan_yearly_interest/12
+            r = (asset_id.plan_yearly_interest or 0 + asset_id.plan_yearly_appreciation or 0)/12
             i = 0
             PV = asset_id.position
             P = (r*PV) / (1-(1+r)**(-n)) if r else 0
             if asset_id.plan_type == 'exit':
                 asset_id.plan_cash_flow = P
 
-            price = asset_id.last_price
 
-            while date <= today + relativedelta(years=predict_years):
+            curr_price = asset_id.last_price
+            price = asset_id.last_price
+            while date <= max(today + relativedelta(years=predict_years), end):
                 i += 1
                 price *= (1+(asset_id.plan_yearly_appreciation/12))
                 base_vals = {
@@ -629,19 +623,19 @@ class InvestmentAsset(models.Model):
                     if asset_id.plan_type == 'acquire':
                         cashflow = asset_id.plan_cash_flow
                         if cashflow:
-                            update = {'quantity': cashflow/price, 'cash_flow': cashflow, 'exchange_rate': price, 'fee': asset_id.plan_fee}
+                            update = {'description': f'{i}: Acquisition', 'quantity': cashflow/price, 'cash_flow': cashflow, 'exchange_rate': price, 'fee': asset_id.plan_fee}
                             Transaction.create({**base_vals, **update})
+                        elif asset_id.plan_fee:
+                            update = {'description': f'{i}: Fee', 'quantity': 0, 'cash_flow': -asset_id.plan_fee, 'exchange_rate': price}
+                            Transaction.create({**base_vals, **update})
+
 
                     elif asset_id.plan_type == 'exit':
                         interest = PV*r
-                        interest_vals = {'description': f'{i}: Interest payment','quantity': 0, 'cash_flow': interest, 'exchange_rate': price}
-                        Transaction.create({**base_vals, **interest_vals})
-
                         reduction = P-interest
-                        reduction_vals = {'description': f'{i}: Loan reduction', 'quantity': reduction/price, 'cash_flow': reduction, 'fee': asset_id.plan_fee}
+                        reduction_vals = {'description': f'{i}: {-reduction:.2f} + {-interest:.2f}', 'quantity': -reduction/curr_price, 'cash_flow': abs(P), 'exchange_rate': price, 'fee': asset_id.plan_fee}
                         Transaction.create({**base_vals, **reduction_vals})
                         PV -= reduction
-
                     else:
                         raise ValueError(f"Invalid plan type {asset_id.plan_type}")
 
@@ -654,7 +648,7 @@ class InvestmentAsset(models.Model):
                 date += relativedelta(months=1)
 
 
-            asset_id.plan_all_cash_flows = sum(Transaction.search([('prediction', '=', True), ('asset_id', 'in', self.ids)]).mapped('cash_flow'))
+            asset_id.plan_payment_or_refund = sum(Transaction.search([('prediction', '=', True), ('asset_id', '=', asset_id.id)]).mapped('payment_or_refund'))
 
 
 
