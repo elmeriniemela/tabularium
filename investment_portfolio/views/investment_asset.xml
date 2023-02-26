@@ -36,11 +36,12 @@
                 <field name="plan_type" optional="hide"/>
                 <field name="plan_start_date" optional="hide"/>
                 <field name="plan_months" optional="hide"/>
-                <field name="plan_cash_flow" attrs="{'readonly': [('plan_type', '!=', 'acquire')]}" optional="hide"/>
+                <field name="plan_payment_or_refund" attrs="{'readonly': [('plan_type', '!=', 'acquire')]}" optional="hide"/>
+                <field name="plan_yield" optional="hide"/>
                 <field name="plan_fee" optional="hide"/>
                 <field name="plan_yearly_appreciation" widget="percentage" optional="hide"/>
                 <field name="plan_yearly_interest" widget="percentage" optional="hide"/>
-                <field name="plan_payment_or_refund" optional="hide"/>
+                <field name="plan_total_payment_or_refund" optional="hide"/>
 
             </tree>
         </field>
@@ -138,13 +139,14 @@
                                     <field name="plan_type"/>
                                     <field name="plan_start_date"/>
                                     <field name="plan_months"/>
-                                    <field name="plan_cash_flow" attrs="{'readonly': [('plan_type', '!=', 'acquire')]}"/>
+                                    <field name="plan_payment_or_refund" attrs="{'readonly': [('plan_type', '!=', 'acquire')]}"/>
+                                    <field name="plan_yield"/>
                                     <field name="plan_fee"/>
                                 </group>
                                 <group>
                                     <field name="plan_yearly_appreciation" widget="percentage"/>
                                     <field name="plan_yearly_interest" widget="percentage"/>
-                                    <field name="plan_payment_or_refund"/>
+                                    <field name="plan_total_payment_or_refund"/>
                                     <button name="generate_plan" type="object" string="Generate Plan" icon="fa-cogs"/>
                                 </group>
                             </group>
