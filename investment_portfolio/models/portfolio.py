@@ -919,7 +919,7 @@ class InvestmentAssetPrice(models.Model):
 class InvestmentAssetTransaction(models.Model):
     _name = 'investment.asset.transaction'
     _description = 'Asset Transaction'
-    _order = 'time desc'
+    _order = 'time desc, ttype'
 
     asset_id = fields.Many2one(
         comodel_name='investment.asset',
