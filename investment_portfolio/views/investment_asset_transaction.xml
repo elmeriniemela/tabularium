@@ -3,10 +3,10 @@
         <field name="name">investment.asset.transaction.tree</field>
         <field name="model">investment.asset.transaction</field>
         <field name="arch" type="xml">
-            <tree editable="top" decoration-success="profit &gt; 0.0" decoration-danger="profit &lt; 0.0">
+            <tree editable="top" decoration-success="profit &gt; 0.0" decoration-danger="profit &lt; 0.0" limit="1000">
                 <field name="time"/>
                 <field name="quantity" sum="Total"/>
-                <field name="cash_flow"/>
+                <field name="cash_flow" sum="Total"/>
                 <field name="payment_or_refund" optional="hide" sum="Total"/>
                 <field name="description"/>
                 <field name="exchange_rate"/>

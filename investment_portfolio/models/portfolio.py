@@ -279,14 +279,8 @@ class InvestmentTimeseries(models.Model):
 
     @api.model
     def cron_create_time_series(self):
-        Price = self.env['investment.asset.price']
-        Transaction = self.env['investment.asset.transaction']
+
         today = datetime.date.today()
-
-        # Remove old predictions.
-        Price.search([('prediction', '=', True),('time', '<', today)]).unlink()
-        Transaction.search([('prediction', '=', True)]).unlink()
-
 
         precision = self.env['decimal.precision'].precision_get('Investment Asset quantity')
         predict_years = int(self.env['ir.config_parameter'].sudo().get_param('investment_portfolio.predict_years', '25'))
@@ -308,36 +302,6 @@ class InvestmentTimeseries(models.Model):
                 prediction = bool(date > today)
                 if prediction and float_is_zero(asset_id.quantity, precision_digits=precision):
                     break
-                if prediction:
-                    expectation = asset_id._get_expectation(date)
-                    if not expectation:
-                        _logger.info("No expectations for %s %s", asset_id.name, date)
-                        break
-                    previous_price *= (1+expectation.yearly_return)
-                    base_vals = {
-                        'prediction': True,
-                        'asset_id': asset_id.id,
-                        'time': date,
-                    }
-                    if expectation.savings:
-                        transaction_id = Transaction.search([(key, '=', value) for key, value in base_vals.items()])
-                        quantity = expectation.savings/previous_price
-                        if date.year-1 == today.year:
-                            months = 12-today.month
-                            _logger.info("Only %s months of %s left to predict.", months, today.year)
-                        else:
-                            months = 12
-                        update = {'quantity': quantity*months, 'cash_flow': expectation.savings*months, 'exchange_rate': previous_price}
-                        if not transaction_id:
-                            transaction_id = Transaction.create({**base_vals, **update})
-                        else:
-                            transaction_id.update(update)
-
-                    price_id = Price.search([(key, '=', value) for key, value in base_vals.items()])
-                    if not price_id:
-                        price_id = Price.create({**base_vals, **{'price': previous_price}})
-                    else:
-                        price_id.price = previous_price
 
                 if (asset_id.id, date) not in existing:
                     existing[(asset_id.id, date)] = self.create({
@@ -352,7 +316,6 @@ class InvestmentTimeseries(models.Model):
                 if date == today:
                     serie_today = existing[(asset_id.id, today)]
                     serie_today._compute_aggregate()
-                    previous_price = serie_today.price_id.price
 
                 if prediction or date == today:
                     date += relativedelta(years=1)
@@ -385,7 +348,13 @@ class InvestmentMilestone(models.Model):
 
     real_position = fields.Monetary(compute='_compute_real_position', currency_field='company_currency_id')
 
-    company_id = fields.Many2one(comodel_name='res.company', required=True, default=lambda self: self.env.company, tracking=True)
+    company_id = fields.Many2one(
+        comodel_name='res.company',
+        required=True,
+        default=lambda self: self.env.company,
+        tracking=True,
+        index=True,
+    )
 
     company_currency_id = fields.Many2one(related='company_id.currency_id', string="Company Currency")
 
@@ -487,36 +456,6 @@ class InvestmentIntegration(models.Model):
         safe_eval(self.code, globals_dict=globals_dict, mode="exec", nocopy=True)
 
 
-class InvestmentAssetExpectation(models.Model):
-    _name = 'investment.asset.expectation'
-    _description = 'Investment Expectation'
-
-    asset_id = fields.Many2one(
-        comodel_name='investment.asset',
-        required=True,
-        ondelete='cascade',
-    )
-    currency_id = fields.Many2one(related='asset_id.company_currency_id')
-
-    yearly_return = fields.Float(group_operator='avg')
-
-    savings = fields.Monetary(string="Monthly savings")
-
-    year = fields.Integer()
-
-    _sql_constraints = [
-        ('unique_expectation', 'unique(asset_id, year)', 'Expectation for this year is already configured!'),
-    ]
-
-    def copy(self, default=None):
-        default = default or {'year': self.year+1}
-        return super().copy(default)
-
-    def copy_button(self):
-        self.ensure_one()
-        self.copy()
-
-
 class InvestmentAsset(models.Model):
     _name = 'investment.asset'
     _description = 'Investment Asset'
@@ -530,9 +469,18 @@ class InvestmentAsset(models.Model):
 
     notes = fields.Text()
 
-    company_id = fields.Many2one(comodel_name='res.company', required=True, default=lambda self: self.env.company)
+    company_id = fields.Many2one(
+        comodel_name='res.company',
+        required=True,
+        default=lambda self: self.env.company,
+        index=True,
+    )
 
-    category_id = fields.Many2one(comodel_name='investment.category', required=True)
+    category_id = fields.Many2one(
+        comodel_name='investment.category',
+        required=True,
+        index=True,
+    )
     liquid = fields.Boolean(related='category_id.liquid', store=True, readonly=True)
 
     company_currency_id = fields.Many2one(related='company_id.currency_id', string="Company Currency")
@@ -540,6 +488,7 @@ class InvestmentAsset(models.Model):
     currency_id = fields.Many2one(
         comodel_name='res.currency',
         required=True,
+        index=True,
     )
 
     price_ids = fields.One2many(
@@ -587,11 +536,15 @@ class InvestmentAsset(models.Model):
 
     thesis = fields.Html(sanitize=False, translate=False)
 
-    integration_id = fields.Many2one(comodel_name='investment.integration')
+    integration_id = fields.Many2one(
+        comodel_name='investment.integration',
+        index=True,
+    )
 
     integration_error_id = fields.Many2one(
         comodel_name='mail.activity',
         copy=False,
+        index=True,
     )
 
 
@@ -599,16 +552,110 @@ class InvestmentAsset(models.Model):
         compute='_compute_is_cash',
     )
 
-    expectation_ids = fields.One2many(
-        comodel_name='investment.asset.expectation',
+    plan_transaction_ids = fields.One2many(
+        comodel_name='investment.asset.transaction',
         inverse_name='asset_id',
-        default=lambda self: [(0, 0, {'yearly_return': 0.1})]
+        domain=[('prediction', '=', True)],
     )
 
+    plan_price_ids = fields.One2many(
+        comodel_name='investment.asset.price',
+        inverse_name='asset_id',
+        domain=[('prediction', '=', True)],
+    )
 
-    def _get_expectation(self, date):
+    plan_type = fields.Selection(
+        selection=[
+            ('acquire', 'Acquire'),
+            ('exit', 'Exit'),
+        ],
+        default='acquire',
+        required=True,
+    )
+    plan_start_date = fields.Date()
+    plan_months = fields.Integer()
+    plan_cash_flow = fields.Monetary()
+    plan_fee = fields.Monetary()
+    plan_yearly_appreciation = fields.Float(group_operator='avg', default=0.0)
+    plan_yearly_interest = fields.Float(group_operator='avg', default=0.0)
+    plan_all_cash_flows = fields.Monetary(readonly=True)
+
+
+
+    def _get_plan(self, date):
         self.ensure_one()
-        return self.expectation_ids.filtered(lambda e: e.year == date.year) or self.expectation_ids.filtered(lambda e: not e.year)
+        return self.plan_ids.filtered(lambda e: e.year == date.year) or self.plan_ids.filtered(lambda e: not e.year)
+
+    def generate_plan(self):
+        Price = self.env['investment.asset.price']
+        Transaction = self.env['investment.asset.transaction']
+        predict_years = int(self.env['ir.config_parameter'].sudo().get_param('investment_portfolio.predict_years', '25'))
+        today = datetime.date.today()
+
+        # Remove old predictions.
+        Price.search([('prediction', '=', True),('time', '<', today), ('asset_id', 'in', self.ids)]).unlink()
+        Transaction.search([('prediction', '=', True), ('asset_id', 'in', self.ids)]).unlink()
+
+        for asset_id in self:
+
+            n = asset_id.plan_months
+            date = asset_id.plan_start_date
+            end = date + relativedelta(months=n)
+
+            if not (date and n):
+                _logger.info("No plans for %s %s", asset_id.name, date)
+                continue
+
+
+            r = asset_id.plan_yearly_interest/12
+            i = 0
+            PV = asset_id.position
+            P = (r*PV) / (1-(1+r)**(-n)) if r else 0
+            if asset_id.plan_type == 'exit':
+                asset_id.plan_cash_flow = P
+
+            price = asset_id.last_price
+
+            while date <= today + relativedelta(years=predict_years):
+                i += 1
+                price *= (1+(asset_id.plan_yearly_appreciation/12))
+                base_vals = {
+                    'prediction': True,
+                    'asset_id': asset_id.id,
+                    'time': date,
+                }
+
+                if date < end:
+                    if asset_id.plan_type == 'acquire':
+                        cashflow = asset_id.plan_cash_flow
+                        if cashflow:
+                            update = {'quantity': cashflow/price, 'cash_flow': cashflow, 'exchange_rate': price, 'fee': asset_id.plan_fee}
+                            Transaction.create({**base_vals, **update})
+
+                    elif asset_id.plan_type == 'exit':
+                        interest = PV*r
+                        interest_vals = {'description': f'{i}: Interest payment','quantity': 0, 'cash_flow': interest, 'exchange_rate': price}
+                        Transaction.create({**base_vals, **interest_vals})
+
+                        reduction = P-interest
+                        reduction_vals = {'description': f'{i}: Loan reduction', 'quantity': reduction/price, 'cash_flow': reduction, 'fee': asset_id.plan_fee}
+                        Transaction.create({**base_vals, **reduction_vals})
+                        PV -= reduction
+
+                    else:
+                        raise ValueError(f"Invalid plan type {asset_id.plan_type}")
+
+                price_id = Price.search([(key, '=', value) for key, value in base_vals.items()])
+                if not price_id:
+                    price_id = Price.create({**base_vals, **{'price': price}})
+                else:
+                    price_id.price = price
+
+                date += relativedelta(months=1)
+
+
+            asset_id.plan_all_cash_flows = sum(Transaction.search([('prediction', '=', True), ('asset_id', 'in', self.ids)]).mapped('cash_flow'))
+
 
 
     @api.model
@@ -852,6 +899,7 @@ class InvestmentAssetPrice(models.Model):
         comodel_name='investment.asset',
         required=True,
         ondelete='cascade',
+        index=True,
     )
     currency_id = fields.Many2one(related='asset_id.currency_id')
 
@@ -863,6 +911,7 @@ class InvestmentAssetPrice(models.Model):
 
     transaction_id = fields.Many2one(
         comodel_name='investment.asset.transaction',
+        index=True,
     )
 
     _sql_constraints = [
@@ -879,6 +928,7 @@ class InvestmentAssetTransaction(models.Model):
         comodel_name='investment.asset',
         required=True,
         ondelete='cascade',
+        index=True,
     )
 
     currency_id = fields.Many2one(related='asset_id.company_currency_id')
@@ -996,6 +1046,7 @@ class InvestmentAssetRealized(models.Model):
         comodel_name='investment.asset',
         required=True,
         ondelete='cascade',
+        index=True,
     )
 
     currency_id = fields.Many2one(related='asset_id.company_currency_id')
@@ -1005,12 +1056,14 @@ class InvestmentAssetRealized(models.Model):
         comodel_name='investment.asset.transaction',
         required=True,
         ondelete='cascade',
+        index=True,
     )
 
     buy_batch_id = fields.Many2one(
         comodel_name='investment.asset.transaction',
         required=True,
         ondelete='cascade',
+        index=True,
     )
 
     quantity = fields.Float(digits='Investment Asset quantity')

@@ -121,8 +121,23 @@
                         <page string="Realized Gains/Losses">
                             <field name="realized_ids" context="{'default_asset_id': id}"/>
                         </page>
-                        <page string="Expectations">
-                            <field name="expectation_ids" context="{'default_asset_id': id}"/>
+                        <page string="Plans">
+                            <group>
+                                <group>
+                                    <field name="plan_type"/>
+                                    <field name="plan_start_date"/>
+                                    <field name="plan_months"/>
+                                    <field name="plan_cash_flow" attrs="{'readonly': [('plan_type', '!=', 'acquire')]}"/>
+                                </group>
+                                <group>
+                                    <field name="plan_fee"/>
+                                    <field name="plan_yearly_appreciation" widget="percentage"/>
+                                    <field name="plan_yearly_interest" widget="percentage"/>
+                                    <field name="plan_all_cash_flows"/>
+                                </group>
+                            </group>
+                            <button name="generate_plan" type="object" string="Generate Plan" icon="fa-cogs"/>
+                            <field name="plan_transaction_ids" context="{'default_asset_id': id, 'default_prediction': True}"/>
                         </page>
                         <page string="Thesis">
                             <field name="thesis"/>
