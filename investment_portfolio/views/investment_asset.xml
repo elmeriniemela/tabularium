@@ -36,8 +36,9 @@
                 <field name="plan_type" optional="hide"/>
                 <field name="plan_start_date" optional="hide"/>
                 <field name="plan_months" optional="hide"/>
-                <field name="plan_cash_flow" attrs="{'readonly': [('plan_type', '!=', 'acquire')]}" optional="hide"/>
+                <field name="plan_payment" attrs="{'readonly': [('plan_type', '!=', 'acquire')]}" optional="hide"/>
                 <field name="plan_yield" optional="hide"/>
+                <field name="plan_cost" optional="hide"/>
                 <field name="plan_fee" optional="hide"/>
                 <field name="plan_yearly_appreciation" widget="percentage" optional="hide"/>
                 <field name="plan_yearly_interest" widget="percentage" optional="hide"/>
@@ -139,8 +140,9 @@
                                     <field name="plan_type"/>
                                     <field name="plan_start_date"/>
                                     <field name="plan_months"/>
-                                    <field name="plan_cash_flow" attrs="{'readonly': [('plan_type', '!=', 'acquire')]}"/>
+                                    <field name="plan_payment" attrs="{'readonly': [('plan_type', '!=', 'acquire')]}"/>
                                     <field name="plan_yield"/>
+                                    <field name="plan_cost"/>
                                     <field name="plan_fee"/>
                                 </group>
                                 <group>

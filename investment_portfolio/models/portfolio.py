@@ -574,8 +574,9 @@ class InvestmentAsset(models.Model):
     )
     plan_start_date = fields.Date()
     plan_months = fields.Integer(default=300)
-    plan_cash_flow = fields.Monetary(string="Plan Cash Flow")
-    plan_yield = fields.Monetary(string="Plan Yield (+/-)", default=0.0)
+    plan_payment = fields.Monetary(string="Plan Cash Flow")
+    plan_yield = fields.Monetary(default=0.0)
+    plan_cost = fields.Monetary(default=0.0)
     plan_fee = fields.Monetary(default=0.0)
     plan_yearly_appreciation = fields.Float(group_operator='avg', default=0.0)
     plan_yearly_interest = fields.Float(group_operator='avg', default=0.0)
@@ -606,14 +607,14 @@ class InvestmentAsset(models.Model):
             PV = asset_id.position
             P = (r*PV) / (1-(1+r)**(-n)) if r else 0
             if asset_id.plan_type == 'exit':
-                asset_id.plan_cash_flow = P
+                asset_id.plan_payment = P
 
 
             curr_price = asset_id.last_price
             price = asset_id.last_price
             while date <= max(today + relativedelta(years=predict_years), end):
                 i += 1
-                price *= (1+(asset_id.plan_yearly_appreciation/12))
+                price *= (1+asset_id.plan_yearly_appreciation)**(1/12)
                 base_vals = {
                     'prediction': True,
                     'asset_id': asset_id.id,
@@ -622,14 +623,15 @@ class InvestmentAsset(models.Model):
 
                 if date < end:
                     if asset_id.plan_type == 'acquire':
-                        if asset_id.plan_cash_flow:
-                            update = {'description': f'{i}: Acquisition', 'quantity': asset_id.plan_cash_flow/price, 'payment': asset_id.plan_cash_flow, 'exchange_rate': price, 'fee': asset_id.plan_fee}
+                        if asset_id.plan_payment:
+                            update = {'description': f'{i}: Acquisition', 'quantity': asset_id.plan_payment/price, 'payment': asset_id.plan_payment, 'exchange_rate': price, 'fee': asset_id.plan_fee}
                             Transaction.create({**base_vals, **update})
                         if asset_id.plan_yield:
-                            name = 'Yield' if asset_id.plan_yield > 0 else 'Fee'
-                            update = {'description': f'{i}: {name}', 'quantity': 0, 'payment': asset_id.plan_yield, 'exchange_rate': price}
+                            update = {'description': f'{i}', 'quantity': 0, 'payment': asset_id.plan_yield, 'exchange_rate': price}
                             Transaction.create({**base_vals, **update})
-
+                        if asset_id.plan_cost:
+                            update = {'description': f'{i}', 'quantity': 0, 'payment': -asset_id.plan_cost, 'exchange_rate': price}
+                            Transaction.create({**base_vals, **update})
 
                     elif asset_id.plan_type == 'exit':
                         interest = PV*r
