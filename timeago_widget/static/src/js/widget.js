@@ -34,11 +34,11 @@ odoo.define('timeago_widget.timeago_widget', function (require) {
             $timeago.attr("disabled", this.mode === 'readonly');
 
 
-            const milliseconds = (date - new Date());
-            const diffMins = Math.floor((milliseconds/1000)/60);
-            this.$el.toggleClass('text-danger', diffMins < -(2*24*60));
-            this.$el.toggleClass('text-warning', diffMins <= -15);
-            this.$el.toggleClass('text-success', diffMins > -15);
+            // const milliseconds = (date - new Date());
+            // const diffMins = Math.floor((milliseconds/1000)/60);
+            // this.$el.toggleClass('text-danger', diffMins < -(2*24*60));
+            // this.$el.toggleClass('text-warning', diffMins <= -15);
+            // this.$el.toggleClass('text-success', diffMins > -15);
 
         },
     });
