@@ -623,15 +623,14 @@ class InvestmentAsset(models.Model):
 
                 if date < end:
                     if asset_id.plan_type == 'acquire':
-                        trans = None
                         if asset_id.plan_payment:
                             trans = {'description': f'{i}: Acquisition', 'quantity': asset_id.plan_payment/price, 'payment': asset_id.plan_payment, 'exchange_rate': price, 'fee': asset_id.plan_fee}
+                            Transaction.create({**base_vals, **trans})
                         if asset_id.plan_yield:
                             trans = {'description': f'{i}', 'quantity': 0, 'payment': asset_id.plan_yield, 'exchange_rate': price}
+                            Transaction.create({**base_vals, **trans})
                         if asset_id.plan_cost:
                             trans = {'description': f'{i}', 'quantity': 0, 'payment': -asset_id.plan_cost, 'exchange_rate': price}
-
-                        if trans:
                             Transaction.create({**base_vals, **trans})
 
                     elif asset_id.plan_type == 'exit':
