@@ -6,8 +6,9 @@
             <tree editable="top" decoration-success="profit &gt; 0.0" decoration-danger="profit &lt; 0.0" limit="1000">
                 <field name="time"/>
                 <field name="quantity" sum="Total"/>
-                <field name="cash_flow" sum="Total"/>
-                <field name="payment_or_refund" optional="hide" sum="Total"/>
+                <field name="payment" sum="Total"/>
+                <field name="ttype" optional="show"/>
+                <field name="cash_flow" optional="hide" sum="Total"/>
                 <field name="description"/>
                 <field name="exchange_rate"/>
                 <field name="fee"/>
@@ -16,7 +17,6 @@
                 <field name="asset_id" optional="hide"/>
                 <field name="liquid" optional="hide"/>
                 <field name="category_id" optional="hide"/>
-                <field name="ttype" optional="hide"/>
             </tree>
         </field>
     </record>
@@ -26,7 +26,7 @@
         <field name="model">investment.asset.transaction</field>
         <field name="arch" type="xml">
             <graph type="bar" stacked="1">
-                <field name="payment_or_refund" type="measure"/>
+                <field name="cash_flow" type="measure"/>
             </graph>
         </field>
    </record>
@@ -41,7 +41,7 @@
                         <group>
                             <field name="time"/>
                             <field name="quantity"/>
-                            <field name="cash_flow"/>
+                            <field name="payment"/>
                             <field name="exchange_rate"/>
                             <field name="profit" options="{'is_profit': 1}"/>
                             <field name="fee"/>
@@ -67,6 +67,14 @@
                 <templates>
                     <t t-name="kanban-box">
                         <div t-attf-class="oe_kanban_global_click">
+                            <div class="row">
+                                <div class="col-4" style="font-weight: bold;">
+                                    <field name="ttype"/>
+                                </div>
+                                <div class="col-8 text-right">
+                                    <field name="payment"/>
+                                </div>
+                            </div>
                             <div class="row">
                                 <div class="col-4">
                                     Time

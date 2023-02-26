@@ -574,12 +574,12 @@ class InvestmentAsset(models.Model):
     )
     plan_start_date = fields.Date()
     plan_months = fields.Integer(default=300)
-    plan_payment_or_refund = fields.Monetary(string="Plan Payment/Refund (+/-)")
+    plan_cash_flow = fields.Monetary(string="Plan Cash Flow")
     plan_yield = fields.Monetary(string="Plan Yield (+/-)", default=0.0)
     plan_fee = fields.Monetary(default=0.0)
     plan_yearly_appreciation = fields.Float(group_operator='avg', default=0.0)
     plan_yearly_interest = fields.Float(group_operator='avg', default=0.0)
-    plan_total_payment_or_refund = fields.Monetary(readonly=True)
+    plan_total_cash_flow = fields.Monetary(readonly=True)
 
 
 
@@ -606,7 +606,7 @@ class InvestmentAsset(models.Model):
             PV = asset_id.position
             P = (r*PV) / (1-(1+r)**(-n)) if r else 0
             if asset_id.plan_type == 'exit':
-                asset_id.plan_payment_or_refund = -P
+                asset_id.plan_cash_flow = P
 
 
             curr_price = asset_id.last_price
@@ -622,19 +622,19 @@ class InvestmentAsset(models.Model):
 
                 if date < end:
                     if asset_id.plan_type == 'acquire':
-                        if asset_id.plan_payment_or_refund:
-                            update = {'description': f'{i}: Acquisition', 'quantity': asset_id.plan_payment_or_refund/price, 'cash_flow': asset_id.plan_payment_or_refund, 'exchange_rate': price, 'fee': asset_id.plan_fee}
+                        if asset_id.plan_cash_flow:
+                            update = {'description': f'{i}: Acquisition', 'quantity': asset_id.plan_cash_flow/price, 'payment': asset_id.plan_cash_flow, 'exchange_rate': price, 'fee': asset_id.plan_fee}
                             Transaction.create({**base_vals, **update})
                         if asset_id.plan_yield:
                             name = 'Yield' if asset_id.plan_yield > 0 else 'Fee'
-                            update = {'description': f'{i}: {name}', 'quantity': 0, 'cash_flow': asset_id.plan_yield, 'exchange_rate': price}
+                            update = {'description': f'{i}: {name}', 'quantity': 0, 'payment': asset_id.plan_yield, 'exchange_rate': price}
                             Transaction.create({**base_vals, **update})
 
 
                     elif asset_id.plan_type == 'exit':
                         interest = PV*r
                         reduction = P-interest
-                        reduction_vals = {'description': f'{i}: {-reduction:.2f} + {-interest:.2f}', 'quantity': -reduction/curr_price, 'cash_flow': abs(P), 'exchange_rate': price, 'fee': asset_id.plan_fee}
+                        reduction_vals = {'description': f'{i}: {-reduction:.2f} + {-interest:.2f}', 'quantity': -reduction/curr_price, 'payment': abs(P), 'exchange_rate': price, 'fee': asset_id.plan_fee}
                         Transaction.create({**base_vals, **reduction_vals})
                         PV -= reduction
                     else:
@@ -649,7 +649,7 @@ class InvestmentAsset(models.Model):
                 date += relativedelta(months=1)
 
 
-            asset_id.plan_total_payment_or_refund = sum(Transaction.search([('prediction', '=', True), ('asset_id', '=', asset_id.id)]).mapped('payment_or_refund'))
+            asset_id.plan_total_cash_flow = sum(Transaction.search([('prediction', '=', True), ('asset_id', '=', asset_id.id)]).mapped('cash_flow'))
 
 
 
@@ -682,7 +682,7 @@ class InvestmentAsset(models.Model):
     @api.depends(
         'transaction_ids',
         'transaction_ids.quantity',
-        'transaction_ids.cash_flow',
+        'transaction_ids.payment',
         'price_ids',
         'price_ids.price',
         'currency_id',
@@ -744,12 +744,12 @@ class InvestmentAsset(models.Model):
 
         for tx in transaction_ids:
             quantity += tx.quantity
-            cash_flow = tx.cash_flow
+            payment = tx.payment
             if tx.quantity > 0:
-                buy_total += cash_flow
+                buy_total += payment
                 buy_volume += abs(tx.quantity)
             else: # Dividends should have 0.0 quantity and they fall here, increasing profit.
-                sell_total += cash_flow
+                sell_total += payment
                 sell_volume += abs(tx.quantity)
 
         sell_total += quantity * market_price
@@ -928,7 +928,7 @@ class InvestmentAssetTransaction(models.Model):
 
     currency_id = fields.Many2one(related='asset_id.company_currency_id')
 
-    cash_flow = fields.Monetary(required=True)
+    payment = fields.Monetary(required=True)
 
     description = fields.Char()
 
@@ -959,7 +959,7 @@ class InvestmentAssetTransaction(models.Model):
         store=True,
     )
 
-    payment_or_refund = fields.Monetary(
+    cash_flow = fields.Monetary(
         compute='_compute_report',
         store=True,
     )
@@ -981,55 +981,55 @@ class InvestmentAssetTransaction(models.Model):
 
 
 
-    @api.depends('cash_flow', 'quantity')
+    @api.depends('payment', 'quantity')
     def _compute_report(self):
         for record in self:
             if record.quantity > 0:
                 record.ttype = 'buy'
-                record.payment_or_refund = record.cash_flow
+                record.cash_flow = record.payment
             elif record.quantity < 0:
                 record.ttype = 'sell'
-                record.payment_or_refund = -record.cash_flow
-            elif record.cash_flow > 0:
+                record.cash_flow = -record.payment
+            elif record.payment > 0:
                 record.ttype = 'yield'
-                record.payment_or_refund = -record.cash_flow
-            elif record.cash_flow < 0:
+                record.cash_flow = -record.payment
+            elif record.payment < 0:
                 record.ttype = 'cost'
-                record.payment_or_refund = -record.cash_flow # cost has a negative cashflow which needs to be flipped to positive as payment.
+                record.cash_flow = -record.payment # cost has a negative cashflow which needs to be flipped to positive as payment.
             else:
                 record.ttype = False
-                record.payment_or_refund = False
+                record.cash_flow = False
                 _logger.error("Invalid type: %s", record)
 
 
 
 
-    @api.depends('cash_flow', 'quantity', 'asset_id.last_price')
+    @api.depends('payment', 'quantity', 'asset_id.last_price')
     def _compute_profit(self):
         for tx in self:
             quantity = tx.quantity
             if not quantity: # if quantity is 0, the cash flow will be profit.
-                tx.profit = tx.cash_flow
+                tx.profit = tx.payment
             else:
-                tx.profit = (tx.asset_id.last_price - (tx.cash_flow / abs(quantity))) * quantity
+                tx.profit = (tx.asset_id.last_price - (tx.payment / abs(quantity))) * quantity
 
 
-    @api.depends('exchange_rate', 'cash_flow', 'quantity')
+    @api.depends('exchange_rate', 'payment', 'quantity')
     def _compute_fee(self):
         for tx in self:
             quantity = abs(tx.quantity)
-            if not (quantity and tx.cash_flow and tx.exchange_rate):
+            if not (quantity and tx.payment and tx.exchange_rate):
                 tx.fee = 0.0
             else:
-                tx.fee = (tx.cash_flow/quantity - tx.exchange_rate) * quantity
+                tx.fee = (tx.payment/quantity - tx.exchange_rate) * quantity
 
     def _inverse_fee(self):
         for tx in self:
             quantity = abs(tx.quantity)
-            if not (quantity and tx.cash_flow and tx.exchange_rate):
+            if not (quantity and tx.payment and tx.exchange_rate):
                 tx.exchange_rate = 0.0
             else:
-                tx.exchange_rate = (tx.cash_flow/quantity - tx.fee/quantity)
+                tx.exchange_rate = (tx.payment/quantity - tx.fee/quantity)
 
 
 class InvestmentAssetRealized(models.Model):
