@@ -912,7 +912,7 @@ class InvestmentAssetPrice(models.Model):
 
         time = first.time
         price = first.price
-        while time < (last.time + relativedelta(months=1)):
+        while time < (last.time - relativedelta(months=1)):
             time += relativedelta(months=1)
             price *= (1+cagr)**(1/12)
             base_vals = {
