@@ -62,6 +62,14 @@
          </field>
     </record>
 
+    <record id="action_price_extrapolate_cagr" model="ir.actions.server">
+        <field name="name">Extrapolate CAGR</field>
+        <field name="model_id" ref="model_investment_asset_price"/>
+        <field name="binding_model_id" ref="model_investment_asset_price"/>
+        <field name="state">code</field>
+        <field name="code">records.extrapolate_cagr()</field>
+    </record>
+
 
 
 
