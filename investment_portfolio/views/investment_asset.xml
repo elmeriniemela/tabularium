@@ -20,6 +20,9 @@
 
                 <field name="quantity" optional="show"/>
                 <field name="position" optional="show" sum="Total Position"/>
+                <field name="investment" optional="hide"/>
+                <field name="max_investment" optional="hide"/>
+                <field name="cost_basis" optional="hide"/>
 
                 <field name="profit" widget="monetary" options="{'is_profit': 1}" optional="show" sum="Total Profit"/>
                 <field name="profit_percent" widget="percentage" options="{'is_profit': 1}" optional="show"/>
@@ -27,10 +30,6 @@
                 <field name="currency_id" optional="hide"/>
                 <field name="integration_id" optional="hide"/>
                 <field name="company_currency_id" optional="hide"/>
-                <field name="buy_total" optional="hide" />
-                <field name="avg_buy_price" optional="hide"/>
-                <field name="sell_total" optional="hide" sum="Total"/>
-                <field name="avg_sell_price" optional="hide"/>
 
 
                 <field name="plan_type" optional="hide"/>
@@ -114,8 +113,7 @@
                                     (<field name="last_update" widget="timeago"  class="oe_inline"/>)
                                 </span>
                             </div>
-                            <field name="avg_buy_price" />
-                            <field name="avg_sell_price" attrs="{'invisible': [('quantity', '!=', 0.0)]}"/>
+                            <field name="cost_basis"/>
                             <field name="quantity"/>
                             <field name="position"/>
                             <field name="investment"/>

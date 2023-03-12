@@ -96,12 +96,9 @@ class InvestmentTimeseries(models.Model):
     position = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
     quantity = fields.Float(compute='_compute_aggregate', store=True, digits='Investment Asset quantity')
 
-    buy_total = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
-    sell_total = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
     position = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
 
-    avg_buy_price = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
-    avg_sell_price = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
+    cost_basis = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
 
 
     last_price = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
@@ -511,13 +508,11 @@ class InvestmentAsset(models.Model):
 
     quantity = fields.Float(compute='_compute_aggregate', store=True, digits='Investment Asset quantity', group_operator=None)
 
-    buy_total = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
-    sell_total = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
     position = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
     investment = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
+    max_investment = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
 
-    avg_buy_price = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
-    avg_sell_price = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
+    cost_basis = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
 
 
     last_update = fields.Datetime(compute='_compute_aggregate', store=True)
@@ -666,13 +661,12 @@ class InvestmentAsset(models.Model):
             for line in res:
                 domain = line.get('__domain') or []
                 assets = self.search(line['__domain'])
-                num = 0.0
-                denom = 0.0
+                total_profits = 0.0
+                total_investment = 0.0
                 for asset in assets:
-                    num += (asset.sell_total-asset.buy_total)
-                    denom += asset.buy_total
-                if denom:
-                    line['profit_percent'] = num / denom
+                    total_profits += asset.profit
+                    total_investment += asset.investment
+                line['profit_percent'] = total_profits / total_investment if total_investment else 0.0
         return res
 
 
@@ -737,35 +731,26 @@ class InvestmentAsset(models.Model):
 
     def _get_position(self, market_price, transaction_ids):
         self.ensure_one()
+
         quantity = 0.0
-        buy_total = 0.0
-        sell_total = 0.0
-
-        buy_volume = 0
-        sell_volume = 0
-
-        for tx in transaction_ids:
+        investment = 0.0
+        max_investment = 0.0
+        for tx in transaction_ids[::-1]:
             quantity += tx.quantity
-            payment = tx.payment
-            if tx.quantity > 0:
-                buy_total += payment
-                buy_volume += abs(tx.quantity)
-            else: # Dividends should have 0.0 quantity and they fall here, increasing profit.
-                sell_total += payment
-                sell_volume += abs(tx.quantity)
+            investment += tx.cash_flow
+            max_investment = max(investment, max_investment)
 
-        sell_total += quantity * market_price
-        sell_volume += quantity
+        position = quantity * market_price
+        profit = position-investment
+
         return {
-            'position': quantity * market_price,
+            'position': position,
             'quantity': quantity,
-            'buy_total': buy_total,
-            'sell_total': sell_total,
-            'avg_buy_price': buy_total/buy_volume if buy_volume else 0.0,
-            'avg_sell_price': sell_total/sell_volume if sell_volume else 0.0,
-            'profit': sell_total - buy_total,
-            'investment': abs(sell_total - buy_total) + (quantity * market_price),
-            'profit_percent': (sell_total-buy_total) / buy_total if buy_total else 0.0,
+            'profit': profit,
+            'investment': investment,
+            'cost_basis': investment/quantity if quantity else 0,
+            'profit_percent': profit/max_investment if max_investment else 0,
+            'max_investment': max_investment,
         }
 
 
