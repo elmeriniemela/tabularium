@@ -4,4 +4,9 @@
         <field name="name">Investment Asset quantity</field>
         <field name="digits">8</field>
     </record>
+
+    <record forcecreate="True" id="decimal_interest" model="decimal.precision">
+        <field name="name">Investment Asset Interest</field>
+        <field name="digits">6</field>
+    </record>
 </odoo>

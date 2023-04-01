@@ -573,8 +573,8 @@ class InvestmentAsset(models.Model):
     plan_yield = fields.Monetary(default=0.0)
     plan_cost = fields.Monetary(default=0.0)
     plan_fee = fields.Monetary(default=0.0)
-    plan_yearly_appreciation = fields.Float(group_operator='avg', default=0.0)
-    plan_yearly_interest = fields.Float(group_operator='avg', default=0.0)
+    plan_yearly_appreciation = fields.Float(group_operator='avg', default=0.0, digits='Investment Asset Interest')
+    plan_yearly_interest = fields.Float(group_operator='avg', default=0.0, digits='Investment Asset Interest')
     plan_total_cash_flow = fields.Monetary(readonly=True)
 
 

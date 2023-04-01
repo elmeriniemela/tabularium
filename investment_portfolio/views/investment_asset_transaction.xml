@@ -17,6 +17,7 @@
                 <field name="asset_id" optional="hide"/>
                 <field name="liquid" optional="hide"/>
                 <field name="category_id" optional="hide"/>
+                <field name="prediction" optional="hide" widget="boolean_toggle"/>
             </tree>
         </field>
     </record>
@@ -50,6 +51,7 @@
                             <field name="currency_id" invisible="not context.get('show_all')"/>
                             <field name="asset_id" invisible="not context.get('show_all')"/>
                             <field name="description"/>
+                            <field name="prediction" widget="boolean_toggle"/>
                         </group>
                     </group>
                 </sheet>
