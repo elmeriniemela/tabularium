@@ -1,0 +1,54 @@
+<odoo>
+    <record model="ir.ui.view" id="directory_tree">
+        <field name="name">document.directory.tree</field>
+        <field name="model">document.directory</field>
+        <field name="arch" type="xml">
+            <tree default_order="write_date desc">
+                <field name="name" optional="show"/>
+                <field name="attachment_ids" widget="many2many_tags" optional="show"/>
+                <field name="write_date" optional="show"/>
+                <field name="create_date" optional="hide"/>
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="directory_form">
+        <field name="name">document.directory.form</field>
+        <field name="model">document.directory</field>
+        <field name="arch" type="xml">
+            <form>
+                <div class="oe_title" style="margin-left: auto; margin-right: auto; width: 600px;">
+                    <h1>
+                        <field name="name"/>
+                    </h1>
+                </div>
+                <div class="o_attachment_preview"/>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="directory_search" model="ir.ui.view">
+        <field name="name">document.directory.search</field>
+        <field name="model">document.directory</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="attachment_ids"/>
+            </search>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="action_document_dirs">
+        <field name="name">Document Directories</field>
+        <field name="res_model">document.directory</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem name="Documents" id="root_menu" web_icon="document_directory,static/description/icon.png" sequence="2" action="action_document_dirs"/>
+
+
+</odoo>
