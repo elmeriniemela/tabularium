@@ -464,7 +464,7 @@ class InvestmentAsset(models.Model):
 
     ticker = fields.Char(required=True)
 
-    notes = fields.Text()
+    notes = fields.Html(sanitize=False, translate=False)
 
     company_id = fields.Many2one(
         comodel_name='res.company',
