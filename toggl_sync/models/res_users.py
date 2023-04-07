@@ -69,6 +69,3 @@ class ResUsers(models.Model):
         })
 
 
-    def toggl_update_time_entry(self, time_entry_id, **kwargs):
-        return self.toggl_api_call('put', f'time_entries/{time_entry_id}', **kwargs)
-

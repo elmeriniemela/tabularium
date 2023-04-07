@@ -79,19 +79,15 @@ class TogglEntry(models.Model):
     _inherit = ['mail.thread']
     _check_company_auto = True
 
-    name = fields.Char(required=True)
+    name = fields.Char(required=True, readonly=True)
 
     export_task_url = fields.Char(compute='_compute_export_task_url')
 
     active = fields.Boolean(default=True, tracking=True)
 
-    toggl_name = fields.Char(required=True)
-
     description = fields.Char(tracking=True)
 
     rounded_duration = fields.Float(compute='_compute_toggl_fields', store=True)
-
-    dirty = fields.Boolean(compute='_compute_dirty')
 
     date = fields.Date(compute='_compute_toggl_fields', store=True)
 
@@ -273,7 +269,6 @@ class TogglEntry(models.Model):
 
     def recompute_depends(self):
         self._compute_toggl_fields()
-        self._compute_dirty()
         (self | self.child_ids).filtered(lambda e: e.export_id)._inverse_export_id()
 
     def lock(self):
@@ -285,7 +280,7 @@ class TogglEntry(models.Model):
             (record | record.child_ids).locked = False
 
 
-    @api.depends('name', 'start', 'toggl_name', 'duration', 'duration', 'extra_duration')
+    @api.depends('name', 'start', 'duration', 'duration', 'extra_duration')
     def _compute_toggl_fields(self):
         Task = self.env['toggl.task']
         daily_entries = (self._origin | self.search([('date', 'in', [False]+self.mapped('date'))])).sorted('id')
@@ -328,15 +323,3 @@ class TogglEntry(models.Model):
         for record in self:
             record.revenue = record.rounded_duration * record.timesheet_price
 
-    @api.depends('name', 'toggl_name')
-    def _compute_dirty(self):
-        for record in self:
-            record.dirty = record.name != record.toggl_name
-
-    def push_toggl(self):
-        for record in self:
-            record.env.user.toggl_update_time_entry(
-                time_entry_id=record.toggl_id,
-                json={'time_entry': {'description': record.name}}
-            )
-            record.toggl_name = record.name

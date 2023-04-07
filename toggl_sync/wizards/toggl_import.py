@@ -38,7 +38,6 @@ class TogglImport(models.TransientModel):
 
             toggl_id = entry['id']
             vals = {
-                'toggl_name': entry['description'],
                 'name': entry['description'],
                 'start': date(entry['start']),
                 'stop': date(entry['stop']),

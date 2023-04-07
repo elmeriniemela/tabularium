@@ -4,7 +4,7 @@
         <field name="model">toggl.entry</field>
         <field name="priority">2</field>
         <field name="arch" type="xml">
-            <tree expand="1" default_order="date desc, id asc" editable="top" multi_edit="1" decoration-info="not description" decoration-muted="not active" decoration-warning="dirty" decoration-danger="rounded_duration &lt; total_duration">
+            <tree expand="1" default_order="date desc, id asc" editable="top" multi_edit="1" decoration-muted="not active">
                 <field name="description" width="450px" optional="show"/>
                 <field name="name" optional="hide"/>
                 <field name="task_id" optional="show"/>
@@ -15,7 +15,6 @@
                 <field name="timesheet_price" optional="hide"/>
                 <field name="revenue" optional="show" sum="Total"/>
                 <field name="company_currency_id" optional="hide"/>
-                <field name="dirty" optional="hide"/>
                 <field name="active" optional="hide"/>
                 <field name="toggl_id" optional="hide"/>
                 <field name="export_id" optional="hide"/>
@@ -39,7 +38,6 @@
                     <button name="recompute_depends" string="Re-compute" type="object"/>
                     <button name="update_timesheet_price" string="Update Timesheet Price" type="object"/>
                     <button name="export" string="Export" type="object"/>
-                    <button name="push_toggl" string="Push to Toggl" type="object"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
@@ -75,7 +73,6 @@
                             <group>
                                 <group>
                                     <field name="active"/>
-                                    <field name="dirty"/>
                                     <field name="toggl_id"/>
                                     <field name="export_id"/>
                                     <field name="task_id"/>
@@ -122,11 +119,11 @@
                                 </div>
                                 <div class="o_kanban_record_bottom">
                                     <div class="oe_kanban_bottom_left">
-                                        <span>Rounded:</span>
+                                        <span>Rounded: </span>
                                         <field name="rounded_duration" widget="float_time"/>
                                     </div>
                                     <div class="oe_kanban_bottom_right">
-                                        <span>Total:</span>
+                                        <span>Total: </span>
                                         <field name="total_duration" widget="float_time"/>
                                     </div>
                                 </div>
@@ -182,15 +179,6 @@
                 </group>
             </search>
         </field>
-    </record>
-
-    <record id="push_toggl_action" model="ir.actions.server">
-        <field name="name">Push to Toggl</field>
-        <field name="model_id" ref="model_toggl_entry"/>
-        <field name="binding_model_id" ref="model_toggl_entry"/>
-        <field name="binding_view_types">list</field>
-        <field name="state">code</field>
-        <field name="code">records.push_toggl()</field>
     </record>
 
     <record id="export_action" model="ir.actions.server">
