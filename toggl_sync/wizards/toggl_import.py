@@ -4,6 +4,7 @@ import logging
 import dateutil
 import pytz
 import datetime
+import re
 from odoo import api, fields, models, _
 
 _logger = logging.getLogger(__name__)
@@ -46,7 +47,8 @@ class TogglImport(models.TransientModel):
             if toggl_id in existing:
                 existing[toggl_id].write(vals)
             else:
-                existing[toggl_id] = Entry.with_context(default_toggl_id=toggl_id, default_description=entry['description']).create(vals)
+                desc = re.sub(Entry.task_id_regex, '', entry['description'])
+                existing[toggl_id] = Entry.with_context(default_toggl_id=toggl_id, default_description=desc).create(vals)
 
             Entry += existing[toggl_id]
 

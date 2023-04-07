@@ -6,7 +6,8 @@
         <field name="arch" type="xml">
             <tree expand="1" default_order="date desc, id asc" editable="top" multi_edit="1" decoration-info="not description" decoration-muted="not active" decoration-warning="dirty" decoration-danger="rounded_duration &lt; total_duration">
                 <field name="description" width="450px" optional="show"/>
-                <field name="name" width="400px" optional="show"/>
+                <field name="name" optional="hide"/>
+                <field name="task_id" optional="show"/>
                 <field name="rounded_duration" widget="float_time" sum="Rounded" optional="show"/>
                 <field name="total_duration" widget="float_time" sum="Total" optional="show"/>
                 <field name="date" optional="show"/>
@@ -16,7 +17,6 @@
                 <field name="company_currency_id" optional="hide"/>
                 <field name="dirty" optional="hide"/>
                 <field name="active" optional="hide"/>
-                <field name="task_id" optional="hide"/>
                 <field name="toggl_id" optional="hide"/>
                 <field name="export_id" optional="hide"/>
                 <field name="parent_id" optional="hide"/>

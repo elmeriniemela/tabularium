@@ -22,9 +22,11 @@ class TogglTask(models.Model):
 
     project_name = fields.Char(readonly=True)
     project_id = fields.Integer(readonly=True)
-    price = fields.Monetary(currency_field='company_currency_id')
+
+    sale_line_name = fields.Char(readonly=True)
+    sale_line_id = fields.Integer(readonly=True)
+
     company_id = fields.Many2one(comodel_name='res.company', required=True, default=lambda self: self.env.company, tracking=True)
-    company_currency_id = fields.Many2one(related='company_id.currency_id', string="Company Currency")
 
     entry_ids = fields.One2many(
         comodel_name='toggl.entry',
@@ -44,13 +46,17 @@ class TogglTask(models.Model):
                 ['id', 'in', self.mapped('task_id')],
                 ['active', 'in', [True, False]],
             ]],
-            {'fields': ['sale_line_id', 'project_id', 'id']}
+            {'fields': ['sale_line_id', 'project_id', 'id', 'display_name']}
         )
 
         project_map = {d['id']: d['project_id'] for d in task_res if d['project_id']}
+        sale_line_map = {d['id']: d['sale_line_id'] for d in task_res if d['sale_line_id']}
+        name_map = {d['id']: d['display_name'] for d in task_res if d['display_name']}
 
         for record in self:
             record.project_id, record.project_name = project_map.get(record.task_id, (False, False))
+            record.sale_line_id, record.sale_line_name = sale_line_map.get(record.task_id, (False, False))
+            record.name = name_map.get(record.task_id, record.name)
 
 
     @api.model_create_multi
@@ -131,6 +137,7 @@ class TogglEntry(models.Model):
         store=True,
         readonly=True,
         check_company=True,
+        ondelete='cascade',
     )
 
     child_ids = fields.One2many(
@@ -144,6 +151,10 @@ class TogglEntry(models.Model):
     price_changed = fields.Boolean()
 
     time_period = fields.Char(compute='_compute_time_period')
+
+    @property
+    def task_id_regex(self):
+        return '\[(\d+)\]'
 
     _sql_constraints = [
         ('export_id_uniq', 'unique(export_id)', 'The export_id must be unique!'),
@@ -208,6 +219,9 @@ class TogglEntry(models.Model):
         self.extra_duration -= 7.5/60
 
     def export(self):
+        no_task = self.filtered(lambda e: not e.task_id)
+        if no_task:
+            raise UserError(_("Unable to export %s. Task ID missing.") %  no_task.mapped('name'))
         self.mapped('task_id').fetch()
 
         server_models, dbname, uid, pwd = self.env.user._get_toggl_export_proxy()
@@ -215,7 +229,7 @@ class TogglEntry(models.Model):
         for record in self:
             values = {
                 'date': record.date,
-                'name': ', '.join({e.description for e in (record | record.child_ids) if e.description and e.description != e.name} or '/'),
+                'name': record.description,
                 'task_id': record.task_id.task_id,
                 'project_id': record.task_id.project_id,
                 'unit_amount': record.rounded_duration,
@@ -279,7 +293,7 @@ class TogglEntry(models.Model):
 
 
         for record in daily_entries:
-            ids = [int(m) for m in re.findall('\[(\d+)\]', record.name or '')]
+            ids = [int(m) for m in re.findall(record.task_id_regex, record.name or '')]
             if ids:
                 [task_id] = ids
                 record.task_id = Task.search([('task_id', '=', task_id),('company_id', '=', record.company_id.id)], limit=1) \

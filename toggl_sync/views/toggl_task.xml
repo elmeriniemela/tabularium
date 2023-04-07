@@ -27,9 +27,11 @@
                     <group>
                         <group>
                             <field name="project_name"/>
+                            <field name="sale_line_name"/>
                         </group>
                         <group>
                             <field name="project_id"/>
+                            <field name="sale_line_id"/>
                         </group>
                     </group>
                     <field name="entry_ids"/>
