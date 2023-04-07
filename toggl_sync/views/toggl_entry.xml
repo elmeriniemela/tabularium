@@ -49,8 +49,11 @@
                     <group>
                         <group>
                             <field name="description"/>
-                            <field name="date"/>
-                            <field name="time_period"/>
+                            <label for="date"/>
+                            <div>
+                                <field name="date" class="pr-2"/>
+                                ( <field name="time_period"/> )
+                            </div>
                             <field name="locked" attrs="{'invisible': [('locked', '=', False)]}"/>
                             <field name="parent_id" attrs="{'invisible': [('parent_id', '=', False)]}"/>
                         </group>
