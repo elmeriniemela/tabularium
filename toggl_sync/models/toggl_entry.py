@@ -123,6 +123,8 @@ class TogglEntry(models.Model):
         check_company=True,
     )
 
+    project_name = fields.Char(related='task_id.project_name')
+
     parent_id = fields.Many2one(
         comodel_name='toggl.entry',
         compute='_compute_toggl_fields',

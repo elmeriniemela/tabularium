@@ -144,6 +144,7 @@
             <search string="Toggl Entry">
                 <field name="name"/>
                 <field name="description"/>
+                <field name="project_name"/>
                 <field name="date"/>
                 <field name="start"/>
                 <field name="stop"/>
