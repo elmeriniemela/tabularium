@@ -149,6 +149,10 @@ class TogglEntry(models.Model):
     time_period = fields.Char(compute='_compute_time_period')
 
     @property
+    def timesheet_rounding(self):
+        return 15/60
+
+    @property
     def task_id_regex(self):
         return '\[(\d+)\]'
 
@@ -204,7 +208,7 @@ class TogglEntry(models.Model):
 
     def action_round_up(self):
         self.ensure_one()
-        self.extra_duration += 7.5/60
+        self.extra_duration += self.timesheet_rounding
 
     def action_reset_rounding(self):
         self.ensure_one()
@@ -212,7 +216,7 @@ class TogglEntry(models.Model):
 
     def action_round_down(self):
         self.ensure_one()
-        self.extra_duration -= 7.5/60
+        self.extra_duration -= self.timesheet_rounding
 
     def export(self):
         no_task = self.filtered(lambda e: not e.task_id)
@@ -311,12 +315,12 @@ class TogglEntry(models.Model):
             for child in same_tasks[1:]:
                 child.parent_id = parent
                 child.total_duration = child.duration
-                child.rounded_duration = roundto(child.duration or 0.0, base=0.25)
+                child.rounded_duration = roundto(child.duration or 0.0, base=self.timesheet_rounding)
                 total_duration += child.duration
                 extra_duration += child.extra_duration
 
             parent.total_duration = total_duration
-            parent.rounded_duration = roundto(parent.total_duration + extra_duration or 0.0, base=0.25)
+            parent.rounded_duration = roundto(parent.total_duration + extra_duration or 0.0, base=self.timesheet_rounding)
 
     @api.depends('rounded_duration', 'timesheet_price')
     def _compute_revenue(self):
