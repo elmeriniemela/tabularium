@@ -119,11 +119,11 @@
                                 </div>
                                 <div class="o_kanban_record_bottom">
                                     <div class="oe_kanban_bottom_left">
-                                        <span>Rounded: </span>
+                                        <span class="pr-2">Rounded:</span>
                                         <field name="rounded_duration" widget="float_time"/>
                                     </div>
                                     <div class="oe_kanban_bottom_right">
-                                        <span>Total: </span>
+                                        <span class="pr-2">Total:</span>
                                         <field name="total_duration" widget="float_time"/>
                                     </div>
                                 </div>
