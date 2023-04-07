@@ -195,7 +195,7 @@ class TogglEntry(models.Model):
 
     def action_round_up(self):
         self.ensure_one()
-        self.extra_duration = 7.5/60
+        self.extra_duration += 7.5/60
 
     def action_reset_rounding(self):
         self.ensure_one()
@@ -203,7 +203,7 @@ class TogglEntry(models.Model):
 
     def action_round_down(self):
         self.ensure_one()
-        self.extra_duration = -7.5/60
+        self.extra_duration -= 7.5/60
 
     def export(self):
         self.mapped('task_id').fetch()
@@ -304,8 +304,8 @@ class TogglEntry(models.Model):
                 total_duration += child.duration
                 extra_duration += child.extra_duration
 
-            parent.total_duration = total_duration + extra_duration
-            parent.rounded_duration = roundto(parent.total_duration or 0.0, base=0.25)
+            parent.total_duration = total_duration
+            parent.rounded_duration = roundto(parent.total_duration + extra_duration or 0.0, base=0.25)
 
     @api.depends('rounded_duration', 'timesheet_price')
     def _compute_revenue(self):

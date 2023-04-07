@@ -63,27 +63,46 @@
                     <group>
                         <group>
                             <field name="description"/>
-                            <field name="active"/>
-                            <field name="original_price"/>
-                            <field name="timesheet_price"/>
-                            <field name="dirty"/>
-                            <field name="toggl_id"/>
-                            <field name="export_id"/>
-                            <field name="task_id"/>
+                            <field name="date"/>
+                            <field name="time_period"/>
                             <field name="locked" attrs="{'invisible': [('locked', '=', False)]}"/>
                             <field name="parent_id" attrs="{'invisible': [('parent_id', '=', False)]}"/>
                         </group>
                         <group>
-                            <field name="date"/>
-                            <field name="time_period"/>
-                            <field name="duration" widget="float_time"/>
-                            <field name="extra_duration" widget="float_time"/>
                             <field name="rounded_duration" widget="float_time"/>
                             <field name="total_duration" widget="float_time"/>
-                            <field name="export_task_url" widget="url"/>
+                            <div>
+                                <button icon="fa-arrow-up" name="action_round_up" type="object" attrs="{'invisible': [('parent_id', '!=', False)]}"/>
+                                <button icon="fa-bullseye" name="action_reset_rounding" type="object" attrs="{'invisible': [('parent_id', '!=', False)]}"/>
+                                <button icon="fa-arrow-down" name="action_round_down" type="object" attrs="{'invisible': [('parent_id', '!=', False)]}"/>
+                                <button string="External Task" name="action_view_task" type="object" attrs="{'invisible': [('parent_id', '!=', False)]}"/>
+                            </div>
                         </group>
                     </group>
-                    <field name="child_ids"/>
+                    <notebook>
+                        <page string="Child Entries">
+                            <field name="child_ids"/>
+                        </page>
+                        <page string="Details">
+                            <group>
+                                <group>
+                                    <field name="active"/>
+                                    <field name="dirty"/>
+                                    <field name="toggl_id"/>
+                                    <field name="export_id"/>
+                                    <field name="task_id"/>
+                                </group>
+                                <group>
+                                    <field name="original_price"/>
+                                    <field name="timesheet_price"/>
+                                    <field name="duration" widget="float_time"/>
+                                    <field name="extra_duration" widget="float_time"/>
+                                    <field name="export_task_url" widget="url"/>
+                                </group>
+                            </group>
+                        </page>
+
+                    </notebook>
                 </sheet>
                 <div class="oe_chatter">
                     <field name="message_follower_ids" widget="mail_followers"/>
@@ -101,7 +120,7 @@
                 <field name="active"/>
                 <templates>
                     <t t-name="kanban-box">
-                        <div class="oe_kanban_global_click">
+                        <div class="oe_kanban_global_click_edit">
                             <div class="oe_kanban_content">
                                 <div class="o_kanban_record_bottom">
                                     <div class="oe_kanban_bottom_left" style="font-weight: bold;">
