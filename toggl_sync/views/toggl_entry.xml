@@ -4,7 +4,7 @@
         <field name="model">toggl.entry</field>
         <field name="priority">2</field>
         <field name="arch" type="xml">
-            <tree default_order="date desc, id asc" editable="top" multi_edit="1" decoration-info="not description" decoration-muted="not active" decoration-warning="dirty" decoration-danger="rounded_duration &lt; total_duration">
+            <tree expand="1" default_order="date desc, id asc" editable="top" multi_edit="1" decoration-info="not description" decoration-muted="not active" decoration-warning="dirty" decoration-danger="rounded_duration &lt; total_duration">
                 <field name="description" width="450px" optional="show"/>
                 <field name="name" width="400px" optional="show"/>
                 <field name="rounded_duration" widget="float_time" sum="Rounded" optional="show"/>
@@ -172,7 +172,7 @@
                 <filter string="Price Changed" name="price_changed" domain="[('price_changed', '=', True)]"/>
                 <separator/>
                 <group expand="1" string="Group by">
-                    <filter string="Date" name="group_date" context="{'group_by': 'date:month'}"/>
+                    <filter string="Date" name="group_date" context="{'group_by': 'date:day'}"/>
                     <filter string="Task" name="group_task_id" context="{'group_by': 'task_id'}"/>
                 </group>
             </search>
@@ -243,6 +243,7 @@
             {
                 'search_default_not_exported': 1,
                 'search_default_not_parent_id': 1,
+                'search_default_group_date': 1,
             }
         </field>
     </record>
@@ -258,6 +259,7 @@
             {
                 'search_default_not_exported': 1,
                 'search_default_not_parent_id': 1,
+                'search_default_group_date': 1,
             }
         </field>
     </record>
