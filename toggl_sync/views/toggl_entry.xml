@@ -11,6 +11,7 @@
                 <field name="rounded_duration" widget="float_time" sum="Rounded" optional="show"/>
                 <field name="total_duration" widget="float_time" sum="Total" optional="show"/>
                 <field name="date" optional="show"/>
+                <field name="time_period" optional="hide"/>
                 <field name="original_price" optional="hide"/>
                 <field name="timesheet_price" optional="hide"/>
                 <field name="revenue" optional="show" sum="Total"/>
