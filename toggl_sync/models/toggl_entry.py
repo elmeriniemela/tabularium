@@ -178,9 +178,10 @@ class TogglEntry(models.Model):
             record.export_task_url = '%sweb#id=%d&view_type=form&model=project.task' % (url, record.task_id.task_id or 0)
 
     def _compute_time_period(self):
-        time_str = lambda dt: fields.Datetime.context_timestamp(self, dt).strftime('%H:%M:%S')
+        time_str = lambda dt: fields.Datetime.context_timestamp(self, dt).strftime('%H:%M')
         for record in self:
-            record.time_period = f"{time_str(record.start)} - {time_str(record.stop)}"
+            entries = (record | record.child_ids)
+            record.time_period = ', '.join(f"{time_str(e.start)} - {time_str(e.stop)}" for e in entries)
 
     def write(self, vals):
         res = super().write(vals)
