@@ -21,24 +21,12 @@
                 <field name="export_id" optional="hide"/>
                 <field name="parent_id" optional="hide"/>
                 <field name="locked" optional="hide"/>
-            </tree>
-        </field>
-    </record>
-
-    <record id="entry_list_buttons" model="ir.ui.view">
-        <field name="name">toggl.entry.list.buttons</field>
-        <field name="model">toggl.entry</field>
-        <field name="mode">primary</field>
-        <field name="priority">1</field>
-        <field name="inherit_id" ref="entry_list"/>
-        <field name="arch" type="xml">
-            <xpath expr="//field[@name='locked']" position="after">
                 <button icon="fa-arrow-up" name="action_round_up" type="object" attrs="{'invisible': [('parent_id', '!=', False)]}"/>
                 <button icon="fa-bullseye" name="action_reset_rounding" type="object" attrs="{'invisible': [('parent_id', '!=', False)]}"/>
                 <button icon="fa-arrow-down" name="action_round_down" type="object" attrs="{'invisible': [('parent_id', '!=', False)]}"/>
                 <button string="External Task" name="action_view_task" type="object" attrs="{'invisible': [('parent_id', '!=', False)]}"/>
                 <button string="Toggl Entry" name="action_open_form" type="object"/>
-            </xpath>
+            </tree>
         </field>
     </record>
 
@@ -155,8 +143,11 @@
                 <filter string="Active" name="active" domain="[('active', '=', True)]"/>
                 <filter string="Archived" name="not_active" domain="[('active', '=', False)]"/>
                 <separator/>
+                <filter name="date_filter" date="date"/>
                 <filter string="Today" name="not_today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
                 <filter string="Before Today" name="not_today" domain="[('date', '&lt;', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="Last Month" name="last_month" domain="[('date', '&gt;=', (context_today() + relativedelta(months=-1)).strftime('%Y-%m-01'))]"/>
+                <filter string="This Month" name="this_month" domain="[('date','&gt;=',time.strftime('%Y-%m-01'))]"/>
                 <separator/>
                 <filter string="Exported" name="exported" domain="[('export_id', '!=', False)]"/>
                 <filter string="Not Exported" name="not_exported" domain="[('export_id', '=', False)]"/>
@@ -239,37 +230,19 @@
     <record model="ir.actions.act_window" id="entry_action">
         <field name="name">Toggl Entries</field>
         <field name="res_model">toggl.entry</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">tree,kanban,form</field>
         <field name="context">
             {
                 'search_default_not_exported': 1,
                 'search_default_not_parent_id': 1,
                 'search_default_group_date': 1,
+                'search_default_this_month': 1,
             }
         </field>
     </record>
-
-    <record model="ir.actions.act_window" id="simple_entry_action">
-        <field name="name">Simplified Toggl Entries</field>
-        <field name="res_model">toggl.entry</field>
-        <field name="view_ids" eval="[(5, 0, 0),
-            (0, 0, {'view_mode': 'tree', 'view_id': ref('entry_list')}),
-            (0, 0, {'view_mode': 'kanban'}),
-            (0, 0, {'view_mode': 'form'})]"/>
-        <field name="context">
-            {
-                'search_default_not_exported': 1,
-                'search_default_not_parent_id': 1,
-                'search_default_group_date': 1,
-            }
-        </field>
-    </record>
-
-
 
     <menuitem name="Toggl Sync" id="menu_root" action="entry_action" web_icon="toggl_sync,static/description/icon.png" sequence="2"/>
     <menuitem name="Entries" parent="menu_root" id="menu_entries" action="entry_action" sequence="1"/>
-    <menuitem name="Simplified Entries" parent="menu_root" id="menu_simple_entries" action="simple_entry_action" sequence="2"/>
     <menuitem name="Import Entries" parent="menu_root" id="menu_import" action="import_action" sequence="3"/>
 
 </odoo>
