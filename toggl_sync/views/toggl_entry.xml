@@ -110,12 +110,24 @@
                     <t t-name="kanban-box">
                         <div class="oe_kanban_global_click_edit">
                             <div class="oe_kanban_content">
+                                <div class="o_kanban_record_top">
+                                    <div class="o_kanban_record_headings">
+                                        <strong class="o_kanban_record_title">
+                                            <field name="description"/>
+                                        </strong>
+                                    </div>
+                                </div>
+                                <div class="o_kanban_record_body">
+                                    <field name="task_id"/>
+                                </div>
                                 <div class="o_kanban_record_bottom">
-                                    <div class="oe_kanban_bottom_left" style="font-weight: bold;">
-                                        <field name="description"/>
+                                    <div class="oe_kanban_bottom_left">
+                                        <span>Rounded:</span>
+                                        <field name="rounded_duration" widget="float_time"/>
                                     </div>
                                     <div class="oe_kanban_bottom_right">
-                                        <field name="rounded_duration" widget="float_time"/>
+                                        <span>Total:</span>
+                                        <field name="total_duration" widget="float_time"/>
                                     </div>
                                 </div>
                             </div>
@@ -146,6 +158,7 @@
                 <filter name="date_filter" date="date"/>
                 <filter string="Today" name="not_today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
                 <filter string="Before Today" name="not_today" domain="[('date', '&lt;', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="1 Month" name="one_month" domain="[('date', '&gt;=', (context_today() + relativedelta(months=-1)).strftime('%Y-%m-%d'))]"/>
                 <filter string="Last Month" name="last_month" domain="[('date', '&gt;=', (context_today() + relativedelta(months=-1)).strftime('%Y-%m-01'))]"/>
                 <filter string="This Month" name="this_month" domain="[('date','&gt;=',time.strftime('%Y-%m-01'))]"/>
                 <separator/>
@@ -236,7 +249,7 @@
                 'search_default_not_exported': 1,
                 'search_default_not_parent_id': 1,
                 'search_default_group_date': 1,
-                'search_default_this_month': 1,
+                'search_default_one_month': 1,
             }
         </field>
     </record>
