@@ -48,9 +48,11 @@ class BitcoinTx(models.Model):
         help="The inputs where outputs of this transaction are spent.",
     )
 
+    _sql_constraints = [
+        ('uniq', 'unique(txid)', 'TXID should be unique!')
+    ]
+
     def rawtx_to_vals(self, rawtx):
-        BitcoinTx = self.env['bitcoin.tx'].with_context(disable_auto_populate=True)
-        BitcoinBlock = self.env['bitcoin.block'].with_context(disable_auto_populate=True)
         vals = {
             'txid': rawtx['txid'],
             'in_active_chain': rawtx.get('in_active_chain'),
@@ -64,7 +66,7 @@ class BitcoinTx(models.Model):
             'vin_ids': [
                 Command.create({
                     'sequence': vin['sequence'],
-                    'vout_tx_id': BitcoinTx.create({'txid': vin.get('txid')}).id if vin.get('txid') else False,
+                    'vout_tx_id': vin.get('txid', False),
                     'vout': vin.get('vout', False),
                     'coinbase': vin.get('coinbase', False),
                 }) for vin in rawtx['vin']
@@ -80,7 +82,7 @@ class BitcoinTx(models.Model):
             ]
         }
         if rawtx.get('blockhash'):
-            vals['block_id'] = BitcoinBlock.create({'hash': rawtx['blockhash']}).id
+            vals['block_id'] = self.env['bitcoin.block'].create({'hash': rawtx['blockhash']}).id
         return vals
 
     @api.model
@@ -109,7 +111,7 @@ class BitcoinTx(models.Model):
             if field == 'txid' and operator == '=':
                 tx = self.getrawtransaction(value)
                 if tx:
-                    auto = self.with_context(disable_auto_populate=True).create(tx)
+                    auto = self.create(tx)
                     res = 1 if count else auto.ids
         return res
 
@@ -118,14 +120,23 @@ class BitcoinTx(models.Model):
         for record in self:
             record.write(record.getrawtransaction(record.txid, blockhash=record.block_id.hash))
 
-    @api.model
-    def create(self, vals):
-        existing = self.search([('txid', '=', vals['txid'])])
-        if existing:
-            if not existing.fee and vals.get('fee'):
-                existing.fee = vals['fee']
-            return existing
-        return super().create(vals)
+    @api.model_create_multi
+    def create(self, vals_list):
+        existing = self.with_context(disable_auto_populate=True).search([('txid', 'in', [vals['txid'] for vals in vals_list])])
+        block_id = self.env.context.get('default_block_id')
+        if block_id:
+            existing.write({'block_id': block_id})
+
+        vals_map = {vals['txid']: vals for vals in vals_list}
+        for tx in existing:
+            vals = vals_map[tx.txid]
+            if not tx.fee and vals.get('fee'):
+                tx.fee = vals['fee']
+
+
+        existing_txids = set(existing.mapped('txid'))
+        unique_vals = {vals['txid']: vals for vals in vals_list if vals['txid'] not in existing_txids}
+        return super().create(list(unique_vals.values())) + existing
 
 
 
@@ -157,18 +168,29 @@ class BitcoinIn(models.Model):
     coinbase = fields.Char()
 
     _sql_constraints = [
-        ('uniq', 'unique(vout_tx_id, vout)', 'Same transaction output can not be spent twice!'),
+        ('uniq_vout', 'unique(vout_tx_id, vout)', 'Same transaction output can not be spent twice!'),
+        ('uniq_coinbase', 'unique(coinbase)', 'The coinbase should be unique!'),
     ]
 
-    @api.model
-    def create(self, vals):
-        if vals.get('coinbase'):
-            existing = self.search([('coinbase', '=', vals['coinbase'])])
-        else:
-            existing = self.search([('vout_tx_id', '=', vals['vout_tx_id']),('vout', '=', vals['vout'])])
-        if existing:
-            return existing
-        return super().create(vals)
+    @api.model_create_multi
+    def create(self, vals_list):
+        existing = self.browse()
+        id_map = {t.txid: t.id for t in self.env['bitcoin.tx'].create([{'txid': v['vout_tx_id']} for v in vals_list if isinstance(v['vout_tx_id'], str)])}
+
+        filtered_vals_list = []
+        for vals in vals_list:
+            if vals.get('coinbase'):
+                found = self.search([('coinbase', '=', vals['coinbase'])])
+            else:
+                if isinstance(vals['vout_tx_id'], str):
+                    vals['vout_tx_id'] = id_map[vals['vout_tx_id']]
+                found = self.search([('vout_tx_id', '=', vals['vout_tx_id']),('vout', '=', vals['vout'])])
+            if found:
+                existing += found
+            else:
+                filtered_vals_list.append(vals)
+
+        return super().create(filtered_vals_list) + existing
 
 
 class BitcoinOut(models.Model):
@@ -195,9 +217,14 @@ class BitcoinOut(models.Model):
         ('uniq', 'unique(tx_id, n)', 'The VOUT index must be unique within a transaction')
     ]
 
-    @api.model
-    def create(self, vals):
-        existing = self.search([('tx_id', '=', vals['tx_id']),('n', '=', vals['n'])])
-        if existing:
-            return existing
-        return super().create(vals)
+    @api.model_create_multi
+    def create(self, vals_list):
+        filtered_vals_list = []
+        existing = self.browse()
+        for vals in vals_list:
+            found = self.search([('tx_id', '=', vals['tx_id']),('n', '=', vals['n'])])
+            if found:
+                existing += found
+            else:
+                filtered_vals_list.append(vals)
+        return super().create(filtered_vals_list) + existing

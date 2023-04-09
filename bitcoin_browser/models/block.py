@@ -30,6 +30,10 @@ class BitcoinBlock(models.Model):
         help="Bitcoin wallet software gives the impression that satoshis are sent from and to wallets, but bitcoins really move from transaction to transaction. Each transaction spends the satoshis previously received in one or more earlier transactions, so the input of one transaction is the output of a previous transaction. A single transaction can create multiple outputs, as would be the case when sending to multiple addresses, but each output of a particular transaction can only be used as an input once in the block chain. Any subsequent reference is a forbidden double spend—an attempt to spend the same satoshis twice."
     )
 
+    _sql_constraints = [
+        ('uniq', 'unique(hash)', 'The block hash should be unique!')
+    ]
+
     def unlink(self):
         self.mapped('tx_ids.vin_ids.vout_tx_id').unlink() # Preceeding empty transactions (only txid), that were created on the fly based on 'vin'.
         return super().unlink()
@@ -57,13 +61,11 @@ class BitcoinBlock(models.Model):
             'n_tx': getblock['nTx'],
         }
 
-        BitcoinTx = self.env['bitcoin.tx'].with_context(disable_auto_populate=True)
         if tx:
             tx_ids = []
             for rawtx in getblock['tx']:
-                txvals = BitcoinTx.rawtx_to_vals(rawtx)
-                tx = BitcoinTx.create(txvals)
-                tx_ids.append(Command.link(tx.id))
+                txvals = self.tx_ids.rawtx_to_vals(rawtx)
+                tx_ids.append(Command.create(txvals))
 
             vals['tx_ids'] = tx_ids
 
@@ -72,6 +74,7 @@ class BitcoinBlock(models.Model):
     def refresh(self):
         for record in self:
             tx = record.n_tx != len(record.tx_ids)
+            record = record.with_context(default_block_id=record.id)
             record.write(record.getblock(record.hash, tx=tx))
 
     @api.model
@@ -86,5 +89,17 @@ class BitcoinBlock(models.Model):
                     auto = self.with_context(disable_auto_populate=True).create(block)
                     res = 1 if count else auto.ids
         return res
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        filtered_vals_list = []
+        existing = self.browse()
+        for vals in vals_list:
+            found = self.with_context(disable_auto_populate=True).search([('hash', '=', vals['hash'])])
+            if found:
+                existing += found
+            else:
+                filtered_vals_list.append(vals)
+        return super().create(filtered_vals_list) + existing
 
 

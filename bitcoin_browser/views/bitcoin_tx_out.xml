@@ -3,7 +3,7 @@
         <field name="name">bitcoin.tx.out.tree</field>
         <field name="model">bitcoin.tx.out</field>
         <field name="arch" type="xml">
-            <tree>
+            <tree create="false">
                 <field name="tx_id" optional="hide"/>
                 <field name="n"/>
                 <field name="type"/>

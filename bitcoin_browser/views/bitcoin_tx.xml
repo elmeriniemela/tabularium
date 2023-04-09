@@ -3,7 +3,7 @@
         <field name="name">bitcoin.tx.tree</field>
         <field name="model">bitcoin.tx</field>
         <field name="arch" type="xml">
-            <tree>
+            <tree create="false">
                 <field name="txid" optional="show"/>
                 <field name="locktime"/>
                 <field name="size"/>
@@ -17,7 +17,7 @@
         <field name="name">bitcoin.tx.form</field>
         <field name="model">bitcoin.tx</field>
         <field name="arch" type="xml">
-            <form>
+            <form create="false" edit="false">
                 <header>
                     <button name="refresh" type="object" string="Refresh" icon="fa-cogs"/>
                 </header>

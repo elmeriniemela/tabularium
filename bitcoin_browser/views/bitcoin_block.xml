@@ -3,7 +3,7 @@
         <field name="name">bitcoin.block.tree</field>
         <field name="model">bitcoin.block</field>
         <field name="arch" type="xml">
-            <tree>
+            <tree create="false">
                 <field name="hash" optional="show"/>
                 <field name="time"/>
                 <field name="mediantime"/>
@@ -16,7 +16,7 @@
         <field name="name">bitcoin.block.form</field>
         <field name="model">bitcoin.block</field>
         <field name="arch" type="xml">
-            <form>
+            <form create="false" edit="false">
                 <header>
                     <button name="refresh" type="object" string="Refresh" icon="fa-cogs"/>
                 </header>
