@@ -1,0 +1,34 @@
+<odoo>
+    <record id="tree_tx_out" model="ir.ui.view">
+        <field name="name">bitcoin.tx.out.tree</field>
+        <field name="model">bitcoin.tx.out</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="tx_id" optional="hide"/>
+                <field name="n"/>
+                <field name="type"/>
+                <field name="address"/>
+                <field name="asm" optional="show"/>
+                <field name="value"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="search_tx_out" model="ir.ui.view">
+        <field name="name">bitcoin.tx.out.search</field>
+        <field name="model">bitcoin.tx.out</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="address"/>
+                <field name="tx_id"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_tx_out" model="ir.actions.act_window">
+        <field name="name">Outputs</field>
+        <field name="res_model">bitcoin.tx.out</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+</odoo>

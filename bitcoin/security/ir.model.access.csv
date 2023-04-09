@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+
+access_bitcoin_block,access_bitcoin_block,model_bitcoin_block,base.group_user,1,1,1,1
+access_bitcoin_tx,access_bitcoin_tx,model_bitcoin_tx,base.group_user,1,1,1,1
+access_bitcoin_tx_in,access_bitcoin_tx_in,model_bitcoin_tx_in,base.group_user,1,1,1,1
+access_bitcoin_tx_out,access_bitcoin_tx_out,model_bitcoin_tx_out,base.group_user,1,1,1,1

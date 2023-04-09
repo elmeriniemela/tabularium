@@ -1,0 +1,33 @@
+<odoo>
+    <record id="tree_tx_in" model="ir.ui.view">
+        <field name="name">bitcoin.tx.in.tree</field>
+        <field name="model">bitcoin.tx.in</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="tx_id" optional="hide"/>
+                <field name="sequence"/>
+                <field name="vout_tx_id"/>
+                <field name="vout"/>
+                <field name="coinbase"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="search_tx_in" model="ir.ui.view">
+        <field name="name">bitcoin.tx.in.search</field>
+        <field name="model">bitcoin.tx.in</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="tx_id"/>
+                <field name="vout_tx_id"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_tx_in" model="ir.actions.act_window">
+        <field name="name">Inputs</field>
+        <field name="res_model">bitcoin.tx.in</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+</odoo>

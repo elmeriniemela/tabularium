@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "Document Directory",
+    'name': "Bitcoin",
     'author': "Elmeri Niemelä",
     'website': "https://eniemela.fi",
     'license': 'LGPL-3',
@@ -13,6 +13,11 @@
     'application': True,
     'data': [
         'security/ir.model.access.csv',
-        'views/document_directory.xml',
+        'data/decimal.xml',
+        'views/bitcoin_block.xml',
+        'views/bitcoin_tx.xml',
+        'views/bitcoin_tx_in.xml',
+        'views/bitcoin_tx_out.xml',
+        'views/menuitems.xml',
     ],
 }

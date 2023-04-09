@@ -1,0 +1,74 @@
+<odoo>
+    <record id="tree_tx" model="ir.ui.view">
+        <field name="name">bitcoin.tx.tree</field>
+        <field name="model">bitcoin.tx</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="txid" optional="show"/>
+                <field name="locktime"/>
+                <field name="size"/>
+                <field name="vsize"/>
+                <field name="fee"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="form_tx" model="ir.ui.view">
+        <field name="name">bitcoin.tx.form</field>
+        <field name="model">bitcoin.tx</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="refresh" type="object" string="Refresh" icon="fa-cogs"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="txid"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="block_id"/>
+                            <field name="hash"/>
+                            <field name="version"/>
+                            <field name="size"/>
+                            <field name="vsize"/>
+                            <field name="weight"/>
+                            <field name="locktime"/>
+                            <field name="fee"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Inputs">
+                            <field name="vin_ids"/>
+                        </page>
+                        <page string="Outputs">
+                            <field name="vout_ids"/>
+                        </page>
+                        <page string="Used In">
+                            <field name="spent_input_ids"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="search_tx" model="ir.ui.view">
+        <field name="name">bitcoin.tx.search</field>
+        <field name="model">bitcoin.tx</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="txid" filter_domain="[('txid', '=', self)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_tx" model="ir.actions.act_window">
+        <field name="name">Transactions</field>
+        <field name="res_model">bitcoin.tx</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+</odoo>

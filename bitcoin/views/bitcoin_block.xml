@@ -1,0 +1,70 @@
+<odoo>
+    <record id="tree_block" model="ir.ui.view">
+        <field name="name">bitcoin.block.tree</field>
+        <field name="model">bitcoin.block</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="hash" optional="show"/>
+                <field name="time"/>
+                <field name="mediantime"/>
+                <field name="n_tx"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="form_block" model="ir.ui.view">
+        <field name="name">bitcoin.block.form</field>
+        <field name="model">bitcoin.block</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="refresh" type="object" string="Refresh" icon="fa-cogs"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="hash"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="confirmations"/>
+                            <field name="height"/>
+                            <field name="merkleroot"/>
+                            <field name="previousblockhash"/>
+                        </group>
+                        <group>
+                            <field name="time"/>
+                            <field name="mediantime"/>
+                            <field name="n_tx"/>
+                            <field name="difficulty"/>
+                            <field name="chainwork"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Transactions">
+                            <field name="tx_ids"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="search_block" model="ir.ui.view">
+        <field name="name">bitcoin.block.search</field>
+        <field name="model">bitcoin.block</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="hash" filter_domain="[('hash', '=', self)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_block" model="ir.actions.act_window">
+        <field name="name">Blocks</field>
+        <field name="res_model">bitcoin.block</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+</odoo>
