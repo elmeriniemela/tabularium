@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import datetime
+import tinyrpc
 
-from odoo import api, fields, models, Command, _
+from odoo import api, exceptions, fields, models, Command, _
 
 class BitcoinBlock(models.Model):
     _name = 'bitcoin.block'
@@ -31,13 +32,14 @@ class BitcoinBlock(models.Model):
 
     @api.model
     def getblock(self, hash, tx=False):
-        if len(hash) != 64:
-            return None
-
         verbosity = 2 if tx else 1
         proxy = self.env['ir.config_parameter'].bitcoind_proxy()
 
-        getblock = proxy.getblock(hash, verbosity)
+        try:
+            getblock = proxy.getblock(hash, verbosity)
+        except tinyrpc.protocols.jsonrpc.JSONRPCError as error:
+            raise exceptions.UserError(error.args[0])
+
         vals = {
             'hash': hash,
             'confirmations': getblock['confirmations'],

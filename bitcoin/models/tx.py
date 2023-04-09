@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import datetime
+import tinyrpc
 
-from odoo import api, fields, models, Command, _
+from odoo import api, exceptions, fields, models, Command, _
 
 
 class BitcoinTx(models.Model):
@@ -92,7 +93,11 @@ class BitcoinTx(models.Model):
         if blockhash:
             args.append(blockhash)
 
-        rawtx = proxy.getrawtransaction(*args)
+        try:
+            rawtx = proxy.getrawtransaction(*args)
+        except tinyrpc.protocols.jsonrpc.JSONRPCError as error:
+            raise exceptions.UserError(error.args[0])
+
         return self.rawtx_to_vals(rawtx)
 
     @api.model
