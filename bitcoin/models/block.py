@@ -30,6 +30,10 @@ class BitcoinBlock(models.Model):
         help="Bitcoin wallet software gives the impression that satoshis are sent from and to wallets, but bitcoins really move from transaction to transaction. Each transaction spends the satoshis previously received in one or more earlier transactions, so the input of one transaction is the output of a previous transaction. A single transaction can create multiple outputs, as would be the case when sending to multiple addresses, but each output of a particular transaction can only be used as an input once in the block chain. Any subsequent reference is a forbidden double spend—an attempt to spend the same satoshis twice."
     )
 
+    def unlink(self):
+        self.mapped('tx_ids.vin_ids.vout_tx_id').unlink() # Preceeding empty transactions (only txid), that were created on the fly based on 'vin'.
+        return super().unlink()
+
     @api.model
     def getblock(self, hash, tx=False):
         verbosity = 2 if tx else 1

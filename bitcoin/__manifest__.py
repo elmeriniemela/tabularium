@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "Bitcoin",
+    'name': "Bitcoin Browser",
     'author': "Elmeri Niemelä",
     'website': "https://eniemela.fi",
     'license': 'LGPL-3',
