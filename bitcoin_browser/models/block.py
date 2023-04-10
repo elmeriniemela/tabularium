@@ -9,10 +9,12 @@ class BitcoinBlock(models.Model):
     _name = 'bitcoin.block'
     _description = 'Bitcoin Block'
     _rec_name = 'hash'
+    _order = 'height desc'
 
     hash = fields.Char(required=True, help="The hash of the block header.")
     confirmations = fields.Integer(help="The number of confirmations, or -1 if the block is not on the main chain")
     height = fields.Integer(help="The block height or index.")
+    version = fields.Integer()
 
     merkleroot = fields.Char(help="Copies of each transaction are hashed, and the hashes are then paired, hashed, paired again, and hashed again until a single hash remains, the merkle root of a merkle tree.")
     time = fields.Datetime(help="The timestamp is chosen by the miners, and has some restrictions on it such as it can't be too far in the future/past (no more than 2 hours into the future), but it is not strictly increasing.")
@@ -34,9 +36,20 @@ class BitcoinBlock(models.Model):
         ('uniq', 'unique(hash)', 'The block hash should be unique!')
     ]
 
-    def unlink(self):
-        self.mapped('tx_ids.vin_ids.vout_tx_id').unlink() # Preceeding empty transactions (only txid), that were created on the fly based on 'vin'.
-        return super().unlink()
+
+    @api.model
+    def cron_fetch(self):
+        mintime_str = self.env['ir.config_parameter'].sudo().get_param('bitoind.mintime', '2023-04-01 00:00:00')
+        mintime = datetime.datetime.strptime(mintime_str, '%Y-%m-%d %H:%M:%S')
+        proxy = self.env['ir.config_parameter'].bitcoind_proxy()
+        getblockchaininfo = proxy.getblockchaininfo()
+        current_hash = getblockchaininfo['bestblockhash']
+        current_block = self.search([('hash', '=', current_hash)])
+        while mintime <= current_block.mediantime:
+            self.env.cr.commit()
+            current_block = self.search([('hash', '=', current_block.previousblockhash)])
+
+
 
     @api.model
     def getblock(self, hash, tx=False):

@@ -62,7 +62,7 @@ class BitcoinTx(models.Model):
             'vsize': rawtx['vsize'],
             'weight': rawtx['weight'],
             'locktime': rawtx['locktime'],
-            'fee': rawtx.get('fee', 0.0),
+            'fee': self.fee or rawtx.get('fee', 0.0),
             'vin_ids': [
                 Command.create({
                     'sequence': vin['sequence'],

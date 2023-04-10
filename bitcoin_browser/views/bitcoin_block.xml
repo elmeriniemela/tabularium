@@ -5,6 +5,7 @@
         <field name="arch" type="xml">
             <tree create="false">
                 <field name="hash" optional="show"/>
+                <field name="height"/>
                 <field name="time"/>
                 <field name="mediantime"/>
                 <field name="n_tx"/>

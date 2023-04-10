@@ -13,6 +13,26 @@
         </field>
     </record>
 
+    <record id="form_tx_in" model="ir.ui.view">
+        <field name="name">bitcoin.tx.in.form</field>
+        <field name="model">bitcoin.tx.in</field>
+        <field name="arch" type="xml">
+            <form create="false" edit="false">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="tx_id" invisible="not context.get('show_all')"/>
+                            <field name="sequence"/>
+                            <field name="vout_tx_id"/>
+                            <field name="vout"/>
+                            <field name="coinbase"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
     <record id="search_tx_in" model="ir.ui.view">
         <field name="name">bitcoin.tx.in.search</field>
         <field name="model">bitcoin.tx.in</field>
@@ -28,6 +48,7 @@
         <field name="name">Inputs</field>
         <field name="res_model">bitcoin.tx.in</field>
         <field name="view_mode">tree,form</field>
+        <field name="context">{'show_all': True}</field>
     </record>
 
 </odoo>

@@ -14,6 +14,7 @@
     'data': [
         'security/ir.model.access.csv',
         'data/decimal.xml',
+        'data/cron.xml',
         'views/bitcoin_block.xml',
         'views/bitcoin_tx.xml',
         'views/bitcoin_tx_in.xml',
