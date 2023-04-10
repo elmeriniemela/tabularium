@@ -9,6 +9,7 @@
                 <field name="vout_tx_id"/>
                 <field name="vout"/>
                 <field name="coinbase"/>
+                <field name="coinbase_ascii"/>
                 <field name="spent_output_id"/>
             </tree>
         </field>
@@ -27,6 +28,7 @@
                             <field name="vout_tx_id"/>
                             <field name="vout"/>
                             <field name="coinbase"/>
+                            <field name="coinbase_ascii"/>
                             <field name="spent_output_id"/>
                         </group>
                     </group>

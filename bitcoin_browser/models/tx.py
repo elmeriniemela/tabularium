@@ -62,7 +62,7 @@ class BitcoinTx(models.Model):
             'vsize': rawtx['vsize'],
             'weight': rawtx['weight'],
             'locktime': rawtx['locktime'],
-            'fee': self.fee or rawtx.get('fee', 0.0),
+            'fee': self.fee if len(self) == 1 else rawtx.get('fee', 0.0),
             'vin_ids': [
                 Command.create({
                     'sequence': vin['sequence'],
@@ -167,6 +167,8 @@ class BitcoinIn(models.Model):
 
     coinbase = fields.Char()
 
+    coinbase_ascii = fields.Char(compute="_compute_coinbase_ascii")
+
     spent_output_id = fields.Many2one(
         comodel_name='bitcoin.tx.out',
         compute='_compute_spent_output_id',
@@ -177,6 +179,14 @@ class BitcoinIn(models.Model):
         ('uniq_vout', 'unique(vout_tx_id, vout)', 'Same transaction output can not be spent twice!'),
         ('uniq_coinbase', 'unique(coinbase)', 'The coinbase should be unique!'),
     ]
+
+    @api.depends('coinbase')
+    def _compute_coinbase_ascii(self):
+        for record in self:
+            if record.coinbase:
+                record.coinbase_ascii = bytearray.fromhex(record.coinbase).decode(encoding='ascii', errors='ignore')
+            else:
+                record.coinbase_ascii = False
 
     def _compute_spent_output_id(self):
         Output = self.env['bitcoin.tx.out']

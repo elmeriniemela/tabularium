@@ -20,7 +20,7 @@ class BitcoinBlock(models.Model):
     time = fields.Datetime(help="The timestamp is chosen by the miners, and has some restrictions on it such as it can't be too far in the future/past (no more than 2 hours into the future), but it is not strictly increasing.")
     mediantime = fields.Datetime(help="Mediantime is the median time of the past 11 block timestamps, and a block must have a timestamp greater than that median time, so the mediantime always increases.")
 
-    nonce = fields.Integer(help="A counter used for the proof-of-work algorithm.")
+    nonce = fields.BigInteger(help="A counter used for the proof-of-work algorithm.")
 
     bits = fields.Char(help="bits refers to nBits, which encodes the target difficulty for the block. The target threshold is a 256-bit unsigned integer which a header hash must be equal to or below in order for that header to be a valid part of the block chain. However, the header field nBits provides only 32 bits of space, so the target number uses a less precise format called “compact” which works like a base-256 version of scientific notation. https://developer.bitcoin.org/reference/block_chain.html?highlight=nbits#target-nbits")
 
@@ -82,7 +82,7 @@ class BitcoinBlock(models.Model):
             'difficulty': getblock['difficulty'],
             'chainwork': getblock['chainwork'],
             'n_tx': getblock['nTx'],
-            'previousblockhash': getblock['previousblockhash'],
+            'previousblockhash': getblock['previousblockhash'] if getblock['height'] != 0 else False,
             'size': getblock['size'],
             'strippedsize': getblock['strippedsize'],
             'weight': getblock['weight'],

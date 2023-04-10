@@ -62,6 +62,14 @@
         </field>
     </record>
 
+    <record model="ir.actions.server" id="action_refresh">
+        <field name="name">Refresh</field>
+        <field name="model_id" ref="model_bitcoin_block"/>
+        <field name="binding_model_id" ref="model_bitcoin_block"/>
+        <field name="state">code</field>
+        <field name="code">records.refresh()</field>
+    </record>
+
     <record id="action_block" model="ir.actions.act_window">
         <field name="name">Blocks</field>
         <field name="res_model">bitcoin.block</field>

@@ -1,21 +1,6 @@
 <odoo>
-    <record model="ir.actions.server" id="action_bestblockhash">
-        <field name="name">Best Block Hash</field>
-        <field name="model_id" ref="model_bitcoin_block"/>
-        <field name="state">code</field>
-        <field name="code">
 
-proxy = env['ir.config_parameter'].bitcoind_proxy()
-getblockchaininfo = proxy.getblockchaininfo()
-
-[action] = env.ref('bitcoin_browser.action_block').read()
-action['context'] = {'search_default_hash': getblockchaininfo['bestblockhash']}
-
-        </field>
-    </record>
-
-
-    <menuitem name="Bitcoin Browser" id="menu_root" web_icon="bitcoin_browser,static/description/icon.webp" sequence="5" action="action_bestblockhash">
+    <menuitem name="Bitcoin Browser" id="menu_root" web_icon="bitcoin_browser,static/description/icon.webp" sequence="5" action="action_block">
         <menuitem id="menu_block" action="action_block"/>
         <menuitem id="menu_tx" action="action_tx"/>
         <menuitem id="menu_tx_in" action="action_tx_in"/>
