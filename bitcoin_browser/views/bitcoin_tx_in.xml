@@ -9,6 +9,7 @@
                 <field name="vout_tx_id"/>
                 <field name="vout"/>
                 <field name="coinbase"/>
+                <field name="spent_output_id"/>
             </tree>
         </field>
     </record>
@@ -26,6 +27,7 @@
                             <field name="vout_tx_id"/>
                             <field name="vout"/>
                             <field name="coinbase"/>
+                            <field name="spent_output_id"/>
                         </group>
                     </group>
                 </sheet>

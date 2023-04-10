@@ -167,10 +167,21 @@ class BitcoinIn(models.Model):
 
     coinbase = fields.Char()
 
+    spent_output_id = fields.Many2one(
+        comodel_name='bitcoin.tx.out',
+        compute='_compute_spent_output_id',
+        help="The UTXO this input consumed. Empty for coinbase inputs.",
+    )
+
     _sql_constraints = [
         ('uniq_vout', 'unique(vout_tx_id, vout)', 'Same transaction output can not be spent twice!'),
         ('uniq_coinbase', 'unique(coinbase)', 'The coinbase should be unique!'),
     ]
+
+    def _compute_spent_output_id(self):
+        Output = self.env['bitcoin.tx.out']
+        for record in self:
+            record.spent_output_id = Output.search([('tx_id', '=', record.vout_tx_id.id), ('n', '=', record.vout)])
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -213,9 +224,20 @@ class BitcoinOut(models.Model):
     asm = fields.Char()
     value = fields.Float(digits='Bitcoin Decimal')
 
+    spent_input_id = fields.Many2one(
+        comodel_name='bitcoin.tx.in',
+        compute='_compute_spent_input_id',
+        help="The input where this UTXO was consumed. If empty, then can be spent."
+    )
+
     _sql_constraints = [
         ('uniq', 'unique(tx_id, n)', 'The VOUT index must be unique within a transaction')
     ]
+
+    def _compute_spent_input_id(self):
+        Input = self.env['bitcoin.tx.in']
+        for record in self:
+            record.spent_input_id = Input.search([('vout_tx_id', '=', record.tx_id.id), ('vout', '=', record.n)])
 
     @api.model_create_multi
     def create(self, vals_list):

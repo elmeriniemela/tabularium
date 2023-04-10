@@ -10,6 +10,7 @@
                 <field name="address"/>
                 <field name="asm" optional="show"/>
                 <field name="value"/>
+                <field name="spent_input_id"/>
             </tree>
         </field>
     </record>
@@ -28,6 +29,7 @@
                             <field name="address"/>
                             <field name="asm" optional="show"/>
                             <field name="value"/>
+                            <field name="spent_input_id"/>
                         </group>
                     </group>
                 </sheet>
