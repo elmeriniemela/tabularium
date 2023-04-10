@@ -2,8 +2,13 @@
 
 import datetime
 import tinyrpc
+import logging
 
 from odoo import api, exceptions, fields, models, Command, _
+
+
+_logger = logging.getLogger(__name__)
+
 
 class BitcoinBlock(models.Model):
     _name = 'bitcoin.block'
@@ -27,6 +32,7 @@ class BitcoinBlock(models.Model):
     difficulty = fields.Float(help="Difficulty is basically a different representation of the target to make it easier for normal humans to understand it. Difficulty represents how difficult the current target makes it to find a block, relative to how difficult it would be at the highest possible target (highest target=lowest difficulty). The current difficulty of 6,695,826 means that at a given hash rate, it will, on average, take ~6.6 million times as long to find a valid block as it would at a difficulty of 1, or alternatively, it will take, again on average, ~6.6 million times as many hashes to find a valid block.")
     chainwork = fields.Char(help="The total amount of work in the chain. For example, converting 0000000000000000000000000000000000000000000086859f7a841475b236fd to decimal, you get 635262017308958427068157, or 635262 exahashes. At june 2014 hash rates (100 petahash/s), it would require only 73 days to perform that many hashes, while in reality it took over 5 years. The hash rate has been going up so fast however that the impact of more than a few months ago is negligible.")
     n_tx = fields.Integer()
+    computed_n_tx = fields.Integer(compute='_compute_computed_n_tx')
     previousblockhash = fields.Char(help="Each block also stores the hash of the previous block's header, chaining the blocks together. This ensures a transaction cannot be modified without modifying the block that records it and all following blocks.")
 
     size = fields.Integer(help="Refers to the size of the block, which is 80 bytes for the header + sum(tx_sizes). This includes the segwit data and is meant to match the actual, on disk size of the block.")
@@ -44,6 +50,17 @@ class BitcoinBlock(models.Model):
         ('uniq', 'unique(hash)', 'The block hash should be unique!')
     ]
 
+
+    def _compute_computed_n_tx(self):
+        res = self.env['bitcoin.tx'].read_group(
+            domain=[('block_id', 'in', self.ids)],
+            fields=['block_id'],
+            groupby=['block_id'],
+            lazy=False,
+        )
+        counts = {(r['block_id'][0]): r['__count'] for r in res}
+        for record in self:
+            record.computed_n_tx = counts.get(record.id, 0)
 
     @api.model
     def cron_fetch(self):
@@ -100,9 +117,11 @@ class BitcoinBlock(models.Model):
 
     def refresh(self):
         for record in self:
-            tx = record.n_tx != len(record.tx_ids)
+            tx = record.n_tx != record.computed_n_tx
             record = record.with_context(default_block_id=record.id)
+            _logger.info("Update block at height %s.", record.height)
             record.write(record.getblock(record.hash, tx=tx))
+            record.env.cr.commit()
 
     @api.model
     def _search(self, domains, offset=0, limit=None, order=None, count=False, access_rights_uid=None):
