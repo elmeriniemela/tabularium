@@ -20,12 +20,12 @@ class BitcoinTx(models.Model):
     in_active_chain = fields.Boolean(default=True)
     txid = fields.Char(required=True, help="An identifier used to uniquely identify a particular transaction; specifically, the sha256d hash of the transaction.")
     hash = fields.Char(help="The transaction hash (differs from txid for witness transactions).")
-    version = fields.Integer()
-    size = fields.Integer()
-    vsize = fields.Integer()
-    weight = fields.Integer()
-    locktime = fields.Integer()
-    fee = fields.Float(digits='Bitcoin Decimal')
+    version = fields.Integer(help="If version is greater han or equal to 2, the sequence field for each input is used as specified in BIP68 and used in CHECKSEQUENCEVERIFY (BIP112).")
+    size = fields.Integer(help="The serialized transaction size.")
+    vsize = fields.Integer(help="The virtual transaction size (differs from size for witness transactions)")
+    weight = fields.Integer(help="The transaction's weight (between vsize*4-3 and vsize*4)")
+    locktime = fields.Integer(help="Locktime sets the earliest time a transaction can be mined in to a block. You can use locktime to make sure that a transaction is locked until a specific block height, or a point in time.")
+    fee = fields.Float(help="A transaction fee is the remainder of a bitcoin transaction. Transaction fees are claimed by miners through the coinbase transaction.", digits='Bitcoin Decimal')
 
     vin_ids = fields.One2many(
         comodel_name='bitcoin.tx.in',
@@ -54,8 +54,8 @@ class BitcoinTx(models.Model):
 
     def rawtx_to_vals(self, rawtx):
         vals = {
-            'txid': rawtx['txid'],
             'in_active_chain': rawtx.get('in_active_chain'),
+            'txid': rawtx['txid'],
             'hash': rawtx['hash'],
             'version': rawtx['version'],
             'size': rawtx['size'],

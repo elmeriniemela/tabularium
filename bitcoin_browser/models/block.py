@@ -14,16 +14,24 @@ class BitcoinBlock(models.Model):
     hash = fields.Char(required=True, help="The hash of the block header.")
     confirmations = fields.Integer(help="The number of confirmations, or -1 if the block is not on the main chain")
     height = fields.Integer(help="The block height or index.")
-    version = fields.Integer()
+    version = fields.Integer(help="A version number to track software/protocol upgrades.")
 
     merkleroot = fields.Char(help="Copies of each transaction are hashed, and the hashes are then paired, hashed, paired again, and hashed again until a single hash remains, the merkle root of a merkle tree.")
     time = fields.Datetime(help="The timestamp is chosen by the miners, and has some restrictions on it such as it can't be too far in the future/past (no more than 2 hours into the future), but it is not strictly increasing.")
     mediantime = fields.Datetime(help="Mediantime is the median time of the past 11 block timestamps, and a block must have a timestamp greater than that median time, so the mediantime always increases.")
+
+    nonce = fields.Integer(help="A counter used for the proof-of-work algorithm.")
+
+    bits = fields.Char(help="bits refers to nBits, which encodes the target difficulty for the block. The target threshold is a 256-bit unsigned integer which a header hash must be equal to or below in order for that header to be a valid part of the block chain. However, the header field nBits provides only 32 bits of space, so the target number uses a less precise format called “compact” which works like a base-256 version of scientific notation. https://developer.bitcoin.org/reference/block_chain.html?highlight=nbits#target-nbits")
+
     difficulty = fields.Float(help="Difficulty is basically a different representation of the target to make it easier for normal humans to understand it. Difficulty represents how difficult the current target makes it to find a block, relative to how difficult it would be at the highest possible target (highest target=lowest difficulty). The current difficulty of 6,695,826 means that at a given hash rate, it will, on average, take ~6.6 million times as long to find a valid block as it would at a difficulty of 1, or alternatively, it will take, again on average, ~6.6 million times as many hashes to find a valid block.")
     chainwork = fields.Char(help="The total amount of work in the chain. For example, converting 0000000000000000000000000000000000000000000086859f7a841475b236fd to decimal, you get 635262017308958427068157, or 635262 exahashes. At june 2014 hash rates (100 petahash/s), it would require only 73 days to perform that many hashes, while in reality it took over 5 years. The hash rate has been going up so fast however that the impact of more than a few months ago is negligible.")
     n_tx = fields.Integer()
     previousblockhash = fields.Char(help="Each block also stores the hash of the previous block's header, chaining the blocks together. This ensures a transaction cannot be modified without modifying the block that records it and all following blocks.")
 
+    size = fields.Integer(help="Refers to the size of the block, which is 80 bytes for the header + sum(tx_sizes). This includes the segwit data and is meant to match the actual, on disk size of the block.")
+    strippedsize = fields.Integer(help="The block size excluding witness data.")
+    weight = fields.Integer(help="Block weight is defined as Base size * 3 + Total size. Base size is the block size in bytes with the original transaction serialization without any witness-related data, as seen by a non-upgraded node. Total size is the block size in bytes with transactions serialized as described in BIP144, including base data and witness data. The new rule is block weight less or equal to 4,000,000.")
 
     tx_ids = fields.One2many(
         comodel_name='bitcoin.tx',
@@ -65,13 +73,19 @@ class BitcoinBlock(models.Model):
             'hash': hash,
             'confirmations': getblock['confirmations'],
             'height': getblock['height'],
+            'version': getblock['version'],
             'merkleroot': getblock['merkleroot'],
             'time': datetime.datetime.utcfromtimestamp(getblock['time']),
             'mediantime': datetime.datetime.utcfromtimestamp(getblock['mediantime']),
+            'nonce': getblock['nonce'],
+            'bits': getblock['bits'],
             'difficulty': getblock['difficulty'],
             'chainwork': getblock['chainwork'],
-            'previousblockhash': getblock['previousblockhash'],
             'n_tx': getblock['nTx'],
+            'previousblockhash': getblock['previousblockhash'],
+            'size': getblock['size'],
+            'strippedsize': getblock['strippedsize'],
+            'weight': getblock['weight'],
         }
 
         if tx:
