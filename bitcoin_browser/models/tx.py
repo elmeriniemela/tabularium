@@ -13,8 +13,10 @@ class BitcoinTx(models.Model):
 
     block_id = fields.Many2one(
         comodel_name='bitcoin.block',
+        required=True,
         readonly=True,
         ondelete='cascade',
+        index=True,
     )
 
     in_active_chain = fields.Boolean(default=True)
@@ -52,56 +54,6 @@ class BitcoinTx(models.Model):
         ('uniq', 'unique(txid)', 'TXID should be unique!')
     ]
 
-    def rawtx_to_vals(self, rawtx):
-        vals = {
-            'in_active_chain': rawtx.get('in_active_chain'),
-            'txid': rawtx['txid'],
-            'hash': rawtx['hash'],
-            'version': rawtx['version'],
-            'size': rawtx['size'],
-            'vsize': rawtx['vsize'],
-            'weight': rawtx['weight'],
-            'locktime': rawtx['locktime'],
-            'fee': self.fee if len(self) == 1 else rawtx.get('fee', 0.0),
-            'vin_ids': [
-                Command.create({
-                    'sequence': vin['sequence'],
-                    'vout_tx_id': vin.get('txid', False),
-                    'vout': vin.get('vout', False),
-                    'coinbase': vin.get('coinbase', False),
-                }) for vin in rawtx['vin']
-            ],
-            'vout_ids': [
-                Command.create({
-                    'n': vout['n'],
-                    'value': vout['value'],
-                    'address': vout['scriptPubKey'].get('address', False),
-                    'asm': vout['scriptPubKey']['asm'],
-                    'type': vout['scriptPubKey']['type'],
-                }) for vout in rawtx['vout']
-            ]
-        }
-        if rawtx.get('blockhash'):
-            vals['block_id'] = self.env['bitcoin.block'].create({'hash': rawtx['blockhash']}).id
-        return vals
-
-    @api.model
-    def getrawtransaction(self, txid, blockhash=False):
-        verbose = True # If false, return a string, otherwise return a json object
-
-        proxy = self.env['ir.config_parameter'].bitcoind_proxy()
-
-        args = [txid, verbose]
-        if blockhash:
-            args.append(blockhash)
-
-        try:
-            rawtx = proxy.getrawtransaction(*args)
-        except tinyrpc.protocols.jsonrpc.JSONRPCError as error:
-            raise exceptions.UserError(error.args[0])
-
-        return self.rawtx_to_vals(rawtx)
-
     @api.model
     def _search(self, domains, offset=0, limit=None, order=None, count=False, access_rights_uid=None):
         res = super()._search(domains, offset, limit, order, count=count, access_rights_uid=access_rights_uid)
@@ -109,25 +61,25 @@ class BitcoinTx(models.Model):
         if not self.env.context.get('disable_auto_populate') and not found and len(domains) == 1:
             field, operator, value = domains[0]
             if field == 'txid' and operator == '=':
-                tx = self.getrawtransaction(value)
-                if tx:
-                    auto = self.create(tx)
-                    res = 1 if count else auto.ids
+                auto = self.create({'txid': value})
+                res = 1 if count else auto.ids
         return res
 
 
-    def refresh(self):
-        for record in self:
-            record.write(record.getrawtransaction(record.txid, blockhash=record.block_id.hash))
-
     @api.model_create_multi
     def create(self, vals_list):
-        existing = self.with_context(disable_auto_populate=True).search([('txid', 'in', [vals['txid'] for vals in vals_list])])
-        block_id = self.env.context.get('default_block_id')
-        if block_id:
-            existing.write({'block_id': block_id})
+        txids = []
+        vals_map = {}
+        proxy = self.env['ir.config_parameter'].bitcoind_proxy()
+        Block = self.env['bitcoin.block'].with_context(disable_auto_populate=False)
 
-        vals_map = {vals['txid']: vals for vals in vals_list}
+        for vals in vals_list:
+            txid = vals['txid']
+            txids.append(txid)
+            vals_map[txid] = vals
+
+
+        existing = self.with_context(disable_auto_populate=True).search([('txid', 'in', txids)])
         for tx in existing:
             vals = vals_map[tx.txid]
             if not tx.fee and vals.get('fee'):
@@ -135,7 +87,20 @@ class BitcoinTx(models.Model):
 
 
         existing_txids = set(existing.mapped('txid'))
-        unique_vals = {vals['txid']: vals for vals in vals_list if vals['txid'] not in existing_txids}
+        unique_vals = {}
+        for vals in vals_list:
+            txid = vals['txid']
+            if txid not in unique_vals and txid not in existing_txids:
+                if not vals.get('block_id'):
+                    try:
+                        rawtx = proxy.getrawtransaction(txid, True)
+                    except tinyrpc.protocols.jsonrpc.JSONRPCError as error:
+                        raise exceptions.UserError(error.args[0])
+
+                    vals['block_id'] = Block.create({'hash': rawtx['blockhash']}).id
+
+                unique_vals[txid] = vals
+
         return super().create(list(unique_vals.values())) + existing
 
 
@@ -150,6 +115,7 @@ class BitcoinIn(models.Model):
         comodel_name='bitcoin.tx',
         required=True,
         readonly=True,
+        index=True,
         ondelete='cascade',
         help="The origin transaction whose input this is."
     )
@@ -159,11 +125,14 @@ class BitcoinIn(models.Model):
     vout_tx_id = fields.Many2one(
         comodel_name='bitcoin.tx',
         readonly=True,
+        index=True,
         ondelete='cascade',
         help="The transaction from which 'vout' is taken to be spent."
     )
 
-    vout = fields.Integer(help="Refers to the 'n' field of bitcoin.tx.out")
+    vout = fields.Integer(
+        index=True,
+        help="Refers to the 'n' field of bitcoin.tx.out")
 
     coinbase = fields.Char()
 
@@ -223,11 +192,15 @@ class BitcoinOut(models.Model):
     tx_id = fields.Many2one(
         comodel_name='bitcoin.tx',
         required=True,
+        index=True,
         readonly=True,
         ondelete='cascade',
     )
 
-    n = fields.Integer(required=True, help="An output list index within tx_id, used to refer to a specific output.")
+    n = fields.Integer(
+        index=True,
+        required=True,
+        help="An output list index within tx_id, used to refer to a specific output.")
     type = fields.Char(required=True)
 
     address = fields.Char()

@@ -70,6 +70,14 @@
         <field name="code">records.refresh()</field>
     </record>
 
+    <record model="ir.actions.server" id="action_compute_computed_n_tx">
+        <field name="name">Compute N TX</field>
+        <field name="model_id" ref="model_bitcoin_block"/>
+        <field name="binding_model_id" ref="model_bitcoin_block"/>
+        <field name="state">code</field>
+        <field name="code">records._compute_computed_n_tx()</field>
+    </record>
+
     <record id="action_block" model="ir.actions.act_window">
         <field name="name">Blocks</field>
         <field name="res_model">bitcoin.block</field>

@@ -18,9 +18,6 @@
         <field name="model">bitcoin.tx</field>
         <field name="arch" type="xml">
             <form create="false" edit="false">
-                <header>
-                    <button name="refresh" type="object" string="Refresh" icon="fa-cogs"/>
-                </header>
                 <sheet>
                     <div class="oe_title">
                         <h1>

@@ -32,7 +32,9 @@ class BitcoinBlock(models.Model):
     difficulty = fields.Float(help="Difficulty is basically a different representation of the target to make it easier for normal humans to understand it. Difficulty represents how difficult the current target makes it to find a block, relative to how difficult it would be at the highest possible target (highest target=lowest difficulty). The current difficulty of 6,695,826 means that at a given hash rate, it will, on average, take ~6.6 million times as long to find a valid block as it would at a difficulty of 1, or alternatively, it will take, again on average, ~6.6 million times as many hashes to find a valid block.")
     chainwork = fields.Char(help="The total amount of work in the chain. For example, converting 0000000000000000000000000000000000000000000086859f7a841475b236fd to decimal, you get 635262017308958427068157, or 635262 exahashes. At june 2014 hash rates (100 petahash/s), it would require only 73 days to perform that many hashes, while in reality it took over 5 years. The hash rate has been going up so fast however that the impact of more than a few months ago is negligible.")
     n_tx = fields.Integer()
-    computed_n_tx = fields.Integer(compute='_compute_computed_n_tx')
+    computed_n_tx = fields.Integer(compute='_compute_computed_n_tx', store=True)
+    all_tx_fetched = fields.Boolean(compute='_compute_computed_n_tx', store=True)
+
     previousblockhash = fields.Char(help="Each block also stores the hash of the previous block's header, chaining the blocks together. This ensures a transaction cannot be modified without modifying the block that records it and all following blocks.")
 
     size = fields.Integer(help="Refers to the size of the block, which is 80 bytes for the header + sum(tx_sizes). This includes the segwit data and is meant to match the actual, on disk size of the block.")
@@ -51,6 +53,7 @@ class BitcoinBlock(models.Model):
     ]
 
 
+    @api.depends('tx_ids')
     def _compute_computed_n_tx(self):
         res = self.env['bitcoin.tx'].read_group(
             domain=[('block_id', 'in', self.ids)],
@@ -61,6 +64,7 @@ class BitcoinBlock(models.Model):
         counts = {(r['block_id'][0]): r['__count'] for r in res}
         for record in self:
             record.computed_n_tx = counts.get(record.id, 0)
+            record.all_tx_fetched = counts.get(record.id) == record.n_tx
 
     @api.model
     def cron_fetch(self):
@@ -70,10 +74,15 @@ class BitcoinBlock(models.Model):
         getblockchaininfo = proxy.getblockchaininfo()
         current_hash = getblockchaininfo['bestblockhash']
         current_block = self.search([('hash', '=', current_hash)])
+        confirmations = 1
         while mintime <= current_block.mediantime:
             self.env.cr.commit()
+            confirmations +=1
+            _logger.info("Update block %s.", current_block.height)
             current_block = self.search([('hash', '=', current_block.previousblockhash)])
-
+            if not current_block.mediantime:
+                current_block.refresh()
+            current_block.confirmations = confirmations
 
 
     @api.model
@@ -81,10 +90,12 @@ class BitcoinBlock(models.Model):
         verbosity = 2 if tx else 1
         proxy = self.env['ir.config_parameter'].bitcoind_proxy()
 
+        _logger.info(f"proxy.getblock({hash}, {verbosity})")
         try:
             getblock = proxy.getblock(hash, verbosity)
         except tinyrpc.protocols.jsonrpc.JSONRPCError as error:
             raise exceptions.UserError(error.args[0])
+        _logger.info("Done.")
 
         vals = {
             'hash': hash,
@@ -108,7 +119,34 @@ class BitcoinBlock(models.Model):
         if tx:
             tx_ids = []
             for rawtx in getblock['tx']:
-                txvals = self.tx_ids.rawtx_to_vals(rawtx)
+                txvals = {
+                    'in_active_chain': rawtx.get('in_active_chain'),
+                    'txid': rawtx['txid'],
+                    'hash': rawtx['hash'],
+                    'version': rawtx['version'],
+                    'size': rawtx['size'],
+                    'vsize': rawtx['vsize'],
+                    'weight': rawtx['weight'],
+                    'locktime': rawtx['locktime'],
+                    'fee': rawtx.get('fee', 0.0),
+                    'vin_ids': [
+                        Command.create({
+                            'sequence': vin['sequence'],
+                            'vout_tx_id': vin.get('txid', False),
+                            'vout': vin.get('vout', False),
+                            'coinbase': vin.get('coinbase', False),
+                        }) for vin in rawtx['vin']
+                    ],
+                    'vout_ids': [
+                        Command.create({
+                            'n': vout['n'],
+                            'value': vout['value'],
+                            'address': vout['scriptPubKey'].get('address', False),
+                            'asm': vout['scriptPubKey']['asm'],
+                            'type': vout['scriptPubKey']['type'],
+                        }) for vout in rawtx['vout']
+                    ]
+                }
                 tx_ids.append(Command.create(txvals))
 
             vals['tx_ids'] = tx_ids
