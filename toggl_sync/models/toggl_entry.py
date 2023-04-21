@@ -87,7 +87,7 @@ class TogglEntry(models.Model):
 
     description = fields.Char(tracking=True)
 
-    rounded_duration = fields.Float(compute='_compute_toggl_fields', store=True)
+    rounded_duration = fields.Float(compute='_compute_toggl_fields', store=True, readonly=False)
 
     date = fields.Date(compute='_compute_toggl_fields', store=True)
 
