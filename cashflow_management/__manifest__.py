@@ -17,6 +17,7 @@
 
         'views/cashflow_entry.xml',
         'views/cashflow_category.xml',
+        'views/cashflow_account.xml',
         'views/cashflow_parser.xml',
     ],
 }

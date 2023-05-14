@@ -52,6 +52,6 @@
         <field name="code">records.sanitize()</field>
     </record>
 
-    <menuitem id="category_menu" action="category_action_window" parent="root_menu" sequence="1"/>
+    <menuitem id="category_menu" action="category_action_window" parent="root_menu" sequence="30"/>
 
 </odoo>

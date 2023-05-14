@@ -75,6 +75,7 @@
                 <field name="category_id"/>
                 <field name="parser_id"/>
                 <field name="date"/>
+                <filter name="date_filter" date="date"/>
                 <group expand="1" string="Group by">
                     <filter string="Account" name="group_account" context="{'group_by': 'account_id'}"/>
                     <filter string="Category" name="group_category" context="{'group_by': 'category_id'}"/>
@@ -94,6 +95,6 @@
     </record>
 
     <menuitem name="Cash Flow Management" id="root_menu" web_icon="cashflow_management,static/description/icon.png" sequence="3"/>
-    <menuitem id="entry_menu" action="entry_action_window" parent="root_menu" sequence="1"/>
+    <menuitem id="entry_menu" action="entry_action_window" parent="root_menu" sequence="10"/>
 
 </odoo>

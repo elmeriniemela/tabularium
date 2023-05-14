@@ -63,7 +63,6 @@ class CashflowImport(models.TransientModel):
             'res_model': self.parser_id._name,
             'res_id': self.parser_id.id,
         })
-        self.parser_id.apply_account()
 
 
 class Cashflowparser(models.Model):
@@ -92,13 +91,7 @@ class Cashflowparser(models.Model):
         ondelete='restrict',
     )
 
-    def apply_account(self):
-        for record in self:
-            to_update = record.env['cashflow.entry'].search([
-                ('parser_id', '=', record.id),
-                ('account_id', '!=', record.account_id.id)
-            ])
-            to_update.write({'account_id': record.account_id.id})
+    account_ids = fields.Many2many(comodel_name='cashflow.account')
 
     def delete_files(self):
         for parser in self:
@@ -137,6 +130,16 @@ class CashflowCategory(models.Model):
     _description = 'Cash Flow Account'
 
     name = fields.Char(required=True)
+
+    parser_ids = fields.Many2many(comodel_name='cashflow.parser')
+
+    active = fields.Boolean(default=True)
+
+    entry_ids = fields.One2many(
+        comodel_name='cashflow.entry',
+        inverse_name='account_id',
+        readonly=True,
+    )
 
     _sql_constraints = [
         ('unique_name', 'unique(name)', 'This account already exists!'),
@@ -186,10 +189,12 @@ class CashflowEntry(models.Model):
 
     company_id = fields.Many2one(comodel_name='res.company', required=True, default=lambda self: self.env.company)
     category_id = fields.Many2one(comodel_name='cashflow.category', required=True)
+
+    active = fields.Boolean(related='account_id.active')
     account_id = fields.Many2one(
         comodel_name='cashflow.account',
-        required=False,
-        ondelete='set null',
+        required=True,
+        ondelete='restrict',
     )
     company_currency_id = fields.Many2one(related='company_id.currency_id', string="Company Currency", readonly=True)
 
