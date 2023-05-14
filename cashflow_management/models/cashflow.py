@@ -64,7 +64,7 @@ class CashflowImport(models.TransientModel):
             if active_model == 'cashflow.parser' and active_ids:
                 record.parser_id = active_ids[0]
                 record.account_id = record.parser_id.account_ids[:1]
-            if active_model == 'cashflow.parser' and active_ids:
+            if active_model == 'cashflow.account' and active_ids:
                 record.account_id = active_ids[0]
                 record.parser_id = record.account_id.parser_ids[:1]
 

@@ -1,35 +1,5 @@
 <odoo>
 
-    <record id="import_form" model="ir.ui.view">
-        <field name="name">cashflow.import.form</field>
-        <field name="model">cashflow.import</field>
-        <field name="priority">1</field>
-        <field name="arch" type="xml">
-            <form>
-                <h2>Import cash flow entries</h2>
-                <group>
-                    <field name="parser_id"/>
-                    <field name="account_id"/>
-                    <field name="attachment_ids"  widget="many2many_binary" colspan="2" string="Select Files" nolabel="1" style="width: 100%"/>
-                </group>
-                <footer>
-                    <button name="import_file" string="Upload" type="object" class="btn-primary" />
-                    <button string="Cancel" class="btn-secondary" special="cancel"/>
-                </footer>
-            </form>
-        </field>
-    </record>
-
-    <record id="import_action_window" model="ir.actions.act_window">
-        <field name="name">Import</field>
-        <field name="type">ir.actions.act_window</field>
-        <field name="res_model">cashflow.import</field>
-        <field name="view_mode">form</field>
-        <field name="target">new</field>
-        <field name="view_id" ref="import_form"/>
-    </record>
-
-
     <record model="ir.ui.view" id="parser_tree">
         <field name="name">cashflow.parser.tree</field>
         <field name="model">cashflow.parser</field>

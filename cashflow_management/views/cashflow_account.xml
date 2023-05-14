@@ -16,6 +16,9 @@
         <field name="model">cashflow.account</field>
         <field name="arch" type="xml">
             <form>
+                <header>
+                    <button name="%(import_action_window)d" type="action" string="Import"/>
+                </header>
                 <sheet>
                     <div class="oe_title">
                         <h1>

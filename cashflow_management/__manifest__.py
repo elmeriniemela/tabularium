@@ -15,6 +15,7 @@
         'security/ir.model.access.csv',
         'data/parser.xml',
 
+        'views/cashflow_import.xml',
         'views/cashflow_entry.xml',
         'views/cashflow_category.xml',
         'views/cashflow_account.xml',
