@@ -15,6 +15,7 @@ class TogglTask(models.Model):
     _name = 'toggl.task'
     _description = 'Toggl Task'
     _order = 'task_id desc'
+    _inherit = ['mail.thread']
 
     name = fields.Char(required=True, readonly=True)
 
