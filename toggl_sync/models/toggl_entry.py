@@ -17,15 +17,15 @@ class TogglTask(models.Model):
     _order = 'task_id desc'
     _inherit = ['mail.thread']
 
-    name = fields.Char(required=True, readonly=True)
+    name = fields.Char(required=True, readonly=True, tracking=True)
 
-    task_id = fields.Integer(required=True, readonly=True)
+    task_id = fields.Integer(required=True, readonly=True, tracking=True)
 
-    project_name = fields.Char(readonly=True)
-    project_id = fields.Integer(readonly=True)
+    project_name = fields.Char(readonly=True, tracking=True)
+    project_id = fields.Integer(readonly=True, tracking=True)
 
-    sale_line_name = fields.Char(readonly=True)
-    sale_line_id = fields.Integer(readonly=True)
+    sale_line_name = fields.Char(readonly=True, tracking=True)
+    sale_line_id = fields.Integer(readonly=True, tracking=True)
 
     company_id = fields.Many2one(comodel_name='res.company', required=True, default=lambda self: self.env.company, tracking=True)
 
