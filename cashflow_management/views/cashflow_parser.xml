@@ -7,8 +7,11 @@
         <field name="arch" type="xml">
             <form>
                 <h2>Import cash flow entries</h2>
-                <field name="parser_id" invisible="1"/>
-                <field name="attachment_ids"  widget="many2many_binary" colspan="2" string="Select Files" nolabel="1" style="width: 100%"/>
+                <group>
+                    <field name="parser_id"/>
+                    <field name="account_id"/>
+                    <field name="attachment_ids"  widget="many2many_binary" colspan="2" string="Select Files" nolabel="1" style="width: 100%"/>
+                </group>
                 <footer>
                     <button name="import_file" string="Upload" type="object" class="btn-primary" />
                     <button string="Cancel" class="btn-secondary" special="cancel"/>
@@ -32,6 +35,7 @@
         <field name="model">cashflow.parser</field>
         <field name="arch" type="xml">
             <tree>
+                <field name="sequence" widget="handle"/>
                 <field name="name" optional="show"/>
                 <field name="account_ids" widget="many2many_tags" optional="show"/>
             </tree>
@@ -53,10 +57,6 @@
                         </h1>
                     </div>
                     <group>
-                        <label for="account_id"/>
-                        <div>
-                            <field name="account_id"/>
-                        </div>
                         <field name="account_ids" widget="many2many_tags"/>
                     </group>
                     <notebook>

@@ -50,26 +50,74 @@ class CashflowImport(models.TransientModel):
     _name = 'cashflow.import'
     _description = 'Cash Flow Import'
 
-    parser_id = fields.Many2one(comodel_name='cashflow.parser', required=True, default=lambda self: self.env.context.get('active_id'))
+    parser_id = fields.Many2one(comodel_name='cashflow.parser', required=True, store=True, readonly=False, compute='_compute_active_ids')
+    account_id = fields.Many2one(comodel_name='cashflow.account', required=True, store=True, readonly=False, compute='_compute_active_ids')
     attachment_ids = fields.Many2many('ir.attachment', string='Files', required=True)
+
+    @api.depends('parser_id', 'account_id')
+    @api.depends_context('active_model', 'active_ids')
+    def _compute_active_ids(self):
+        ctx = self.env.context
+        active_ids = ctx.get('active_ids', [])
+        active_model = ctx.get('active_model', '')
+        for record in self:
+            if active_model == 'cashflow.parser' and active_ids:
+                record.parser_id = active_ids[0]
+                record.account_id = record.parser_id.account_ids[:1]
+            if active_model == 'cashflow.parser' and active_ids:
+                record.account_id = active_ids[0]
+                record.parser_id = record.account_id.parser_ids[:1]
+
 
     def import_file(self):
         for attachment_id in self.attachment_ids:
-            data = base64.b64decode(attachment_id.datas)
-            fp = io.BytesIO(data)
-            self.parser_id.parse(fp, attachment_id)
+            self.parse(attachment_id)
 
         self.attachment_ids.write({
             'res_model': self.parser_id._name,
             'res_id': self.parser_id.id,
         })
 
+    def parse(self, attachment_id):
+        self.ensure_one()
+        attachment_id.ensure_one()
+
+        data = base64.b64decode(attachment_id.datas)
+        fp = io.BytesIO(data)
+        def add_entry(vals):
+            vals['account_id'] = self.account_id.id
+            vals['parser_id'] = self.parser_id.id
+            vals['attachment_id'] = attachment_id.id
+            return self.env['cashflow.entry'].create(vals)
+
+        globals_dict = {
+            'ValidationError': ValidationError,
+            'requests': requests,
+            'datetime': datetime,
+            'dateutil': dateutil,
+            'lxml': lxml,
+            'io': io,
+            'self': self.env['cashflow.entry'],
+            'fp': fp,
+            'pandas': pandas,
+            '_logger': _logger,
+            'pdfminer': pdfminer,
+            'pdftotext': pdftotext,
+            're': re,
+            'add_entry': add_entry,
+        }
+        safe_eval(self.parser_id.code, globals_dict=globals_dict, mode="exec", nocopy=True)
+
+
+
 
 class Cashflowparser(models.Model):
     _name = 'cashflow.parser'
     _description = 'Cash Flow Parser'
+    _order = 'sequence, id'
 
     name = fields.Char(required=True)
+    sequence = fields.Integer(string='Sequence')
     code = fields.Text(required=True)
 
     entry_ids = fields.One2many(
@@ -85,12 +133,6 @@ class Cashflowparser(models.Model):
         string='Imported Files'
     )
 
-    account_id = fields.Many2one(
-        comodel_name='cashflow.account',
-        required=True,
-        ondelete='restrict',
-    )
-
     account_ids = fields.Many2many(comodel_name='cashflow.account')
 
     def delete_files(self):
@@ -104,32 +146,14 @@ class Cashflowparser(models.Model):
             if msg:
                 raise ValidationError(msg)
 
-    def parse(self, fp, attachment_id):
-        self.ensure_one()
-        globals_dict = {
-            'ValidationError': ValidationError,
-            'requests': requests,
-            'datetime': datetime,
-            'dateutil': dateutil,
-            'lxml': lxml,
-            'io': io,
-            'self': self,
-            'fp': fp,
-            'attachment_id': attachment_id,
-            'pandas': pandas,
-            '_logger': _logger,
-            'pdfminer': pdfminer,
-            'pdftotext': pdftotext,
-            're': re,
-        }
-        safe_eval(self.code, globals_dict=globals_dict, mode="exec", nocopy=True)
-
 
 class CashflowCategory(models.Model):
     _name = 'cashflow.account'
     _description = 'Cash Flow Account'
+    _order = 'sequence, id'
 
     name = fields.Char(required=True)
+    sequence = fields.Integer(string='Sequence')
 
     parser_ids = fields.Many2many(comodel_name='cashflow.parser')
 
@@ -198,10 +222,10 @@ class CashflowEntry(models.Model):
     )
     company_currency_id = fields.Many2one(related='company_id.currency_id', string="Company Currency", readonly=True)
 
-    parser_id = fields.Many2one(comodel_name='cashflow.parser', readonly=True)
+    parser_id = fields.Many2one(comodel_name='cashflow.parser', required=True)
     raw = fields.Text(readonly=True)
     identifier = fields.Char(readonly=True)
-    attachment_id = fields.Many2one(comodel_name='ir.attachment', ondelete='cascade', readonly=True)
+    attachment_id = fields.Many2one(comodel_name='ir.attachment', ondelete='cascade', required=True, domain="[('res_model', '=', 'cashflow.parser'), ('res_id', '=', parser_id)]")
     entry_type = fields.Selection(
         selection=[
             ('deposit', 'Deposit'),

@@ -4,6 +4,7 @@
         <field name="model">cashflow.account</field>
         <field name="arch" type="xml">
             <tree>
+                <field name="sequence" widget="handle"/>
                 <field name="name" optional="show"/>
                 <field name="parser_ids" widget="many2many_tags" optional="show"/>
             </tree>
