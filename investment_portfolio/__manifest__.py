@@ -26,9 +26,4 @@
         'views/investment_asset_transaction.xml',
         'views/menuitems.xml',
     ],
-    'assets': {
-        'web.assets_backend': [
-            'investment_portfolio/static/src/js/widget.js',
-        ],
-    }
 }

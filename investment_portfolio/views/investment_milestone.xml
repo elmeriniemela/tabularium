@@ -4,7 +4,7 @@
         <field name="model">investment.milestone</field>
         <field name="arch" type="xml">
             <tree decoration-info="state == 'ahead'" decoration-muted="state == 'behind'" decoration-danger="state == 'missed'" decoration-success="state == 'reached'">
-                <button name="copy_button" class="oe_edit_only" type="object" icon="fa-files-o" help="Copy"/>
+                <button name="copy_button" class="oe_edit_only" title="Copy" type="object" icon="fa-files-o" help="Copy"/>
                 <field name="name"/>
                 <field name="date"/>
                 <field name="position"/>

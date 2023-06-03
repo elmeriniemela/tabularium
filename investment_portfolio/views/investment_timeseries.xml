@@ -6,8 +6,8 @@
             <tree>
                 <field name="asset_id" optional="show" />
                 <field name="position" optional="show" sum="Total Position" />
-                <field name="profit" widget="monetary" options="{'is_profit': 1}" optional="show" sum="Total Profit" />
-                <field name="profit_percent" widget="percentage" options="{'is_profit': 1}" optional="show" />
+                <field name="profit" widget="monetary" decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0" optional="show" sum="Total Profit" />
+                <field name="profit_percent" widget="percentage" decoration-danger="profit_percent &lt; 0" decoration-success="profit_percent &gt; 0" optional="show" />
                 <field name="company_currency_id" invisible="1" />
 
                 <field name="last_price" optional="hide" />
@@ -57,8 +57,8 @@
                             <field name="category_id" />
                             <field name="quantity" />
                             <field name="last_price" />
-                            <field name="profit" options="{'is_profit': 1}" />
-                            <field name="profit_percent" widget="percentage" options="{'is_profit': 1}" />
+                            <field name="profit" decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0" />
+                            <field name="profit_percent" widget="percentage" decoration-danger="profit_percent &lt; 0" decoration-success="profit_percent &gt; 0" />
                         </group>
                     </group>
                     <notebook>

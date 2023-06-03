@@ -44,7 +44,7 @@
                             <field name="quantity"/>
                             <field name="payment"/>
                             <field name="exchange_rate"/>
-                            <field name="profit" options="{'is_profit': 1}"/>
+                            <field name="profit" decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0"/>
                             <field name="fee"/>
                         </group>
                         <group>

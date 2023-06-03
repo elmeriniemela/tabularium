@@ -4,3 +4,4 @@ openpyxl
 pysftp
 cryptography
 paramiko
+pyopenssl==22.1.0
