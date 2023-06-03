@@ -79,7 +79,7 @@
                     <button name="%(action_prices)d"
                         string="Prices"
                         type="action"
-                        context="{'search_default_asset_id': id, 'search_default_realized': 1}"
+                        context="{'search_default_asset_id': id, 'search_default_realized': 1, 'search_default_group_time': 1}"
                         class="oe_stat_button"
                         icon="fa-usd">
                     </button>
