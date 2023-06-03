@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<templates>
-
-    <t t-name="FieldTimeago">
-        <div t-att-class="'oe_form_field '+widget.widget_class" t-att-style="widget.attrs.style">
-            <time class="timeago" t-att-datetime="value"></time>
-        </div>
+<templates xml:space="preserve">
+    <t t-name="timeago_widget.TimeagoField" owl="1">
+        <time class="timeago" t-att-datetime="isoValue" t-esc="formattedValue"/>
     </t>
-
 </templates>

@@ -15,14 +15,10 @@
     ],
     'assets': {
         'web.assets_backend': [
-            '/timeago_widget/static/src/js/widget.js',
-            '/timeago_widget/static/src/css/widget.css',
-        ],
-        "web.assets_qweb": [
-            "/timeago_widget/static/src/xml/widget.xml",
-        ],
-        'web._assets_common_scripts': [
+            'timeago_widget/static/src/xml/widget.xml',
+            'timeago_widget/static/src/js/widget.js',
+            'timeago_widget/static/src/css/widget.css',
             'timeago_widget/static/src/lib/jquery.timeago.js',
-        ]
+        ],
     }
 }
