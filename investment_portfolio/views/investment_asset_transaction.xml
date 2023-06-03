@@ -3,7 +3,7 @@
         <field name="name">investment.asset.transaction.tree</field>
         <field name="model">investment.asset.transaction</field>
         <field name="arch" type="xml">
-            <tree editable="top" decoration-success="profit &gt; 0.0" decoration-danger="profit &lt; 0.0" limit="1000">
+            <tree editable="top" limit="1000">
                 <field name="time"/>
                 <field name="quantity" sum="Total"/>
                 <field name="payment" sum="Total"/>
@@ -12,7 +12,7 @@
                 <field name="description"/>
                 <field name="exchange_rate"/>
                 <field name="fee"/>
-                <field name="profit" optional="hide"/>
+                <field name="profit" decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0" optional="show"/>
                 <field name="currency_id" optional="hide"/>
                 <field name="asset_id" optional="hide"/>
                 <field name="liquid" optional="hide"/>
