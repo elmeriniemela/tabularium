@@ -292,6 +292,8 @@ class InvestmentTimeseries(models.Model):
             if not first:
                 _logger.info(f"No transactions on {asset_id.name}")
                 continue
+
+            asset_id.generate_plan()
             date = first.time.date()
             _logger.info(f"Make time series for {asset_id.name} starting from {date}")
 
