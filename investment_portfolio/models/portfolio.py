@@ -599,12 +599,15 @@ class InvestmentAsset(models.Model):
         today = datetime.date.today()
 
         # Remove old predictions.
-        Price.search([('prediction', '=', True), ('asset_id', 'in', self.ids)]).unlink()
-        Transaction.search([('prediction', '=', True), ('asset_id', 'in', self.ids)]).unlink()
 
         for asset_id in self:
+            if asset_id.plan_auto_realize:
+                asset_id.plan_transaction_ids.filtered(lambda t: t.time.date() <= today).prediction = False
+
+            Price.search([('prediction', '=', True), ('asset_id', '=', asset_id.id)]).unlink()
+            Transaction.search([('prediction', '=', True), ('asset_id', '=', asset_id.id)]).unlink()
             n = asset_id.plan_months or 0
-            date = asset_id.plan_start_date or today
+            date = max(asset_id.plan_start_date or today, today)
             end = date + relativedelta(months=n)
             r = (asset_id.plan_yearly_interest or 0 + asset_id.plan_yearly_appreciation or 0)/12
             i = 0
