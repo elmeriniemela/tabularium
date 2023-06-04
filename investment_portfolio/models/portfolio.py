@@ -326,7 +326,7 @@ class InvestmentTimeseries(models.Model):
             if first.time.date() <= yesterday:
                 recompute += existing[(asset_id.id, yesterday)]
 
-        recompute._compute_aggregate()
+        recompute.exists()._compute_aggregate()
 
 
 class InvestmentMilestone(models.Model):
