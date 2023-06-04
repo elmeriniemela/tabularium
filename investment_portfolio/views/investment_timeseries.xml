@@ -48,7 +48,7 @@
                             <field name="asset_id" />
                             <field name="date" />
                             <field name="granularity" />
-                            <field name="is_monday" />
+                            <field name="is_sunday" />
                             <field name="price_id" />
                             <field name="company_currency_id" />
                             <field name="position" />

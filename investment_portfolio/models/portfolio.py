@@ -2,7 +2,7 @@
 
 from odoo import api, models, fields, _
 from odoo.exceptions import ValidationError
-from odoo.tools import float_is_zero, float_compare
+from odoo.tools import float_is_zero, float_compare, date_utils
 from odoo.osv import expression
 import traceback, logging
 from dateutil.relativedelta import relativedelta
@@ -157,7 +157,7 @@ class InvestmentTimeseries(models.Model):
         index=True,
     )
 
-    is_monday = fields.Boolean(
+    is_sunday = fields.Boolean(
         compute='_compute_granularity',
         store=True,
         index=True,
@@ -170,16 +170,16 @@ class InvestmentTimeseries(models.Model):
     @api.depends('date')
     def _compute_granularity(self):
         for record in self:
-            if record.date.month == 1 and record.date.day == 1:
+            if date_utils.end_of(record.date, "year") == record.date:
                 record.granularity = '1_yearly'
-            elif record.date.month % 4 == 0 and record.date.day == 1:
+            elif date_utils.end_of(record.date, "quarter") == record.date:
                 record.granularity = '2_quaterly'
-            elif record.date.day == 1:
+            elif date_utils.end_of(record.date, "month") == record.date:
                 record.granularity = '3_monthly'
             else:
                 record.granularity = '4_daily'
 
-            record.is_monday = record.date.isoweekday() == 1
+            record.is_sunday = record.date.isoweekday() == 7
 
 
     @api.model
@@ -206,7 +206,7 @@ class InvestmentTimeseries(models.Model):
         """
         map_group = {
             'day': [('granularity', 'in', ['4_daily', '3_monthly', '2_quaterly', '1_yearly'])],
-            'week': [('is_monday', '=', True)],
+            'week': [('is_sunday', '=', True)],
             'month': [('granularity', 'in', ['3_monthly', '2_quaterly', '1_yearly'])],
             'quarter': [('granularity', 'in', ['2_quaterly', '1_yearly'])],
             'year': [('granularity', 'in', ['1_yearly'])],
@@ -318,7 +318,7 @@ class InvestmentTimeseries(models.Model):
 
                 if prediction or date == today:
                     date += relativedelta(years=1)
-                    date = date.replace(month=1, day=1)
+                    date = date.replace(month=12, day=31)
                 else:
                     date += datetime.timedelta(days=1)
 
