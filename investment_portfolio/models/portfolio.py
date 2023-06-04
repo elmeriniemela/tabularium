@@ -316,9 +316,10 @@ class InvestmentTimeseries(models.Model):
                     serie_today = existing[(asset_id.id, today)]
                     serie_today._compute_aggregate()
 
-                if prediction or date == today:
+                if date == today:
+                    date = date.replace(month=12, day=31) # start predictions
+                elif prediction:
                     date += relativedelta(years=1)
-                    date = date.replace(month=12, day=31)
                 else:
                     date += datetime.timedelta(days=1)
 
