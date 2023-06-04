@@ -585,6 +585,7 @@ class InvestmentAsset(models.Model):
     plan_yearly_appreciation = fields.Float(group_operator='avg', default=0.0, digits='Investment Asset Interest')
     plan_yearly_interest = fields.Float(group_operator='avg', default=0.0, digits='Investment Asset Interest')
     plan_total_cash_flow = fields.Monetary(readonly=True)
+    plan_auto_realize = fields.Boolean()
 
 
 
