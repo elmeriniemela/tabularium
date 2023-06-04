@@ -4,8 +4,10 @@
         <field name="model">investment.category</field>
         <field name="arch" type="xml">
             <tree>
+                <field name="sequence" widget="handle"/>
                 <field name="name" optional="show"/>
-                <field name="liquid" optional="show"/>
+                <field name="liquid" optional="show" widget="boolean_toggle"/>
+                <field name="favourite" optional="show" widget="boolean_favorite"/>
             </tree>
         </field>
     </record>
