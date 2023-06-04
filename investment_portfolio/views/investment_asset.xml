@@ -3,7 +3,8 @@
         <field name="name">investment.asset.tree</field>
         <field name="model">investment.asset</field>
         <field name="arch" type="xml">
-            <tree expand="1" default_order="category_id, position desc">
+            <tree expand="1" default_order="category_id, sequence, id">
+                <field name="sequence" widget="handle"/>
                 <field name="name" optional="show"/>
                 <field name="ticker" optional="show"/>
                 <field name="last_price" optional="show"/>
@@ -32,6 +33,7 @@
                 <field name="company_currency_id" optional="hide"/>
 
 
+                <field name="follow" widget="boolean_toggle" optional="hide"/>
                 <field name="plan_type" optional="hide"/>
                 <field name="plan_start_date" optional="hide"/>
                 <field name="plan_months" optional="hide"/>
@@ -128,7 +130,7 @@
                             <field name="one_year_price" widget="percentage" decoration-danger="one_year_price &lt; 0" decoration-success="one_year_price &gt; 0"/>
                             <field name="three_year_price" widget="percentage" decoration-danger="three_year_price &lt; 0" decoration-success="three_year_price &gt; 0"/>
                             <field name="five_year_price" widget="percentage" decoration-danger="five_year_price &lt; 0" decoration-success="five_year_price &gt; 0"/>
-                            <field name="message_main_attachment_id" options="{'no_create_edit': True}" domain="[('res_model', '=', 'investment.asset'), ('res_id', '=', id)]"/>
+                            <field name="follow" widget="boolean_toggle"/>
                         </group>
                         <field name="notes"/>
                     </group>
@@ -189,6 +191,9 @@
                 <filter string="Transactions" name="transactions" domain="[('transaction_ids', '!=', False)]"/>
                 <filter string="No Transactions" name="no_transactions" domain="[('transaction_ids', '=', False)]"/>
                 <separator/>
+                <filter string="Follow" name="follow" domain="[('follow', '=', True)]"/>
+                <filter string="No Follow" name="no_follow" domain="[('follow', '=', False)]"/>
+                <separator/>
                 <filter string="Liquid" name="liquid" domain="[('liquid', '=', True)]"/>
                 <filter string="Illiquid" name="illiquid" domain="[('liquid', '=', False)]"/>
                 <separator/>
@@ -232,7 +237,7 @@
         <field name="name">Current positions</field>
         <field name="res_model">investment.asset</field>
         <field name="view_mode">tree,form,graph</field>
-        <field name="context">{'search_default_group_category_id': 1, 'search_default_transactions': 1, 'search_default_favourite': 1}</field>
+        <field name="context">{'search_default_group_category_id': 1, 'search_default_follow': 1, 'search_default_favourite': 1}</field>
     </record>
 
     <record model="ir.actions.act_window" id="action_liquid_allocations">

@@ -469,6 +469,9 @@ class InvestmentAsset(models.Model):
     _name = 'investment.asset'
     _description = 'Investment Asset'
     _inherit = ['mail.thread', 'mail.activity.mixin']
+    _order = 'category_id, sequence, id'
+
+    sequence = fields.Integer(string='Sequence')
 
     name = fields.Char(required=True)
 
@@ -517,6 +520,8 @@ class InvestmentAsset(models.Model):
         inverse_name='asset_id',
         readonly=True,
     )
+
+    follow = fields.Boolean(compute='_compute_follow', store=True, readonly=False)
 
     quantity = fields.Float(compute='_compute_aggregate', store=True, digits='Investment Asset quantity', group_operator=None)
 
@@ -701,6 +706,11 @@ class InvestmentAsset(models.Model):
         currency_ticker = self.env.company.currency_id.name
         for record in self:
             record.is_cash = record.ticker == currency_ticker
+
+    @api.depends('transaction_ids')
+    def _compute_follow(self):
+        for record in self:
+            record.follow = bool(record.transaction_ids)
 
     @api.depends(
         'transaction_ids',
