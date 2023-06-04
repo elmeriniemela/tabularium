@@ -128,6 +128,7 @@
                             <field name="one_year_price" widget="percentage" decoration-danger="one_year_price &lt; 0" decoration-success="one_year_price &gt; 0"/>
                             <field name="three_year_price" widget="percentage" decoration-danger="three_year_price &lt; 0" decoration-success="three_year_price &gt; 0"/>
                             <field name="five_year_price" widget="percentage" decoration-danger="five_year_price &lt; 0" decoration-success="five_year_price &gt; 0"/>
+                            <field name="message_main_attachment_id" options="{'no_create_edit': True}" domain="[('res_model', '=', 'investment.asset'), ('res_id', '=', id)]"/>
                         </group>
                         <field name="notes"/>
                     </group>

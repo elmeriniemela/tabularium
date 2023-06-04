@@ -21,6 +21,9 @@
                     <h1>
                         <field name="name"/>
                     </h1>
+                    <group>
+                        <field name="message_main_attachment_id" options="{'no_create_edit': True}" domain="[('res_model', '=', 'document.directory'), ('res_id', '=', id)]"/>
+                    </group>
                 </div>
                 <div class="o_attachment_preview"/>
                 <div class="oe_chatter">
