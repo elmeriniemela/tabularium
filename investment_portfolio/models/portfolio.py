@@ -611,6 +611,9 @@ class InvestmentAsset(models.Model):
             Transaction.search([('prediction', '=', True), ('asset_id', '=', asset_id.id)]).unlink()
             n = asset_id.plan_months or 0
             date = max(asset_id.plan_start_date or today, today)
+            while date <= today:
+                date += relativedelta(months=1)
+
             end = date + relativedelta(months=n)
             r = (asset_id.plan_yearly_interest or 0 + asset_id.plan_yearly_appreciation or 0)/12
             i = 0
