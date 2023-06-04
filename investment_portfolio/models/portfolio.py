@@ -610,7 +610,7 @@ class InvestmentAsset(models.Model):
             Price.search([('prediction', '=', True), ('asset_id', '=', asset_id.id)]).unlink()
             Transaction.search([('prediction', '=', True), ('asset_id', '=', asset_id.id)]).unlink()
             n = asset_id.plan_months or 0
-            date = max(asset_id.plan_start_date or today, today)
+            date = asset_id.plan_start_date or today
             while date <= today:
                 date += relativedelta(months=1)
 
