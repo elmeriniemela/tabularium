@@ -649,7 +649,10 @@ class InvestmentAsset(models.Model):
                             Transaction.create({**base_vals, **trans})
 
                     elif asset_id.plan_type == 'exit':
-                        interest = PV*r
+                        # Korkopäivät lasketaan todellisten päivien mukaan ja vuodessa on 360 päivää
+                        days = (date - (date-relativedelta(months=1))).days
+                        rate = asset_id.plan_yearly_interest*(days/360)
+                        interest = PV*rate
                         reduction = P-interest+asset_id.plan_fee
                         dsum = (-reduction) + (-interest) + (asset_id.plan_fee)
                         reduction_vals = {
