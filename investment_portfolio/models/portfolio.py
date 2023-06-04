@@ -613,12 +613,14 @@ class InvestmentAsset(models.Model):
             date = asset_id.plan_start_date or today
             while date <= today:
                 date += relativedelta(months=1)
+                if asset_id.plan_start_date:
+                    n -= 1
 
             end = date + relativedelta(months=n)
             r = (asset_id.plan_yearly_interest or 0 + asset_id.plan_yearly_appreciation or 0)/12
             i = 0
             PV = asset_id.position
-            P = (r*PV) / (1-(1+r)**(-n)) if r else 0
+            P = ((r*PV) / (1-(1+r)**(-n)) if r else 0) - asset_id.plan_fee
             if asset_id.plan_type == 'exit':
                 asset_id.plan_payment = P
 
@@ -648,9 +650,12 @@ class InvestmentAsset(models.Model):
 
                     elif asset_id.plan_type == 'exit':
                         interest = PV*r
-                        reduction = P-interest
-                        reduction_vals = {'description': f'{i}: {-reduction:.2f} + {-interest:.2f}', 'quantity': -reduction/curr_price, 'payment': abs(P), 'exchange_rate': price, 'fee': asset_id.plan_fee}
-                        Transaction.create({**base_vals, **reduction_vals})
+                        reduction = P-interest+asset_id.plan_fee
+                        dsum = (-reduction) + (-interest) + (asset_id.plan_fee)
+                        reduction_vals = {
+                            'description': f'{i}: {-reduction:.2f} + {-interest:.2f} + {asset_id.plan_fee:.2f} = {dsum:.2f}',
+                            'quantity': -reduction/curr_price, 'payment': abs(P), 'fee': asset_id.plan_fee, 'exchange_rate': 1}
+                        tr = Transaction.create({**base_vals, **reduction_vals})
                         PV -= reduction
                     else:
                         raise ValueError(f"Invalid plan type {asset_id.plan_type}")
@@ -967,7 +972,7 @@ class InvestmentAssetTransaction(models.Model):
 
     description = fields.Char()
 
-    exchange_rate = fields.Monetary()
+    exchange_rate = fields.Float(digits='Investment Asset quantity')
 
     fee = fields.Monetary(store=True, readonly=False,  compute='_compute_fee', inverse='_inverse_fee')
 
