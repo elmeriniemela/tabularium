@@ -151,7 +151,7 @@ class TogglEntry(models.Model):
 
     @property
     def timesheet_rounding(self):
-        return 15/60
+        return 5/60
 
     @property
     def task_id_regex(self):
