@@ -52,8 +52,8 @@
                             <field name="description"/>
                             <label for="date"/>
                             <div>
-                                <field name="date" class="pr-1"/>
-                                (<field name="time_period"/>)
+                                <field name="date" class="oe_inline pr-1"/>
+                                (<field class="oe_inline" name="time_period"/>)
                             </div>
                             <field name="locked" attrs="{'invisible': [('locked', '=', False)]}"/>
                             <field name="parent_id" attrs="{'invisible': [('parent_id', '=', False)]}"/>
@@ -61,13 +61,15 @@
                         <group>
                             <field name="rounded_duration" widget="float_time"/>
                             <field name="total_duration" widget="float_time"/>
-                            <div>
-                                <button title="Round Up" icon="fa-arrow-up" name="action_round_up" type="object" attrs="{'invisible': [('parent_id', '!=', False)]}"/>
-                                <button title="Reset Rounding" icon="fa-bullseye" name="action_reset_rounding" type="object" attrs="{'invisible': [('parent_id', '!=', False)]}"/>
-                                <button title="Round Down" icon="fa-arrow-down" name="action_round_down" type="object" attrs="{'invisible': [('parent_id', '!=', False)]}"/>
-                                <button string="External Task" name="action_view_task" type="object" attrs="{'invisible': [('parent_id', '!=', False)]}"/>
-                            </div>
                         </group>
+                        <div>
+                        </div>
+                        <div>
+                            <button title="Round Up" icon="fa-arrow-up" name="action_round_up" type="object" attrs="{'invisible': [('parent_id', '!=', False)]}"/>
+                            <button title="Reset Rounding" icon="fa-bullseye" name="action_reset_rounding" type="object" attrs="{'invisible': [('parent_id', '!=', False)]}"/>
+                            <button title="Round Down" icon="fa-arrow-down" name="action_round_down" type="object" attrs="{'invisible': [('parent_id', '!=', False)]}"/>
+                            <button string="External Task" name="action_view_task" type="object" attrs="{'invisible': [('parent_id', '!=', False)]}"/>
+                        </div>
                     </group>
                     <notebook>
                         <page string="Child Entries">
