@@ -12,6 +12,12 @@ class InvestmentCategory(models.Model):
     name = fields.Char(required=True)
     sequence = fields.Integer(string='Sequence')
     liquid = fields.Boolean()
+    parent_id = fields.Many2one(
+        comodel_name='investment.category',
+        compute='_compute_parent_id',
+        store=True,
+        readonly=False,
+    )
 
     favourite = fields.Boolean()
 
@@ -19,3 +25,6 @@ class InvestmentCategory(models.Model):
         for record in self:
             record.favourite = not record.favourite
 
+    def _compute_parent_id(self):
+        for record in self:
+            record.parent_id = record.parent_id or record

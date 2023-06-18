@@ -6,6 +6,7 @@
             <tree>
                 <field name="sequence" widget="handle"/>
                 <field name="name" optional="show"/>
+                <field name="parent_id" optional="show"/>
                 <field name="liquid" optional="show" widget="boolean_toggle"/>
                 <field name="favourite" optional="show" widget="boolean_favorite"/>
             </tree>
@@ -25,6 +26,7 @@
                     </div>
                     <group>
                         <field name="liquid"/>
+                        <field name="parent_id" required="0"/>
                     </group>
                 </sheet>
             </form>
@@ -37,6 +39,7 @@
         <field name="arch" type="xml">
             <search>
                 <field name="name"/>
+                <field name="parent_id"/>
             </search>
         </field>
     </record>

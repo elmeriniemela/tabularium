@@ -17,7 +17,7 @@ class InvestmentAsset(models.Model):
     _name = 'investment.asset'
     _description = 'Investment Asset'
     _inherit = ['mail.thread', 'mail.activity.mixin']
-    _order = 'category_id, sequence, id'
+    _order = 'parent_category_id, sequence, id'
 
     sequence = fields.Integer(string='Sequence')
 
@@ -41,6 +41,12 @@ class InvestmentAsset(models.Model):
         required=True,
         index=True,
     )
+
+    parent_category_id = fields.Many2one(
+        related='category_id.parent_id',
+        store=True,
+    )
+
     liquid = fields.Boolean(related='category_id.liquid', store=True, readonly=True)
 
     company_currency_id = fields.Many2one(related='company_id.currency_id', string="Company Currency")
