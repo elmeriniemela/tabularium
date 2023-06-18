@@ -1,5 +1,5 @@
 <odoo>
-    <record model="ir.ui.view" id="account_tree">
+    <record id="account_tree" model="ir.ui.view">
         <field name="name">cashflow.account.tree</field>
         <field name="model">cashflow.account</field>
         <field name="arch" type="xml">
@@ -11,7 +11,7 @@
         </field>
     </record>
 
-    <record model="ir.ui.view" id="account_form">
+    <record id="account_form" model="ir.ui.view">
         <field name="name">cashflow.account.form</field>
         <field name="model">cashflow.account</field>
         <field name="arch" type="xml">
@@ -45,7 +45,7 @@
     </record>
 
 
-    <record model="ir.actions.act_window" id="account_action_window">
+    <record id="account_action_window" model="ir.actions.act_window">
         <field name="name">Accounts</field>
         <field name="res_model">cashflow.account</field>
         <field name="view_mode">tree,form,graph</field>

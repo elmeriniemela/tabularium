@@ -1,5 +1,5 @@
 <odoo>
-    <record model="ir.ui.view" id="directory_tree">
+    <record id="directory_tree" model="ir.ui.view">
         <field name="name">document.directory.tree</field>
         <field name="model">document.directory</field>
         <field name="arch" type="xml">
@@ -12,7 +12,7 @@
         </field>
     </record>
 
-    <record model="ir.ui.view" id="directory_form">
+    <record id="directory_form" model="ir.ui.view">
         <field name="name">document.directory.form</field>
         <field name="model">document.directory</field>
         <field name="arch" type="xml">
@@ -45,7 +45,7 @@
         </field>
     </record>
 
-    <record model="ir.actions.act_window" id="action_document_dirs">
+    <record id="action_document_dirs" model="ir.actions.act_window">
         <field name="name">Document Directories</field>
         <field name="res_model">document.directory</field>
         <field name="view_mode">tree,form</field>

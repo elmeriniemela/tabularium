@@ -1,5 +1,5 @@
 <odoo>
-    <record model="ir.ui.view" id="asset_realized_tree">
+    <record id="asset_realized_tree" model="ir.ui.view">
         <field name="name">investment.asset.realized.tree</field>
         <field name="model">investment.asset.realized</field>
         <field name="arch" type="xml">
@@ -20,7 +20,7 @@
         </field>
     </record>
 
-    <record model="ir.ui.view" id="asset_realized_form">
+    <record id="asset_realized_form" model="ir.ui.view">
         <field name="name">investment.asset.realized.form</field>
         <field name="model">investment.asset.realized</field>
         <field name="arch" type="xml">
@@ -64,7 +64,7 @@
         </field>
     </record>
 
-    <record model="ir.ui.view" id="asset_realized_graph">
+    <record id="asset_realized_graph" model="ir.ui.view">
         <field name="name">investment.asset.realized.graph</field>
         <field name="model">investment.asset.realized</field>
         <field name="arch" type="xml">
@@ -75,7 +75,7 @@
     </record>
 
 
-    <record model="ir.actions.act_window" id="action_realized">
+    <record id="action_realized" model="ir.actions.act_window">
         <field name="name">Assets Realized</field>
         <field name="res_model">investment.asset.realized</field>
         <field name="view_mode">tree,graph,form</field>

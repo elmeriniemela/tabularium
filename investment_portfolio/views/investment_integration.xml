@@ -1,5 +1,5 @@
 <odoo>
-    <record model="ir.ui.view" id="integration_tree">
+    <record id="integration_tree" model="ir.ui.view">
         <field name="name">investment.integration.tree</field>
         <field name="model">investment.integration</field>
         <field name="arch" type="xml">
@@ -9,7 +9,7 @@
         </field>
     </record>
 
-    <record model="ir.ui.view" id="integration_form">
+    <record id="integration_form" model="ir.ui.view">
         <field name="name">investment.integration.form</field>
         <field name="model">investment.integration</field>
         <field name="arch" type="xml">
@@ -37,7 +37,7 @@
     </record>
 
 
-    <record model="ir.actions.act_window" id="action_integrations">
+    <record id="action_integrations" model="ir.actions.act_window">
         <field name="name">Integrations</field>
         <field name="res_model">investment.integration</field>
         <field name="view_mode">tree,form</field>

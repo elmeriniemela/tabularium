@@ -234,7 +234,7 @@
 
 
 
-    <record model="ir.actions.act_window" id="entry_action">
+    <record id="entry_action" model="ir.actions.act_window">
         <field name="name">Toggl Entries</field>
         <field name="res_model">toggl.entry</field>
         <field name="view_mode">tree,kanban,form</field>

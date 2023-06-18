@@ -1,5 +1,5 @@
 <odoo>
-    <record model="ir.ui.view" id="entry_tree">
+    <record id="entry_tree" model="ir.ui.view">
         <field name="name">cashflow.entry.tree</field>
         <field name="model">cashflow.entry</field>
         <field name="arch" type="xml">
@@ -15,7 +15,7 @@
         </field>
     </record>
 
-    <record model="ir.ui.view" id="entry_graph">
+    <record id="entry_graph" model="ir.ui.view">
          <field name="name">cashflow.entry.graph</field>
          <field name="model">cashflow.entry</field>
          <field name="arch" type="xml">
@@ -25,7 +25,7 @@
          </field>
     </record>
 
-    <record model="ir.ui.view" id="entry_form">
+    <record id="entry_form" model="ir.ui.view">
         <field name="name">cashflow.entry.form</field>
         <field name="model">cashflow.entry</field>
         <field name="arch" type="xml">
@@ -87,7 +87,7 @@
     </record>
 
 
-    <record model="ir.actions.act_window" id="entry_action_window">
+    <record id="entry_action_window" model="ir.actions.act_window">
         <field name="name">Entrys</field>
         <field name="res_model">cashflow.entry</field>
         <field name="view_mode">tree,form,graph</field>

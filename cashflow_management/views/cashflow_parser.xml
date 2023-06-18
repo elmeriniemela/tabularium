@@ -1,6 +1,6 @@
 <odoo>
 
-    <record model="ir.ui.view" id="parser_tree">
+    <record id="parser_tree" model="ir.ui.view">
         <field name="name">cashflow.parser.tree</field>
         <field name="model">cashflow.parser</field>
         <field name="arch" type="xml">
@@ -12,7 +12,7 @@
         </field>
     </record>
 
-    <record model="ir.ui.view" id="parser_form">
+    <record id="parser_form" model="ir.ui.view">
         <field name="name">cashflow.parser.form</field>
         <field name="model">cashflow.parser</field>
         <field name="arch" type="xml">
@@ -57,7 +57,7 @@
     </record>
 
 
-    <record model="ir.actions.act_window" id="parser_action_window">
+    <record id="parser_action_window" model="ir.actions.act_window">
         <field name="name">Parsers</field>
         <field name="res_model">cashflow.parser</field>
         <field name="view_mode">tree,form,graph</field>

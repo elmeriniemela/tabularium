@@ -49,7 +49,7 @@
         </field>
     </record>
 
-    <record model="ir.actions.act_window" id="task_action">
+    <record id="task_action" model="ir.actions.act_window">
         <field name="name">Toggl Tasks</field>
         <field name="res_model">toggl.task</field>
         <field name="view_mode">tree,form</field>

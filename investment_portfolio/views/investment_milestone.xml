@@ -1,5 +1,5 @@
 <odoo>
-    <record model="ir.ui.view" id="milestone_tree">
+    <record id="milestone_tree" model="ir.ui.view">
         <field name="name">investment.milestone.tree</field>
         <field name="model">investment.milestone</field>
         <field name="arch" type="xml">
@@ -19,7 +19,7 @@
         </field>
     </record>
 
-    <record model="ir.ui.view" id="milestone_form">
+    <record id="milestone_form" model="ir.ui.view">
         <field name="name">investment.milestone.form</field>
         <field name="model">investment.milestone</field>
         <field name="arch" type="xml">
@@ -67,7 +67,7 @@
     </record>
 
 
-    <record model="ir.actions.act_window" id="action_milestones">
+    <record id="action_milestones" model="ir.actions.act_window">
         <field name="name">Milestones</field>
         <field name="res_model">investment.milestone</field>
         <field name="view_mode">tree,form,graph</field>

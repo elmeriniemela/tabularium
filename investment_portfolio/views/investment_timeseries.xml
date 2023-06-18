@@ -1,5 +1,5 @@
 <odoo>
-    <record model="ir.ui.view" id="timeseries_tree">
+    <record id="timeseries_tree" model="ir.ui.view">
         <field name="name">investment.timeseries.tree</field>
         <field name="model">investment.timeseries</field>
         <field name="arch" type="xml">
@@ -15,7 +15,7 @@
         </field>
     </record>
 
-    <record model="ir.ui.view" id="timeseries_profit">
+    <record id="timeseries_profit" model="ir.ui.view">
         <field name="name">investment.timeseries.graph</field>
         <field name="model">investment.timeseries</field>
         <field name="priority" eval="1" />
@@ -26,7 +26,7 @@
         </field>
     </record>
 
-    <record model="ir.ui.view" id="timeseries_position">
+    <record id="timeseries_position" model="ir.ui.view">
         <field name="name">investment.timeseries.graph</field>
         <field name="model">investment.timeseries</field>
         <field name="priority" eval="2" />
@@ -37,7 +37,7 @@
         </field>
     </record>
 
-    <record model="ir.ui.view" id="timeseries_form">
+    <record id="timeseries_form" model="ir.ui.view">
         <field name="name">investment.timeseries.form</field>
         <field name="model">investment.timeseries</field>
         <field name="arch" type="xml">
@@ -119,7 +119,7 @@
         <field name="code">records._compute_aggregate()</field>
     </record>
 
-    <record model="ir.actions.act_window" id="action_profits">
+    <record id="action_profits" model="ir.actions.act_window">
         <field name="name">Profits</field>
         <field name="res_model">investment.timeseries</field>
         <field name="view_mode">graph,tree,form</field>
@@ -133,7 +133,7 @@
         />
     </record>
 
-    <record model="ir.actions.act_window" id="action_positions">
+    <record id="action_positions" model="ir.actions.act_window">
         <field name="name">Positions</field>
         <field name="res_model">investment.timeseries</field>
         <field name="view_mode">graph,tree,form</field>
@@ -149,7 +149,7 @@
     </record>
 
 
-    <record model="ir.actions.act_window" id="action_profits_per_asset">
+    <record id="action_profits_per_asset" model="ir.actions.act_window">
         <field name="name">Profits per asset</field>
         <field name="res_model">investment.timeseries</field>
         <field name="view_mode">graph,tree,form</field>
@@ -163,7 +163,7 @@
         />
     </record>
 
-    <record model="ir.actions.act_window" id="action_positions_per_asset">
+    <record id="action_positions_per_asset" model="ir.actions.act_window">
         <field name="name">Positions per asset</field>
         <field name="res_model">investment.timeseries</field>
         <field name="view_mode">graph,tree,form</field>
@@ -178,7 +178,7 @@
         />
     </record>
 
-    <record model="ir.actions.act_window" id="action_prediction_growth">
+    <record id="action_prediction_growth" model="ir.actions.act_window">
         <field name="name">Predicted growth</field>
         <field name="res_model">investment.timeseries</field>
         <field name="view_mode">graph,tree,form</field>
