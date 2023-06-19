@@ -11,7 +11,7 @@
                 <field name="cash_flow" optional="hide" sum="Total"/>
                 <field name="description"/>
                 <field name="exchange_rate"/>
-                <field name="fee"/>
+                <field name="fee" sum="Total Fee"/>
                 <field name="profit" decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0" optional="show"/>
                 <field name="currency_id" optional="hide"/>
                 <field name="asset_id" optional="hide"/>
