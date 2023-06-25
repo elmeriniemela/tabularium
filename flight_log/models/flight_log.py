@@ -25,7 +25,7 @@ class FightPlane(models.Model):
 class FlightLog(models.Model):
     _name = 'flight.log'
     _description = 'Flight Log'
-    _order = 'start asc, id desc'
+    _order = 'date asc, start_time asc, id asc'
     _inherit = ['mail.thread']
     _check_company_auto = True
 
@@ -77,30 +77,24 @@ class FlightLog(models.Model):
         ondelete='restrict',
     )
 
-    start = fields.Datetime(
-        tracking=True,
-        required=True,
-        states={'confirmed': [('readonly', True)]},
-    )
-    end = fields.Datetime(
-        tracking=True,
-        required=True,
-        states={'confirmed': [('readonly', True)]},
-    )
-
     start_time = fields.Float(
-        compute='_compute_time',
-        store=True,
+        tracking=True,
+        required=True,
+        states={'confirmed': [('readonly', True)]},
+        group_operator=None,
     )
 
     end_time = fields.Float(
-        compute='_compute_time',
-        store=True,
+        tracking=True,
+        required=True,
+        states={'confirmed': [('readonly', True)]},
+        group_operator=None,
     )
 
     date = fields.Date(
-        compute='_compute_date',
-        store=True,
+        tracking=True,
+        required=True,
+        states={'confirmed': [('readonly', True)]},
     )
 
     purpose = fields.Selection(
@@ -138,12 +132,6 @@ class FlightLog(models.Model):
         store=True,
     )
 
-    @api.depends('start', 'end', 'date')
-    def _compute_time(self):
-        for record in self:
-            record.start_time = ((record.start-record.start.replace(hour=0, minute=0, second=0, microsecond=0) + datetime.timedelta(hours=3)).seconds/(60*60))
-            record.end_time = ((record.end-record.end.replace(hour=0, minute=0, second=0, microsecond=0) + datetime.timedelta(hours=3)).seconds/(60*60))
-
     @api.depends('start_time', 'end_time')
     def _compute_duration(self):
         for record in self:
@@ -152,11 +140,3 @@ class FlightLog(models.Model):
             else:
                 record.duration = False
 
-
-    @api.depends('start')
-    def _compute_date(self):
-        for record in self:
-            if record.start:
-                record.date = record.start.date()
-            else:
-                record.date = False
