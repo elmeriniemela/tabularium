@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import datetime
 import logging
 from odoo import models, tools, fields, api, _
 
@@ -87,6 +88,16 @@ class FlightLog(models.Model):
         states={'confirmed': [('readonly', True)]},
     )
 
+    start_time = fields.Float(
+        compute='_compute_time',
+        store=True,
+    )
+
+    end_time = fields.Float(
+        compute='_compute_time',
+        store=True,
+    )
+
     date = fields.Date(
         compute='_compute_date',
         store=True,
@@ -127,11 +138,17 @@ class FlightLog(models.Model):
         store=True,
     )
 
-    @api.depends('start', 'end')
+    @api.depends('start', 'end', 'date')
+    def _compute_time(self):
+        for record in self:
+            record.start_time = ((record.start-record.start.replace(hour=0, minute=0, second=0, microsecond=0) + datetime.timedelta(hours=3)).seconds/(60*60))
+            record.end_time = ((record.end-record.end.replace(hour=0, minute=0, second=0, microsecond=0) + datetime.timedelta(hours=3)).seconds/(60*60))
+
+    @api.depends('start_time', 'end_time')
     def _compute_duration(self):
         for record in self:
-            if record.start and record.end:
-                record.duration = ((record.end-record.start).seconds/(60*60))
+            if record.start_time and record.end_time:
+                record.duration = record.end_time - record.start_time
             else:
                 record.duration = False
 
