@@ -1,0 +1,43 @@
+<odoo>
+    <record id="plane_list" model="ir.ui.view">
+        <field name="name">flight.plane.list</field>
+        <field name="model">flight.plane</field>
+        <field name="priority">2</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name" optional="show"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="plane_form" model="ir.ui.view">
+        <field name="name">flight.plane.form</field>
+        <field name="model">flight.plane</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+
+
+    <record id="plane_action" model="ir.actions.act_window">
+        <field name="name">Planes</field>
+        <field name="res_model">flight.plane</field>
+        <field name="view_mode">tree,kanban,form</field>
+    </record>
+
+    <menuitem id="plane_menu" parent="log_menu" action="plane_action" sequence="4"/>
+
+</odoo>

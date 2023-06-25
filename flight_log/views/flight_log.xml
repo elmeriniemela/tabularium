@@ -1,0 +1,124 @@
+<odoo>
+    <record id="log_list" model="ir.ui.view">
+        <field name="name">flight.log.list</field>
+        <field name="model">flight.log</field>
+        <field name="priority">2</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name" optional="show"/>
+                <field name="plane_id" optional="show"/>
+                <field name="purpose" optional="show"/>
+                <field name="departure_method" optional="show"/>
+                <field name="start" widget="daterange" options="{'related_end_date': 'end'}" optional="show"/>
+                <field name="end" widget="daterange" options="{'related_end_date': 'start'}" optional="show"/>
+                <field name="duration" widget="float_time" optional="show"/>
+                <field name="state" optional="show"/>
+                <field name="instrumental_time" optional="hide"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="log_form" model="ir.ui.view">
+        <field name="name">flight.log.form</field>
+        <field name="model">flight.log</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <field name="state" widget="statusbar" options="{'clickable': '1'}"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="desc"/>
+                            <field name="plane_id"/>
+                            <field name="purpose"/>
+                            <field name="departure_method"/>
+                            <label for="start" string="Airport"/>
+                            <div class="o_row">
+                                <field name="airport_takeoff_id" />
+                                <i class="fa fa-long-arrow-right mx-1" aria-label="Arrow icon" title="Arrow"/>
+                                <field name="airport_landing_id" />
+                            </div>
+                            <label for="start" string="Time"/>
+                            <div class="o_row">
+                                <field name="start" widget="daterange" options='{"related_end_date": "end"}'/>
+                                <i class="fa fa-long-arrow-right mx-1" aria-label="Arrow icon" title="Arrow"/>
+                                <field name="end" widget="daterange" options='{"related_start_date": "start"}'/>
+                            </div>
+                            <field name="duration" widget="float_time"/>
+                            <field name="instrumental_time"/>
+                        </group>
+                        <group>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="log_kanban" model="ir.ui.view">
+        <field name="name">flight.log.kanban</field>
+        <field name="model">flight.log</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile" sample="1">
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click_edit">
+                            <div class="oe_kanban_content">
+                                <div class="o_kanban_record_top">
+                                    <div class="o_kanban_record_headings">
+                                        <strong class="o_kanban_record_title">
+                                            <field name="name"/>
+                                        </strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="log_search" model="ir.ui.view">
+        <field name="model">flight.log</field>
+        <field name="arch" type="xml">
+            <search string="Toggl Entry">
+                <field name="name"/>
+                <field name="date"/>
+                <filter name="date" string="Date" date="date"/>
+                <group expand="1" string="Group by">
+                    <filter string="Name" name="group_name" context="{'group_by': 'name'}"/>
+                    <filter string="Date" name="group_date" context="{'group_by': 'date:year'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+
+    <record id="log_action" model="ir.actions.act_window">
+        <field name="name">Flight Log</field>
+        <field name="res_model">flight.log</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="context">
+            {
+            'search_default_not_exported': 1,
+            'search_default_not_parent_id': 1,
+            'search_default_group_date': 1,
+            'search_default_one_month': 1,
+            }
+        </field>
+    </record>
+
+    <menuitem id="log_menu" action="log_action" web_icon="flight_log,static/description/icon2.png" sequence="4"/>
+
+</odoo>
