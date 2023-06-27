@@ -1,0 +1,77 @@
+<odoo>
+    <record id="file_list" model="ir.ui.view">
+        <field name="name">file.scanner.list</field>
+        <field name="model">file.scanner</field>
+        <field name="priority">2</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="path" optional="show"/>
+                <field name="fname" optional="show"/>
+                <field name="date" optional="show"/>
+                <field name="parsed_date" optional="show"/>
+                <field name="mtime" optional="show"/>
+                <field name="ctime" optional="show"/>
+                <field name="parent" optional="show"/>
+                <field name="suffix" optional="show"/>
+                <field name="size" optional="show"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="file_form" model="ir.ui.view">
+        <field name="name">file.scanner.form</field>
+        <field name="model">file.scanner</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="path"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="fname"/>
+                            <field name="size"/>
+                            <field name="mtime"/>
+                            <field name="ctime"/>
+                            <field name="suffix"/>
+                            <field name="parent"/>
+                            <field name="date"/>
+                            <field name="parsed_date"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="file_search" model="ir.ui.view">
+        <field name="model">file.scanner</field>
+        <field name="arch" type="xml">
+            <search string="Toggl Entry">
+                <field name="path"/>
+                <field name="ctime"/>
+                <filter name="date" string="date" date="date"/>
+                <group expand="1" string="Group by">
+                    <filter string="Date" name="group_date" context="{'group_by': 'date:year'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+
+    <record id="file_action" model="ir.actions.act_window">
+        <field name="name">file scanner</field>
+        <field name="res_model">file.scanner</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="context">
+            {
+            'search_default_group_date': 1,
+            }
+        </field>
+    </record>
+
+    <menuitem id="file_menu" action="file_action" web_icon="file_scanner,static/description/icon.png" sequence="4"/>
+
+</odoo>
