@@ -6,6 +6,8 @@ from odoo import models, tools, fields, api, _
 from odoo.exceptions import ValidationError
 
 _logger = logging.getLogger(__name__)
+def ftime(time):
+    return '{0:02.0f}:{1:02.0f}'.format(*divmod(time * 60, 60))
 
 class FightPlane(models.Model):
     _name = 'flight.plane'
@@ -158,7 +160,7 @@ class FlightLog(models.Model):
                 ('end_time', '>=', record.start_time),
             ], limit=1)
             if overlap:
-                raise ValidationError(_("There is already a flight on %s from %s to %s.") % (overlap.date, overlap.start_time, overlap.end_time))
+                raise ValidationError(_("There is already a flight on %s from %s to %s.") % (overlap.date, ftime(overlap.start_time), ftime(overlap.end_time)))
 
 
 
