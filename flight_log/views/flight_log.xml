@@ -6,9 +6,13 @@
         <field name="arch" type="xml">
             <tree>
                 <field name="name" optional="show"/>
-                <field name="plane_id" optional="show"/>
+                <field name="desc" optional="show"/>
                 <field name="purpose" optional="show"/>
                 <field name="departure_method" optional="show"/>
+                <field name="plane_id" optional="show"/>
+                <field name="airport_takeoff_id" optional="show"/>
+                <field name="airport_landing_id" optional="show"/>
+                <field name="date" optional="show"/>
                 <field name="start_time" widget="float_time" optional="show"/>
                 <field name="end_time" widget="float_time" optional="show"/>
                 <field name="duration" widget="float_time" optional="show"/>
