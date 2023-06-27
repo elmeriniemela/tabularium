@@ -80,6 +80,7 @@ class FlightLog(models.Model):
     start_time = fields.Float(
         tracking=True,
         required=True,
+        copy=False,
         states={'confirmed': [('readonly', True)]},
         group_operator=None,
     )
@@ -87,6 +88,7 @@ class FlightLog(models.Model):
     end_time = fields.Float(
         tracking=True,
         required=True,
+        copy=False,
         states={'confirmed': [('readonly', True)]},
         group_operator=None,
     )
