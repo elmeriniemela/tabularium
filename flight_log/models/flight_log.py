@@ -3,6 +3,7 @@
 import datetime
 import logging
 from odoo import models, tools, fields, api, _
+from odoo.exceptions import ValidationError
 
 _logger = logging.getLogger(__name__)
 
@@ -100,6 +101,7 @@ class FlightLog(models.Model):
         tracking=True,
         required=True,
         states={'confirmed': [('readonly', True)]},
+        index=True,
     )
 
     purpose = fields.Selection(
@@ -138,6 +140,23 @@ class FlightLog(models.Model):
         store=True,
         copy=False,
     )
+
+    @api.constrains('start_time', 'end_time', 'date')
+    def _constrain_time(self):
+        for record in self:
+            if record.end_time < record.start_time:
+                raise ValidationError(_("End time can not be before start time"))
+
+            overlap = record.search([
+                ('date', '=', record.date),
+                ('id', '!=', record.id),
+                ('start_time', '<=', record.end_time),
+                ('end_time', '>=', record.start_time),
+            ], limit=1)
+            if overlap:
+                raise ValidationError(_("There is already a flight on %s from %s to %s.") % (overlap.date, overlap.start_time, overlap.end_time))
+
+
 
     @api.depends('start_time', 'end_time')
     def _compute_duration(self):
