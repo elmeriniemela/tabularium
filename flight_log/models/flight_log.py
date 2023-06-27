@@ -82,6 +82,7 @@ class FlightLog(models.Model):
         tracking=True,
         required=True,
         copy=False,
+        default=0.0,
         states={'confirmed': [('readonly', True)]},
         group_operator=None,
     )
@@ -90,6 +91,7 @@ class FlightLog(models.Model):
         tracking=True,
         required=True,
         copy=False,
+        default=0.0,
         states={'confirmed': [('readonly', True)]},
         group_operator=None,
     )
