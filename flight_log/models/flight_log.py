@@ -147,6 +147,10 @@ class FlightLog(models.Model):
             if record.end_time < record.start_time:
                 raise ValidationError(_("End time can not be before start time"))
 
+            if any(t < 0 or t > 24 for t in [record.end_time, record.start_time]):
+                raise ValidationError(_("Time should be between 0h and 24h"))
+
+
             overlap = record.search([
                 ('date', '=', record.date),
                 ('id', '!=', record.id),
