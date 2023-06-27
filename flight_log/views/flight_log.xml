@@ -50,7 +50,7 @@
                                 <field name="start_time" options="{'type': 'time'}" widget="float_time"/>
                                 <i class="fa fa-long-arrow-right mx-1" aria-label="Arrow icon" title="Arrow"/>
                                 <field name="end_time" options="{'type': 'time'}" widget="float_time"/>
-                                <i class="fa fa-long-arrow-right mx-1" aria-label="Arrow icon" title="Arrow"/>
+                                <span>duration</span>
                                 <field name="duration" widget="float_time"/>
                             </div>
                             <field name="instrumental_time" widget="float_time"/>
