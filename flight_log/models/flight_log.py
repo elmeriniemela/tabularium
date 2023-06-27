@@ -66,6 +66,7 @@ class FlightLog(models.Model):
         required=True,
         default='draft',
         tracking=True,
+        copy=False,
     )
 
     plane_id = fields.Many2one(
@@ -126,12 +127,14 @@ class FlightLog(models.Model):
 
     instrumental_time = fields.Float(
         tracking=True,
+        copy=False,
         states={'confirmed': [('readonly', True)]},
     )
 
     duration = fields.Float(
         compute='_compute_duration',
         store=True,
+        copy=False,
     )
 
     @api.depends('start_time', 'end_time')
