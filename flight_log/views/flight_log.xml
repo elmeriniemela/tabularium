@@ -35,9 +35,9 @@
                     <group>
                         <group>
                             <field name="desc"/>
-                            <field name="plane_id"/>
                             <field name="purpose"/>
                             <field name="departure_method"/>
+                            <field name="plane_id"/>
                             <field name="date"/>
                             <label for="airport_takeoff_id" string="Airport"/>
                             <div class="o_row">
