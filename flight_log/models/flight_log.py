@@ -17,9 +17,9 @@ class FightPlane(models.Model):
     name = fields.Char(required=True, tracking=True)
 
 
-class FightPlane(models.Model):
+class FightAirport(models.Model):
     _name = 'flight.airport'
-    _description = 'Flight Plane'
+    _description = 'Flight Airport'
     _inherit = ['mail.thread']
 
     name = fields.Char(required=True, tracking=True)
@@ -36,10 +36,6 @@ class FlightLog(models.Model):
     name = fields.Char(
         required=True,
         default='HAR',
-        tracking=True,
-        states={'confirmed': [('readonly', True)]},
-    )
-    desc = fields.Char(
         tracking=True,
         states={'confirmed': [('readonly', True)]},
     )

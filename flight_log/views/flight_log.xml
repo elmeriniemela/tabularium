@@ -6,7 +6,6 @@
         <field name="arch" type="xml">
             <tree>
                 <field name="name" optional="show"/>
-                <field name="desc" optional="show"/>
                 <field name="purpose" optional="show"/>
                 <field name="departure_method" optional="show"/>
                 <field name="plane_id" optional="show"/>
@@ -38,7 +37,6 @@
                     </div>
                     <group>
                         <group>
-                            <field name="desc"/>
                             <field name="purpose"/>
                             <field name="departure_method"/>
                             <field name="plane_id"/>
