@@ -14,7 +14,7 @@
                 <field name="date" optional="show"/>
                 <field name="start_time" widget="float_time" optional="show"/>
                 <field name="end_time" widget="float_time" optional="show"/>
-                <field name="duration" widget="float_time" optional="show"/>
+                <field name="duration" widget="float_time" optional="show" sum="Total Duration"/>
                 <field name="state" optional="show"/>
                 <field name="instrumental_time" widget="float_time" optional="hide"/>
             </tree>
