@@ -6,8 +6,18 @@ from odoo import models, tools, fields, api, _
 from odoo.exceptions import ValidationError
 
 _logger = logging.getLogger(__name__)
+
 def ftime(time):
     return '{0:02.0f}:{1:02.0f}'.format(*divmod(time * 60, 60))
+
+def ptime(time):
+    try:
+        h, m = time.split(':')
+        h, m = float(h), float(m)
+    except ValueError:
+        raise ValidationError(_("Invalid time '%s', expected format '23:59'.") % time)
+    m /= 60.0
+    return h + m
 
 class FightPlane(models.Model):
     _name = 'flight.plane'
@@ -138,6 +148,19 @@ class FlightLog(models.Model):
         store=True,
         copy=False,
     )
+
+    search_date = fields.Char(compute='_compute_search_date', search='_search_date')
+    search_start_time = fields.Char(compute='_compute_search_start_time', search='_search_start_time')
+    search_end_time = fields.Char(compute='_compute_search_end_time', search='_search_end_time')
+
+    def _search_date(self, operator, value):
+        return [('date', 'like', value)]
+
+    def _search_start_time(self, operator, value):
+        return [('start_time', '=', ptime(value))]
+
+    def _search_end_time(self, operator, value):
+        return [('end_time', '=', ptime(value))]
 
     @api.constrains('start_time', 'end_time', 'date')
     def _constrain_time(self):
