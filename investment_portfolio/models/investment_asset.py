@@ -5,6 +5,7 @@ from odoo.exceptions import ValidationError
 from odoo.tools import float_is_zero, float_compare
 import traceback
 from dateutil.relativedelta import relativedelta
+from dateutil import rrule
 import pytz
 import datetime
 import logging
@@ -12,6 +13,8 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
+def banking_date(date):
+    return rrule.rrule(rrule.DAILY, byweekday=(rrule.MO,rrule.TU,rrule.WE,rrule.TH,rrule.FR), dtstart=date.replace(day=15))[0].date()
 
 class InvestmentAsset(models.Model):
     _name = 'investment.asset'
@@ -172,11 +175,11 @@ class InvestmentAsset(models.Model):
             n = asset_id.plan_months or 0
             date = asset_id.plan_start_date or today
             while date <= today:
-                date += relativedelta(months=1)
+                date = banking_date(date+relativedelta(months=1))
                 if asset_id.plan_start_date:
                     n -= 1
 
-            end = date + relativedelta(months=n)
+            end = banking_date(date+relativedelta(months=n))
             r = (asset_id.plan_yearly_interest or 0 + asset_id.plan_yearly_appreciation or 0)/12
             i = 0
             PV = asset_id.position
@@ -210,14 +213,14 @@ class InvestmentAsset(models.Model):
 
                     elif asset_id.plan_type == 'exit':
                         # Korkopäivät lasketaan todellisten päivien mukaan ja vuodessa on 360 päivää
-                        days = (date - (date-relativedelta(months=1))).days
+                        days = (date - banking_date(date-relativedelta(months=1))).days
                         rate = asset_id.plan_yearly_interest*(days/360)
                         interest = PV*rate
                         reduction = P-interest+asset_id.plan_fee
                         dsum = (-reduction) + (-interest) + (asset_id.plan_fee)
                         reduction_vals = {
                             'description': f'{i}: {-reduction:.2f} + {-interest:.2f} + {asset_id.plan_fee:.2f} = {dsum:.2f}',
-                            'quantity': -reduction/curr_price, 'payment': abs(P), 'fee': asset_id.plan_fee, 'exchange_rate': 1}
+                            'quantity': float(f'{-reduction/curr_price:.2f}'), 'payment': abs(P), 'fee': asset_id.plan_fee, 'exchange_rate': 1}
                         tr = Transaction.create({**base_vals, **reduction_vals})
                         PV -= reduction
                     else:
@@ -229,7 +232,7 @@ class InvestmentAsset(models.Model):
                 else:
                     price_id.price = price
 
-                date += relativedelta(months=1)
+                date = banking_date(date+relativedelta(months=1))
 
 
             asset_id.plan_total_cash_flow = sum(Transaction.search([('prediction', '=', True), ('asset_id', '=', asset_id.id)]).mapped('cash_flow'))
