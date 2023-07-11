@@ -119,10 +119,13 @@
         <field name="arch" type="xml">
             <search string="Toggl Entry">
                 <field name="name"/>
+                <field name="search_date" string="Partial date (i.e. 2015-05-)"/>
                 <field name="search_start_time" string="Start Time"/>
                 <field name="search_end_time" string="End Time"/>
-                <field name="search_date" string="Partial date (i.e. 2015-05-)"/>
-                <field name="date" string="Exact Date" widget="date"/>
+                <field name="plane_id"/>
+                <field name="airport_takeoff_id"/>
+                <field name="purpose"/>
+                <field name="departure_method"/>
                 <filter name="date" string="Date" date="date"/>
                 <group expand="1" string="Group by">
                     <filter string="Name" name="group_name" context="{'group_by': 'name'}"/>

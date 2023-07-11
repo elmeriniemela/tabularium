@@ -156,11 +156,17 @@ class FlightLog(models.Model):
     def _search_date(self, operator, value):
         return [('date', 'like', value)]
 
+    def _search_time(self, field, operator, value):
+        if value.isdigit():
+            hour = int(value)
+            return [(field, '>=', hour), (field, '<=', hour+1)]
+        return [(field, '=', ptime(value))]
+
     def _search_start_time(self, operator, value):
-        return [('start_time', '=', ptime(value))]
+        return self._search_time('start_time', operator, value)
 
     def _search_end_time(self, operator, value):
-        return [('end_time', '=', ptime(value))]
+        return self._search_time('end_time', operator, value)
 
     @api.constrains('start_time', 'end_time', 'date')
     def _constrain_time(self):
