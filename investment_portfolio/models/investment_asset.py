@@ -163,9 +163,9 @@ class InvestmentAsset(models.Model):
         precision = self.env['decimal.precision'].precision_get('Investment Asset quantity')
         predict_years = int(self.env['ir.config_parameter'].sudo().get_param('investment_portfolio.predict_years', '25'))
 
-        existing = {(p.asset_id.id, p.date): p for p in self.search([])}
-
         Timeseries = self.env['investment.timeseries']
+
+        existing = {(p.asset_id.id, p.date): p for p in Timeseries.search([])}
         recompute = Timeseries.browse()
 
 
