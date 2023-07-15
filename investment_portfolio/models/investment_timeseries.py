@@ -225,19 +225,20 @@ class InvestmentTimeseries(models.Model):
                 if prediction and float_is_zero(asset_id.quantity, precision_digits=precision):
                     break
 
-                if (asset_id.id, date) not in existing:
-                    existing[(asset_id.id, date)] = self.create({
+                serie = existing.get((asset_id.id, today), None)
+                if not serie:
+                    serie = self.create({
                         'asset_id': asset_id.id,
                         'date': date,
                     })
-                    recompute += existing[(asset_id.id, date)]
-
-                if prediction:
-                    recompute += existing[(asset_id.id, date)]
-
-                if date == today:
-                    serie_today = existing[(asset_id.id, today)]
-                    serie_today._compute_aggregate()
+                    existing[(asset_id.id, date)] = serie
+                    recompute += serie
+                elif not any([serie.profit, serie.position]):
+                    recompute += serie
+                elif prediction:
+                    recompute += serie
+                elif date == today:
+                    recompute += serie
 
                 if date == today:
                     date = date.replace(month=12, day=31) # start predictions
