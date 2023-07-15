@@ -19,12 +19,6 @@ class InvestmentCategory(models.Model):
         readonly=False,
     )
 
-    favourite = fields.Boolean()
-
-    def toggle_favourite(self):
-        for record in self:
-            record.favourite = not record.favourite
-
     def _compute_parent_id(self):
         for record in self:
             record.parent_id = record.parent_id or record

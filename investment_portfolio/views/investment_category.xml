@@ -8,7 +8,6 @@
                 <field name="name" optional="show"/>
                 <field name="parent_id" optional="show"/>
                 <field name="liquid" optional="show" widget="boolean_toggle"/>
-                <field name="favourite" optional="show" widget="boolean_favorite"/>
             </tree>
         </field>
     </record>

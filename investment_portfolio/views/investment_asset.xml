@@ -44,13 +44,6 @@
                 <field name="plan_yearly_appreciation" widget="percentage" optional="hide"/>
                 <field name="plan_yearly_interest" widget="percentage" optional="hide"/>
                 <field name="plan_total_cash_flow" optional="hide"/>
-
-                <groupby name="parent_category_id">
-                    <field name="favourite" invisible="1"/>
-                    <button type="object" name="toggle_favourite" title="Favourite" icon="fa-star-o" attrs="{'invisible': [('favourite', '=', True)]}"/>
-                    <button type="object" name="toggle_favourite" title="Un-favourite" icon="fa-star" attrs="{'invisible': [('favourite', '=', False)]}"/>
-                </groupby>
-
             </tree>
         </field>
     </record>
@@ -197,10 +190,6 @@
                 <filter string="Liquid" name="liquid" domain="[('liquid', '=', True)]"/>
                 <filter string="Illiquid" name="illiquid" domain="[('liquid', '=', False)]"/>
                 <separator/>
-                <separator/>
-                <filter string="Favourites" name="favourite" domain="[('category_id.favourite', '=', True)]"/>
-                <filter string="Not Favourites" name="not_favourite" domain="[('category_id.favourite', '=', False)]"/>
-                <separator/>
                 <group expand="1" string="Group by">
                     <filter string="Parent Category" name="group_parent_category_id" context="{'group_by': 'parent_category_id'}"/>
                     <filter string="Category" name="group_category_id" context="{'group_by': 'category_id'}"/>
@@ -246,7 +235,7 @@
         <field name="name">Current positions</field>
         <field name="res_model">investment.asset</field>
         <field name="view_mode">tree,form,graph</field>
-        <field name="context">{'search_default_group_parent_category_id': 1, 'search_default_follow': 1, 'search_default_favourite': 1}</field>
+        <field name="context">{'search_default_group_parent_category_id': 1, 'search_default_follow': 1}</field>
     </record>
 
     <record id="action_liquid_allocations" model="ir.actions.act_window">
