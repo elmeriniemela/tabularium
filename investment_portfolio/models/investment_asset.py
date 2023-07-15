@@ -184,7 +184,7 @@ class InvestmentAsset(models.Model):
                 if prediction and float_is_zero(asset_id.quantity, precision_digits=precision):
                     break
 
-                serie = existing.get((asset_id.id, today), None)
+                serie = existing.get((asset_id.id, date), None)
                 if not serie:
                     serie = Timeseries.create({
                         'asset_id': asset_id.id,
