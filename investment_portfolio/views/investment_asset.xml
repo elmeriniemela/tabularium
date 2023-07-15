@@ -234,6 +234,14 @@
         <field name="code">records.generate_plan()</field>
     </record>
 
+    <record id="action_asset_generate_timeseries" model="ir.actions.server">
+        <field name="name">Generate Timeseries</field>
+        <field name="model_id" ref="model_investment_asset"/>
+        <field name="binding_model_id" ref="model_investment_asset"/>
+        <field name="state">code</field>
+        <field name="code">records.with_context(force_recompute=True).generate_timeseries()</field>
+    </record>
+
     <record id="action_current_positions" model="ir.actions.act_window">
         <field name="name">Current positions</field>
         <field name="res_model">investment.asset</field>

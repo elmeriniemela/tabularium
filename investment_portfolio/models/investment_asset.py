@@ -153,10 +153,64 @@ class InvestmentAsset(models.Model):
     plan_auto_realize = fields.Boolean()
 
 
+    @api.model
+    def cron_create_time_series(self):
+        self.env['investment.asset'].search([]).generate_timeserie()
 
-    def _get_plan(self, date):
-        self.ensure_one()
-        return self.plan_ids.filtered(lambda e: e.year == date.year) or self.plan_ids.filtered(lambda e: not e.year)
+    def generate_timeseries(self):
+        today = datetime.date.today()
+
+        precision = self.env['decimal.precision'].precision_get('Investment Asset quantity')
+        predict_years = int(self.env['ir.config_parameter'].sudo().get_param('investment_portfolio.predict_years', '25'))
+
+        existing = {(p.asset_id.id, p.date): p for p in self.search([])}
+
+        Timeseries = self.env['investment.timeseries']
+        recompute = Timeseries.browse()
+
+
+        for asset_id in self:
+            first = self.env['investment.asset.transaction'].search([('asset_id', '=', asset_id.id)], order='time asc', limit=1)
+            if not first:
+                _logger.info(f"No transactions on {asset_id.name}")
+                continue
+
+            asset_id.generate_plan()
+            date = first.time.date()
+            _logger.info(f"Make time series for {asset_id.name} starting from {date}")
+
+            while date <= today + relativedelta(years=predict_years):
+                prediction = bool(date > today)
+                if prediction and float_is_zero(asset_id.quantity, precision_digits=precision):
+                    break
+
+                serie = existing.get((asset_id.id, today), None)
+                if not serie:
+                    serie = Timeseries.create({
+                        'asset_id': asset_id.id,
+                        'date': date,
+                    })
+                    existing[(asset_id.id, date)] = serie
+                    recompute += serie
+                elif asset_id.env.context.get('force_recompute'):
+                    recompute += serie
+                elif prediction:
+                    recompute += serie
+                elif date == today:
+                    recompute += serie
+
+                if date == today:
+                    date = date.replace(month=12, day=31) # start predictions
+                elif prediction:
+                    date += relativedelta(years=1)
+                else:
+                    date += datetime.timedelta(days=1)
+
+            yesterday = datetime.date.today() - relativedelta(days=1)
+            if first.time.date() <= yesterday:
+                recompute += existing[(asset_id.id, yesterday)]
+
+        recompute.exists()._compute_aggregate()
 
     def generate_plan(self):
         Price = self.env['investment.asset.price']
