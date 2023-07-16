@@ -45,7 +45,6 @@ class FlightLog(models.Model):
 
     name = fields.Char(
         required=True,
-        default='HAR',
         tracking=True,
         states={'confirmed': [('readonly', True)]},
     )
