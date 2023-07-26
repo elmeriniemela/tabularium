@@ -4,7 +4,7 @@
         <field name="model">flight.log</field>
         <field name="priority">2</field>
         <field name="arch" type="xml">
-            <tree>
+            <tree default_order="date desc, start_time desc, id desc">
                 <field name="name" optional="show"/>
                 <field name="purpose" optional="show"/>
                 <field name="departure_method" optional="show"/>
@@ -68,7 +68,7 @@
         <field name="name">flight.log.kanban</field>
         <field name="model">flight.log</field>
         <field name="arch" type="xml">
-            <kanban class="o_kanban_mobile" sample="1">
+            <kanban class="o_kanban_mobile" sample="1" default_order="date desc, start_time desc, id desc">
                 <templates>
                     <t t-name="kanban-box">
                         <div class="oe_kanban_global_click_edit">
