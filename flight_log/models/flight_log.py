@@ -38,7 +38,7 @@ class FightAirport(models.Model):
 class FlightLog(models.Model):
     _name = 'flight.log'
     _description = 'Flight Log'
-    _order = 'date asc, start_time asc, id asc'
+    _order = 'date desc, start_time desc, id desc'
     _inherit = ['mail.thread']
     _check_company_auto = True
 
