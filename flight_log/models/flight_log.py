@@ -141,6 +141,7 @@ class FlightLog(models.Model):
         copy=False,
         states={'confirmed': [('readonly', True)]},
         default=0.0,
+        required=True,
     )
 
     duration = fields.Float(
@@ -197,3 +198,7 @@ class FlightLog(models.Model):
             else:
                 record.duration = False
 
+    def copy(self, default=None):
+        default = dict(default or {})
+        default.update(name=_("%s (copy)") % self.name)
+        return super().copy(default)
