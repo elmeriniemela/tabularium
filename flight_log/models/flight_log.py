@@ -140,6 +140,7 @@ class FlightLog(models.Model):
         tracking=True,
         copy=False,
         states={'confirmed': [('readonly', True)]},
+        default=0.0,
     )
 
     duration = fields.Float(
