@@ -114,6 +114,28 @@
         </field>
     </record>
 
+    <record id="log_pivot" model="ir.ui.view">
+        <field name="name">flight.log.pivot</field>
+        <field name="model">flight.log</field>
+        <field name="arch" type="xml">
+            <pivot sample="1">
+                <field name="duration" type="measure"/>
+                <field name="instrumental_time" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="log_graph" model="ir.ui.view">
+        <field name="name">flight.log.graph</field>
+        <field name="model">flight.log</field>
+        <field name="priority" eval="2" />
+        <field name="arch" type="xml">
+            <graph type="bar">
+                <field name="duration" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
     <record id="log_search" model="ir.ui.view">
         <field name="model">flight.log</field>
         <field name="arch" type="xml">
@@ -139,12 +161,11 @@
     <record id="log_action" model="ir.actions.act_window">
         <field name="name">Flight Log</field>
         <field name="res_model">flight.log</field>
-        <field name="view_mode">tree,kanban,form</field>
-        <field name="context">
-            {
+        <field name="view_mode">tree,kanban,form,pivot,graph</field>
+        <field name="context">{
             'search_default_group_date': 1,
-            }
-        </field>
+            'pivot_measures': ['__count__', 'duration', 'instrumental_time'],
+        }</field>
     </record>
 
     <menuitem id="log_menu" action="log_action" web_icon="flight_log,static/description/icon2.png" sequence="4"/>
