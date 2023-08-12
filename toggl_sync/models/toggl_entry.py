@@ -47,7 +47,10 @@ class TogglTask(models.Model):
                 ['id', 'in', self.mapped('task_id')],
                 ['active', 'in', [True, False]],
             ]],
-            {'fields': ['sale_line_id', 'project_id', 'id', 'display_name']}
+            {
+                'fields': ['sale_line_id', 'project_id', 'id', 'display_name'],
+                'context': {'lang': 'en_UK'},
+            }
         )
 
         project_map = {d['id']: d['project_id'] for d in task_res if d['project_id']}
