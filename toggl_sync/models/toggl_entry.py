@@ -49,7 +49,7 @@ class TogglTask(models.Model):
             ]],
             {
                 'fields': ['sale_line_id', 'project_id', 'id', 'display_name'],
-                'context': {'lang': 'en_UK'},
+                'context': {'lang': 'en_GB'},
             }
         )
 
