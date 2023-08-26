@@ -149,6 +149,7 @@
                                     <field name="plan_yearly_appreciation" widget="percentage"/>
                                     <field name="plan_yearly_interest" widget="percentage"/>
                                     <field name="plan_total_cash_flow"/>
+                                    <field name="plan_allow_past" widget="boolean_toggle"/>
                                     <field name="plan_auto_realize" widget="boolean_toggle"/>
                                     <button name="generate_plan" type="object" string="Generate Plan" icon="fa-cogs"/>
                                 </group>

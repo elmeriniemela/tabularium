@@ -151,6 +151,7 @@ class InvestmentAsset(models.Model):
     plan_yearly_interest = fields.Float(group_operator='avg', default=0.0, digits='Investment Asset Interest')
     plan_total_cash_flow = fields.Monetary(readonly=True)
     plan_auto_realize = fields.Boolean()
+    plan_allow_past = fields.Boolean()
 
 
     @api.model
@@ -228,10 +229,11 @@ class InvestmentAsset(models.Model):
             Transaction.search([('prediction', '=', True), ('asset_id', '=', asset_id.id)]).unlink()
             n = asset_id.plan_months or 0
             date = asset_id.plan_start_date or today
-            while date <= today:
-                date = banking_date(date+relativedelta(months=1))
-                if asset_id.plan_start_date:
-                    n -= 1
+            if not asset_id.plan_allow_past:
+                while date <= today:
+                    date = banking_date(date+relativedelta(months=1))
+                    if asset_id.plan_start_date:
+                        n -= 1
 
             end = banking_date(date+relativedelta(months=n))
             r = (asset_id.plan_yearly_interest or 0 + asset_id.plan_yearly_appreciation or 0)/12
