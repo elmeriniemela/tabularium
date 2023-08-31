@@ -6,12 +6,11 @@
         <field name="arch" type="xml">
             <tree expand="1" default_order="date desc, id asc" editable="top" multi_edit="1" decoration-muted="not active">
                 <field name="description" width="450px" optional="show"/>
-                <field name="name" optional="hide"/>
                 <field name="project_name" optional="hide"/>
                 <field name="task_id" optional="show"/>
                 <field name="rounded_duration" widget="float_time" sum="Rounded" optional="show"/>
                 <field name="total_duration" widget="float_time" sum="Total" optional="show"/>
-                <field name="date" optional="show"/>
+                <field name="date" optional="hide"/>
                 <field name="time_period" optional="hide"/>
                 <field name="original_price" optional="hide"/>
                 <field name="timesheet_price" optional="hide"/>
