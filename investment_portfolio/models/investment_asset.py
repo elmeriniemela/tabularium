@@ -156,7 +156,7 @@ class InvestmentAsset(models.Model):
 
     @api.model
     def cron_create_time_series(self):
-        self.env['investment.asset'].search([]).generate_timeserie()
+        self.env['investment.asset'].search([]).generate_timeseries()
 
     def generate_timeseries(self):
         today = datetime.date.today()

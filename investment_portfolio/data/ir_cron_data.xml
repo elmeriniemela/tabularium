@@ -22,7 +22,7 @@
     </record>
     <record id="cron_create_time_series" model="ir.cron">
         <field name="name">Create Investment Time Series</field>
-        <field name="model_id" ref="model_investment_timeseries"/>
+        <field name="model_id" ref="model_investment_asset"/>
         <field name="state">code</field>
         <field name="code">model.cron_create_time_series()</field>
         <field name="user_id" ref="base.user_root" />
