@@ -39,7 +39,21 @@ class InvestmentAssetTransaction(models.Model):
 
     profit = fields.Monetary(compute='_compute_profit')
 
-    prediction = fields.Boolean()
+    prediction = fields.Boolean(
+        compute='_compute_prediction',
+        inverse='_inverse_prediction',
+        store=True,
+    )
+
+    usage = fields.Selection(
+        selection=[
+            ('record', 'Record'),
+            ('prediction', 'Prediction'),
+            ('realized', 'Realized Calculation'),
+        ],
+        required=True,
+        default='record',
+    )
 
     category_id = fields.Many2one(related='asset_id.category_id', store=True, readonly=True)
     liquid = fields.Boolean(related='category_id.liquid', store=True, readonly=True)
@@ -60,6 +74,15 @@ class InvestmentAssetTransaction(models.Model):
         compute='_compute_report',
         store=True,
     )
+
+    @api.depends('usage')
+    def _compute_prediction(self):
+        for record in self:
+            record.prediction = record.usage == 'prediction'
+
+    def _inverse_prediction(self):
+        for record in self:
+            record.usage = 'prediction' if record.prediction else 'record'
 
     def _fill_daily_price(self):
         Price = self.env['investment.asset.price']

@@ -461,18 +461,29 @@ class InvestmentAsset(models.Model):
 
 
     def update_realized_fifo(self):
+        class TxJoin:
+            def __init__(self, buys, sells, precision):
+                self.buys, self.sells, self.precision = buys, sells, precision
+
+            def __iter__(self):
+                self._iter_state = {
+                    'buy': {'iter': iter(self.buys), 'tx': False, 'qty': 0},
+                    'sell': {'iter': iter(self.sells), 'tx': False, 'qty': 0},
+                }
+                return self
+
+            def __next__(self):
+                s = self._iter_state
+                sub = min(s['buy']['qty'], s['sell']['qty'])
+                for op in ['sell', 'buy']:
+                    s[op]['qty'] -= sub
+                    if float_is_zero(s[op]['qty'], precision_digits=self.precision):
+                        tx = next(s[op]['iter']) # This will eventually raise StopIteration
+                        s[op]['tx'] = tx
+                        s[op]['qty'] = abs(tx.quantity)
+                return s['sell']['tx'], s['buy']['tx'], min(s['buy']['qty'], s['sell']['qty'])
+
         qty_precision = self.env['decimal.precision'].precision_get('Investment Asset quantity')
-
-        def fill(s, filled):
-            quantity = s[filled[0]]['remaining_qty']
-            s['sell']['remaining_qty'] -= quantity
-            s['buy']['remaining_qty'] -= quantity
-            for op in filled:
-                assert float_is_zero(s[op]['remaining_qty'], precision_digits=qty_precision), f"Not filled: {s[op]['remaining_qty']}"
-                next_tx = next(s[op]['tx_iter'])
-                s[op]['tx'] = next_tx
-                s[op]['remaining_qty'] = abs(next_tx.quantity)
-
         for asset in self:
             valid = self.env['investment.asset.realized'].browse()
 
@@ -481,29 +492,14 @@ class InvestmentAsset(models.Model):
             sells = transactions.filtered(lambda t: t.ttype == 'sell')
             buys = transactions.filtered(lambda t: t.ttype == 'buy')
             if buys and sells:
-                state = {
-                    'buy': {'tx_iter': iter(buys), 'tx': False, 'remaining_qty': 0},
-                    'sell': {'tx_iter': iter(sells), 'tx': False, 'remaining_qty': 0},
-                }
-                fill(state, ['buy', 'sell']) # Initial assignment of the 'tx' and 'remaining_qty' keys.
-                while True:
-                    key = (state['sell']['tx'], state['buy']['tx'])
+                for (sell, buy, quantity) in TxJoin(buys, sells, qty_precision):
+                    key = (sell, buy)
                     vals = {
                         'asset_id': asset.id,
-                        'sell_batch_id': state['sell']['tx'].id,
-                        'buy_batch_id': state['buy']['tx'].id,
+                        'sell_batch_id': sell.id,
+                        'buy_batch_id': buy.id,
+                        'quantity': quantity,
                     }
-                    compare = float_compare(state['buy']['remaining_qty'], state['sell']['remaining_qty'], precision_digits=qty_precision)
-                    if compare == 0: # Equal
-                        filled = ['buy', 'sell']
-                    elif compare == -1: # Buy quantity was smaller
-                        filled = ['buy']
-                    elif compare: # Sell quantity was smaller
-                        filled = ['sell']
-                    else:
-                        raise ValueError(f"Invalid float_compare {compare}")
-
-                    vals['quantity'] = state[filled[0]]['remaining_qty']
                     if key in existing:
                         existing[key].write(vals)
                     else:
@@ -512,11 +508,4 @@ class InvestmentAsset(models.Model):
                     existing[key]._compute_profit()
                     valid |= existing[key]
 
-                    try:
-                        fill(state, filled)
-                    except StopIteration:
-                        break # no more buy or sell transactions left.
-
             (asset.realized_ids - valid).unlink()
-
-
