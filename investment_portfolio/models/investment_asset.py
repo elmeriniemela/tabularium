@@ -69,7 +69,7 @@ class InvestmentAsset(models.Model):
     transaction_ids = fields.One2many(
         comodel_name='investment.asset.transaction',
         inverse_name='asset_id',
-        domain=[('prediction', '=', False)],
+        domain=[('usage', '=', 'record')],
     )
 
     realized_ids = fields.One2many(
@@ -124,7 +124,7 @@ class InvestmentAsset(models.Model):
     plan_transaction_ids = fields.One2many(
         comodel_name='investment.asset.transaction',
         inverse_name='asset_id',
-        domain=[('prediction', '=', True)],
+        domain=[('usage', '=', 'prediction')],
     )
 
     plan_price_ids = fields.One2many(
@@ -490,6 +490,27 @@ class InvestmentAsset(models.Model):
             existing = {(r.sell_batch_id, r.buy_batch_id): r for r in asset.realized_ids}
             transactions = asset.transaction_ids.sorted(key=lambda s: s.time)
             sells = transactions.filtered(lambda t: t.ttype == 'sell')
+            sell_vals = {
+                'description': 'Simulated Realization',
+                'quantity': asset.quantity,
+                'payment': asset.quantity * asset.last_price,
+                'exchange_rate': asset.last_price,
+                'usage': 'realized',
+                'asset_id': asset.id,
+                'time': fields.Datetime.now(),
+            }
+            simulated = sells.search([('asset_id', '=', asset.id), ('usage', '=', 'realized')])
+            assert len(simulated) <= 1
+
+            if asset.quantity:
+                if simulated:
+                    simulated.write(sell_vals)
+                else:
+                    simulated = simulated.create(sell_vals)
+                sells += simulated
+            else:
+                simulated.unlink()
+
             buys = transactions.filtered(lambda t: t.ttype == 'buy')
             if buys and sells:
                 for (sell, buy, quantity) in TxJoin(buys, sells, qty_precision):

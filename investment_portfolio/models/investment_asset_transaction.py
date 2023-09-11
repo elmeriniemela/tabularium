@@ -75,14 +75,17 @@ class InvestmentAssetTransaction(models.Model):
         store=True,
     )
 
+
+    _sql_constraints = [
+        ('check_exchange_rate', "CHECK(exchange_rate <> 0 OR ttype not in ('buy', 'sell'))", "A buy/sell transaction can not be encoded without an exchange rate."),
+    ]
+
     @api.depends('usage')
     def _compute_prediction(self):
-        for record in self:
-            record.prediction = record.usage == 'prediction'
+        for record in self: record.prediction = record.usage == 'prediction'
 
     def _inverse_prediction(self):
-        for record in self:
-            record.usage = 'prediction' if record.prediction else 'record'
+        for record in self: record.usage = 'prediction' if record.prediction else 'record'
 
     def _fill_daily_price(self):
         Price = self.env['investment.asset.price']

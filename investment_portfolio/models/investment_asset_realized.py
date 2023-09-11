@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoo import models, fields, _
+from odoo import api, models, fields, _
 
 class InvestmentAssetRealized(models.Model):
     _name = 'investment.asset.realized'
@@ -32,6 +32,7 @@ class InvestmentAssetRealized(models.Model):
     )
 
     quantity = fields.Float(digits='Investment Asset quantity')
+    simulated = fields.Boolean(compute='_compute_simulated', store=True)
 
     sell_price = fields.Monetary(compute='_compute_profit', store=True)
     sell_date = fields.Date(compute='_compute_profit', store=True)
@@ -41,6 +42,9 @@ class InvestmentAssetRealized(models.Model):
     buy_fee = fields.Monetary(compute='_compute_profit', store=True)
     profit = fields.Monetary(string='Profit/Loss', compute='_compute_profit', store=True)
 
+    @api.depends('sell_batch_id.usage')
+    def _compute_simulated(self):
+        for r in self: r.simulated = r.sell_batch_id.usage == 'realized'
 
     def _compute_profit(self):
         for record in self:

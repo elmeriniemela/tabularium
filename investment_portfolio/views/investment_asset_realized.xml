@@ -3,7 +3,7 @@
         <field name="name">investment.asset.realized.tree</field>
         <field name="model">investment.asset.realized</field>
         <field name="arch" type="xml">
-            <tree>
+            <tree decoration-info="simulated">
                 <field name="asset_id" optional="hide"/>
                 <field name="currency_id" optional="hide"/>
                 <field name="quantity" sum="Total Volume"/>
@@ -16,6 +16,7 @@
                 <field name="buy_date"/>
                 <field name="buy_price"/>
                 <field name="buy_fee"/>
+                <field name="simulated" optional="hide"/>
             </tree>
         </field>
     </record>
@@ -55,6 +56,10 @@
         <field name="arch" type="xml">
             <search>
                 <filter name="sell_date" date="sell_date"/>
+                <separator/>
+                <filter string="Not Simulated" name="not_simulated" domain="[('simulated', '=', False)]"/>
+                <filter string="Simulated" name="simulated" domain="[('simulated', '=', True)]"/>
+                <separator/>
                 <group expand="1" string="Group by">
                     <filter string="Sell Date" name="group_sell_date" context="{'group_by': 'sell_date:year'}"/>
                     <filter string="Asset" name="group_asset_id" context="{'group_by': 'asset_id'}"/>
@@ -79,7 +84,7 @@
         <field name="name">Assets Realized</field>
         <field name="res_model">investment.asset.realized</field>
         <field name="view_mode">tree,graph,form</field>
-        <field name="context">{'search_default_group_sell_date': 1}</field>
+        <field name="context">{'search_default_group_sell_date': 1, 'search_default_not_simulated': 1}</field>
     </record>
 
 </odoo>
