@@ -3,12 +3,9 @@
         <field name="name">cashflow.plan.tree</field>
         <field name="model">cashflow.plan</field>
         <field name="arch" type="xml">
-            <tree editable="bottom">
-                <field name="sequence" widget="handle"/>
-                <field name="date"  optional="show"/>
+            <tree>
                 <field name="name"/>
-                <field name="amount" sum="Total"/>
-                <field name="balance"/>
+                <field name="create_date"  optional="show"/>
                 <field name="company_id" optional="hide"/>
                 <field name="company_currency_id"  optional="hide"/>
             </tree>
@@ -29,14 +26,25 @@
                     </div>
                     <group>
                         <group>
-                            <field name="date"/>
-                            <field name="amount"/>
+                            <field name="create_date"/>
+                            <field name="create_uid" widget="many2one_avatar_user"/>
                         </group>
                         <group>
-                            <field name="company_id"/>
                             <field name="company_currency_id"/>
+                            <field name="company_id"/>
                         </group>
                     </group>
+                    <field name="line_ids">
+                        <tree editable="bottom">
+                            <field name="sequence" widget="handle"/>
+                            <field name="date" optional="hide"/>
+                            <field name="name"/>
+                            <field name="amount" sum="Total"/>
+                            <field name="balance"/>
+                            <field name="company_id" optional="hide"/>
+                            <field name="company_currency_id"  optional="hide"/>
+                        </tree>
+                    </field>
                 </sheet>
             </form>
         </field>
@@ -48,10 +56,10 @@
         <field name="arch" type="xml">
             <search>
                 <field name="name"/>
-                <field name="date"/>
-                <filter name="date_filter" date="date"/>
+                <field name="create_date"/>
+                <filter name="create_date_filter" date="create_date"/>
                 <group expand="1" string="Group by">
-                    <filter string="Date" name="group_date" context="{'group_by': 'date:month'}"/>
+                    <filter string="Creation Date" name="group_create_date" context="{'group_by': 'create_date:month'}"/>
                 </group>
             </search>
         </field>
@@ -59,7 +67,7 @@
 
 
     <record id="plan_action_window" model="ir.actions.act_window">
-        <field name="name">Plan</field>
+        <field name="name">Plans</field>
         <field name="res_model">cashflow.plan</field>
         <field name="view_mode">tree,form</field>
     </record>
