@@ -227,6 +227,11 @@ class TogglEntry(models.Model):
         no_task = self.filtered(lambda e: not e.task_id)
         if no_task:
             raise UserError(_("Unable to export %s. Task ID missing.") %  no_task.mapped('name'))
+
+        no_amount = self.filtered(lambda e: e.rounded_duration < self.timesheet_rounding)
+        if no_amount:
+            raise UserError(_("Unable to export %s. Duration is below rounding limit.") %  no_amount.mapped('name'))
+
         self.mapped('task_id').fetch()
 
         server_models, dbname, uid, pwd = self.env.user._get_toggl_export_proxy()
