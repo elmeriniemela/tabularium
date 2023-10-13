@@ -77,7 +77,7 @@ class InvestmentAssetTransaction(models.Model):
 
 
     _sql_constraints = [
-        ('check_exchange_rate', "CHECK(exchange_rate <> 0 OR ttype not in ('buy', 'sell'))", "A buy/sell transaction can not be encoded without an exchange rate."),
+        ('check_exchange_rate', "CHECK(payment = 0 OR exchange_rate <> 0 OR ttype not in ('buy', 'sell'))", "A buy/sell transaction can not be encoded without an exchange rate."),
     ]
 
     @api.depends('usage')
