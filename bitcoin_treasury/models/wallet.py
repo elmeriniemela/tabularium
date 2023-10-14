@@ -113,7 +113,7 @@ class BitcoinWallet(models.Model):
                         },
                         "id": 0
                     })
-                    _logger.info(tx_json)
+                    _logger.info('%s: %s', addr.address, tx_json)
 
 
 
