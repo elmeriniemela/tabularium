@@ -1,0 +1,8 @@
+<odoo>
+
+    <menuitem name="Treasury" id="menu_root" web_icon="bitcoin_treasury,static/description/icon.webp" sequence="4">
+        <menuitem id="menu_wallet" action="action_wallet"/>
+        <menuitem id="menu_key" action="action_key"/>
+    </menuitem>
+
+</odoo>

@@ -5,3 +5,4 @@ pysftp
 cryptography
 paramiko
 pyopenssl==22.1.0
+git+https://github.com/elmeriniemela/bitcoinlib

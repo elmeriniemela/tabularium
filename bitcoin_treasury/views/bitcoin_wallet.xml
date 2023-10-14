@@ -1,0 +1,78 @@
+<odoo>
+    <record id="tree_wallet" model="ir.ui.view">
+        <field name="name">bitcoin.wallet.tree</field>
+        <field name="model">bitcoin.wallet</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="multisig"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="form_wallet" model="ir.ui.view">
+        <field name="name">bitcoin.wallet.form</field>
+        <field name="model">bitcoin.wallet</field>
+        <field name="arch" type="xml">
+            <form>
+                <style>
+                    .o_list_char {
+                        font-family:monospace !important;
+                    }
+                </style>
+                <header>
+                    <button name="update_addresses" string="Update Addresses" type="object"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="multisig"/>
+
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Addresses">
+                            <field name="address_ids">
+                                <tree>
+                                    <field name="index"/>
+                                    <field name="atype"/>
+                                    <field name="address"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Keys">
+                            <field name="key_ids">
+                                <tree editable="top">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="key_id"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="search_wallet" model="ir.ui.view">
+        <field name="name">bitcoin.wallet.search</field>
+        <field name="model">bitcoin.wallet</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_wallet" model="ir.actions.act_window">
+        <field name="name">Wallets</field>
+        <field name="res_model">bitcoin.wallet</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+</odoo>

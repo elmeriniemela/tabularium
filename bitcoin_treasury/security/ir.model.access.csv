@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+
+access_bitcoin_wallet,access_bitcoin_wallet,model_bitcoin_wallet,base.group_user,1,1,1,1
+access_bitcoin_wallet_key,access_bitcoin_wallet_key,model_bitcoin_wallet_key,base.group_user,1,1,1,1
+access_bitcoin_wallet_address,access_bitcoin_wallet_address,model_bitcoin_wallet_address,base.group_user,1,1,1,1
+access_bitcoin_key,access_bitcoin_key,model_bitcoin_key,base.group_user,1,1,1,1
