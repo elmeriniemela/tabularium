@@ -14,17 +14,22 @@ _logger = logging.getLogger(__name__)
 
 def electrumx(host, port, content):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.settimeout(10)
     sock.connect((host, port))
     sock.sendall(json.dumps(content).encode('utf-8')+b'\n')
     responselist = []
+    buffer = 1024
     while True:
         try:
-            data = sock.recv(1024)
+            data = sock.recv(buffer)
         except socket.timeout:
             break
         if not data:
             break
         responselist.append(data)
+        if len(data) < buffer:
+            break
+
     sock.close()
     return json.loads(b''.join(responselist))
 
