@@ -1,13 +1,32 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import hashlib
 from bitcoinlib.scripts import Script
-from bitcoinlib.keys import Address
+from bitcoinlib.keys import Address, deserialize_address
+import socket
+import json
 
 from odoo import api, exceptions, fields, models, Command, _
 
 
 _logger = logging.getLogger(__name__)
+
+def electrumx(host, port, content):
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.connect((host, port))
+    sock.sendall(json.dumps(content).encode('utf-8')+b'\n')
+    responselist = []
+    while True:
+        try:
+            data = sock.recv(1024)
+        except socket.timeout:
+            break
+        if not data:
+            break
+        responselist.append(data)
+    sock.close()
+    return json.loads(b''.join(responselist))
 
 
 class BitcoinWallet(models.Model):
@@ -71,6 +90,23 @@ class BitcoinWallet(models.Model):
                             'atype': str(atype),
                             'wallet_id': wallet.id
                         })
+
+    def update_transactions(self):
+        for wallet in self:
+            encoding = wallet.key_ids[:1].key_id.encoding
+            for addr in wallet.address_ids:
+                d_addr = deserialize_address(addr.address, encoding=encoding)
+                sh = hashlib.sha256(b'\x00 ' + d_addr['public_key_hash_bytes']).digest()[::-1].hex()
+                content = {
+                    "method": "blockchain.scripthash.get_balance",
+                    "params": {
+                        "scripthash": sh,
+                    },
+                    "id": 0
+                }
+                tx_json = electrumx('127.0.0.1', 50001, content)
+                _logger.info(tx_json)
+
 
 
 class BitcoinWallet(models.Model):

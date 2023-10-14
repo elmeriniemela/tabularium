@@ -23,6 +23,7 @@
                 </style>
                 <header>
                     <button name="update_addresses" string="Update Addresses" type="object"/>
+                    <button name="update_transactions" string="Update Transactions" type="object"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
