@@ -13,7 +13,9 @@ _logger = logging.getLogger(__name__)
 class BitcoinWallet(models.Model):
     _name = 'bitcoin.wallet'
     _description = 'Bitcoin Wallet'
+    _order = 'sequence, id'
 
+    sequence = fields.Integer()
     name = fields.Char()
 
     key_ids = fields.One2many(
