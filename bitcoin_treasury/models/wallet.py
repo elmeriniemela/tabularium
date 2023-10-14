@@ -8,7 +8,7 @@ import socket
 import json
 from contextlib import contextmanager
 from odoo import api, exceptions, fields, models, Command, _
-
+from ..electrum.bitcoin import address_to_scripthash
 
 _logger = logging.getLogger(__name__)
 
@@ -102,13 +102,8 @@ class BitcoinWallet(models.Model):
     def update_transactions(self):
         with electumx_jsonrpc('127.0.0.1', 50001) as send:
             for wallet in self:
-                encoding = wallet.key_ids[:1].key_id.encoding
                 for addr in wallet.address_ids:
-                    d_addr = deserialize_address(addr.address, encoding=encoding)
-                    script = d_addr['public_key_hash_bytes']
-                    if wallet.multisig:
-                        script = b'\x00 ' + script
-                    sh = hashlib.sha256(script).digest()[::-1].hex()
+                    sh = address_to_scripthash(addr.address)
                     tx_json = send({
                         "method": "blockchain.scripthash.get_history",
                         "params": {
