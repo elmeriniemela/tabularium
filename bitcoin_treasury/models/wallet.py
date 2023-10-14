@@ -103,7 +103,7 @@ class BitcoinWallet(models.Model):
                 d_addr = deserialize_address(addr.address, encoding=encoding)
                 sh = hashlib.sha256(b'\x00 ' + d_addr['public_key_hash_bytes']).digest()[::-1].hex()
                 content = {
-                    "method": "blockchain.scripthash.get_balance",
+                    "method": "blockchain.scripthash.get_history",
                     "params": {
                         "scripthash": sh,
                     },
