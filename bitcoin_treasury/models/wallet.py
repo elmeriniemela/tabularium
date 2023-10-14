@@ -6,32 +6,35 @@ from bitcoinlib.scripts import Script
 from bitcoinlib.keys import Address, deserialize_address
 import socket
 import json
-
+from contextlib import contextmanager
 from odoo import api, exceptions, fields, models, Command, _
 
 
 _logger = logging.getLogger(__name__)
 
-def electrumx(host, port, content):
+@contextmanager
+def electumx_jsonrpc(host, port):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.settimeout(10)
     sock.connect((host, port))
-    sock.sendall(json.dumps(content).encode('utf-8')+b'\n')
-    responselist = []
-    buffer = 1024
-    while True:
-        try:
+    def send(content):
+        sock.sendall(json.dumps(content).encode('utf-8')+b'\n')
+        responselist = []
+        buffer = 1024
+        while True:
             data = sock.recv(buffer)
-        except socket.timeout:
-            break
-        if not data:
-            break
-        responselist.append(data)
-        if len(data) < buffer:
-            break
+            if not data:
+                break
+            responselist.append(data)
+            if len(data) < buffer:
+                break
+        return json.loads(b''.join(responselist))
 
-    sock.close()
-    return json.loads(b''.join(responselist))
+    try:
+        yield send
+    finally:
+        sock.close()
+
 
 
 class BitcoinWallet(models.Model):
@@ -97,20 +100,20 @@ class BitcoinWallet(models.Model):
                         })
 
     def update_transactions(self):
-        for wallet in self:
-            encoding = wallet.key_ids[:1].key_id.encoding
-            for addr in wallet.address_ids:
-                d_addr = deserialize_address(addr.address, encoding=encoding)
-                sh = hashlib.sha256(b'\x00 ' if wallet.multisig else b'' + d_addr['public_key_hash_bytes']).digest()[::-1].hex()
-                content = {
-                    "method": "blockchain.scripthash.get_history",
-                    "params": {
-                        "scripthash": sh,
-                    },
-                    "id": 0
-                }
-                tx_json = electrumx('127.0.0.1', 50001, content)
-                _logger.info(tx_json)
+        with electumx_jsonrpc('127.0.0.1', 50001) as send:
+            for wallet in self:
+                encoding = wallet.key_ids[:1].key_id.encoding
+                for addr in wallet.address_ids:
+                    d_addr = deserialize_address(addr.address, encoding=encoding)
+                    sh = hashlib.sha256(b'\x00 ' if wallet.multisig else b'' + d_addr['public_key_hash_bytes']).digest()[::-1].hex()
+                    tx_json = send({
+                        "method": "blockchain.scripthash.get_history",
+                        "params": {
+                            "scripthash": sh,
+                        },
+                        "id": 0
+                    })
+                    _logger.info(tx_json)
 
 
 
