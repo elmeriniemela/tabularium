@@ -1,6 +1,6 @@
 <odoo>
 
-    <menuitem name="Bitcoin Browser" id="menu_root" web_icon="bitcoin_browser,static/description/icon.webp" sequence="5" action="action_block">
+    <menuitem name="Bitcoin Browser" id="menu_root" web_icon="bitcoin_browser,static/description/icon.webp" sequence="4" action="action_block">
         <menuitem id="menu_block" action="action_block"/>
         <menuitem id="menu_tx" action="action_tx"/>
         <menuitem id="menu_tx_in" action="action_tx_in"/>

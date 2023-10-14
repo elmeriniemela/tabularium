@@ -3,6 +3,7 @@
 import datetime
 import tinyrpc
 import logging
+from dateutil.relativedelta import relativedelta
 
 from odoo import api, exceptions, fields, models, Command, _
 
@@ -68,8 +69,8 @@ class BitcoinBlock(models.Model):
 
     @api.model
     def cron_fetch(self):
-        mintime_str = self.env['ir.config_parameter'].sudo().get_param('bitoind.mintime', '2023-04-01 00:00:00')
-        mintime = datetime.datetime.strptime(mintime_str, '%Y-%m-%d %H:%M:%S')
+        delta = int(self.env['ir.config_parameter'].sudo().get_param('bitoind.history.hours', '1'))
+        mintime = fields.Datetime.now() - relativedelta(hours=delta)
         proxy = self.env['ir.config_parameter'].bitcoind_proxy()
         getblockchaininfo = proxy.getblockchaininfo()
         current_hash = getblockchaininfo['bestblockhash']
