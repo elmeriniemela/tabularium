@@ -105,7 +105,10 @@ class BitcoinWallet(models.Model):
                 encoding = wallet.key_ids[:1].key_id.encoding
                 for addr in wallet.address_ids:
                     d_addr = deserialize_address(addr.address, encoding=encoding)
-                    sh = hashlib.sha256(b'\x00 ' + d_addr['public_key_hash_bytes']).digest()[::-1].hex()
+                    script = d_addr['public_key_hash_bytes']
+                    if wallet.multisig:
+                        script = b'\x00 ' + script
+                    sh = hashlib.sha256(script).digest()[::-1].hex()
                     tx_json = send({
                         "method": "blockchain.scripthash.get_history",
                         "params": {
