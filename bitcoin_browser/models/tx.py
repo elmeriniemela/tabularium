@@ -59,12 +59,16 @@ class BitcoinTx(models.Model):
     def _search(self, domains, offset=0, limit=None, order=None, count=False, access_rights_uid=None):
         res = super()._search(domains, offset, limit, order, count=count, access_rights_uid=access_rights_uid)
         found = res if count else len(res)
-        if not self.env.context.get('disable_auto_populate') and not found and len(domains) == 1:
+        if not self.env.context.get('disable_auto_populate') and len(domains) == 1:
             field, operator, value = domains[0]
             if field == 'txid' and operator == '=':
-                auto = self.create({'txid': value})
-                auto.refresh()
-                res = 1 if count else auto.ids
+                if not found:
+                    auto = self.create({'txid': value})
+                    res = 1 if count else auto.ids
+
+                if not count:
+                    self.browse(res).filtered(lambda tx: not tx.block_id).refresh()
+
         return res
 
 
@@ -84,7 +88,8 @@ class BitcoinTx(models.Model):
             vals = vals_map[tx.txid]
             tx.write(vals)
 
-
+        # Write above may have added new transactions via vout_tx_id. Redo search for existing
+        existing = self.with_context(disable_auto_populate=True).search([('txid', 'in', txids)])
         existing_txids = set(existing.mapped('txid'))
         unique_vals = {}
         for vals in vals_list:
