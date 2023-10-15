@@ -156,10 +156,9 @@ class BitcoinBlock(models.Model):
 
     def refresh(self):
         for record in self:
-            tx = record.n_tx != record.computed_n_tx
             record = record.with_context(default_block_id=record.id)
             _logger.info("Update block at height %s.", record.height)
-            vals = record.getblock(record.hash, tx=tx)
+            vals = record.getblock(record.hash, tx=True)
             record.write(vals)
             record.env.cr.commit()
 
@@ -171,7 +170,7 @@ class BitcoinBlock(models.Model):
             field, operator, value = domains[0]
             if field == 'hash' and operator == '=':
                 auto = self.create({'hash': value})
-                auto.refresh()
+                auto.with_context(force_tx=True).refresh()
                 res = 1 if count else auto.ids
         return res
 

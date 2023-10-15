@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import datetime
+import logging
 import tinyrpc
 
 from odoo import api, exceptions, fields, models, Command, _
+_logger = logging.getLogger(__name__)
 
 
 class BitcoinTx(models.Model):
@@ -98,9 +100,12 @@ class BitcoinTx(models.Model):
         for record in self:
             if not record.block_id:
                 try:
+                    _logger.info(f"proxy.getrawtransaction({record.txid}, {True})")
                     rawtx = proxy.getrawtransaction(record.txid, True)
                 except tinyrpc.protocols.jsonrpc.JSONRPCError as error:
                     raise exceptions.UserError(error.args[0])
+                _logger.info("Done.")
+
                 record.block_id = Block.create({'hash': rawtx['blockhash']}).id
 
             record.block_id.refresh()
