@@ -119,7 +119,10 @@ class BitcoinBlock(models.Model):
 
         if tx:
             tx_ids = []
+            only_txid = self.env.context.get('only_txid')
             for rawtx in getblock['tx']:
+                if only_txid and rawtx['txid'] != only_txid:
+                    continue
                 txvals = {
                     'in_active_chain': rawtx.get('in_active_chain'),
                     'txid': rawtx['txid'],

@@ -45,6 +45,11 @@ class BitcoinWallet(models.Model):
     sequence = fields.Integer()
     name = fields.Char()
 
+    history_ids = fields.One2many(
+        comodel_name='bitcoin.wallet.history',
+        inverse_name='wallet_id',
+    )
+
     key_ids = fields.One2many(
         comodel_name='bitcoin.wallet.key',
         inverse_name='wallet_id',
@@ -59,6 +64,15 @@ class BitcoinWallet(models.Model):
     sigs_required = fields.Integer()
 
     multisig = fields.Boolean(compute='_compute_multisig')
+
+    balance = fields.Float(
+        digits='Bitcoin Decimal',
+        readonly=True,
+    )
+
+    transactions = fields.Integer(
+        readonly=True,
+    )
 
     def _compute_multisig(self):
         for wallet in self:
@@ -100,7 +114,11 @@ class BitcoinWallet(models.Model):
                         })
 
     def update_transactions(self):
-        with electumx_jsonrpc('127.0.0.1', 50001) as send:
+        get_param = self.env['ir.config_parameter'].sudo().get_param
+        host = get_param('electrumx.host', '127.0.0.1')
+        port = int(get_param('electrumx.port', '50001'))
+
+        with electumx_jsonrpc(host, port) as send:
             for wallet in self:
                 for addr in wallet.address_ids:
                     sh = address_to_scripthash(addr.address)
@@ -111,11 +129,44 @@ class BitcoinWallet(models.Model):
                         },
                         "id": 0
                     })
-                    _logger.info('%s: %s', addr.address, tx_json)
+                    for vals in tx_json['result']:
+                        addr.transaction_ids |= self.env['bitcoin.tx'].search([('txid', '=', vals['tx_hash'])])
+
+    def update_history(self):
+        for wallet in self:
+            existing = {h.transaction_id: h for h in wallet.history_ids}
+            for tx in wallet.address_ids.transaction_ids:
+                amount = 0.0
+                for addr in tx.wallet_address_ids.filtered(lambda a: a.wallet_id == wallet):
+                    for vin in tx.vin_ids:
+                        if addr.address == vin.spent_output_id.address:
+                            amount -= vin.spent_output_id.value
+                    for vout in tx.vout_ids:
+                        if addr.address == vout.address:
+                            amount += vout.value
+
+                vals = {
+                    'amount': amount,
+                    'date': tx.block_id.time,
+                }
+
+                History = self.env['bitcoin.wallet.history'].with_context(
+                    default_wallet_id=wallet.id,
+                    default_transaction_id=tx.id,
+                )
+                if tx in existing:
+                    existing[tx].write(vals)
+                else:
+                    existing[tx] = History.create(vals)
+
+            wallet.balance = sum(wallet.mapped('history_ids.amount'))
+            wallet.transactions = len(wallet.history_ids)
 
 
 
-class BitcoinWallet(models.Model):
+
+
+class BitcoinWalletKey(models.Model):
     _name = 'bitcoin.wallet.key'
     _description = 'Bitcoin Wallet Key'
     _order = 'sequence, id'
@@ -166,9 +217,58 @@ class BitcoinWalletAddress(models.Model):
         readonly=True,
     )
 
+    transaction_ids = fields.Many2many(
+        comodel_name='bitcoin.tx',
+        readonly=True,
+    )
+
 
     _sql_constraints = [
         ('wallet_address_uniq', 'unique(wallet_id, address)', 'The wallet already has this address!'),
     ]
 
+class BitcoinTx(models.Model):
+    _inherit = 'bitcoin.tx'
+
+    wallet_address_ids = fields.Many2many( # Inverse lookup.
+        comodel_name='bitcoin.wallet.address',
+        readonly=True,
+    )
+
+
+class BitcoinWalletHistory(models.Model):
+    _name = 'bitcoin.wallet.history'
+    _description = 'Bitcoin Wallet History'
+    _order = 'date desc, id desc'
+
+    wallet_id = fields.Many2one(
+        comodel_name='bitcoin.wallet',
+        required=True,
+        readonly=True,
+    )
+
+    date = fields.Datetime(
+        readonly=True,
+        required=True,
+    )
+
+    name = fields.Char(string="Description")
+
+
+    amount = fields.Float(
+        digits='Bitcoin Decimal',
+        readonly=True,
+        required=True,
+    )
+
+    transaction_id = fields.Many2one(
+        comodel_name='bitcoin.tx',
+        ondelete='restrict',
+        required=True,
+        readonly=True,
+    )
+
+    _sql_constraints = [
+        ('wallet_transaction_uniq', 'unique(wallet_id, transaction_id)', 'You should net out the balance change of one transaction instead of creating multiple lines per transaction!'),
+    ]
 

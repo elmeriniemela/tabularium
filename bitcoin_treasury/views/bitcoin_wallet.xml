@@ -24,6 +24,7 @@
                 <header>
                     <button name="update_addresses" string="Update Addresses" type="object"/>
                     <button name="update_transactions" string="Update Transactions" type="object"/>
+                    <button name="update_history" string="Update History" type="object"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
@@ -34,18 +35,31 @@
                     <group>
                         <group>
                             <field name="multisig"/>
+                            <field name="balance"/>
                         </group>
                         <group>
                             <field name="sigs_required"/>
+                            <field name="transactions"/>
                         </group>
                     </group>
                     <notebook>
+                        <page string="History">
+                            <field name="history_ids">
+                                <tree editable="top" create="false" limit="1000">
+                                    <field name="date"/>
+                                    <field name="name"/>
+                                    <field name="amount" sum="Total Amount" decoration-danger="amount &lt; 0" decoration-success="amount &gt; 0"/>
+                                    <field name="transaction_id"/>
+                                </tree>
+                            </field>
+                        </page>
                         <page string="Addresses">
                             <field name="address_ids">
                                 <tree>
                                     <field name="index"/>
                                     <field name="atype"/>
                                     <field name="address"/>
+                                    <field name="transaction_ids"/>
                                 </tree>
                             </field>
                         </page>

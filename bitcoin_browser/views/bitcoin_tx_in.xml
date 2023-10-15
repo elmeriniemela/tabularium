@@ -23,7 +23,7 @@
                 <sheet>
                     <group>
                         <group>
-                            <field name="tx_id" invisible="not context.get('show_all')"/>
+                            <field name="tx_id"/>
                             <field name="sequence"/>
                             <field name="vout_tx_id"/>
                             <field name="vout"/>

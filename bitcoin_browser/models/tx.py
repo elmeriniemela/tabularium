@@ -24,10 +24,10 @@ class BitcoinTx(models.Model):
     txid = fields.Char(required=True, help="An identifier used to uniquely identify a particular transaction; specifically, the sha256d hash of the transaction.")
     hash = fields.Char(help="The transaction hash (differs from txid for witness transactions).")
     version = fields.Integer(help="If version is greater han or equal to 2, the sequence field for each input is used as specified in BIP68 and used in CHECKSEQUENCEVERIFY (BIP112).")
-    size = fields.Integer(help="The serialized transaction size.")
-    vsize = fields.Integer(help="The virtual transaction size (differs from size for witness transactions)")
-    weight = fields.Integer(help="The transaction's weight (between vsize*4-3 and vsize*4)")
-    locktime = fields.Integer(help="Locktime sets the earliest time a transaction can be mined in to a block. You can use locktime to make sure that a transaction is locked until a specific block height, or a point in time.")
+    size = fields.BigInteger(help="The serialized transaction size.")
+    vsize = fields.BigInteger(help="The virtual transaction size (differs from size for witness transactions)")
+    weight = fields.BigInteger(help="The transaction's weight (between vsize*4-3 and vsize*4)")
+    locktime = fields.BigInteger(help="Locktime sets the earliest time a transaction can be mined in to a block. You can use locktime to make sure that a transaction is locked until a specific block height, or a point in time.")
     fee = fields.Float(help="A transaction fee is the remainder of a bitcoin transaction. Transaction fees are claimed by miners through the coinbase transaction.", digits='Bitcoin Decimal')
 
     vin_ids = fields.One2many(
@@ -113,7 +113,7 @@ class BitcoinTx(models.Model):
 
                 record.block_id = Block.create({'hash': rawtx['blockhash']}).id
 
-            record.block_id.refresh()
+            record.block_id.with_context(only_txid=record.txid).refresh()
 
 
 
