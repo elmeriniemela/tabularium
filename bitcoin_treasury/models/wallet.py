@@ -39,6 +39,7 @@ def electumx_jsonrpc(host, port):
 
 class BitcoinWallet(models.Model):
     _name = 'bitcoin.wallet'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = 'Bitcoin Wallet'
     _order = 'sequence, id'
 
@@ -74,16 +75,25 @@ class BitcoinWallet(models.Model):
         readonly=True,
     )
 
+    address_amount = fields.Integer(default=100, tracking=True)
+
     def _compute_multisig(self):
         for wallet in self:
             wallet.multisig = len(wallet.key_ids) > 1
 
-    def update_addresses(self):
+
+    def refresh(self):
+        self.refresh_addresses()
+        self.refresh_transactions()
+        self.refresh_history()
+
+
+    def refresh_addresses(self):
         for wallet in self:
             existing = {('M', str(r.atype), str(r.index)): r for r in wallet.address_ids}
             master_keys = [k.key_id.hdkey for k in wallet.key_ids]
             for atype in range(2):
-                for index in range(100):
+                for index in range(wallet.address_amount):
                     subkey_path = ('M', str(atype), str(index))
                     subkeys = [k.subkey_for_path(subkey_path) for k in master_keys]
                     subkeys.sort(key=lambda k: k.public_byte)
@@ -113,7 +123,7 @@ class BitcoinWallet(models.Model):
                             'wallet_id': wallet.id
                         })
 
-    def update_transactions(self):
+    def refresh_transactions(self):
         get_param = self.env['ir.config_parameter'].sudo().get_param
         host = get_param('electrumx.host', '127.0.0.1')
         port = int(get_param('electrumx.port', '50001'))
@@ -132,7 +142,7 @@ class BitcoinWallet(models.Model):
                     for vals in tx_json['result']:
                         addr.transaction_ids |= self.env['bitcoin.tx'].search([('txid', '=', vals['tx_hash'])])
 
-    def update_history(self):
+    def refresh_history(self):
         for wallet in self:
             existing = {h.transaction_id: h for h in wallet.history_ids}
             for tx in wallet.address_ids.transaction_ids:

@@ -7,6 +7,8 @@
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
                 <field name="multisig"/>
+                <field name="transactions"/>
+                <field name="balance"/>
             </tree>
         </field>
     </record>
@@ -22,9 +24,7 @@
                     }
                 </style>
                 <header>
-                    <button name="update_addresses" string="Update Addresses" type="object"/>
-                    <button name="update_transactions" string="Update Transactions" type="object"/>
-                    <button name="update_history" string="Update History" type="object"/>
+                    <button name="refresh" type="object" string="Refresh" icon="fa-cogs"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
@@ -48,12 +48,15 @@
                                 <tree editable="top" create="false" limit="1000">
                                     <field name="date"/>
                                     <field name="name"/>
-                                    <field name="amount" sum="Total Amount" decoration-danger="amount &lt; 0" decoration-success="amount &gt; 0"/>
+                                    <field name="amount" decoration-danger="amount &lt; 0" decoration-success="amount &gt; 0"/>
                                     <field name="transaction_id"/>
                                 </tree>
                             </field>
                         </page>
                         <page string="Addresses">
+                            <group>
+                                <field name="address_amount"/>
+                            </group>
                             <field name="address_ids">
                                 <tree>
                                     <field name="index"/>
@@ -73,6 +76,12 @@
                         </page>
                     </notebook>
                 </sheet>
+                <div class="o_attachment_preview"/>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
             </form>
         </field>
     </record>
