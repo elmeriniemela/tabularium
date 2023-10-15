@@ -13,7 +13,6 @@ class BitcoinTx(models.Model):
 
     block_id = fields.Many2one(
         comodel_name='bitcoin.block',
-        required=True,
         readonly=True,
         ondelete='cascade',
         index=True,
@@ -62,6 +61,7 @@ class BitcoinTx(models.Model):
             field, operator, value = domains[0]
             if field == 'txid' and operator == '=':
                 auto = self.create({'txid': value})
+                auto.refresh()
                 res = 1 if count else auto.ids
         return res
 
@@ -70,8 +70,6 @@ class BitcoinTx(models.Model):
     def create(self, vals_list):
         txids = []
         vals_map = {}
-        proxy = self.env['ir.config_parameter'].bitcoind_proxy()
-        Block = self.env['bitcoin.block'].with_context(disable_auto_populate=False)
 
         for vals in vals_list:
             txid = vals['txid']
@@ -82,8 +80,7 @@ class BitcoinTx(models.Model):
         existing = self.with_context(disable_auto_populate=True).search([('txid', 'in', txids)])
         for tx in existing:
             vals = vals_map[tx.txid]
-            if not tx.fee and vals.get('fee'):
-                tx.fee = vals['fee']
+            tx.write(vals)
 
 
         existing_txids = set(existing.mapped('txid'))
@@ -91,17 +88,22 @@ class BitcoinTx(models.Model):
         for vals in vals_list:
             txid = vals['txid']
             if txid not in unique_vals and txid not in existing_txids:
-                if not vals.get('block_id'):
-                    try:
-                        rawtx = proxy.getrawtransaction(txid, True)
-                    except tinyrpc.protocols.jsonrpc.JSONRPCError as error:
-                        raise exceptions.UserError(error.args[0])
-
-                    vals['block_id'] = Block.create({'hash': rawtx['blockhash']}).id
-
                 unique_vals[txid] = vals
 
         return super().create(list(unique_vals.values())) + existing
+
+    def refresh(self):
+        proxy = self.env['ir.config_parameter'].bitcoind_proxy()
+        Block = self.env['bitcoin.block'].with_context(disable_auto_populate=False)
+        for record in self:
+            if not record.block_id:
+                try:
+                    rawtx = proxy.getrawtransaction(record.txid, True)
+                except tinyrpc.protocols.jsonrpc.JSONRPCError as error:
+                    raise exceptions.UserError(error.args[0])
+                record.block_id = Block.create({'hash': rawtx['blockhash']}).id
+
+            record.block_id.refresh()
 
 
 
@@ -164,8 +166,9 @@ class BitcoinIn(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        Tx = self.env['bitcoin.tx'].with_context(disable_auto_populate=True)
         existing = self.browse()
-        id_map = {t.txid: t.id for t in self.env['bitcoin.tx'].create([{'txid': v['vout_tx_id']} for v in vals_list if isinstance(v['vout_tx_id'], str)])}
+        id_map = {t.txid: t.id for t in Tx.create([{'txid': v['vout_tx_id']} for v in vals_list if isinstance(v['vout_tx_id'], str)])}
 
         filtered_vals_list = []
         for vals in vals_list:
@@ -176,6 +179,7 @@ class BitcoinIn(models.Model):
                     vals['vout_tx_id'] = id_map[vals['vout_tx_id']]
                 found = self.search([('vout_tx_id', '=', vals['vout_tx_id']),('vout', '=', vals['vout'])])
             if found:
+                found.write(vals)
                 existing += found
             else:
                 filtered_vals_list.append(vals)
@@ -229,6 +233,7 @@ class BitcoinOut(models.Model):
         for vals in vals_list:
             found = self.search([('tx_id', '=', vals['tx_id']),('n', '=', vals['n'])])
             if found:
+                found.write(vals)
                 existing += found
             else:
                 filtered_vals_list.append(vals)

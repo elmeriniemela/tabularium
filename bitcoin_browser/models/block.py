@@ -159,7 +159,8 @@ class BitcoinBlock(models.Model):
             tx = record.n_tx != record.computed_n_tx
             record = record.with_context(default_block_id=record.id)
             _logger.info("Update block at height %s.", record.height)
-            record.write(record.getblock(record.hash, tx=tx))
+            vals = record.getblock(record.hash, tx=tx)
+            record.write(vals)
             record.env.cr.commit()
 
     @api.model
@@ -169,10 +170,9 @@ class BitcoinBlock(models.Model):
         if not self.env.context.get('disable_auto_populate') and not found and len(domains) == 1:
             field, operator, value = domains[0]
             if field == 'hash' and operator == '=':
-                block = self.getblock(value, tx=True)
-                if block:
-                    auto = self.with_context(disable_auto_populate=True).create(block)
-                    res = 1 if count else auto.ids
+                auto = self.create({'hash': value})
+                auto.refresh()
+                res = 1 if count else auto.ids
         return res
 
     @api.model_create_multi
@@ -182,6 +182,7 @@ class BitcoinBlock(models.Model):
         for vals in vals_list:
             found = self.with_context(disable_auto_populate=True).search([('hash', '=', vals['hash'])])
             if found:
+                found.write(vals)
                 existing += found
             else:
                 filtered_vals_list.append(vals)
