@@ -86,20 +86,20 @@ class BitcoinBlock(models.Model):
             current_block.confirmations = confirmations
 
 
-    @api.model
-    def getblock(self, hash, tx=False):
+    def fetchblock(self, tx):
+        self.ensure_one()
         verbosity = 2 if tx else 1
         proxy = self.env['ir.config_parameter'].bitcoind_proxy()
 
-        _logger.info(f"proxy.getblock({hash}, {verbosity})")
+        _logger.info(f"proxy.getblock({self.hash}, {verbosity})")
         try:
-            getblock = proxy.getblock(hash, verbosity)
+            getblock = proxy.getblock(self.hash, verbosity)
         except tinyrpc.protocols.jsonrpc.JSONRPCError as error:
             raise exceptions.UserError(error.args[0])
         _logger.info("Done.")
 
         vals = {
-            'hash': hash,
+            'hash': self.hash,
             'confirmations': getblock['confirmations'],
             'height': getblock['height'],
             'version': getblock['version'],
@@ -124,6 +124,7 @@ class BitcoinBlock(models.Model):
                 if only_txid and rawtx['txid'] != only_txid:
                     continue
                 txvals = {
+                    'block_id': self.id,
                     'in_active_chain': rawtx.get('in_active_chain'),
                     'txid': rawtx['txid'],
                     'hash': rawtx['hash'],
@@ -159,9 +160,8 @@ class BitcoinBlock(models.Model):
 
     def refresh(self):
         for record in self:
-            record = record.with_context(default_block_id=record.id)
             _logger.info("Update block at height %s.", record.height)
-            vals = record.getblock(record.hash, tx=True)
+            vals = record.fetchblock(tx=True)
             record.write(vals)
             record.env.cr.commit()
 
