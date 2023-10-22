@@ -11,13 +11,14 @@ _logger = logging.getLogger(__name__)
 
 class BitcoinKey(models.Model):
     _name = 'bitcoin.key'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = 'Bitcoin Key'
     _order = 'sequence, id'
 
     sequence = fields.Integer()
-    name = fields.Char()
+    name = fields.Char(tracking=True)
 
-    wif = fields.Char(required=True)
+    wif = fields.Char(required=True, tracking=True)
 
     wallet_ids = fields.One2many(
         comodel_name='bitcoin.wallet.key',
@@ -35,6 +36,9 @@ class BitcoinKey(models.Model):
     script_type = fields.Char(compute='_compute_info', store=True)
     address = fields.Char(compute='_compute_info', store=True)
     encoding = fields.Char(compute='_compute_info', store=True)
+
+    real_parent_fingerprint = fields.Char(tracking=True)
+    real_derivation_path = fields.Char(tracking=True)
 
 
     @property
