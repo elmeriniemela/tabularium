@@ -110,8 +110,9 @@ class BitcoinTx(models.Model):
                 except tinyrpc.protocols.jsonrpc.JSONRPCError as error:
                     raise exceptions.UserError(error.args[0])
                 _logger.info("Done: %s", rawtx)
-
-                record.block_id = Block.create({'hash': rawtx['blockhash']}).id
+                blockhash = rawtx.get('blockhash')
+                if blockhash:
+                    record.block_id = Block.create({'hash': rawtx['blockhash']}).id
 
             record.block_id.with_context(only_txid=record.txid).refresh()
 
