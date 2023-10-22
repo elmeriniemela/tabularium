@@ -109,7 +109,7 @@ class BitcoinTx(models.Model):
                     rawtx = proxy.getrawtransaction(record.txid, True)
                 except tinyrpc.protocols.jsonrpc.JSONRPCError as error:
                     raise exceptions.UserError(error.args[0])
-                _logger.info("Done.")
+                _logger.info("Done: %s", rawtx)
 
                 record.block_id = Block.create({'hash': rawtx['blockhash']}).id
 
