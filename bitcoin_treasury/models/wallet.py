@@ -157,7 +157,7 @@ class BitcoinWallet(models.Model):
 
                 vals = {
                     'amount': amount,
-                    'date': tx.block_id.time,
+                    'date': tx.block_id.time or fields.Datetime.now(),
                 }
 
                 History = self.env['bitcoin.wallet.history'].with_context(
