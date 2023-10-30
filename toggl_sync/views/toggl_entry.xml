@@ -6,6 +6,7 @@
         <field name="arch" type="xml">
             <tree expand="1" default_order="date desc, id asc" editable="top" multi_edit="1" decoration-muted="not active">
                 <field name="description" width="450px" optional="show"/>
+                <field name="checked" widget="boolean_toggle"/>
                 <field name="project_name" optional="hide"/>
                 <field name="task_id" optional="show"/>
                 <field name="rounded_duration" widget="float_time" sum="Rounded" optional="show"/>
@@ -78,7 +79,8 @@
                         <page string="Details">
                             <group>
                                 <group>
-                                    <field name="active"/>
+                                    <field name="active" widget="boolean_toggle"/>
+                                    <field name="checked" widget="boolean_toggle"/>
                                     <field name="toggl_id"/>
                                     <field name="export_id"/>
                                     <field name="task_id"/>

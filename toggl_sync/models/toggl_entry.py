@@ -88,6 +88,7 @@ class TogglEntry(models.Model):
     export_task_url = fields.Char(compute='_compute_export_task_url')
 
     active = fields.Boolean(default=True, tracking=True)
+    checked = fields.Boolean(tracking=True)
 
     description = fields.Char(tracking=True)
 
@@ -227,6 +228,10 @@ class TogglEntry(models.Model):
         no_task = self.filtered(lambda e: not e.task_id)
         if no_task:
             raise UserError(_("Unable to export %s. Task ID missing.") %  no_task.mapped('name'))
+
+        not_checked = self.filtered(lambda e: not e.checked)
+        if not_checked:
+            raise UserError(_("Unable to export %s. Entry description is not checked.") %  not_checked.mapped('name'))
 
         no_amount = self.filtered(lambda e: e.rounded_duration < self.timesheet_rounding)
         if no_amount:
