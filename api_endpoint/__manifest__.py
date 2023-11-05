@@ -14,8 +14,9 @@
     'application': True,
     'data': [
         'security/ir.model.access.csv',
-        'views/api_endpoint.xml',
         'views/api_message.xml',
+        'views/api_endpoint.xml',
+        'views/menuitems.xml',
         'data/cron.xml',
     ],
 }

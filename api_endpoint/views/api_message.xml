@@ -1,31 +1,48 @@
 <odoo>
     <record id="api_message_list" model="ir.ui.view">
-        <field name="name">api.message.list</field>
         <field name="model">api.message</field>
         <field name="priority">2</field>
         <field name="arch" type="xml">
             <tree>
                 <field name="name" optional="show"/>
+                <field name="endpoint_id" optional="show"/>
+                <field name="create_uid" optional="show" widget="many2one_avatar_user"/>
+                <field name="create_date" optional="show"/>
             </tree>
         </field>
     </record>
 
     <record id="api_message_form" model="ir.ui.view">
-        <field name="name">api.message.form</field>
         <field name="model">api.message</field>
         <field name="arch" type="xml">
             <form>
+                <header>
+                    <field name="state" widget="statusbar" statusbar_visible="waiting,done" options="{'clickable': '1'}"/>
+                </header>
                 <sheet>
                     <div class="oe_title">
                         <h1>
-                            <field name="name"/>
+                            <field name="name" required="False"/>
                         </h1>
                     </div>
                     <group>
                         <group>
+                            <field name="endpoint_id"/>
+                            <field name="content" filename="name"/>
+                        </group>
+                        <group>
+                            <field name="params"/>
+                            <field name="context"/>
                         </group>
                     </group>
+                    <label for="preview"/>
+                    <field name="preview"/>
                 </sheet>
+                <div class="o_attachment_preview"/>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
             </form>
         </field>
     </record>
@@ -35,6 +52,7 @@
         <field name="arch" type="xml">
             <search>
                 <field name="name"/>
+                <field name="endpoint_id"/>
                 <group expand="1" string="Group by">
                     <filter string="Create Date" name="group_create_date" context="{'group_by': 'create_date:year'}"/>
                 </group>
@@ -50,6 +68,5 @@
         <field name="context"></field>
     </record>
 
-    <menuitem id="api_message_menu" parent="api_endpoint_menu" action="api_message_action" sequence="4"/>
 
 </odoo>

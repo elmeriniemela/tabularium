@@ -11,10 +11,11 @@ _logger = logging.getLogger(__name__)
 
 class ApiController(http.Controller):
 
-    @http.route('/api-endpoint/v1/<location>', type='http', auth="none")
-    def api_endopoint(self, location, **kw):
+    @http.route('/api-endpoint/v1/<location>', type='http', auth="none", csrf=False)
+    def api_endopoint(self, location, **params):
         method = request.httprequest.method.lower()
         auth = request.httprequest.headers.get('Authorization') or ''
-        import pdb; pdb.set_trace()
-        return 'OK'
+        data = request.httprequest.data
+        _logger.info(f"{method=}, {location=} {auth=}, {params=}, {data=}")
+        return request.env['api.endpoint'].process_inbound_http(method, location, auth, params, data)
 

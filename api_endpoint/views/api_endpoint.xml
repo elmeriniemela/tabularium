@@ -1,21 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="api_endpoint_list" model="ir.ui.view">
-        <field name="name">api.endpoint.list</field>
         <field name="model">api.endpoint</field>
         <field name="priority">2</field>
         <field name="arch" type="xml">
             <tree>
                 <field name="name" optional="show"/>
+                <field name="location"/>
+                <field name="authorization"/>
+                <field name="sequence_id"/>
+                <field name="user_id" widget="many2one_avatar_user"/>
+                <field name="directon"/>
+                <field name="role"/>
+                <field name="comm_method"/>
+                <field name="file_format"/>
             </tree>
         </field>
     </record>
 
     <record id="api_endpoint_form" model="ir.ui.view">
-        <field name="name">api.endpoint.form</field>
         <field name="model">api.endpoint</field>
         <field name="arch" type="xml">
             <form>
+                <header>
+                    <button name="fetch" type="object" string="Fetch" icon="fa-cogs"/>
+                </header>
                 <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" type="action" icon="fa-tasks" name="%(api_message_action)d" context="{'default_endpoint_id': id, 'search_default_endpoint_id': id}">
+                            <field string="Messages" name="msg_count" widget="statinfo"/>
+                        </button>
+                    </div>
                     <div class="oe_title">
                         <h1>
                             <field name="name"/>
@@ -23,9 +38,28 @@
                     </div>
                     <group>
                         <group>
+                            <field name="location"/>
+                            <field name="authorization"/>
+                            <field name="sequence_id" attrs="{'invisible': [('sequence_id', '=', False)]}" required="False"/>
+                            <field name="user_id" widget="many2one_avatar_user"/>
+                        </group>
+                        <group>
+                            <field name="directon"/>
+                            <field name="role"/>
+                            <field name="comm_method"/>
+                            <field name="file_format"/>
                         </group>
                     </group>
+                    <label for="producer"/>
+                    <field name="producer" widget="ace" options="{'mode': 'python'}"/>
+                    <label for="processor"/>
+                    <field name="processor" widget="ace" options="{'mode': 'python'}"/>
                 </sheet>
+                <div class="o_attachment_preview"/>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
             </form>
         </field>
     </record>
@@ -44,12 +78,11 @@
 
 
     <record id="api_endpoint_action" model="ir.actions.act_window">
-        <field name="name">API Endpoint</field>
+        <field name="name">API Endpoints</field>
         <field name="res_model">api.endpoint</field>
         <field name="view_mode">tree,kanban,form</field>
         <field name="context"></field>
     </record>
 
-    <menuitem id="api_endpoint_menu" action="api_endpoint_action" web_icon="api_endpoint,static/description/icon.png" sequence="4"/>
 
 </odoo>
