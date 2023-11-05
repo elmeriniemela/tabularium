@@ -11,7 +11,7 @@
                 <field name="comm_method"/>
                 <field name="file_format"/>
                 <field name="location"/>
-                <field name="auto_process" widget="boolean_toggle"/>
+                <field name="auto_consume" widget="boolean_toggle"/>
                 <field name="auto_commit" widget="boolean_toggle"/>
                 <field name="ttl"/>
                 <field name="user_id" widget="many2one_avatar_user"/>
@@ -46,7 +46,7 @@
                             <field name="authorization"/>
                             <field name="sequence_id" attrs="{'invisible': [('sequence_id', '=', False)]}" required="False"/>
                             <field name="user_id" widget="many2one_avatar_user"/>
-                            <field name="auto_process" widget="boolean_toggle"/>
+                            <field name="auto_consume" widget="boolean_toggle"/>
                             <field name="auto_commit" widget="boolean_toggle"/>
                         </group>
                         <group>
@@ -58,9 +58,10 @@
                         </group>
                     </group>
                     <label for="producer"/>
+                    <field name="hardcoded_producer" widget="ace" options="{'mode': 'python'}" attrs="{'invisible': [('hardcoded_producer', '=', '')]}"/>
                     <field name="producer" widget="ace" options="{'mode': 'python'}"/>
-                    <label for="processor"/>
-                    <field name="processor" widget="ace" options="{'mode': 'python'}"/>
+                    <label for="consumer"/>
+                    <field name="consumer" widget="ace" options="{'mode': 'python'}"/>
                 </sheet>
                 <div class="o_attachment_preview"/>
                 <div class="oe_chatter">

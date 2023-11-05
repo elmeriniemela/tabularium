@@ -17,7 +17,7 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <field name="state" widget="statusbar" statusbar_visible="waiting,done" options="{'clickable': '1'}"/>
+                    <field name="state" widget="statusbar" statusbar_visible="produced,consumed" options="{'clickable': '1'}"/>
                 </header>
                 <sheet>
                     <div class="oe_title">

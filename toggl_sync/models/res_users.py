@@ -9,7 +9,7 @@ TOGGL_SELF = [
     'toggl_api_token',
     'toggl_export_url',
     'toggl_export_dbname',
-    'toggl_export_username',
+    'toggl_export_uid',
     'toggl_export_pwd',
 ]
 
@@ -19,7 +19,7 @@ class ResUsers(models.Model):
     toggl_api_token = fields.Char()
     toggl_export_url = fields.Char()
     toggl_export_dbname = fields.Char()
-    toggl_export_username = fields.Char()
+    toggl_export_uid = fields.Char()
     toggl_export_pwd = fields.Char()
 
     @property
@@ -35,7 +35,7 @@ class ResUsers(models.Model):
         self.ensure_one()
         url = self.toggl_export_url
         dbname = self.toggl_export_dbname
-        username = self.toggl_export_username
+        username = self.toggl_export_uid
         pwd = self.toggl_export_pwd
 
         if not all([url, dbname, username, pwd]):

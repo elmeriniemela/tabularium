@@ -21,12 +21,12 @@ class ApiMessage(models.Model):
 
     state = fields.Selection(
         selection=[
-            ('waiting', 'Waiting'),
-            ('done', 'Done'),
+            ('produced', 'Produced'),
+            ('consumed', 'Consumed'),
         ],
         required=True,
         tracking=True,
-        default='waiting',
+        default='produced',
     )
 
     content = fields.Binary()

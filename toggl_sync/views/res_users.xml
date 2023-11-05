@@ -9,7 +9,7 @@
                 <field name="toggl_api_token"/>
                 <field name="toggl_export_url"/>
                 <field name="toggl_export_dbname"/>
-                <field name="toggl_export_username"/>
+                <field name="toggl_export_uid"/>
                 <field name="toggl_export_pwd"/>
             </xpath>
         </field>
