@@ -6,14 +6,18 @@
         <field name="arch" type="xml">
             <tree>
                 <field name="name" optional="show"/>
-                <field name="location"/>
-                <field name="authorization"/>
-                <field name="sequence_id"/>
-                <field name="user_id" widget="many2one_avatar_user"/>
-                <field name="directon"/>
+                <field name="direction"/>
                 <field name="role"/>
                 <field name="comm_method"/>
                 <field name="file_format"/>
+                <field name="location"/>
+                <field name="auto_process" widget="boolean_toggle"/>
+                <field name="auto_commit" widget="boolean_toggle"/>
+                <field name="ttl"/>
+                <field name="user_id" widget="many2one_avatar_user"/>
+                <field name="authorization" optional="hide"/>
+                <field name="sequence_id" optional="hide"/>
+                <field name="msg_count"/>
             </tree>
         </field>
     </record>
@@ -23,12 +27,12 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <button name="fetch" type="object" string="Fetch" icon="fa-cogs"/>
+                    <button name="action_run" type="object" string="Run" icon="fa-cogs"/>
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button class="oe_stat_button" type="action" icon="fa-tasks" name="%(api_message_action)d" context="{'default_endpoint_id': id, 'search_default_endpoint_id': id}">
-                            <field string="Messages" name="msg_count" widget="statinfo"/>
+                            <field name="msg_count" widget="statinfo"/>
                         </button>
                     </div>
                     <div class="oe_title">
@@ -42,12 +46,15 @@
                             <field name="authorization"/>
                             <field name="sequence_id" attrs="{'invisible': [('sequence_id', '=', False)]}" required="False"/>
                             <field name="user_id" widget="many2one_avatar_user"/>
+                            <field name="auto_process" widget="boolean_toggle"/>
+                            <field name="auto_commit" widget="boolean_toggle"/>
                         </group>
                         <group>
-                            <field name="directon"/>
+                            <field name="direction"/>
                             <field name="role"/>
                             <field name="comm_method"/>
                             <field name="file_format"/>
+                            <field name="ttl"/>
                         </group>
                     </group>
                     <label for="producer"/>

@@ -17,5 +17,6 @@ class ApiController(http.Controller):
         auth = request.httprequest.headers.get('Authorization') or ''
         data = request.httprequest.data
         _logger.info(f"{method=}, {location=} {auth=}, {params=}, {data=}")
-        return request.env['api.endpoint'].process_inbound_http(method, location, auth, params, data)
+        params['data'] = data
+        return request.env['api.endpoint'].process_inbound_http(method, location, auth, params)
 

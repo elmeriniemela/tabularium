@@ -60,8 +60,9 @@ class ApiMessage(models.Model):
     def create(self, vals_list):
         for vals in vals_list:
             endpoint_id = vals.get('endpoint_id') or self.env.context.get('default_endpoint_id')
-            if not vals.get('name') and endpoint_id:
+            if endpoint_id:
                 endpoint = self.env['api.endpoint'].browse(endpoint_id)
-                vals['name'] = '%s.%s' % (endpoint.sequence_id.next_by_id(), endpoint.file_format)
+                if 'name' not in vals:
+                    vals['name'] = '%s.%s' % (endpoint.sequence_id.next_by_id(), endpoint.file_format)
         return super().create(vals_list)
 
