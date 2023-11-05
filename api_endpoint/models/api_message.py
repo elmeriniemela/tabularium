@@ -54,8 +54,6 @@ class ApiMessage(models.Model):
             record.preview = preview
 
 
-
-
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
@@ -65,4 +63,3 @@ class ApiMessage(models.Model):
                 if 'name' not in vals:
                     vals['name'] = '%s.%s' % (endpoint.sequence_id.next_by_id(), endpoint.file_format)
         return super().create(vals_list)
-
