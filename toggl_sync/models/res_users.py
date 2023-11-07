@@ -35,15 +35,12 @@ class ResUsers(models.Model):
         self.ensure_one()
         url = self.toggl_export_url
         dbname = self.toggl_export_dbname
-        username = self.toggl_export_uid
+        uid = self.toggl_export_uid
         pwd = self.toggl_export_pwd
 
-        if not all([url, dbname, username, pwd]):
+        if not all([url, dbname, uid, pwd]):
             raise UserError(_("Export credentials not configured."))
 
-
-        server_common = xmlrpc.client.ServerProxy(urllib.parse.urljoin(url, '/xmlrpc/common'))
-        uid = server_common.authenticate(dbname, username, pwd, {})
         return xmlrpc.client.ServerProxy(urllib.parse.urljoin(url, '/xmlrpc/object')), dbname, uid, pwd
 
     def toggl_api_call(self, method, endpoint, **kwargs):
