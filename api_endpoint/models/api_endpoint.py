@@ -213,7 +213,7 @@ class ApiEndpoint(models.Model):
                     hardcoded_producer = "obj = json.loads(params['data'])\n"
                 elif rec.file_format == 'xml':
                     hardcoded_producer = "obj = etree.fromstring(params['data'])\n"
-                    if rec.xslt.strip():
+                    if (rec.xslt or '').strip():
                         hardcoded_producer += 'obj = etree.XSLT(etree.XML(self.xslt))(obj)\n'
 
             rec.hardcoded_producer = hardcoded_producer
