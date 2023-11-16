@@ -132,6 +132,8 @@ class ApiEndpoint(models.Model):
         default='',
     )
 
+    url = fields.Char(compute='_compute_url')
+
     ttl = fields.Integer(
         string="TTL",
         default=7,
@@ -208,6 +210,15 @@ class ApiEndpoint(models.Model):
     def _compute_msg_count(self):
         for rec in self:
             rec.msg_count = len(rec.msg_ids)
+
+    @api.depends('comm_method', 'role', 'direction', 'file_format')
+    def _compute_url(self):
+        base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url').rstrip('/')
+        for rec in self:
+            url = False
+            if rec.comm_method in ['post', 'put', 'delete'] and rec.direction == 'inbound' and rec.role == 'passive' and rec.location:
+                url = f'{base_url}/api-endpoint/v1/{rec.location}'
+            rec.url = url
 
     @api.depends('comm_method', 'role', 'direction', 'file_format')
     def _compute_hardcoded_producer(self):
