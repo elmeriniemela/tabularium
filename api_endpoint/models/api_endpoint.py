@@ -241,7 +241,7 @@ class ApiEndpoint(models.Model):
 
     def action_test(self):
         globals_dict = self._get_globals(params={})
-        safe_eval(self.testing_example, globals_dict, mode="exec", nocopy=True)
+        safe_eval(self.test_example or '', globals_dict, mode="exec", nocopy=True)
 
 
     def run(self, params):
