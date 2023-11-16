@@ -299,7 +299,7 @@ class ApiEndpoint(models.Model):
         endpoint = self.sudo().search([
                 ('comm_method', '=', method),
                 ('location', '=', location),
-                ('authorization', '=', auth),
+                ('authorization', 'in', [auth, False]),
                 ('role', '=', 'passive'),
                 ('direction', '=', 'outbound' if method == 'get' else 'inbound'),
             ],
