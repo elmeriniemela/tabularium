@@ -160,6 +160,11 @@ class ApiEndpoint(models.Model):
 
     documentation = fields.Html()
 
+    test_example = fields.Text(
+        string="Test Example",
+        help="Example code to test the integration.",
+    )
+
     producer = fields.Text(
         string="Producer (READ)",
         tracking=True,
@@ -222,6 +227,11 @@ class ApiEndpoint(models.Model):
     def action_run(self):
         globals_dict = self.run({})
         return globals_dict.get('action', None)
+
+    def action_test(self):
+        globals_dict = self._get_globals(params={})
+        safe_eval(self.testing_example, globals_dict, mode="exec", nocopy=True)
+
 
     def run(self, params):
         self.ensure_one()
