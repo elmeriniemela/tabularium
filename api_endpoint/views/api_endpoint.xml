@@ -57,6 +57,10 @@
                             <field name="ttl"/>
                         </group>
                     </group>
+                    <label for="documentation"/>
+                    <field name="documentation"/>
+                    <label for="xslt" attrs="{'invisible': [('file_format', '!=', 'xml')]}"/>
+                    <field name="xslt" widget="ace" options="{'mode': 'xml'}" attrs="{'invisible': [('file_format', '!=', 'xml')]}"/>
                     <label for="producer"/>
                     <field name="hardcoded_producer" widget="ace" options="{'mode': 'python'}" attrs="{'invisible': [('hardcoded_producer', '=', '')]}"/>
                     <field name="producer" widget="ace" options="{'mode': 'python'}"/>

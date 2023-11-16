@@ -151,6 +151,15 @@ class ApiEndpoint(models.Model):
     hardcoded_producer = fields.Text(
         compute='_compute_hardcoded_producer'
     )
+
+    xslt = fields.Text(
+        string="XSLT",
+        tracking=True,
+        help="XSLT transformation.",
+    )
+
+    documentation = fields.Html()
+
     producer = fields.Text(
         string="Producer (READ)",
         tracking=True,
@@ -204,6 +213,9 @@ class ApiEndpoint(models.Model):
                     hardcoded_producer = "obj = json.loads(params['data'])\n"
                 elif rec.file_format == 'xml':
                     hardcoded_producer = "obj = etree.fromstring(params['data'])\n"
+                    if rec.xslt.strip():
+                        hardcoded_producer += 'obj = etree.XSLT(etree.XML(self.xslt))(obj)\n'
+
             rec.hardcoded_producer = hardcoded_producer
 
 
