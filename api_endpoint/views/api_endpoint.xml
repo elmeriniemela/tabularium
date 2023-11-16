@@ -57,6 +57,7 @@
                             <field name="comm_method"/>
                             <field name="file_format"/>
                             <field name="ttl"/>
+                            <field name="auto_code" widget="boolean_toggle"/>
                         </group>
                     </group>
                     <label for="documentation"/>
@@ -69,6 +70,7 @@
                     <field name="hardcoded_producer" widget="ace" options="{'mode': 'python'}" attrs="{'invisible': [('hardcoded_producer', '=', '')]}"/>
                     <field name="producer" widget="ace" options="{'mode': 'python'}"/>
                     <label for="consumer"/>
+                    <field name="hardcoded_consumer" widget="ace" options="{'mode': 'python'}" attrs="{'invisible': [('hardcoded_consumer', '=', '')]}"/>
                     <field name="consumer" widget="ace" options="{'mode': 'python'}"/>
                 </sheet>
                 <div class="o_attachment_preview"/>

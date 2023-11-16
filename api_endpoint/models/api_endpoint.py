@@ -150,8 +150,17 @@ class ApiEndpoint(models.Model):
         tracking=True,
     )
 
+    auto_code = fields.Boolean(
+        default=True,
+        tracking=True,
+    )
+
     hardcoded_producer = fields.Text(
-        compute='_compute_hardcoded_producer'
+        compute='_compute_hardcoded'
+    )
+
+    hardcoded_consumer = fields.Text(
+        compute='_compute_hardcoded'
     )
 
     xslt = fields.Text(
@@ -221,18 +230,21 @@ class ApiEndpoint(models.Model):
             rec.url = url
 
     @api.depends('comm_method', 'role', 'direction', 'file_format')
-    def _compute_hardcoded_producer(self):
+    def _compute_hardcoded(self):
         for rec in self:
             hardcoded_producer = ''
-            if rec.comm_method in ['post', 'put', 'delete'] and rec.direction == 'inbound' and rec.role == 'passive':
-                if rec.file_format == 'json':
-                    hardcoded_producer = "obj = json.loads(params['data'])\n"
-                elif rec.file_format == 'xml':
-                    hardcoded_producer = "obj = etree.fromstring(params['data'])\n"
-                    if (rec.xslt or '').strip():
-                        hardcoded_producer += 'obj = etree.XSLT(etree.XML(self.xslt))(obj)\n'
+            hardcoded_consumer = ''
+            if rec.auto_code:
+                if rec.comm_method in ['post', 'put', 'delete'] and rec.direction == 'inbound' and rec.role == 'passive':
+                    if rec.file_format == 'json':
+                        hardcoded_producer += "obj = json.loads(params['data'])\n"
+                    elif rec.file_format == 'xml':
+                        hardcoded_producer += "obj = etree.fromstring(params['data'])\n"
+                        if (rec.xslt or '').strip():
+                            hardcoded_consumer += 'obj = etree.XSLT(etree.XML(self.xslt))(obj)\n'
 
             rec.hardcoded_producer = hardcoded_producer
+            rec.hardcoded_consumer = hardcoded_consumer
 
 
     def action_run(self):
@@ -256,7 +268,7 @@ class ApiEndpoint(models.Model):
         return globals_dict
 
     def consume(self, globals_dict):
-        safe_eval(self.consumer or '', globals_dict, mode="exec", nocopy=True)
+        safe_eval(self.hardcoded_consumer or '' + self.consumer or '', globals_dict, mode="exec", nocopy=True)
         globals_dict['msgs'].write({'state': 'consumed'})
         if self.auto_commit:
             self.env.cr.commit()
