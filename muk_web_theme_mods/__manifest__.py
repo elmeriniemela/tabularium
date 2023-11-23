@@ -1,6 +1,6 @@
 {
     'name': 'MuK Backend Theme MODS',
-    'version': '16.0.1.0.6',
+    'version': '1.0',
     'category': 'Themes/Backend',
     'license': 'LGPL-3',
     'author': 'Elmeri Niemelä',

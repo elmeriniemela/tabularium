@@ -259,7 +259,7 @@ class ApiEndpoint(models.Model):
     def run(self, params):
         self.ensure_one()
         globals_dict = self._get_globals(params=params)
-        safe_eval(self.hardcoded_producer or '' + self.producer or '', globals_dict, mode="exec", nocopy=True)
+        safe_eval((self.hardcoded_producer or '') + (self.producer or ''), globals_dict, mode="exec", nocopy=True)
         self.store(globals_dict)
         if self.auto_commit:
             self.env.cr.commit()
@@ -268,7 +268,7 @@ class ApiEndpoint(models.Model):
         return globals_dict
 
     def consume(self, globals_dict):
-        safe_eval(self.hardcoded_consumer or '' + self.consumer or '', globals_dict, mode="exec", nocopy=True)
+        safe_eval((self.hardcoded_consumer or '') + (self.consumer or ''), globals_dict, mode="exec", nocopy=True)
         globals_dict['msgs'].write({'state': 'consumed'})
         if self.auto_commit:
             self.env.cr.commit()
