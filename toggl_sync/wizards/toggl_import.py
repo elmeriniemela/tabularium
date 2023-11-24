@@ -16,7 +16,7 @@ class TogglImport(models.TransientModel):
 
     start_date = fields.Datetime(
         required=True,
-        default=lambda self: self.env['toggl.entry'].search([('export_id', '!=', False)], limit=1).stop - datetime.timedelta(days=1)
+        default=lambda self: self.env['toggl.entry'].search([('export_id', '!=', False)], limit=1).date_stop - datetime.timedelta(days=1)
     )
 
     end_date = fields.Datetime(
@@ -30,7 +30,7 @@ class TogglImport(models.TransientModel):
         date = lambda dt_str: dateutil.parser.parse(dt_str).astimezone(pytz.utc).replace(tzinfo=None)
 
         Entry = self.env['toggl.entry'].with_context(active_test=False)
-        existing = {e.toggl_id: e for e in Entry.search([('start', '>=', self.start_date),('stop', '<=', self.end_date)])}
+        existing = {e.toggl_id: e for e in Entry.search([('date_start', '>=', self.start_date),('date_stop', '<=', self.end_date)])}
         _logger.info("Found %s existing toggl entries.", len(existing))
         for entry in entries:
             if not entry.get('stop'):
@@ -39,8 +39,8 @@ class TogglImport(models.TransientModel):
             toggl_id = entry['id']
             vals = {
                 'name': entry['description'],
-                'start': date(entry['start']),
-                'stop': date(entry['stop']),
+                'date_start': date(entry['start']),
+                'date_stop': date(entry['stop']),
                 'duration': entry['duration']/(60*60),
             }
             if toggl_id in existing:

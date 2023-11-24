@@ -153,8 +153,8 @@
                 <field name="description"/>
                 <field name="project_name"/>
                 <field name="date"/>
-                <field name="start"/>
-                <field name="stop"/>
+                <field name="date_start"/>
+                <field name="date_stop"/>
                 <field name="duration"/>
                 <field name="toggl_id"/>
                 <field name="export_id"/>
@@ -241,7 +241,7 @@
     <record id="entry_action" model="ir.actions.act_window">
         <field name="name">Toggl Entries</field>
         <field name="res_model">toggl.entry</field>
-        <field name="view_mode">tree,kanban,form</field>
+        <field name="view_mode">tree,kanban,form,calendar</field>
         <field name="context">
             {
                 'search_default_not_exported': 1,

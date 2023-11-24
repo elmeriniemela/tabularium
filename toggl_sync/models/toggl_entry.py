@@ -111,9 +111,9 @@ class TogglEntry(models.Model):
     company_id = fields.Many2one(comodel_name='res.company', required=True, default=lambda self: self.env.company, tracking=True)
     company_currency_id = fields.Many2one(related='company_id.currency_id', string="Company Currency")
 
-    start = fields.Datetime(required=True, readonly=True)
+    date_start = fields.Datetime(required=True, readonly=True)
 
-    stop = fields.Datetime(required=True, readonly=True)
+    date_stop = fields.Datetime(required=True, readonly=True)
 
     toggl_id = BigInteger(string="Toggl ID", required=True, readonly=True)
 
@@ -186,7 +186,7 @@ class TogglEntry(models.Model):
         time_str = lambda dt: fields.Datetime.context_timestamp(self, dt).strftime('%H:%M')
         for record in self:
             entries = (record | record.child_ids)
-            record.time_period = ', '.join(f"{time_str(e.start)} - {time_str(e.stop)}" for e in entries)
+            record.time_period = ', '.join(f"{time_str(e.date_start)} - {time_str(e.date_stop)}" for e in entries)
 
     def write(self, vals):
         res = super().write(vals)
@@ -299,7 +299,7 @@ class TogglEntry(models.Model):
             (record | record.child_ids).locked = False
 
 
-    @api.depends('name', 'start', 'duration', 'duration', 'extra_duration')
+    @api.depends('name', 'date_start', 'duration', 'duration', 'extra_duration')
     def _compute_toggl_fields(self):
         Task = self.env['toggl.task']
         daily_entries = (self._origin | self.search([('date', 'in', [False]+self.mapped('date'))])).sorted('id')
@@ -318,7 +318,7 @@ class TogglEntry(models.Model):
             else:
                 record.task_id = False
 
-            record.date = record.start.date()
+            record.date = record.date_start.date()
 
 
         for key, same_tasks in tools.groupby(daily_entries, lambda e: (e['name'], e['date'])):
