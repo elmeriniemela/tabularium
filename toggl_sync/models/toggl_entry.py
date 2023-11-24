@@ -152,6 +152,7 @@ class TogglEntry(models.Model):
     price_changed = fields.Boolean()
 
     time_period = fields.Char(compute='_compute_time_period')
+    color = fields.Integer(string='Color Index')
 
     @property
     def timesheet_rounding(self):

@@ -145,6 +145,22 @@
         </field>
     </record>
 
+    <record id="entry_calendar" model="ir.ui.view">
+        <field name="name">toggl.entry.calendar</field>
+        <field name="model">toggl.entry</field>
+        <field name="arch" type="xml">
+            <calendar string="Toggl Entry"
+                date_start="date_start"
+                date_stop="date_stop"
+                mode="week"
+                quick_add="False"
+                color="color"
+                event_limit="5">
+            </calendar>
+        </field>
+    </record>
+
+
     <record id="entry_search" model="ir.ui.view">
         <field name="model">toggl.entry</field>
         <field name="arch" type="xml">
