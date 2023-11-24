@@ -21,8 +21,8 @@ class TogglTask(models.Model):
 
     task_id = fields.Integer(required=True, readonly=True, tracking=True)
 
-    project_name = fields.Char(readonly=True, tracking=True)
-    project_id = fields.Integer(readonly=True, tracking=True)
+    project_name = fields.Char(readonly=True, tracking=True, string="Project")
+    project_id = fields.Integer(readonly=True, tracking=True, string="Project ID")
 
     sale_line_name = fields.Char(readonly=True, tracking=True)
     sale_line_id = fields.Integer(readonly=True, tracking=True)

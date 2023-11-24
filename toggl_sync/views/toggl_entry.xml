@@ -44,13 +44,15 @@
                 <sheet>
                     <div class="oe_title">
                         <h1>
-                            <field name="name"/>
+                            <field name="task_id"/>
                         </h1>
                     </div>
                     <field name="company_currency_id" invisible="1"/>
                     <group>
                         <group>
+                            <field name="project_name"/>
                             <field name="description"/>
+                            <field name="checked" widget="boolean_toggle"/>
                             <label for="date"/>
                             <div>
                                 <field name="date" class="oe_inline pr-1"/>
@@ -83,7 +85,7 @@
                                     <field name="checked" widget="boolean_toggle"/>
                                     <field name="toggl_id"/>
                                     <field name="export_id"/>
-                                    <field name="task_id"/>
+                                    <field name="name"/>
                                 </group>
                                 <group>
                                     <field name="original_price"/>
@@ -123,7 +125,7 @@
                                     </div>
                                 </div>
                                 <div class="o_kanban_record_body">
-                                    <field name="task_id"/>
+                                    <field name="task_id"/> / <field name="project_name"/>
                                 </div>
                                 <div class="o_kanban_record_bottom">
                                     <div class="oe_kanban_bottom_left">
