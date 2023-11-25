@@ -48,6 +48,7 @@ class ApiEndpoint(models.Model):
             'io': io,
             're': re,
             'etree': lxml.etree,
+            'getattr': getattr,
         }
 
 
