@@ -243,6 +243,16 @@ class ApiEndpoint(models.Model):
                         hardcoded_producer += "obj = etree.fromstring(params['data'])\n"
                         if (rec.xslt or '').strip():
                             hardcoded_consumer += 'obj = etree.XSLT(etree.XML(self.xslt))(obj)\n'
+                elif rec.comm_method == 'xmlrpc' and rec.direction == 'outbound' and rec.role == 'active':
+                    hardcoded_producer += 'obj = params'
+                    hardcoded_consumer += (
+                        "proxy = self.xmlrpc_proxy('https://%s@%s' % (self.authorization, self.location))\n"
+                        "method = obj.pop('method', 'test')\n"
+                        "args = obj.pop('args', tuple())\n"
+                        "kwargs = obj.pop('kwargs', dict())\n"
+                        "getattr(proxy, method)(*args, **kwargs)\n"
+                    )
+
 
             rec.hardcoded_producer = hardcoded_producer
             rec.hardcoded_consumer = hardcoded_consumer
