@@ -355,8 +355,11 @@ class ApiEndpoint(models.Model):
         return Msg.browse()
 
 
-    def get_xmlrpc_proxy(self, params):
+    def odoo_xmlrpc_proxy(self, params):
         self.ensure_one()
-        proxy = xmlrpc.client.ServerProxy(self.location)
+        proxy = self.xmlrpc_proxy(self.location)
         authorization = safe_eval(self.authorization, self._get_globals(params=params))
         return proxy, *authorization
+
+    def xmlrpc_proxy(self, url):
+        return xmlrpc.client.ServerProxy(url)
