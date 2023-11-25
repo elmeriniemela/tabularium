@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="cloud_instance_menu" action="cloud_instance_action" web_icon="cloud_manager,static/description/icon.png" sequence="4"/>
+</odoo>
