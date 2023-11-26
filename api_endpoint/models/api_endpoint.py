@@ -5,7 +5,7 @@ import secrets
 import base64
 import json
 import xmlrpc.client
-import ast
+import ssl
 from lxml import etree
 from odoo import models, tools, fields, api, _
 from odoo.tools.safe_eval import safe_eval, test_python_expr, wrap_module, datetime, dateutil
@@ -372,5 +372,9 @@ class ApiEndpoint(models.Model):
         authorization = safe_eval(self.authorization, self._get_globals(params=params))
         return proxy, *authorization
 
-    def xmlrpc_proxy(self, url):
-        return xmlrpc.client.ServerProxy(url)
+    def xmlrpc_proxy(self, url, verify_ssl=True):
+        if not verify_ssl:
+            kwargs = dict(context=ssl._create_unverified_context())
+        else:
+            kwargs = dict()
+        return xmlrpc.client.ServerProxy(url, **kwargs)
