@@ -18,8 +18,7 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <!-- <button name="action_run" type="object" string="Run" icon="fa-cogs"/>
-                    <button name="action_test" type="object" string="Test" icon="fa-cogs"/> -->
+                    <button name="action_deploy" type="object" string="Deploy" icon="fa-cogs"/>
                 </header>
                 <sheet>
                     <div class="oe_title">

@@ -7,7 +7,7 @@ import json
 import xmlrpc.client
 import ssl
 from lxml import etree
-from odoo import models, tools, fields, api, _
+from odoo import models, exceptions, tools, fields, api, _
 from odoo.tools.safe_eval import safe_eval, test_python_expr, wrap_module, datetime, dateutil
 
 requests = wrap_module(__import__('requests'), ['get', 'post', 'put', 'delete'])
@@ -246,11 +246,10 @@ class ApiEndpoint(models.Model):
                 elif rec.comm_method == 'xmlrpc' and rec.direction == 'outbound' and rec.role == 'active':
                     hardcoded_producer += 'obj = params'
                     hardcoded_consumer += (
-                        "proxy = self.xmlrpc_proxy('https://%s@%s' % (self.authorization, self.location))\n"
+                        "url = 'https://%s@%s' % (self.authorization, self.location)\n"
                         "method = obj.pop('method', 'test')\n"
                         "args = obj.pop('args', tuple())\n"
-                        "kwargs = obj.pop('kwargs', dict())\n"
-                        "getattr(proxy, method)(*args, **kwargs)\n"
+                        "response = self.xmlrpc(url, method, args)\n"
                     )
 
 
@@ -372,9 +371,17 @@ class ApiEndpoint(models.Model):
         authorization = safe_eval(self.authorization, self._get_globals(params=params))
         return proxy, *authorization
 
-    def xmlrpc_proxy(self, url, verify_ssl=True):
+    def xmlrpc(self, url, method, args, verify_ssl=True):
         if not verify_ssl:
             kwargs = dict(context=ssl._create_unverified_context())
         else:
             kwargs = dict()
-        return xmlrpc.client.ServerProxy(url, **kwargs)
+
+        proxy = xmlrpc.client.ServerProxy(url, **kwargs)
+        call_proxy = getattr(proxy, method)
+        try:
+            return call_proxy(*args)
+        except xmlrpc.client.Fault as err:
+            raise exceptions.UserError(err.faultString)
+        except xmlrpc.client.ProtocolError as err:
+            raise exceptions.UserError(f'Error connecting to {err.url}: {err.errmsg}')

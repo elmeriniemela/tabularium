@@ -59,3 +59,10 @@ class CloudInstance(models.Model):
 
         return super().create(vals_list)
 
+    def action_deploy(self):
+        self.ensure_one()
+        globals_dict = self.endpoint_id.run({
+            'method': 'new_instance',
+            'args': (self.name, self.uid, self.http_port, self.gevent_port),
+        })
+        return globals_dict.get('action', None)
