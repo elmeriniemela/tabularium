@@ -62,7 +62,39 @@ class CloudInstance(models.Model):
     def action_deploy(self):
         self.ensure_one()
         globals_dict = self.endpoint_id.run({
-            'method': 'new_instance',
-            'args': (self.name, self.uid, self.http_port, self.gevent_port),
+            'method': 'create',
+            'args': (self.uid, self.name, self.http_port, self.gevent_port),
+        })
+        return globals_dict.get('action', None)
+
+    def action_remove(self):
+        self.ensure_one()
+        globals_dict = self.endpoint_id.run({
+            'method': 'remove',
+            'args': (self.uid, self.name),
+        })
+        return globals_dict.get('action', None)
+
+    def action_stop(self):
+        self.ensure_one()
+        globals_dict = self.endpoint_id.run({
+            'method': 'stop',
+            'args': (self.uid,),
+        })
+        return globals_dict.get('action', None)
+
+    def action_start(self):
+        self.ensure_one()
+        globals_dict = self.endpoint_id.run({
+            'method': 'start',
+            'args': (self.uid,),
+        })
+        return globals_dict.get('action', None)
+
+    def action_restart(self):
+        self.ensure_one()
+        globals_dict = self.endpoint_id.run({
+            'method': 'restart',
+            'args': (self.uid,),
         })
         return globals_dict.get('action', None)
