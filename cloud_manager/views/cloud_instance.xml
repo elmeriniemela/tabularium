@@ -6,6 +6,9 @@
             <tree>
                 <field name="name" optional="show"/>
                 <field name="endpoint_id" optional="show"/>
+                <field name="uid" optional="show"/>
+                <field name="http_port" optional="show"/>
+                <field name="gevent_port" optional="show"/>
             </tree>
         </field>
     </record>
@@ -27,9 +30,12 @@
                     <group>
                         <group>
                             <field name="endpoint_id"/>
-
+                            <field name="http_port" required="0" attrs="{'invisible': [('http_port', '=', 0)]}"/>
                         </group>
-                        <group></group>
+                        <group>
+                            <field name="uid" required="0" attrs="{'invisible': [('uid', '=', False)]}"/>
+                            <field name="gevent_port" required="0" attrs="{'invisible': [('gevent_port', '=', 0)]}"/>
+                        </group>
                     </group>
                 </sheet>
                 <div class="o_attachment_preview"/>
