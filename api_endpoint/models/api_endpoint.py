@@ -87,6 +87,7 @@ class ApiEndpoint(models.Model):
         required=True,
         tracking=True,
         default='outbound',
+        help="Is the data flow inbound or outbound from the endpoint's perspective?"
     )
 
     role = fields.Selection(
@@ -97,6 +98,7 @@ class ApiEndpoint(models.Model):
         required=True,
         tracking=True,
         default='active',
+        help="Is the endpoint an active participant on the integration, or does it passivly respond to events calls from an external system?"
     )
 
     user_id = fields.Many2one(
@@ -221,6 +223,17 @@ class ApiEndpoint(models.Model):
         string="Messages",
         compute='_compute_msg_count',
     )
+
+    @api.autovacuum
+    def _gc_messages(self):
+        for endpoint in self.search([('ttl', '>', 0)]):
+            limit_dt = fields.Datetime.subtract(fields.Datetime.now(), days=endpoint.ttl)
+            to_unlink = self.env['api.message'].search([
+                ('endpoint_id', '=', endpoint.id),
+                ('create_date', '<=', limit_dt),
+            ])
+            to_unlink.unlink()
+            to_unlink.env.cr.commit()
 
 
     @api.model_create_multi
@@ -376,6 +389,9 @@ class ApiEndpoint(models.Model):
         globals_dict = endpoint.run(params)
         return globals_dict['response']
 
+
+    def cron_execute(self):
+        pass # TODO
 
     def next_from_queue(self):
         self.ensure_one()
