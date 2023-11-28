@@ -5,19 +5,22 @@
         <field name="priority">2</field>
         <field name="arch" type="xml">
             <tree>
+                <field name="sequence" widget="handle"/>
                 <field name="name" optional="show"/>
-                <field name="direction"/>
-                <field name="role"/>
-                <field name="comm_method"/>
-                <field name="file_format"/>
-                <field name="location"/>
-                <field name="auto_consume" widget="boolean_toggle"/>
-                <field name="auto_commit" widget="boolean_toggle"/>
-                <field name="ttl"/>
-                <field name="user_id" widget="many2one_avatar_user"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+                <field name="usage_field_id" optional="show"/>
+                <field name="direction" optional="show"/>
+                <field name="role" optional="show"/>
+                <field name="comm_method" optional="show"/>
+                <field name="file_format" optional="show"/>
+                <field name="location" optional="show"/>
+                <field name="auto_consume" widget="boolean_toggle" optional="show"/>
+                <field name="auto_commit" widget="boolean_toggle" optional="show"/>
+                <field name="ttl" optional="show"/>
+                <field name="user_id" widget="many2one_avatar_user" optional="show"/>
                 <field name="authorization" optional="hide"/>
                 <field name="sequence_id" optional="hide"/>
-                <field name="msg_count"/>
+                <field name="msg_count" optional="show"/>
             </tree>
         </field>
     </record>
@@ -48,10 +51,12 @@
                             <field name="authorization"/>
                             <field name="sequence_id" attrs="{'invisible': [('sequence_id', '=', False)]}" required="False"/>
                             <field name="user_id" widget="many2one_avatar_user"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
                             <field name="auto_consume" widget="boolean_toggle"/>
                             <field name="auto_commit" widget="boolean_toggle"/>
                         </group>
                         <group>
+                            <field name="usage_field_id"/>
                             <field name="direction"/>
                             <field name="role"/>
                             <field name="comm_method"/>

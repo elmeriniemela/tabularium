@@ -13,7 +13,7 @@ from odoo.tools.safe_eval import safe_eval, test_python_expr, wrap_module, datet
 requests = wrap_module(__import__('requests'), ['get', 'post', 'put', 'delete'])
 io = wrap_module(__import__('io'), ['StringIO', 'BytesIO'])
 pandas = wrap_module(__import__('pandas'), ['read_csv', 'read_excel'])
-re = wrap_module(__import__('re'), ['findall',])
+re = wrap_module(__import__('re'), ['findall', 'sub'])
 json = wrap_module(__import__('json'), ['loads','dumps'])
 xmltodict = wrap_module(__import__('xmltodict'), ['parse'])
 dicttoxml = wrap_module(__import__('dicttoxml'), ['dicttoxml'])
@@ -33,6 +33,7 @@ class ApiEndpoint(models.Model):
     _name = 'api.endpoint'
     _description = 'API Endpoint'
     _inherit = ['mail.thread']
+    _order = "sequence, id"
 
     def _get_globals(self, params):
         return {
@@ -49,12 +50,33 @@ class ApiEndpoint(models.Model):
             're': re,
             'etree': lxml.etree,
             'getattr': getattr,
+            '_logger': _logger,
         }
 
+
+    sequence = fields.Integer(
+        string="Sequence",
+        tracking=True,
+    )
 
     name = fields.Char(
         required=True,
         tracking=True,
+    )
+
+    company_id = fields.Many2one(
+        comodel_name='res.company',
+        tracking=True,
+        index=True,
+    )
+
+    usage_field_id = fields.Many2one(
+        comodel_name='ir.model.fields',
+        string='Used in',
+        ondelete='set null',
+        tracking=True,
+        domain=[('relation', '=', 'api.endpoint')],
+        help="Use this field to limit selection of a spefic field to a specific subset of API endpoints."
     )
 
     direction = fields.Selection(
@@ -206,12 +228,12 @@ class ApiEndpoint(models.Model):
         for vals in vals_list:
             if not vals.get('sequence_id'):
                 name = vals['name']
-                code = ''.join(c[:1].lower() for c in name.split())
-
+                code = re.sub(r'[^a-z\d]', '_', name.lower())
                 vals['sequence_id'] = self.env['ir.sequence'].create({
                     'name': 'API: %s' % name,
-                    'prefix': 'api_%s_' % code,
+                    'prefix': '%s_' % code,
                     'company_id': False,
+                    'padding': 8,
                 }).id
         return super().create(vals_list)
 

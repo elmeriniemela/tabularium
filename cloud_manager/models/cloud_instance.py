@@ -35,9 +35,14 @@ class CloudInstance(models.Model):
     )
 
     endpoint_id = fields.Many2one(
+        string="Server",
         comodel_name='api.endpoint',
         required=True,
-        ondelete='restrict'
+        ondelete='restrict',
+        domain=[
+            ('usage_field_id.name', '=', 'endpoint_id'),
+            ('usage_field_id.model_id.model', '=', 'cloud.instance'),
+        ],
     )
 
     _sql_constraints = [
