@@ -124,10 +124,7 @@ class ApiEndpoint(models.Model):
     comm_method = fields.Selection(
         string="Communication",
         selection=[
-            ('get', 'HTTP GET'),
-            ('post', 'HTTP POST'),
-            ('delete', 'HTTP DELETE'),
-            ('put', 'HTTP PUT'),
+            ('http', 'HTTP'),
             ('xmlrpc', 'XML-RPC'),
             ('jsonrpc', 'JSON-RPC'),
             ('sftp', 'SFTP'),
@@ -135,6 +132,17 @@ class ApiEndpoint(models.Model):
         required=True,
         tracking=True,
         default='get',
+    )
+
+    http_method = fields.Selection(
+        string="HTTP-Method",
+        selection=[
+            ('get', 'GET'),
+            ('post', 'POST'),
+            ('delete', 'DELETE'),
+            ('put', 'PUT'),
+        ],
+        tracking=True,
     )
 
     file_format = fields.Selection(
@@ -242,7 +250,7 @@ class ApiEndpoint(models.Model):
     )
 
     msg_count = fields.Integer(
-        string="Messages",
+        string="Files",
         compute='_compute_msg_count',
     )
 
@@ -283,7 +291,7 @@ class ApiEndpoint(models.Model):
         base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url').rstrip('/')
         for rec in self:
             url = False
-            if rec.comm_method in ['post', 'put', 'delete'] and rec.direction == 'inbound' and rec.role == 'passive' and rec.location:
+            if rec.comm_method == 'http' and rec.http_method in ['post', 'put', 'delete']  and rec.direction == 'inbound' and rec.role == 'passive' and rec.location:
                 url = f'{base_url}/api-endpoint/v1/{rec.location}'
             rec.url = url
 
@@ -293,7 +301,7 @@ class ApiEndpoint(models.Model):
             hardcoded_producer = ''
             hardcoded_consumer = ''
             if rec.auto_code:
-                if rec.comm_method in ['post', 'put', 'delete'] and rec.direction == 'inbound' and rec.role == 'passive':
+                if rec.comm_method == 'http' and rec.http_method in ['post', 'put', 'delete'] and rec.direction == 'inbound' and rec.role == 'passive':
                     if rec.file_format == 'json':
                         hardcoded_producer += "obj = json.loads(params['data'])\n"
                     elif rec.file_format == 'xml':
@@ -419,7 +427,8 @@ class ApiEndpoint(models.Model):
     def process_inbound_http(self, method, location, auth, params):
         assert method in ['get', 'post', 'delete', 'put']
         endpoint = self.sudo().search([
-                ('comm_method', '=', method),
+                '|', ('http_method', '=', method), ('http_method', '=', False)
+                ('comm_method', '=', 'http'),
                 ('location', '=', location),
                 ('authorization', 'in', [auth, False]),
                 ('role', '=', 'passive'),
