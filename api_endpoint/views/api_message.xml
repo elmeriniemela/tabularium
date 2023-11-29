@@ -8,6 +8,7 @@
                 <field name="endpoint_id" optional="show"/>
                 <field name="create_uid" optional="show" widget="many2one_avatar_user"/>
                 <field name="create_date" optional="show"/>
+                <field name="state" optional="show"/>
             </tree>
         </field>
     </record>
@@ -17,7 +18,7 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <field name="state" widget="statusbar" statusbar_visible="produced,consumed" options="{'clickable': '1'}"/>
+                    <field name="state" widget="statusbar" statusbar_visible="produced,consumed,error" options="{'clickable': '1'}"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
@@ -29,14 +30,17 @@
                         <group>
                             <field name="endpoint_id"/>
                             <field name="content" filename="name"/>
+                            <field name="response"/>
                         </group>
                         <group>
                             <field name="params"/>
                             <field name="context"/>
                         </group>
                     </group>
-                    <label for="preview"/>
-                    <field name="preview"/>
+                    <label for="content_preview"/>
+                    <field name="content_preview"/>
+                    <label for="response_preview"/>
+                    <field name="response_preview"/>
                 </sheet>
                 <div class="o_attachment_preview"/>
                 <div class="oe_chatter">

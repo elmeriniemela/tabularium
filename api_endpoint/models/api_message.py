@@ -23,6 +23,7 @@ class ApiMessage(models.Model):
         selection=[
             ('produced', 'Produced'),
             ('consumed', 'Consumed'),
+            ('error', 'Error'),
         ],
         required=True,
         tracking=True,
@@ -30,6 +31,7 @@ class ApiMessage(models.Model):
     )
 
     content = fields.Binary()
+    response = fields.Binary()
 
     endpoint_id = fields.Many2one(
         comodel_name='api.endpoint',
@@ -38,20 +40,34 @@ class ApiMessage(models.Model):
         index=True
     )
 
-    preview = fields.Text(
+    content_preview = fields.Text(
         string="Content Preview",
-        compute='_compute_preview',
+        compute='_compute_content_preview',
     )
 
+    response_preview = fields.Text(
+        string="Response Preview",
+        compute='_compute_response_preview',
+    )
 
-    def _compute_preview(self):
-        for record in self:
-            preview = False
+    def _compute_response_preview(self):
+        for record in self.with_context(bin_size=False):
+            response_preview = False
+            if record.endpoint_id.response_format in ['json', 'xml', 'csv']:
+                response = record.response
+                if response:
+                    response_preview = base64.b64decode(response)
+            record.response_preview = response_preview
+
+
+    def _compute_content_preview(self):
+        for record in self.with_context(bin_size=False):
+            content_preview = False
             if record.endpoint_id.file_format in ['json', 'xml', 'csv']:
-                content = record.with_context(bin_size=False).content
+                content = record.content
                 if content:
-                    preview = base64.b64decode(content)
-            record.preview = preview
+                    content_preview = base64.b64decode(content)
+            record.content_preview = content_preview
 
 
     @api.model_create_multi

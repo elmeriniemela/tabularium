@@ -55,13 +55,24 @@ class ApiEndpoint(models.Model):
 
 
     sequence = fields.Integer(
-        string="Sequence",
+        string="Endpoint Sequence",
         tracking=True,
     )
 
     name = fields.Char(
         required=True,
         tracking=True,
+    )
+
+    state = fields.Selection(
+        selection=[
+            ('active', 'Active'),
+            ('error', 'Error'),
+            ('archived', 'Archived'),
+        ],
+        required=True,
+        tracking=True,
+        default='active',
     )
 
     company_id = fields.Many2one(
@@ -137,6 +148,17 @@ class ApiEndpoint(models.Model):
         required=True,
         tracking=True,
         default='json',
+    )
+
+    response_format = fields.Selection(
+        selection=[
+            ('json', 'JSON'),
+            ('xml', 'XML'),
+            ('csv', 'CSV'),
+            ('zip', 'ZIP'),
+            ('pdf', 'PDF'),
+        ],
+        tracking=True,
     )
 
     sequence_id = fields.Many2one(
@@ -303,9 +325,22 @@ class ApiEndpoint(models.Model):
 
     def run(self, params):
         self.ensure_one()
-        globals_dict = self._get_globals(params=params)
-        safe_eval((self.hardcoded_producer or '') + (self.producer or ''), globals_dict, mode="exec", nocopy=True)
-        self.store(globals_dict)
+        try:
+            with self.env.cr.savepoint():
+                globals_dict = self._get_globals(params=params)
+                safe_eval((self.hardcoded_producer or '') + (self.producer or ''), globals_dict, mode="exec", nocopy=True)
+                self.store(globals_dict)
+        except Exception as error:
+            if self.auto_commit:
+                if self.state != 'error':
+                    self.state = 'error'
+                self.message_post(body=str(error))
+                self.env.cr.commit()
+            raise error
+        else:
+            if self.state == 'error':
+                self.state = 'active'
+
         if self.auto_commit:
             self.env.cr.commit()
         if self.auto_consume:
@@ -313,7 +348,16 @@ class ApiEndpoint(models.Model):
         return globals_dict
 
     def consume(self, globals_dict):
-        safe_eval((self.hardcoded_consumer or '') + (self.consumer or ''), globals_dict, mode="exec", nocopy=True)
+        try:
+            with self.env.cr.savepoint():
+                safe_eval((self.hardcoded_consumer or '') + (self.consumer or ''), globals_dict, mode="exec", nocopy=True)
+        except Exception as error:
+            if self.auto_commit:
+                globals_dict['msgs'].write({'state': 'error'})
+                globals_dict['msgs'].message_post(body=str(error))
+                self.env.cr.commit()
+            raise error
+
         globals_dict['msgs'].write({'state': 'consumed'})
         if self.auto_commit:
             self.env.cr.commit()

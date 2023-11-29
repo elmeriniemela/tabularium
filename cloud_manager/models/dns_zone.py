@@ -112,6 +112,7 @@ class DnsZoneRecord(models.Model):
     )
 
     ttl = fields.Integer(
+        string="TTL",
         required=True,
         tracking=True,
     )

@@ -4,7 +4,7 @@
         <field name="model">api.endpoint</field>
         <field name="priority">2</field>
         <field name="arch" type="xml">
-            <tree>
+            <tree decoration-danger="state == 'error'" decoration-muted="state == 'archived'">
                 <field name="sequence" widget="handle"/>
                 <field name="name" optional="show"/>
                 <field name="company_id" groups="base.group_multi_company" optional="hide"/>
@@ -20,6 +20,7 @@
                 <field name="user_id" widget="many2one_avatar_user" optional="show"/>
                 <field name="authorization" optional="hide"/>
                 <field name="sequence_id" optional="hide"/>
+                <field name="state" optional="show"/>
                 <field name="msg_count" optional="show"/>
             </tree>
         </field>
@@ -30,6 +31,7 @@
         <field name="arch" type="xml">
             <form>
                 <header>
+                    <field name="state" widget="statusbar" statusbar_visible="active,error,archived" options="{'clickable': '1'}"/>
                     <button name="action_run" type="object" string="Run" icon="fa-cogs"/>
                     <button name="action_test" type="object" string="Test" icon="fa-cogs"/>
                 </header>
