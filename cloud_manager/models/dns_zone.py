@@ -1,0 +1,136 @@
+# -*- coding: utf-8 -*-
+
+import logging
+import secrets
+from odoo import models, api, fields, _
+
+_logger = logging.getLogger(__name__)
+
+
+class DnsZone(models.Model):
+    _name = 'dns.zone'
+    _description = 'DNS Zone'
+    _inherit = ['mail.thread']
+
+    name = fields.Char(
+        required=True,
+        tracking=True,
+    )
+
+    identifier = fields.Char(
+        required=True,
+        tracking=True,
+    )
+
+    record_ids = fields.One2many(
+        comodel_name='dns.zone.record',
+        inverse_name='zone_id',
+    )
+
+    ns_endpoint_id = fields.Many2one(
+        string="Nameservers",
+        comodel_name='api.endpoint',
+        domain=[
+            ('usage_field_id.name', '=', 'ns_endpoint_id'),
+            ('usage_field_id.model_id.model', '=', 'dns.zone'),
+        ],
+        compute='_compute_ns_endpoint_id',
+    )
+
+    _sql_constraints = [
+        ('uniq_name', 'UNIQUE(name)', 'The zone name must be unique!'),
+        ('uniq_identifier', 'UNIQUE(identifier)', 'The zone identifier must be unique!'),
+    ]
+
+    def _compute_ns_endpoint_id(self):
+        ns_endpoint = self.env['api.endpoint'].search([
+            ('usage_field_id.name', '=', 'ns_endpoint_id'),
+            ('usage_field_id.model_id.model', '=', 'dns.zone'),
+        ], limit=1)
+        for zone in self:
+            zone.ns_endpoint_id = ns_endpoint
+
+
+
+    def fetch(self):
+        ZoneRecord = self.env['dns.zone.record']
+        for zone in self:
+            globals_dict = zone.ns_endpoint_id.run({
+                'url': f'/zones/{zone.identifier}/dns_records',
+            })
+            res_list = globals_dict['obj']['result']
+            for res in res_list:
+                _logger.info(res)
+                ZoneRecord.upsert({
+                    'name': res['name'],
+                    'identifier': res['id'],
+                    'ttl': res['ttl'],
+                    'rtype': res['type'],
+                    'content': res['content'],
+                    'proxied': res['proxied'],
+                    'zone_id': zone.id,
+                })
+
+
+
+
+
+
+
+
+
+
+
+
+class DnsZoneRecord(models.Model):
+    _name = 'dns.zone.record'
+    _description = 'DNS Zone Record'
+    _inherit = ['mail.thread']
+
+    name = fields.Char(
+        required=True,
+        tracking=True,
+    )
+
+    content = fields.Char(
+        required=True,
+        tracking=True,
+    )
+
+    identifier = fields.Char(
+        tracking=True,
+    )
+
+    proxied = fields.Boolean(
+        tracking=True,
+    )
+
+    ttl = fields.Integer(
+        required=True,
+        tracking=True,
+    )
+
+    rtype = fields.Char(
+        string="Type",
+        required=True,
+        tracking=True,
+    )
+
+    zone_id = fields.Many2one(
+        comodel_name='dns.zone',
+        ondelete='restrict',
+        required=True,
+        tracking=True,
+    )
+
+    _sql_constraints = [
+        ('uniq_identifier', 'UNIQUE(identifier)', 'The zone record identifier must be unique!'),
+    ]
+
+    @api.model
+    def upsert(self, vals):
+        rec = self.search([('identifier', '=', vals['identifier'])])
+        if not rec:
+            rec = self.create(vals)
+        return rec
+

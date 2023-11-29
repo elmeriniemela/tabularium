@@ -56,7 +56,7 @@
                             <field name="auto_commit" widget="boolean_toggle"/>
                         </group>
                         <group>
-                            <field name="usage_field_id"/>
+                            <field name="usage_field_id" options="{'no_create': 1}"/>
                             <field name="direction"/>
                             <field name="role"/>
                             <field name="comm_method"/>

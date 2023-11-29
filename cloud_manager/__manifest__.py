@@ -17,6 +17,7 @@
     'data': [
         'security/ir.model.access.csv',
         'views/cloud_instance.xml',
+        'views/dns_zone.xml',
         'views/menuitems.xml',
     ],
 }
