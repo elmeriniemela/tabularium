@@ -50,6 +50,12 @@ class DnsZone(models.Model):
         for zone in self:
             zone.ns_endpoint_id = ns_endpoint
 
+    @api.model
+    def upsert(self, vals):
+        rec = self.search([('identifier', '=', vals['identifier'])])
+        if not rec:
+            rec = self.create(vals)
+        return rec
 
 
     def fetch(self):
