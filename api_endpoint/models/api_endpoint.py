@@ -427,7 +427,7 @@ class ApiEndpoint(models.Model):
     def process_inbound_http(self, method, location, auth, params):
         assert method in ['get', 'post', 'delete', 'put']
         endpoint = self.sudo().search([
-                '|', ('http_method', '=', method), ('http_method', '=', False)
+                '|', ('http_method', '=', method), ('http_method', '=', False),
                 ('comm_method', '=', 'http'),
                 ('location', '=', location),
                 ('authorization', 'in', [auth, False]),
