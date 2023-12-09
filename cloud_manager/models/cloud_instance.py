@@ -93,6 +93,7 @@ class CloudInstance(models.Model):
             'method': 'create',
             'args': (self.uid, self.name, self.http_port, self.gevent_port),
         })
+        self.state = 'running'
         return globals_dict.get('action', None)
 
     def action_remove(self):
@@ -101,6 +102,7 @@ class CloudInstance(models.Model):
             'method': 'remove',
             'args': (self.uid, self.name),
         })
+        self.state = 'removed'
         return globals_dict.get('action', None)
 
     def action_stop(self):
@@ -109,6 +111,7 @@ class CloudInstance(models.Model):
             'method': 'stop',
             'args': (self.uid,),
         })
+        self.state = 'exited'
         return globals_dict.get('action', None)
 
     def action_start(self):
@@ -117,6 +120,7 @@ class CloudInstance(models.Model):
             'method': 'start',
             'args': (self.uid,),
         })
+        self.state = 'running'
         return globals_dict.get('action', None)
 
     def action_restart(self):
@@ -125,6 +129,7 @@ class CloudInstance(models.Model):
             'method': 'restart',
             'args': (self.uid,),
         })
+        self.state = 'running'
         return globals_dict.get('action', None)
 
 
