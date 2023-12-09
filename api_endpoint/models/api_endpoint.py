@@ -472,6 +472,7 @@ class ApiEndpoint(models.Model):
                     msg.env.cr.commit() # Save all and release msg lock.
                 else:
                     msg.endpoint_id.consume(globals_dict, force_commit=True) # method consume already handles rollbacks with savepoint.
+                assert msg.state != 'produced', "Programming error, break infinite while loop."
 
 
 
