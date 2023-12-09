@@ -370,6 +370,12 @@ class ApiEndpoint(models.Model):
         if self.auto_commit:
             self.env.cr.commit()
 
+        globals_dict['msgs'].write({
+            'response': base64.b64encode(globals_dict['response'])
+        })
+        if self.auto_commit:
+            self.env.cr.commit()
+
 
     def store(self, globals_dict):
         self.ensure_one()
@@ -427,11 +433,11 @@ class ApiEndpoint(models.Model):
     def process_inbound_http(self, method, location, auth, params):
         assert method in ['get', 'post', 'delete', 'put']
         endpoint = self.sudo().search([
-                '|', ('http_method', '=', method), ('http_method', '=', False),
+                ('role', '=', 'passive'),
                 ('comm_method', '=', 'http'),
+                ('http_method', 'in', [method, False]),
                 ('location', '=', location),
                 ('authorization', 'in', [auth, False]),
-                ('role', '=', 'passive'),
                 ('direction', '=', 'outbound' if method == 'get' else 'inbound'),
             ],
             limit=1,

@@ -64,6 +64,7 @@
                             <field name="comm_method"/>
                             <field name="http_method" attrs="{'invisible': [('comm_method', '!=', 'http')]}"/>
                             <field name="file_format"/>
+                            <field name="response_format"/>
                             <field name="ttl"/>
                             <field name="auto_code" widget="boolean_toggle"/>
                         </group>
