@@ -370,11 +370,12 @@ class ApiEndpoint(models.Model):
         if self.auto_commit:
             self.env.cr.commit()
 
-        globals_dict['msgs'].write({
-            'response': base64.b64encode(globals_dict['response'])
-        })
-        if self.auto_commit:
-            self.env.cr.commit()
+        if self.response_format:
+            globals_dict['msgs'].write({
+                'response': base64.b64encode(globals_dict['response'])
+            })
+            if self.auto_commit:
+                self.env.cr.commit()
 
 
     def store(self, globals_dict):
