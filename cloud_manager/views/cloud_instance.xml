@@ -9,6 +9,7 @@
                 <field name="uid" optional="show"/>
                 <field name="http_port" optional="show"/>
                 <field name="gevent_port" optional="show"/>
+                <field name="state" optional="show"/>
             </tree>
         </field>
     </record>
