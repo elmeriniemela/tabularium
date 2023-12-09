@@ -387,9 +387,16 @@ class ApiEndpoint(models.Model):
 
     def _serialize_dict(self, globals_dict, original_dict):
         d = original_dict.copy()
+        class EvalModel:
+            def __init__(self, recs):
+                self.recs = recs
+
+            def __repr__(self) -> str:
+                return f"self.env['{self.recs._name}'].browse({self.recs.ids})"
+
         for key, val in d.items():
             if isinstance(val, models.AbstractModel):
-                d[key] = f'self.env[{val._name}].browse({val.ids})'
+                d[key] = EvalModel(val)
 
         serialized_dict = str(d)
         assert isinstance(safe_eval(serialized_dict, globals_dict), dict), "Ensure that the dict can be evaluated from message queue."
