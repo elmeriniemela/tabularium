@@ -462,6 +462,7 @@ class ApiEndpoint(models.Model):
     @api.model
     def cron_run(self, frequency):
         for rec in self.search([('cron_frequency', '=', frequency)]):
+            _logger.info("Run %s", rec.name)
             rec.action_run()
             while msg := rec.next_from_queue():
                 try:

@@ -135,11 +135,10 @@ class CloudInstance(models.Model):
 
     @api.model
     def parse_status(self, endpoint, obj):
-        _logger.info(obj)
-
         all_insts = self.with_context(active_test=False).search([('endpoint_id', '=', endpoint.id)])
         existing = {i.uid: i for i in all_insts}
         found = self.browse()
+        _logger.info("Parse %s containers.", len(obj))
         for container in obj:
             vals = {
                 'endpoint_id': endpoint.id,
