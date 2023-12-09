@@ -32,8 +32,8 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <field name="state" widget="statusbar" statusbar_visible="active,error,archived" options="{'clickable': '1'}"/>
-                    <button name="action_run" type="object" string="Run" icon="fa-cogs"/>
+                    <field name="state" widget="statusbar" statusbar_visible="active,error,archived" options="{'clickable': '1'}" />
+                    <button name="action_execute" type="object" string="Execute" icon="fa-cogs" attrs="{'invisible': [('role', '!=', 'active')]}"/>
                     <button name="action_test" type="object" string="Test" icon="fa-cogs"/>
                 </header>
                 <sheet>
@@ -55,7 +55,7 @@
                             <field name="sequence_id" attrs="{'invisible': [('sequence_id', '=', False)]}" required="False"/>
                             <field name="user_id" widget="many2one_avatar_user"/>
                             <field name="company_id" groups="base.group_multi_company"/>
-                            <field name="cron_frequency"/>
+                            <field name="cron_frequency" attrs="{'invisible': [('role', '!=', 'active')]}"/>
                             <field name="auto_consume" widget="boolean_toggle"/>
                             <field name="auto_commit" widget="boolean_toggle"/>
                         </group>
@@ -77,6 +77,8 @@
                     <field name="test_example" widget="ace" options="{'mode': 'python'}"/>
                     <label for="xslt" attrs="{'invisible': [('file_format', '!=', 'xml')]}"/>
                     <field name="xslt" widget="ace" options="{'mode': 'xml'}" attrs="{'invisible': [('file_format', '!=', 'xml')]}"/>
+                    <label for="initiator" attrs="{'invisible': [('role', '!=', 'active')]}"/>
+                    <field name="initiator" widget="ace" options="{'mode': 'python'}" attrs="{'invisible': [('role', '!=', 'active')]}"/>
                     <label for="producer"/>
                     <field name="hardcoded_producer" widget="ace" options="{'mode': 'python'}" attrs="{'invisible': [('hardcoded_producer', '=', '')]}"/>
                     <field name="producer" widget="ace" options="{'mode': 'python'}"/>

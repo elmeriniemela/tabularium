@@ -96,8 +96,7 @@ class ApiMessage(models.Model):
         globals_dict = msg.endpoint_id._get_globals(params)
         obj = msg.endpoint_id.bytes_to_obj(base64.b64decode(msg.content))
         globals_dict['obj'] = obj
-        globals_dict['objs'] = [obj]
-        globals_dict['msgs'] = msg
+        globals_dict['msg'] = msg
         return globals_dict
 
     def action_consume(self):

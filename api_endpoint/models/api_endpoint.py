@@ -6,8 +6,7 @@ import base64
 import json
 import xmlrpc.client
 import ssl
-from lxml import etree
-from odoo import models, exceptions, tools, fields, api, _
+from odoo import models, exceptions, fields, api, _
 from odoo.tools.safe_eval import safe_eval, test_python_expr, wrap_module, datetime, dateutil
 
 requests = wrap_module(__import__('requests'), ['get', 'post', 'put', 'delete'])
@@ -40,7 +39,7 @@ class ApiEndpoint(models.Model):
             'self': self.with_user(self.user_id),
             'params': params,
             'response': 'Message received.',
-            'msgs': self.env['api.message'].browse(),
+            'msg': self.env['api.message'].browse(),
             'json': json,
             'xmltodict': xmltodict,
             'dicttoxml': dicttoxml,
@@ -50,9 +49,10 @@ class ApiEndpoint(models.Model):
             'dateutil': dateutil,
             'io': io,
             're': re,
-            'etree': lxml.etree,
+            'lxml': lxml,
             'getattr': getattr,
             '_logger': _logger,
+            'exceptions': exceptions,
         }
 
 
@@ -244,6 +244,13 @@ class ApiEndpoint(models.Model):
         help="Example code to test the integration.",
     )
 
+    initiator = fields.Text(
+        string="Initiator",
+        tracking=True,
+        help="Default initiator for the integration, used by the cron actions and the 'Execute' button. The 'params' variable will be empty by default.",
+        default='self.execute(params={})',
+    )
+
     producer = fields.Text(
         string="Producer (READ)",
         tracking=True,
@@ -318,9 +325,9 @@ class ApiEndpoint(models.Model):
                     if rec.file_format == 'json':
                         hardcoded_producer += "obj = json.loads(params['data'])\n"
                     elif rec.file_format == 'xml':
-                        hardcoded_producer += "obj = etree.fromstring(params['data'])\n"
+                        hardcoded_producer += "obj = lxml.etree.fromstring(params['data'])\n"
                         if (rec.xslt or '').strip():
-                            hardcoded_consumer += 'obj = etree.XSLT(etree.XML(self.xslt))(obj)\n'
+                            hardcoded_consumer += 'obj = lxml.etree.XSLT(lxml.etree.XML(self.xslt))(obj)\n'
                 elif rec.comm_method == 'xmlrpc' and rec.direction == 'outbound' and rec.role == 'active':
                     hardcoded_producer += 'obj = params'
                     hardcoded_consumer += (
@@ -335,16 +342,19 @@ class ApiEndpoint(models.Model):
             rec.hardcoded_consumer = hardcoded_consumer
 
 
-    def action_run(self):
-        globals_dict = self.run({})
-        return globals_dict.get('action', None)
+    def action_execute(self):
+        if not (self.initiator and self.role == 'active'):
+            raise exceptions.UserError(_("Unable to initiate, check integration parameters."))
+        globals_dict = self._get_globals(params={})
+        safe_eval(self.initiator, globals_dict, mode="exec", nocopy=True)
+
 
     def action_test(self):
         globals_dict = self._get_globals(params={})
         safe_eval(self.test_example or '', globals_dict, mode="exec", nocopy=True)
 
 
-    def run(self, params):
+    def execute(self, params):
         self.ensure_one()
         try:
             with self.env.cr.savepoint():
@@ -374,17 +384,17 @@ class ApiEndpoint(models.Model):
                 safe_eval((self.hardcoded_consumer or '') + (self.consumer or ''), globals_dict, mode="exec", nocopy=True)
         except Exception as error:
             if (self.auto_commit or force_commit):
-                globals_dict['msgs'].write({'state': 'error'})
-                globals_dict['msgs'].message_post(body=str(error))
+                globals_dict['msg'].write({'state': 'error'})
+                globals_dict['msg'].message_post(body=str(error))
                 self.env.cr.commit()
             raise error
 
-        globals_dict['msgs'].write({'state': 'consumed'})
+        globals_dict['msg'].write({'state': 'consumed'})
         if (self.auto_commit or force_commit):
             self.env.cr.commit()
 
         if self.response_format:
-            globals_dict['msgs'].write({
+            globals_dict['msg'].write({
                 'response': base64.b64encode(globals_dict['response'])
             })
             if (self.auto_commit or force_commit):
@@ -393,19 +403,16 @@ class ApiEndpoint(models.Model):
 
     def store(self, globals_dict):
         self.ensure_one()
-        Msg = self.env['api.message'].with_context(default_endpoint_id=self.id)
-        msgs = Msg.browse()
         if 'obj' in globals_dict:
             obj = globals_dict['obj']
             bytesdata = self.obj_to_bytes(obj)
-            msgs += Msg.create({'content': base64.b64encode(bytesdata), 'params': str(globals_dict['params'])})
-        elif 'objs' in globals_dict:
-            for obj in globals_dict['objs']:
-                bytesdata = self.obj_to_bytes(obj)
-                msgs += Msg.create({'content': base64.b64encode(bytesdata), 'params': str(globals_dict['params'])})
+            globals_dict['msg'] = self.env['api.message'].create({
+                'content': base64.b64encode(bytesdata),
+                'params': str(globals_dict['params']),
+                'endpoint_id': self.id,
+            })
         else:
-            raise RuntimeError("No objs to store! The producer code should assign either 'obj' or 'objs'!")
-        globals_dict['msgs'] = msgs
+            raise RuntimeError("No obj to store! The producer code should assign a variable called 'obj'!")
 
 
 
@@ -413,7 +420,7 @@ class ApiEndpoint(models.Model):
         if self.file_format == 'json':
             assert isinstance(obj, (list, dict)), str(type(obj))
         elif self.file_format == 'xml':
-            assert isinstance(obj, (etree._Element)), str(type(obj))
+            assert isinstance(obj, (lxml.etree._Element)), str(type(obj))
         else:
             raise NotImplementedError(f"Invalid file format: {self.file_format}")
 
@@ -423,7 +430,7 @@ class ApiEndpoint(models.Model):
         if self.file_format == 'json':
             obj = json.loads(bytesdata)
         elif self.file_format == 'xml':
-            obj = etree.fromstring(bytesdata)
+            obj = lxml.etree.fromstring(bytesdata)
         else:
             raise NotImplementedError(f"Invalid file format: {self.file_format}")
         self.assert_obj_type(obj)
@@ -435,7 +442,7 @@ class ApiEndpoint(models.Model):
         if self.file_format == 'json':
             bytesdata = json.dumps(obj, sort_keys=True, indent=4).encode()
         elif self.file_format == 'xml':
-            bytesdata = etree.tostring(obj, pretty_print=True, xml_declaration=True, encoding='utf-8')
+            bytesdata = lxml.etree.tostring(obj, pretty_print=True, xml_declaration=True, encoding='utf-8')
         else:
             raise NotImplementedError(f"Invalid file format: {self.file_format}")
         assert isinstance(bytesdata, bytes)
@@ -459,15 +466,15 @@ class ApiEndpoint(models.Model):
         if not endpoint:
             raise RuntimeError(f"Endpoint not found: {method=}, {location=} {auth=}")
 
-        globals_dict = endpoint.run(params)
+        globals_dict = endpoint.execute(params)
         return globals_dict['response']
 
 
     @api.model
     def cron_run(self, frequency):
-        for rec in self.search([('cron_frequency', '=', frequency)]):
-            _logger.info("Run %s", rec.name)
-            rec.action_run()
+        for rec in self.search([('cron_frequency', '=', frequency),('role', '=', 'active')]):
+            _logger.info("Execute %s", rec.name)
+            rec.action_execute()
             while msg := rec.next_from_queue():
                 try:
                     globals_dict = msg._get_msg_globals() # READ-ONLY, should be OK not to ROLLBACK
