@@ -22,7 +22,7 @@
                     <button name="action_deploy" type="object" string="Deploy" icon="fa-cogs" states="draft,removed"/>
                     <button name="action_start" type="object" string="Start" icon="fa-cogs"  states="exited"/>
                     <button name="action_restart" type="object" string="Restart" icon="fa-cogs" states="running"/>
-                    <button name="action_stop" type="object" string="Stop" icon="fa-cogs" states="running"/>
+                    <button name="action_stop" type="object" string="Stop" icon="fa-cogs" states="running,restarting,paused"/>
                     <button name="action_remove" type="object" string="Remove" icon="fa-cogs" states="exited,dead"/>
                 </header>
                 <sheet>
