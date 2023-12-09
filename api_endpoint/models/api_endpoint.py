@@ -52,7 +52,9 @@ class ApiEndpoint(models.Model):
             'lxml': lxml,
             'getattr': getattr,
             '_logger': _logger,
-            'exceptions': exceptions,
+            'ValidationError': exceptions.ValidationError,
+            'UserError': exceptions.UserError,
+            'AccessError': exceptions.AccessError,
         }
 
 
