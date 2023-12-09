@@ -3,7 +3,7 @@
     <record id="mt_field_changed" model="mail.message.subtype">
         <field name="name">Field Changed</field>
         <field name="res_model">cloud.instance</field>
-        <field name="default" eval="False"/>
+        <field name="default" eval="True"/>
         <field name="description">Field changed</field>
     </record>
 </odoo>
