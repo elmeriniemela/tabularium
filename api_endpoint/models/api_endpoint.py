@@ -6,6 +6,7 @@ import base64
 import json
 import xmlrpc.client
 import ssl
+import ast
 from lxml import etree
 from odoo import models, exceptions, tools, fields, api, _
 from odoo.tools.safe_eval import safe_eval, test_python_expr, wrap_module, datetime, dateutil
@@ -192,6 +193,15 @@ class ApiEndpoint(models.Model):
     ttl = fields.Integer(
         string="TTL",
         default=7,
+        tracking=True,
+    )
+
+    cron_frequency = fields.Selection(
+        selection=[
+            ('low', 'Low'),
+            ('mid', 'Mid'),
+            ('high', 'High'),
+        ],
         tracking=True,
     )
 
@@ -450,10 +460,31 @@ class ApiEndpoint(models.Model):
         return globals_dict['response']
 
 
-    def cron_execute(self):
-        pass # TODO
+    @api.model
+    def cron_run(self, frequency):
+        for endpoint in self.search([('cron_frequency', '=', frequency)]):
+            endpoint.action_run()
+            while msg := endpoint.next_from_queue():
+                context = ast.literal_eval(msg.context)
+                context['bin_size'] = False
+                msg = msg.with_context(context)
+                endpoint = endpoint.with_context(context)
+
+                params = ast.literal_eval(msg.params)
+                globals_dict = endpoint._get_globals(params)
+                obj = endpoint.bytes_to_obj(base64.b64decode(msg.content))
+                globals_dict['obj'] = obj
+                globals_dict['objs'] = [obj]
+                globals_dict['msgs'] = msg
+
+                endpoint.consume(globals_dict)
+
+
 
     def next_from_queue(self):
+        """
+        Get next record to consume and lock it to support multiple cronthreads.
+        """
         self.ensure_one()
         Msg = self.env['api.message']
         self.env.cr.execute(f"SELECT id FROM {Msg._table} WHERE endpoint_id=%s AND state='produced' ORDER BY name ASC, id ASC LIMIT 1 FOR UPDATE SKIP LOCKED", (self.id,))
