@@ -77,6 +77,8 @@ class ApiEndpoint(models.Model):
         default='active',
     )
 
+    active = fields.Boolean(compute='_compute_active', store=True)
+
     company_id = fields.Many2one(
         comodel_name='res.company',
         tracking=True,
@@ -274,6 +276,11 @@ class ApiEndpoint(models.Model):
         compute='_compute_msg_count',
     )
 
+    @api.depends('state')
+    def _compute_active(self):
+        for record in self:
+            record.active = record.state != 'archived'
+
     @api.autovacuum
     def _gc_messages(self):
         for endpoint in self.search([('ttl', '>', 0)]):
@@ -331,8 +338,6 @@ class ApiEndpoint(models.Model):
                 elif rec.comm_method == 'xmlrpc' and rec.direction == 'outbound' and rec.role == 'active':
                     hardcoded_producer += (
                         "url = 'https://%s@%s' % (self.authorization, self.location)\n"
-                        "method = obj.pop('method', 'test')\n"
-                        "args = obj.pop('args', tuple())\n"
                         "response = self.xmlrpc(url, method, args)\n"
                     )
 
