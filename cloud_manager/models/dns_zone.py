@@ -61,7 +61,7 @@ class DnsZone(models.Model):
     def fetch(self):
         ZoneRecord = self.env['dns.zone.record']
         for zone in self:
-            globals_dict = zone.ns_endpoint_id.run({
+            globals_dict = zone.ns_endpoint_id.produce({
                 'url': f'/zones/{zone.identifier}/dns_records',
             })
             res_list = globals_dict['obj']['result']
