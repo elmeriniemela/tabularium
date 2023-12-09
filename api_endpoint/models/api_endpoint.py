@@ -385,7 +385,8 @@ class ApiEndpoint(models.Model):
             self.consume(globals_dict)
         return globals_dict
 
-    def _serialize_dict(self, globals_dict, d):
+    def _serialize_dict(self, globals_dict, original_dict):
+        d = original_dict.copy()
         for key, val in d.items():
             if isinstance(val, models.AbstractModel):
                 d[key] = f'self.env[{val._name}].browse({val.ids})'
