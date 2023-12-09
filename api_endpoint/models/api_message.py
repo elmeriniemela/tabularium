@@ -79,7 +79,10 @@ class ApiMessage(models.Model):
                 endpoint = self.env['api.endpoint'].browse(endpoint_id)
                 if 'name' not in vals:
                     vals['name'] = '%s.%s' % (endpoint.sequence_id.next_by_id(), endpoint.file_format)
-        return super().create(vals_list)
+        msgs = super().create(vals_list)
+        for msg in msgs:
+            msg.message_subscribe(msg.endpoint_id.message_follower_ids.mapped('partner_id.id'))
+        return msgs
 
     def _get_msg_globals(msg):
         # READ-ONLY, should be OK not to ROLLBACK
