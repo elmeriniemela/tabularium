@@ -110,6 +110,12 @@ class InvestmentAsset(models.Model):
         index=True,
     )
 
+    endpoint_id = fields.Many2one(
+        string="Integration",
+        comodel_name='api.endpoint',
+        index=True,
+    )
+
     integration_error_id = fields.Many2one(
         comodel_name='mail.activity',
         copy=False,
@@ -409,10 +415,10 @@ class InvestmentAsset(models.Model):
     def run_integration(self):
         for asset in self:
             _logger.info("Run integration on %s", asset.name)
-            integration = asset.integration_id
-            if not integration:
-                raise ValidationError('Define integration first.')
-            integration.execute(asset)
+            if asset.endpoint_id:
+                asset.endpoint_id.produce({'asset': asset})
+            elif asset.integration_id:
+                asset.integration_id.execute(asset)
             asset._compute_aggregate() # For some reason, the depends on price_ids does not work...
 
 
