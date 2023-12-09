@@ -250,7 +250,7 @@ class ApiEndpoint(models.Model):
         string="Initiator",
         tracking=True,
         help="Default initiator for the integration, used by the cron actions and the 'Execute' button. The 'params' variable will be empty by default.",
-        default='self.execute(params={})',
+        default='self.produce(params={})',
     )
 
     producer = fields.Text(
@@ -356,7 +356,7 @@ class ApiEndpoint(models.Model):
         safe_eval(self.test_example or '', globals_dict, mode="exec", nocopy=True)
 
 
-    def execute(self, params):
+    def produce(self, params):
         self.ensure_one()
         try:
             with self.env.cr.savepoint():
@@ -468,7 +468,7 @@ class ApiEndpoint(models.Model):
         if not endpoint:
             raise RuntimeError(f"Endpoint not found: {method=}, {location=} {auth=}")
 
-        globals_dict = endpoint.execute(params)
+        globals_dict = endpoint.produce(params)
         return globals_dict['response']
 
 
