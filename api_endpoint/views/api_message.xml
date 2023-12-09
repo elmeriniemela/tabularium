@@ -19,6 +19,7 @@
             <form>
                 <header>
                     <field name="state" widget="statusbar" statusbar_visible="produced,consumed,error" options="{'clickable': '1'}"/>
+                    <button name="action_consume" type="object" string="Consume" icon="fa-cogs" states="produced"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
