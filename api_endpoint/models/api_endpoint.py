@@ -348,12 +348,12 @@ class ApiEndpoint(models.Model):
         if not (self.initiator and self.role == 'active'):
             raise exceptions.UserError(_("Unable to initiate, check integration parameters."))
         globals_dict = self._get_globals(params={})
-        safe_eval(self.initiator, globals_dict, mode="exec", nocopy=True)
+        safe_eval(self.initiator, globals_dict, mode="exec", nocopy=False)
 
 
     def action_test(self):
         globals_dict = self._get_globals(params={})
-        safe_eval(self.test_example or '', globals_dict, mode="exec", nocopy=True)
+        safe_eval(self.test_example or '', globals_dict, mode="exec", nocopy=False)
 
 
     def produce(self, params):
@@ -361,7 +361,7 @@ class ApiEndpoint(models.Model):
         try:
             with self.env.cr.savepoint():
                 globals_dict = self._get_globals(params=params)
-                safe_eval((self.hardcoded_producer or '') + (self.producer or ''), globals_dict, mode="exec", nocopy=True)
+                safe_eval((self.hardcoded_producer or '') + (self.producer or ''), globals_dict, mode="exec", nocopy=False)
                 self.store(globals_dict)
         except Exception as error:
             if self.auto_commit:
@@ -383,7 +383,7 @@ class ApiEndpoint(models.Model):
     def consume(self, globals_dict, force_commit=False):
         try:
             with self.env.cr.savepoint():
-                safe_eval((self.hardcoded_consumer or '') + (self.consumer or ''), globals_dict, mode="exec", nocopy=True)
+                safe_eval((self.hardcoded_consumer or '') + (self.consumer or ''), globals_dict, mode="exec", nocopy=False)
         except Exception as error:
             if (self.auto_commit or force_commit):
                 globals_dict['msg'].write({'state': 'error'})
