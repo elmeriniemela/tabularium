@@ -114,6 +114,11 @@ class InvestmentAsset(models.Model):
         string="Integration",
         comodel_name='api.endpoint',
         index=True,
+        ondelete='restrict',
+        domain=[
+            ('usage_field_id.name', '=', 'endpoint_id'),
+            ('usage_field_id.model_id.model', '=', 'investment.asset'),
+        ],
     )
 
     integration_error_id = fields.Many2one(

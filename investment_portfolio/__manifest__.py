@@ -9,6 +9,7 @@
     'depends': [
         'mail',
         'timeago_widget',
+        'api_endpoint',
     ],
     'installable': True,
     'application': True,

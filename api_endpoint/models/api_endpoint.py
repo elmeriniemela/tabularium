@@ -361,8 +361,13 @@ class ApiEndpoint(models.Model):
         try:
             with self.env.cr.savepoint():
                 globals_dict = self._get_globals(params=params)
-                safe_eval((self.hardcoded_producer or '') + (self.producer or ''), globals_dict, mode="exec", nocopy=False)
-                self.store(globals_dict)
+                copied_globals_dict = globals_dict.copy() # To prevent sharing new vars between Producer and Consumer. These vars are not stored in message queue.
+                safe_eval((self.hardcoded_producer or '') + (self.producer or ''), copied_globals_dict, mode="exec", nocopy=True)
+                if 'obj' in copied_globals_dict:
+                    globals_dict['obj'] = copied_globals_dict['obj']
+                else:
+                    raise RuntimeError("No obj to store! The producer code should assign a variable called 'obj'!")
+                self._store(globals_dict)
         except Exception as error:
             if self.auto_commit:
                 if self.state != 'error':
@@ -403,18 +408,15 @@ class ApiEndpoint(models.Model):
                 self.env.cr.commit()
 
 
-    def store(self, globals_dict):
+    def _store(self, globals_dict):
         self.ensure_one()
-        if 'obj' in globals_dict:
-            obj = globals_dict['obj']
-            bytesdata = self.obj_to_bytes(obj)
-            globals_dict['msg'] = self.env['api.message'].create({
-                'content': base64.b64encode(bytesdata),
-                'params': str(globals_dict['params']),
-                'endpoint_id': self.id,
-            })
-        else:
-            raise RuntimeError("No obj to store! The producer code should assign a variable called 'obj'!")
+        obj = globals_dict['obj']
+        bytesdata = self.obj_to_bytes(obj)
+        globals_dict['msg'] = self.env['api.message'].create({
+            'content': base64.b64encode(bytesdata),
+            'params': str(globals_dict['params']),
+            'endpoint_id': self.id,
+        })
 
 
 
