@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="mt_field_changed" model="mail.message.subtype">
+        <field name="name">Field Changed</field>
+        <field name="res_model">cloud.instance</field>
+        <field name="default" eval="False"/>
+        <field name="description">Field changed</field>
+    </record>
+</odoo>

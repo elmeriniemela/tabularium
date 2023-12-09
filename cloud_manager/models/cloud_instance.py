@@ -70,6 +70,18 @@ class CloudInstance(models.Model):
         ('uniq_gevent_port', 'UNIQUE(endpoint_id, gevent_port)', 'The Gevent port must be unique within the same endpoint!'),
     ]
 
+    def _track_subtype(self, initial_values):
+        """ Give the subtypes triggered by the changes on the record according
+        to values that have been updated.
+
+        :param dict initial_values: original values of the record; only modified
+          fields are present in the dict
+
+        :returns: a subtype browse record or False if no subtype is triggered
+        """
+        self.ensure_one()
+        return self.env.ref('cloud_manager.mt_field_changed')
+
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
