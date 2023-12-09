@@ -105,11 +105,6 @@ class InvestmentAsset(models.Model):
 
     thesis = fields.Html(sanitize=False, translate=False)
 
-    integration_id = fields.Many2one(
-        comodel_name='investment.integration',
-        index=True,
-    )
-
     endpoint_id = fields.Many2one(
         string="Integration",
         comodel_name='api.endpoint',
@@ -120,13 +115,6 @@ class InvestmentAsset(models.Model):
             ('usage_field_id.model_id.model', '=', 'investment.asset'),
         ],
     )
-
-    integration_error_id = fields.Many2one(
-        comodel_name='mail.activity',
-        copy=False,
-        index=True,
-    )
-
 
     is_cash = fields.Boolean(
         compute='_compute_is_cash',
@@ -419,37 +407,9 @@ class InvestmentAsset(models.Model):
 
     def run_integration(self):
         for asset in self:
-            _logger.info("Run integration on %s", asset.name)
-            if asset.endpoint_id:
-                asset.endpoint_id.produce({'asset': asset})
-            elif asset.integration_id:
-                asset.integration_id.execute(asset)
+            asset.endpoint_id.produce({'asset': asset})
             asset._compute_aggregate() # For some reason, the depends on price_ids does not work...
 
-
-    def cron_run_integration(self):
-        assets = self.search([('integration_id', '!=', False)])
-        for asset in assets:
-            try:
-                with asset.env.cr.savepoint():
-                    asset.run_integration()
-            except Exception as error:
-                _logger.exception(error)
-                note = traceback.format_exc().replace('\n', '<br/>')
-                if asset.integration_error_id:
-                    asset.integration_error_id.note = note
-                else:
-                    asset.integration_error_id = asset.env['mail.activity'].create({
-                        'res_model_id': asset.env['ir.model']._get(asset._name).id,
-                        'res_id': asset.id,
-                        'activity_type_id': asset.env.ref('mail.mail_activity_data_todo').id,
-                        'summary': _('Integration issue'),
-                        'date_deadline': datetime.date.today(),
-                        'user_id': asset.create_uid.id,
-                        'note': note,
-                    })
-            else:
-                asset.integration_error_id.unlink()
 
     def price_upsert(self, time, price):
         "Used by investment integrations."
