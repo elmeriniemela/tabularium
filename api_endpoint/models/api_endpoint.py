@@ -6,7 +6,6 @@ import base64
 import json
 import xmlrpc.client
 import ssl
-import ast
 from lxml import etree
 from odoo import models, exceptions, tools, fields, api, _
 from odoo.tools.safe_eval import safe_eval, test_python_expr, wrap_module, datetime, dateutil
@@ -365,26 +364,26 @@ class ApiEndpoint(models.Model):
             self.consume(globals_dict)
         return globals_dict
 
-    def consume(self, globals_dict):
+    def consume(self, globals_dict, force_commit=False):
         try:
             with self.env.cr.savepoint():
                 safe_eval((self.hardcoded_consumer or '') + (self.consumer or ''), globals_dict, mode="exec", nocopy=True)
         except Exception as error:
-            if self.auto_commit:
+            if (self.auto_commit or force_commit):
                 globals_dict['msgs'].write({'state': 'error'})
                 globals_dict['msgs'].message_post(body=str(error))
                 self.env.cr.commit()
             raise error
 
         globals_dict['msgs'].write({'state': 'consumed'})
-        if self.auto_commit:
+        if (self.auto_commit or force_commit):
             self.env.cr.commit()
 
         if self.response_format:
             globals_dict['msgs'].write({
                 'response': base64.b64encode(globals_dict['response'])
             })
-            if self.auto_commit:
+            if (self.auto_commit or force_commit):
                 self.env.cr.commit()
 
 
@@ -462,22 +461,18 @@ class ApiEndpoint(models.Model):
 
     @api.model
     def cron_run(self, frequency):
-        for endpoint in self.search([('cron_frequency', '=', frequency)]):
-            endpoint.action_run()
-            while msg := endpoint.next_from_queue():
-                context = ast.literal_eval(msg.context)
-                context['bin_size'] = False
-                msg = msg.with_context(context)
-                endpoint = endpoint.with_context(context)
+        for rec in self.search([('cron_frequency', '=', frequency)]):
+            rec.action_run()
+            while msg := rec.next_from_queue():
+                try:
+                    globals_dict = msg._get_msg_globals() # READ-ONLY, should be OK not to ROLLBACK
+                except Exception as error:
+                    msg.write({'state': 'error'})
+                    msg.message_post(body=str(error))
+                    msg.env.cr.commit() # Save all and release msg lock.
+                else:
+                    msg.endpoint_id.consume(globals_dict, force_commit=True) # method consume already handles rollbacks with savepoint.
 
-                params = ast.literal_eval(msg.params)
-                globals_dict = endpoint._get_globals(params)
-                obj = endpoint.bytes_to_obj(base64.b64decode(msg.content))
-                globals_dict['obj'] = obj
-                globals_dict['objs'] = [obj]
-                globals_dict['msgs'] = msg
-
-                endpoint.consume(globals_dict)
 
 
 

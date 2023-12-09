@@ -2,6 +2,7 @@
 
 import logging
 import base64
+import ast
 from odoo import models, tools, fields, api, _
 
 _logger = logging.getLogger(__name__)
@@ -79,3 +80,17 @@ class ApiMessage(models.Model):
                 if 'name' not in vals:
                     vals['name'] = '%s.%s' % (endpoint.sequence_id.next_by_id(), endpoint.file_format)
         return super().create(vals_list)
+
+    def _get_msg_globals(msg):
+        # READ-ONLY, should be OK not to ROLLBACK
+        context = ast.literal_eval(msg.context)
+        context['bin_size'] = False
+        msg = msg.with_context(context)
+
+        params = ast.literal_eval(msg.params)
+        globals_dict = msg.endpoint_id._get_globals(params)
+        obj = msg.endpoint_id.bytes_to_obj(base64.b64decode(msg.content))
+        globals_dict['obj'] = obj
+        globals_dict['objs'] = [obj]
+        globals_dict['msgs'] = msg
+        return globals_dict
