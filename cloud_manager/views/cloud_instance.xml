@@ -18,6 +18,7 @@
         <field name="arch" type="xml">
             <form>
                 <header>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,created,restarting,running,paused,exited,dead,removed"/>
                     <button name="action_deploy" type="object" string="Deploy" icon="fa-cogs"/>
                     <button name="action_start" type="object" string="Start" icon="fa-cogs"/>
                     <button name="action_restart" type="object" string="Restart" icon="fa-cogs"/>

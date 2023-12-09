@@ -17,6 +17,22 @@ class CloudInstance(models.Model):
         tracking=True,
     )
 
+    state = fields.Selection(
+        selection=[
+            ('draft', 'Draft'),
+            ('created', 'Deployed'),
+            ('restarting', 'Restarting'),
+            ('running', 'Running'),
+            ('paused', 'Paused'),
+            ('exited', 'Exited'),
+            ('dead', 'Dead'),
+            ('removed', 'Removed'),
+        ],
+        required=True,
+        tracking=True,
+        default='draft',
+    )
+
     uid = fields.Char(
         string="UID",
         readonly=True,
@@ -38,6 +54,7 @@ class CloudInstance(models.Model):
         string="Server",
         comodel_name='api.endpoint',
         required=True,
+        tracking=True,
         ondelete='restrict',
         domain=[
             ('usage_field_id.name', '=', 'endpoint_id'),
@@ -56,11 +73,17 @@ class CloudInstance(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
-            vals['uid'] = secrets.token_hex(6)
             endpoint_id = vals.get('endpoint_id', 0)
+            if not vals.get('uid'):
+                vals['uid'] = secrets.token_hex(6)
+
             same = self.search([('endpoint_id', '=', endpoint_id)], order='id desc')
-            vals['http_port'] = (same.http_port + 2) if same else 49152
-            vals['gevent_port'] = (same.gevent_port + 2) if same else 49153
+
+            if not vals.get('http_port'):
+                vals['http_port'] = (same.http_port + 2) if same else 49152
+
+            if not vals.get('gevent_port'):
+                vals['gevent_port'] = (same.gevent_port + 2) if same else 49153
 
         return super().create(vals_list)
 
@@ -103,3 +126,39 @@ class CloudInstance(models.Model):
             'args': (self.uid,),
         })
         return globals_dict.get('action', None)
+
+
+    @api.model
+    def parse_status(self, endpoint, obj):
+        _logger.info(obj)
+
+        all_insts = self.with_context(active_test=False).search([('endpoint_id', '=', endpoint.id)])
+        existing = {i.uid: i for i in all_insts}
+        found = self.browse()
+        for container in obj:
+            vals = {
+                'endpoint_id': endpoint.id,
+                'uid': container['Names'][0].lstrip('/'),
+            }
+            ports = {p['PublicPort'] for p in container["Ports"]}
+
+            for port in ports:
+                if port % 2 == 0:
+                    vals['http_port'] = port
+                else:
+                    vals['gevent_port'] = port
+
+
+            state = container['State']
+            assert state in {'created', 'running', 'restarting', 'exited', 'paused', 'dead'}, state
+            vals['state'] = state
+
+            inst = existing.get(vals['uid']) or self.browse()
+            if inst:
+                inst.write(vals)
+            else:
+                inst = inst.create(vals)
+
+            found += inst
+
+        (all_insts - found).write({'state': 'removed'})
