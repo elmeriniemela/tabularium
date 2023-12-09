@@ -16,9 +16,9 @@ class ApiMessage(models.Model):
 
     name = fields.Char(required=True, index=True)
 
-    context = fields.Char(required=True, default=lambda self: str(self.env.context))
+    context = fields.Char(required=True, default='{}')
 
-    params = fields.Char(required=True, default='{}')
+    variables = fields.Char(required=True, default='{}')
 
     state = fields.Selection(
         selection=[
@@ -86,14 +86,15 @@ class ApiMessage(models.Model):
 
     def _get_msg_globals(msg):
         # READ-ONLY, should be OK not to ROLLBACK
-        literal_globals = msg.endpoint_id._get_globals(params={})
+        literal_globals = msg.endpoint_id._get_globals()
 
         context = safe_eval(msg.context, literal_globals)
         context['bin_size'] = False
         msg = msg.with_context(context)
 
-        params = safe_eval(msg.params, literal_globals)
-        globals_dict = msg.endpoint_id._get_globals(params)
+        variables = safe_eval(msg.variables, literal_globals)
+        globals_dict = msg.endpoint_id._get_globals()
+        globals_dict.update(variables)
         obj = msg.endpoint_id.bytes_to_obj(base64.b64decode(msg.content))
         globals_dict['obj'] = obj
         globals_dict['msg'] = msg

@@ -34,12 +34,10 @@ class ApiEndpoint(models.Model):
     _inherit = ['mail.thread']
     _order = "sequence, id"
 
-    def _get_globals(self, params):
+    def _get_globals(self):
         return {
             'self': self.with_user(self.user_id),
-            'params': params,
             'response': 'Message received.',
-            'msg': self.env['api.message'].browse(),
             'json': json,
             'xmltodict': xmltodict,
             'dicttoxml': dicttoxml,
@@ -137,7 +135,7 @@ class ApiEndpoint(models.Model):
         ],
         required=True,
         tracking=True,
-        default='get',
+        default='http',
     )
 
     http_method = fields.Selection(
@@ -249,8 +247,8 @@ class ApiEndpoint(models.Model):
     initiator = fields.Text(
         string="Initiator",
         tracking=True,
-        help="Default initiator for the integration, used by the cron actions and the 'Execute' button. The 'params' variable will be empty by default.",
-        default='self.produce(params={})',
+        help="Default initiator for the integration, used by the cron actions and the 'Execute' button. The 'variables' variable will be empty by default.",
+        default='self.produce(variables={})',
     )
 
     producer = fields.Text(
@@ -325,14 +323,13 @@ class ApiEndpoint(models.Model):
             if rec.auto_code:
                 if rec.comm_method == 'http' and rec.http_method in ['post', 'put', 'delete'] and rec.direction == 'inbound' and rec.role == 'passive':
                     if rec.file_format == 'json':
-                        hardcoded_producer += "obj = json.loads(params['data'])\n"
+                        hardcoded_producer += "obj = json.loads(data)\n"
                     elif rec.file_format == 'xml':
-                        hardcoded_producer += "obj = lxml.etree.fromstring(params['data'])\n"
+                        hardcoded_producer += "obj = lxml.etree.fromstring(data)\n"
                         if (rec.xslt or '').strip():
                             hardcoded_consumer += 'obj = lxml.etree.XSLT(lxml.etree.XML(self.xslt))(obj)\n'
                 elif rec.comm_method == 'xmlrpc' and rec.direction == 'outbound' and rec.role == 'active':
-                    hardcoded_producer += 'obj = params'
-                    hardcoded_consumer += (
+                    hardcoded_producer += (
                         "url = 'https://%s@%s' % (self.authorization, self.location)\n"
                         "method = obj.pop('method', 'test')\n"
                         "args = obj.pop('args', tuple())\n"
@@ -347,27 +344,30 @@ class ApiEndpoint(models.Model):
     def action_execute(self):
         if not (self.initiator and self.role == 'active'):
             raise exceptions.UserError(_("Unable to initiate, check integration parameters."))
-        globals_dict = self._get_globals(params={})
+        globals_dict = self._get_globals()
         safe_eval(self.initiator, globals_dict, mode="exec", nocopy=False)
 
 
     def action_test(self):
-        globals_dict = self._get_globals(params={})
+        globals_dict = self._get_globals()
         safe_eval(self.test_example or '', globals_dict, mode="exec", nocopy=False)
 
 
-    def produce(self, params):
+    def produce(self, variables):
         self.ensure_one()
         try:
             with self.env.cr.savepoint():
-                globals_dict = self._get_globals(params=params)
+                globals_dict = self._get_globals()
+                serialized_vars = self._serialize_dict(globals_dict, variables)
+                serialized_ctx = self._serialize_dict(globals_dict, self.env.context)
+                globals_dict.update(variables)
                 copied_globals_dict = globals_dict.copy() # To prevent sharing new vars between Producer and Consumer. These vars are not stored in message queue.
                 safe_eval((self.hardcoded_producer or '') + (self.producer or ''), copied_globals_dict, mode="exec", nocopy=True)
                 if 'obj' in copied_globals_dict:
                     globals_dict['obj'] = copied_globals_dict['obj']
                 else:
                     raise RuntimeError("No obj to store! The producer code should assign a variable called 'obj'!")
-                self._store(globals_dict)
+                self._store(globals_dict, serialized_vars, serialized_ctx)
         except Exception as error:
             if self.auto_commit:
                 if self.state != 'error':
@@ -384,6 +384,27 @@ class ApiEndpoint(models.Model):
         if self.auto_consume:
             self.consume(globals_dict)
         return globals_dict
+
+    def _serialize_dict(self, globals_dict, d):
+        for key, val in d.items():
+            if isinstance(val, models.AbstractModel):
+                d[key] = f'self.env[{val._name}].browse({val.ids})'
+
+        serialized_dict = str(d)
+        assert isinstance(safe_eval(serialized_dict, globals_dict), dict), "Ensure that the dict can be evaluated from message queue."
+        return serialized_dict
+
+
+    def _store(self, globals_dict, variables, context):
+        self.ensure_one()
+        obj = globals_dict['obj']
+        bytesdata = self.obj_to_bytes(obj)
+        globals_dict['msg'] = self.env['api.message'].create({
+            'endpoint_id': self.id,
+            'content': base64.b64encode(bytesdata),
+            'variables': variables,
+            'context': context,
+        })
 
     def consume(self, globals_dict, force_commit=False):
         try:
@@ -406,18 +427,6 @@ class ApiEndpoint(models.Model):
             })
             if (self.auto_commit or force_commit):
                 self.env.cr.commit()
-
-
-    def _store(self, globals_dict):
-        self.ensure_one()
-        obj = globals_dict['obj']
-        bytesdata = self.obj_to_bytes(obj)
-        globals_dict['msg'] = self.env['api.message'].create({
-            'content': base64.b64encode(bytesdata),
-            'params': str(globals_dict['params']),
-            'endpoint_id': self.id,
-        })
-
 
 
     def assert_obj_type(self, obj):
@@ -455,7 +464,7 @@ class ApiEndpoint(models.Model):
 
 
     @api.model
-    def process_inbound_http(self, method, location, auth, params):
+    def process_inbound_http(self, method, location, auth, variables):
         assert method in ['get', 'post', 'delete', 'put']
         endpoint = self.sudo().search([
                 ('role', '=', 'passive'),
@@ -470,7 +479,7 @@ class ApiEndpoint(models.Model):
         if not endpoint:
             raise RuntimeError(f"Endpoint not found: {method=}, {location=} {auth=}")
 
-        globals_dict = endpoint.produce(params)
+        globals_dict = endpoint.produce(variables)
         return globals_dict['response']
 
 
@@ -505,12 +514,6 @@ class ApiEndpoint(models.Model):
             return Msg.browse(ids[0])
         return Msg.browse()
 
-
-    def odoo_xmlrpc_proxy(self, params):
-        self.ensure_one()
-        proxy = self.xmlrpc_proxy(self.location)
-        authorization = safe_eval(self.authorization, self._get_globals(params=params))
-        return proxy, *authorization
 
     def xmlrpc(self, url, method, args, verify_ssl=True):
         if not verify_ssl:

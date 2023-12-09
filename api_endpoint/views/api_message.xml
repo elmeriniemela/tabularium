@@ -34,7 +34,7 @@
                             <field name="response"/>
                         </group>
                         <group>
-                            <field name="params"/>
+                            <field name="variables"/>
                             <field name="context"/>
                         </group>
                     </group>
