@@ -117,7 +117,9 @@ class ApiEndpoint(models.Model):
         string='User',
         default=lambda self: self.env.user,
         required=True,
+        tracking=True,
         ondelete='restrict',
+        domain=[('active', 'in', [True, False])],
     )
 
 
