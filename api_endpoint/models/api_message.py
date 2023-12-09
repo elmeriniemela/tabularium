@@ -83,11 +83,13 @@ class ApiMessage(models.Model):
 
     def _get_msg_globals(msg):
         # READ-ONLY, should be OK not to ROLLBACK
-        context = safe_eval(msg.context)
+        literal_globals = msg.endpoint_id._get_globals(params={})
+
+        context = safe_eval(msg.context, literal_globals)
         context['bin_size'] = False
         msg = msg.with_context(context)
 
-        params = safe_eval(msg.params)
+        params = safe_eval(msg.params, literal_globals)
         globals_dict = msg.endpoint_id._get_globals(params)
         obj = msg.endpoint_id.bytes_to_obj(base64.b64decode(msg.content))
         globals_dict['obj'] = obj

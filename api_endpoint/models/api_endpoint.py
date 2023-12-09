@@ -46,6 +46,8 @@ class ApiEndpoint(models.Model):
             'dicttoxml': dicttoxml,
             'pandas': pandas,
             'requests': requests,
+            'datetime': datetime,
+            'dateutil': dateutil,
             'io': io,
             're': re,
             'etree': lxml.etree,
