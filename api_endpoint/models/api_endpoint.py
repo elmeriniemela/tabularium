@@ -397,7 +397,7 @@ class ApiEndpoint(models.Model):
         if self.auto_commit:
             self.env.cr.commit()
         if self.auto_consume:
-            self.consume(globals_dict)
+            self._consume(globals_dict)
         return globals_dict
 
     def _serialize_dict(self, globals_dict, original_dict):
@@ -429,27 +429,29 @@ class ApiEndpoint(models.Model):
             'context': context,
         })
 
-    def consume(self, globals_dict, force_commit=False):
+    def _consume(self, globals_dict, force_commit=False, raise_exc=True):
+        commit = force_commit or self.auto_commit
         try:
             with self.env.cr.savepoint():
                 safe_eval((self.hardcoded_consumer or '') + (self.consumer or ''), globals_dict, mode="exec", nocopy=False)
         except Exception as error:
-            if (self.auto_commit or force_commit):
+            if commit:
                 globals_dict['msg'].write({'state': 'error'})
                 globals_dict['msg'].message_post(body=str(error))
                 self.env.cr.commit()
-            raise error
-
-        globals_dict['msg'].write({'state': 'consumed'})
-        if (self.auto_commit or force_commit):
-            self.env.cr.commit()
-
-        if self.response_format:
-            globals_dict['msg'].write({
-                'response': base64.b64encode(globals_dict['response'])
-            })
-            if (self.auto_commit or force_commit):
+            if not commit or raise_exc: # Commit required, silent bypass is not allowed
+                raise error
+        else:
+            globals_dict['msg'].write({'state': 'consumed'})
+            if commit:
                 self.env.cr.commit()
+
+            if self.response_format:
+                globals_dict['msg'].write({
+                    'response': base64.b64encode(globals_dict['response'])
+                })
+                if commit:
+                    self.env.cr.commit()
 
 
     def assert_obj_type(self, obj):
@@ -525,15 +527,18 @@ class ApiEndpoint(models.Model):
         for rec in self.search([('cron_frequency', '=', frequency),('role', '=', 'active')]):
             _logger.info("Execute %s", rec.name)
             rec.action_execute()
+            rec.env.cr.commit()
             while msg := rec.next_from_queue():
                 try:
                     globals_dict = msg._get_msg_globals() # READ-ONLY, should be OK not to ROLLBACK
                 except Exception as error:
+                    # NO ROLLBACK NEEDED.
                     msg.write({'state': 'error'})
                     msg.message_post(body=str(error))
-                    msg.env.cr.commit() # Save all and release msg lock.
                 else:
-                    msg.endpoint_id.consume(globals_dict, force_commit=True) # method consume already handles rollbacks with savepoint.
+                    msg.endpoint_id._consume(globals_dict, force_commit=True, raise_exc=False) # method _consume already has error handling.
+                finally:
+                    msg.env.cr.commit() # Save all and release msg lock.
                 assert msg.state != 'produced', "Programming error, break infinite while loop."
 
 
@@ -545,7 +550,7 @@ class ApiEndpoint(models.Model):
         """
         self.ensure_one()
         Msg = self.env['api.message']
-        self.env.cr.execute(f"SELECT id FROM {Msg._table} WHERE endpoint_id=%s AND state='produced' ORDER BY name ASC, id ASC LIMIT 1 FOR UPDATE SKIP LOCKED", (self.id,))
+        self.env.cr.execute(f"SELECT id FROM {Msg._table} WHERE endpoint_id=%s AND state='produced' ORDER BY id ASC LIMIT 1 FOR UPDATE SKIP LOCKED", (self.id,))
         ids = self.env.cr.fetchall()
         if ids:
             return Msg.browse(ids[0])

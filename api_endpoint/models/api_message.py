@@ -12,7 +12,7 @@ class ApiMessage(models.Model):
     _name = 'api.message'
     _description = 'API Message'
     _inherit = ['mail.thread']
-    _order = 'name desc, id desc'
+    _order = 'id desc'
 
     name = fields.Char(required=True, index=True)
 
@@ -103,5 +103,5 @@ class ApiMessage(models.Model):
     def action_consume(self):
         for msg in self:
             globals_dict = msg._get_msg_globals()
-            msg.endpoint_id.consume(globals_dict)
+            msg.endpoint_id._consume(globals_dict)
 
