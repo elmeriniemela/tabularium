@@ -61,6 +61,7 @@ class ApiEndpoint(models.Model):
         string="Endpoint Sequence",
         tracking=True,
         default=10000,
+        copy=False,
     )
 
     name = fields.Char(
