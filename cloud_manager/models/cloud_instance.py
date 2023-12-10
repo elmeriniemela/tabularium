@@ -89,7 +89,7 @@ class CloudInstance(models.Model):
             if not vals.get('uid'):
                 vals['uid'] = secrets.token_hex(6)
 
-            same = self.search([('endpoint_id', '=', endpoint_id)], order='id desc')
+            same = self.search([('endpoint_id', '=', endpoint_id)], order='id desc', limit=1)
 
             if not vals.get('http_port'):
                 vals['http_port'] = (same.http_port + 2) if same else 49152
