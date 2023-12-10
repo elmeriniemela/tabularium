@@ -7,5 +7,4 @@ from . import investment_asset
 from . import investment_category
 from . import investment_milestone
 from . import investment_timeseries
-from . import res_currency
 
