@@ -471,11 +471,11 @@ class ApiEndpoint(models.Model):
     def obj_to_bytes(self, obj):
         self.ensure_one()
         if self.file_format == 'json':
-            bytesdata = json.dumps(obj, sort_keys=True, indent=4).encode()
+            bytesdata = json.dumps(obj, sort_keys=True, indent=4).encode('utf-8')
         elif self.file_format == 'xml':
             bytesdata = lxml.etree.tostring(obj, pretty_print=True, xml_declaration=True, encoding='utf-8')
         elif self.file_format == 'csv':
-            bytesdata = obj.to_csv(encoding='utf-8')
+            bytesdata = obj.to_csv().encode('utf-8')
         else:
             raise NotImplementedError(f"Invalid file format: {self.file_format}")
         assert isinstance(bytesdata, bytes)
