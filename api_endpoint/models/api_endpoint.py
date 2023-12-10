@@ -12,7 +12,7 @@ from odoo.tools.safe_eval import safe_eval, test_python_expr, wrap_module, datet
 
 requests = wrap_module(__import__('requests'), ['get', 'post', 'put', 'delete'])
 io = wrap_module(__import__('io'), ['StringIO', 'BytesIO'])
-pandas = wrap_module(__import__('pandas'), ['read_csv', 'read_excel'])
+pandas = wrap_module(__import__('pandas'), ['read_csv', 'read_excel', 'DataFrame'])
 re = wrap_module(__import__('re'), ['findall', 'sub'])
 json = wrap_module(__import__('json'), ['loads','dumps'])
 xmltodict = wrap_module(__import__('xmltodict'), ['parse'])
