@@ -50,6 +50,8 @@ class CloudInstance(models.Model):
         readonly=True,
     )
 
+    config = fields.Text()
+
     endpoint_id = fields.Many2one(
         string="Server",
         comodel_name='api.endpoint',
@@ -106,6 +108,7 @@ class CloudInstance(models.Model):
             'args': (self.uid, self.name, self.http_port, self.gevent_port),
         })
         self.state = 'running'
+        self.config = globals_dict.get('obj', False)
         return globals_dict.get('action', None)
 
     def action_remove(self):
@@ -141,7 +144,25 @@ class CloudInstance(models.Model):
             'method': 'restart',
             'args': (self.uid,),
         })
-        self.state = 'running'
+        self.message_post(body="Restarted.")
+        return globals_dict.get('action', None)
+
+    def action_reset(self):
+        self.ensure_one()
+        globals_dict = self.endpoint_id.produce({
+            'method': 'reset',
+            'args': (self.uid,),
+        })
+        self.message_post(body="Resetted.")
+        return globals_dict.get('action', None)
+
+    def action_config(self):
+        self.ensure_one()
+        globals_dict = self.endpoint_id.produce({
+            'method': 'config',
+            'args': (self.uid, self.config),
+        })
+        self.message_post(body="Config updated.")
         return globals_dict.get('action', None)
 
 
