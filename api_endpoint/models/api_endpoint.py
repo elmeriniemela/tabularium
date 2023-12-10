@@ -460,6 +460,8 @@ class ApiEndpoint(models.Model):
             obj = json.loads(bytesdata)
         elif self.file_format == 'xml':
             obj = lxml.etree.fromstring(bytesdata)
+        elif self.file_format == 'csv':
+            obj = pandas.read_csv(io.StringIO(bytesdata))
         else:
             raise NotImplementedError(f"Invalid file format: {self.file_format}")
         self.assert_obj_type(obj)
@@ -472,6 +474,8 @@ class ApiEndpoint(models.Model):
             bytesdata = json.dumps(obj, sort_keys=True, indent=4).encode()
         elif self.file_format == 'xml':
             bytesdata = lxml.etree.tostring(obj, pretty_print=True, xml_declaration=True, encoding='utf-8')
+        elif self.file_format == 'csv':
+            bytesdata = obj.to_csv()
         else:
             raise NotImplementedError(f"Invalid file format: {self.file_format}")
         assert isinstance(bytesdata, bytes)
