@@ -180,6 +180,7 @@ class ApiEndpoint(models.Model):
         comodel_name='ir.sequence',
         required=True,
         tracking=True,
+        copy=False,
         ondelete='restrict',
     )
 
