@@ -153,6 +153,7 @@ class CloudInstance(models.Model):
             'method': 'reset',
             'args': (self.uid,),
         })
+        self.state = 'running'
         self.message_post(body="Resetted.")
         return globals_dict.get('action', None)
 
