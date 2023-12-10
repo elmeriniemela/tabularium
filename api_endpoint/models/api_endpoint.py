@@ -450,6 +450,8 @@ class ApiEndpoint(models.Model):
             assert isinstance(obj, (list, dict)), str(type(obj))
         elif self.file_format == 'xml':
             assert isinstance(obj, (etree._Element)), str(type(obj)) # the wrapped module does not have attr ._Element
+        elif self.file_format == 'csv':
+            assert isinstance(obj, (pandas.DataFrame)), str(type(obj)) # the wrapped module does not have attr ._Element
         else:
             raise NotImplementedError(f"Invalid file format: {self.file_format}")
 
