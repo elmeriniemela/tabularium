@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "API endpoint",
+    'name': "API Framework",
     'summary': "Build robust integrations with Odoo",
     'author': "Elmeri Niemelä",
     'website': "https://eniemela.fi",
