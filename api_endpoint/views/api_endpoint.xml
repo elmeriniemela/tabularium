@@ -109,7 +109,7 @@
 
 
     <record id="api_endpoint_action" model="ir.actions.act_window">
-        <field name="name">API Endpoints</field>
+        <field name="name">APIs</field>
         <field name="res_model">api.endpoint</field>
         <field name="view_mode">tree,kanban,form</field>
         <field name="context"></field>
