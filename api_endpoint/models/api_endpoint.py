@@ -17,6 +17,7 @@ re = wrap_module(__import__('re'), ['findall', 'sub'])
 json = wrap_module(__import__('json'), ['loads','dumps'])
 xmltodict = wrap_module(__import__('xmltodict'), ['parse'])
 dicttoxml = wrap_module(__import__('dicttoxml'), ['dicttoxml'])
+zipfile = wrap_module(__import__('zipfile'), ['ZipFile','ZIP_DEFLATED','BadZipfile'])
 
 import lxml
 lxml_mods = ['etree']
@@ -42,6 +43,7 @@ class ApiEndpoint(models.Model):
             'json': json,
             'xmltodict': xmltodict,
             'dicttoxml': dicttoxml,
+            'zipfile': zipfile,
             'pandas': pandas,
             'requests': requests,
             'datetime': datetime,
@@ -160,7 +162,6 @@ class ApiEndpoint(models.Model):
             ('xml', 'XML'),
             ('csv', 'CSV'),
             ('zip', 'ZIP'),
-            ('pdf', 'PDF'),
         ],
         required=True,
         tracking=True,
@@ -173,7 +174,6 @@ class ApiEndpoint(models.Model):
             ('xml', 'XML'),
             ('csv', 'CSV'),
             ('zip', 'ZIP'),
-            ('pdf', 'PDF'),
         ],
         tracking=True,
     )
@@ -302,7 +302,7 @@ class ApiEndpoint(models.Model):
         for vals in vals_list:
             if not vals.get('sequence_id'):
                 name = vals['name']
-                code = re.sub(r'[^a-z\d]', '_', name.lower())
+                code = re.sub(r'[^a-z\d]+', '_', name.lower()).strip('_')
                 vals['sequence_id'] = self.env['ir.sequence'].create({
                     'name': 'API: %s' % name,
                     'prefix': '%s_' % code,
@@ -339,6 +339,12 @@ class ApiEndpoint(models.Model):
                         hardcoded_producer += "obj = lxml.etree.fromstring(data)\n"
                         if (rec.xslt or '').strip():
                             hardcoded_consumer += 'obj = lxml.etree.XSLT(lxml.etree.XML(self.xslt))(obj)\n'
+                    elif rec.file_format == 'csv':
+                        hardcoded_producer += "obj = pandas.read_csv(io.BytesIO(data))\n"
+                    elif rec.file_format == 'zip':
+                        hardcoded_producer += "obj = zipfile.ZipFile(io.BytesIO(data))\n"
+
+
                 elif rec.comm_method == 'xmlrpc' and rec.direction == 'outbound' and rec.role == 'active':
                     hardcoded_producer += (
                         "url = 'https://%s@%s' % (self.authorization, self.location)\n"
@@ -452,7 +458,9 @@ class ApiEndpoint(models.Model):
         elif self.file_format == 'xml':
             assert isinstance(obj, (etree._Element)), str(type(obj)) # the wrapped module does not have attr ._Element
         elif self.file_format == 'csv':
-            assert isinstance(obj, (pandas.DataFrame)), str(type(obj)) # the wrapped module does not have attr ._Element
+            assert isinstance(obj, (pandas.DataFrame)), str(type(obj))
+        elif self.file_format == 'zip':
+            assert isinstance(obj, (zipfile.ZipFile)), str(type(obj))
         else:
             raise NotImplementedError(f"Invalid file format: {self.file_format}")
 
@@ -465,6 +473,8 @@ class ApiEndpoint(models.Model):
             obj = lxml.etree.fromstring(bytesdata)
         elif self.file_format == 'csv':
             obj = pandas.read_csv(io.BytesIO(bytesdata))
+        elif self.file_format == 'zip':
+            obj = zipfile.ZipFile(io.BytesIO(bytesdata))
         else:
             raise NotImplementedError(f"Invalid file format: {self.file_format}")
         self.assert_obj_type(obj)
@@ -479,6 +489,10 @@ class ApiEndpoint(models.Model):
             bytesdata = lxml.etree.tostring(obj, pretty_print=True, xml_declaration=True, encoding='utf-8')
         elif self.file_format == 'csv':
             bytesdata = obj.to_csv().encode('utf-8')
+        elif self.file_format == 'zip':
+            fp = obj.fp
+            fp.seek(0)
+            bytesdata = fp.read()
         else:
             raise NotImplementedError(f"Invalid file format: {self.file_format}")
         assert isinstance(bytesdata, bytes)
