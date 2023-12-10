@@ -2,7 +2,8 @@
 
 import logging
 import secrets
-from odoo import models, api, fields, _
+from odoo import models, api, fields, exceptions, _
+from odoo.exceptions import ValidationError
 
 _logger = logging.getLogger(__name__)
 
@@ -48,6 +49,10 @@ class CloudInstance(models.Model):
     gevent_port = fields.Integer(
         required=True,
         readonly=True,
+    )
+
+    protected = fields.Boolean(
+        tracking=True,
     )
 
     config = fields.Text()
@@ -113,6 +118,8 @@ class CloudInstance(models.Model):
 
     def action_remove(self):
         self.ensure_one()
+        if self.protected:
+            raise exceptions.ValidationError(_("Unable to proceed with the action. This server is protected."))
         globals_dict = self.endpoint_id.produce({
             'method': 'remove',
             'args': (self.uid, self.name),
@@ -149,6 +156,8 @@ class CloudInstance(models.Model):
 
     def action_reset(self):
         self.ensure_one()
+        if self.protected:
+            raise exceptions.ValidationError(_("Unable to proceed with the action. This server is protected."))
         globals_dict = self.endpoint_id.produce({
             'method': 'reset',
             'args': (self.uid,),

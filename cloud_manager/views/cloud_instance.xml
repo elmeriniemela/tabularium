@@ -23,11 +23,10 @@
                     <button name="action_deploy" type="object" string="Deploy" states="draft,removed"/>
                     <button name="action_start" type="object" string="Start"  states="exited"/>
                     <button name="action_restart" type="object" string="Restart" states="running"/>
-                    <button name="action_restart" type="object" string="Restart" states="running"/>
-                    <button name="action_reset" type="object" string="Reset" states="exited"/>
+                    <button name="action_reset" type="object" string="Reset" states="exited" confirm="Are you sure you want to RESET this instance?"/>
                     <button name="action_config" type="object" string="Config" states="running,exited,paused"/>
                     <button name="action_stop" type="object" string="Stop" states="running,restarting,paused"/>
-                    <button name="action_remove" type="object" string="Remove" states="exited,dead"/>
+                    <button name="action_remove" type="object" string="Remove" states="exited,dead" confirm="Are you sure you want to REMOVE this instance?"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
@@ -39,6 +38,7 @@
                         <group>
                             <field name="endpoint_id"/>
                             <field name="http_port" required="0" attrs="{'invisible': [('http_port', '=', 0)]}"/>
+                            <field name="protected" widget="boolean_toggle"/>
                         </group>
                         <group>
                             <field name="uid" required="0" attrs="{'invisible': [('uid', '=', False)]}"/>
