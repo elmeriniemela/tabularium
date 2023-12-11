@@ -65,9 +65,10 @@ class DnsZone(models.Model):
                 'url': f'/zones/{zone.identifier}/dns_records',
             })
             res_list = globals_dict['obj']['result']
+            existing = ZoneRecord.browse()
             for res in res_list:
                 _logger.info(res)
-                ZoneRecord.upsert({
+                existing += ZoneRecord.upsert({
                     'name': res['name'],
                     'identifier': res['id'],
                     'ttl': res['ttl'],
@@ -76,15 +77,7 @@ class DnsZone(models.Model):
                     'proxied': res['proxied'],
                     'zone_id': zone.id,
                 })
-
-
-
-
-
-
-
-
-
+            (zone.record_ids - existing).unlink()
 
 
 
