@@ -163,10 +163,12 @@ class InvestmentTimeseries(models.Model):
             ]) # latest but before date
             price_id = record.env['investment.asset.price'].search(domain+prediction, limit=1, order='time desc') # latest but before time_cutoff
             if not price_id:
+                # TODO: We should not use prediction=False price here, as prediction is a related field. Instead create a predicted price if one is not found.
                 _logger.warning("No price: %s", domain+prediction)
                 price_id = record.env['investment.asset.price'].search(domain, limit=1, order='time desc') # latest but before time_cutoff
             record.price_id = price_id
             if not price_id:
+                # TODO: Remove this.
                 _logger.warning("No price: %s", domain)
                 market_price = 0.0
             elif price_id.time.date() == t:
