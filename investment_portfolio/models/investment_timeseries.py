@@ -157,9 +157,10 @@ class InvestmentTimeseries(models.Model):
             domain = [
                 ('time', '<=', time_cutoff),
                 ('asset_id', '=', record.asset_id.id),
-                ('usage', '=', 'record'),
             ]
-            record.transaction_ids = record.env['investment.asset.transaction'].search(domain) # latest but before date
+            record.transaction_ids = record.env['investment.asset.transaction'].search(domain + [
+                ('usage', '=', 'record'),
+            ]) # latest but before date
             price_id = record.env['investment.asset.price'].search(domain+prediction, limit=1, order='time desc') # latest but before time_cutoff
             if not price_id:
                 _logger.warning("No price: %s", domain+prediction)
