@@ -6,6 +6,7 @@
             <tree editable="top" default_order="time desc" expand="1">
                 <field name="time"/>
                 <field name="price"/>
+                <field name="prediction" optional="hide"/>
                 <field name="currency_id" optional="show"/>
                 <field name="asset_id" optional="hide"/>
             </tree>
@@ -22,6 +23,7 @@
                         <group>
                             <field name="time"/>
                             <field name="price"/>
+                            <field name="prediction"/>
                         </group>
                         <group>
                             <field name="currency_id" invisible="not context.get('show_all')"/>
@@ -53,13 +55,13 @@
     </record>
 
     <record id="asset_price_graph" model="ir.ui.view">
-         <field name="name">investment.asset.price.graph</field>
-         <field name="model">investment.asset.price</field>
-         <field name="arch" type="xml">
-             <graph type="line">
-                 <field name="price" type="measure"/>
-             </graph>
-         </field>
+        <field name="name">investment.asset.price.graph</field>
+        <field name="model">investment.asset.price</field>
+        <field name="arch" type="xml">
+            <graph type="line">
+                <field name="price" type="measure"/>
+            </graph>
+        </field>
     </record>
 
     <record id="action_price_extrapolate_cagr" model="ir.actions.server">
@@ -69,8 +71,6 @@
         <field name="state">code</field>
         <field name="code">records.extrapolate_cagr()</field>
     </record>
-
-
 
 
     <record id="action_prices" model="ir.actions.act_window">

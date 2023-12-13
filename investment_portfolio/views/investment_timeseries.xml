@@ -59,6 +59,7 @@
                             <field name="last_price" />
                             <field name="profit" decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0" />
                             <field name="profit_percent" widget="percentage" decoration-danger="profit_percent &lt; 0" decoration-success="profit_percent &gt; 0" />
+                            <field name="prediction"/>
                         </group>
                     </group>
                     <notebook>
