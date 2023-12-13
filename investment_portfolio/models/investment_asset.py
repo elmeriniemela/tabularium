@@ -227,7 +227,7 @@ class InvestmentAsset(models.Model):
             Price.search([('prediction', '=', True), ('asset_id', '=', asset_id.id)]).unlink()
             Transaction.search([('prediction', '=', True), ('asset_id', '=', asset_id.id)]).unlink()
             n = asset_id.plan_months or 0
-            date = asset_id.plan_start_date or today
+            date = banking_date(asset_id.plan_start_date or today)
             if not asset_id.plan_allow_past:
                 while date <= today:
                     date = banking_date(date+relativedelta(months=1))
