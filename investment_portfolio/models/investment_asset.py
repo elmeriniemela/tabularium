@@ -233,6 +233,8 @@ class InvestmentAsset(models.Model):
                     date = banking_date(date+relativedelta(months=1))
                     if asset_id.plan_start_date:
                         n -= 1
+            if n <= 0:
+                continue
 
             end = banking_date(date+relativedelta(months=n))
             r = (asset_id.plan_yearly_interest or 0 + asset_id.plan_yearly_appreciation or 0)/12
