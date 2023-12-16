@@ -69,6 +69,12 @@ class CloudInstance(models.Model):
         ],
     )
 
+    backup_ids = fields.One2many(
+        comodel_name='cloud.backup',
+        inverse_name='instance_id',
+        readonly=True,
+    )
+
     _sql_constraints = [
         ('uniq_uid', 'UNIQUE(uid)', 'The instance uid must be unique!'),
         ('even_http_port', 'CHECK(http_port % 2 = 0)', 'The HTTP port must be even!'),
@@ -191,10 +197,12 @@ class CloudInstance(models.Model):
         existing = {i.uid: i for i in all_insts}
         found = self.browse()
         _logger.info("Parse %s containers.", len(obj))
-        for container in obj:
+        for vals in obj:
+            uid = vals['uid']
+            container = vals['docker']
             vals = {
                 'endpoint_id': endpoint.id,
-                'uid': container['Names'][0].lstrip('/'),
+                'uid': uid,
             }
             ports = {p['PublicPort'] for p in container["Ports"]}
 
