@@ -158,6 +158,10 @@ class InvestmentAsset(models.Model):
         self.env['investment.asset'].search([]).generate_timeseries()
 
     def generate_timeseries(self):
+        # Re-generate plans first, as this removes price ids and cascades existing timeseries.
+        for asset_id in self:
+            asset_id.generate_plan()
+
         today = datetime.date.today()
 
         precision = self.env['decimal.precision'].precision_get('Investment Asset quantity')
@@ -168,14 +172,12 @@ class InvestmentAsset(models.Model):
         existing = {(p.asset_id.id, p.date): p for p in Timeseries.search([])}
         recompute = Timeseries.browse()
 
-
         for asset_id in self:
             first = self.env['investment.asset.transaction'].search([('asset_id', '=', asset_id.id)], order='time asc', limit=1)
             if not first:
                 _logger.info(f"No transactions on {asset_id.name}")
                 continue
 
-            asset_id.generate_plan()
             date = first.time.date()
             _logger.info(f"Make time series for {asset_id.name} starting from {date}")
 

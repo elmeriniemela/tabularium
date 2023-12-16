@@ -152,45 +152,50 @@ class InvestmentTimeseries(models.Model):
                 continue
 
             t = record.date
-            prediction = [('prediction', '=', record.date > fields.Date.today())]
+            is_prediction = record.date > fields.Date.today()
             time_cutoff = datetime.datetime(t.year, t.month, t.day, 20, 0, 0)
-            domain = [
+            record.transaction_ids = record.env['investment.asset.transaction'].search([
                 ('time', '<=', time_cutoff),
                 ('asset_id', '=', record.asset_id.id),
-            ]
-            record.transaction_ids = record.env['investment.asset.transaction'].search(domain + [
-                ('usage', '=', 'record'),
+                ('usage', 'in', ('record', 'prediction')),
             ]) # latest but before date
-            price_id = record.env['investment.asset.price'].search(domain+prediction, limit=1, order='time desc') # latest but before time_cutoff
-            if not price_id:
-                # TODO: We should not use prediction=False price here, as prediction is a related field. Instead create a predicted price if one is not found.
-                _logger.warning("No price: %s", domain+prediction)
-                price_id = record.env['investment.asset.price'].search(domain, limit=1, order='time desc') # latest but before time_cutoff
-            record.price_id = price_id
-            if not price_id:
-                # TODO: Remove this.
-                _logger.warning("No price: %s", domain)
-                market_price = 0.0
-            elif price_id.time.date() == t:
-                market_price = price_id.price
-            else:
-                next_price_id = record.env['investment.asset.price'].search([
-                    ('time', '>=', time_cutoff),
+
+            # Determine the best estimate for market price at 'record.date'.
+            at_price_id = record.env['investment.asset.price'].search([
+                    ('time', '<=', date_utils.end_of(time_cutoff, "day")),
+                    ('time', '>=', date_utils.start_of(time_cutoff, "day")),
                     ('asset_id', '=', record.asset_id.id),
-                ]+prediction, limit=1, order='time asc') # earliest but after time_cutoff
-                if next_price_id:
-                    # Linear Interpolation
-                    slope = (next_price_id.price - price_id.price) / (next_price_id.time - price_id.time).days
-                    market_price = price_id.price + slope*(time_cutoff-price_id.time).days
+                    ('prediction', '=', is_prediction),
+                ], limit=1, order='time desc') # latest = closing price for the day
+
+            if not at_price_id:
+                after_price_id = record.env['investment.asset.price'].search([
+                        ('time', '>=', time_cutoff),
+                        ('asset_id', '=', record.asset_id.id),
+                    ], limit=1, order='time asc') # earliest but after time_cutoff
+                before_price_id = record.env['investment.asset.price'].search([
+                        ('time', '<=', time_cutoff),
+                        ('asset_id', '=', record.asset_id.id),
+                    ], limit=1, order='time desc') # latest but before time_cutoff
+                if before_price_id and after_price_id:
+                    slope = (after_price_id.price - before_price_id.price) / (after_price_id.time - before_price_id.time).days
+                    interpolated_price = before_price_id.price + slope*(time_cutoff-before_price_id.time).days
+                    at_price_id = record.env['investment.asset.price'].create({
+                        'time': time_cutoff,
+                        'asset_id': record.asset_id.id,
+                        'prediction': is_prediction,
+                        'price': interpolated_price,
+                    })
                 else:
-                    market_price = price_id.price
+                    _logger.warning("No price for %s at %s.", record.asset_id.name, time_cutoff)
 
 
-            record.last_price = price_id.currency_id._convert(
-                from_amount=market_price,
+            record.price_id = at_price_id
+            record.last_price = record.price_id.currency_id._convert(
+                from_amount=record.price_id.price,
                 to_currency=self.company_currency_id,
                 company=self.env.company,
-                date=price_id.time or fields.Datetime.now(),
+                date=record.price_id.time or fields.Datetime.now(),
             )
 
             vals = record.asset_id._get_position(record.last_price, record.transaction_ids).items()
