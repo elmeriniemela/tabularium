@@ -25,6 +25,7 @@
                     <button name="action_restart" type="object" string="Restart" states="running"/>
                     <button name="action_reset" type="object" string="Reset" states="exited" confirm="Are you sure you want to RESET this instance?"/>
                     <button name="action_stop" type="object" string="Stop" states="running,restarting,paused"/>
+                    <button name="action_backup" type="object" string="Backup" states="running,restarting,paused"/>
                     <button name="action_remove" type="object" string="Remove" states="exited,dead" confirm="Are you sure you want to REMOVE this instance?"/>
                     <button name="action_config" type="object" string="Config" states="running,exited,paused" confirm="Are you sure you want to overwrite the config on this instance?"/>
                 </header>

@@ -154,6 +154,15 @@ class CloudInstance(models.Model):
         self.message_post(body="Restarted.")
         return globals_dict.get('action', None)
 
+    def action_backup(self):
+        self.ensure_one()
+        globals_dict = self.endpoint_id.produce({
+            'method': 'backup',
+            'args': (self.uid,),
+        })
+        self.message_post(body="Backup created.")
+        return globals_dict.get('action', None)
+
     def action_reset(self):
         self.ensure_one()
         if self.protected:
