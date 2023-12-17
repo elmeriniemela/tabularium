@@ -123,6 +123,16 @@ class CloudInstance(models.Model):
         self.config = globals_dict.get('obj', False)
         return globals_dict.get('action', None)
 
+    def action_rebuild(self):
+        self.ensure_one()
+        globals_dict = self.endpoint_id.produce({
+            'method': 'rebuild',
+            'args': (self.uid, self.http_port, self.gevent_port),
+        })
+        self.state = 'running'
+        self.message_post(body="Rebuilt.")
+        return globals_dict.get('action', None)
+
     def action_remove(self):
         self.ensure_one()
         if self.protected:
