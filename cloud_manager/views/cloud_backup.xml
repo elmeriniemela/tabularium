@@ -5,6 +5,7 @@
         <field name="arch" type="xml">
             <tree>
                 <field name="name" optional="show"/>
+                <field name="timestamp" optional="show"/>
                 <field name="instance_id" optional="hide"/>
                 <button name="action_restore" type="object" string="Restore"/>
             </tree>
@@ -29,6 +30,7 @@
                             <field name="instance_id"/>
                         </group>
                         <group>
+                            <field name="timestamp"/>
                         </group>
                     </group>
                 </sheet>
@@ -47,9 +49,10 @@
             <search>
                 <field name="name"/>
                 <field name="instance_id"/>
+                <filter name="filter_timestamp" date="timestamp"/>
                 <group expand="1" string="Group by">
                     <filter string="Instance" name="group_instance_id" context="{'group_by': 'instance_id'}"/>
-                    <filter string="Create Date" name="group_create_date" context="{'group_by': 'create_date:year'}"/>
+                    <filter string="Timestamp" name="group_timestamp" context="{'group_by': 'timestamp:day'}"/>
                 </group>
             </search>
         </field>
