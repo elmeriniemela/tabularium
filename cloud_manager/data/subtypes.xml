@@ -4,6 +4,6 @@
         <field name="name">Field Changed</field>
         <field name="res_model">cloud.instance</field>
         <field name="default" eval="True"/>
-        <field name="description">Field changed</field>
+        <field name="description" eval="False"/>
     </record>
 </odoo>

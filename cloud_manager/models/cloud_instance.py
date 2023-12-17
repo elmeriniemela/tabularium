@@ -255,7 +255,7 @@ class CloudInstance(models.Model):
         existing = {i.uid: i for i in all_insts}
         found = self.browse()
         _logger.info("Parse %s containers.", len(obj))
-        for cloud in obj:
+        for cloud in obj['instances']:
             uid = cloud['uid']
             inst = existing.get(uid) or self.browse()
             vals = {
