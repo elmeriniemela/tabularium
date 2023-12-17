@@ -35,10 +35,11 @@ class CloudBackup(models.Model):
         ('uniq_name', 'UNIQUE(instance_id, name)', 'Backup name should be unique within an instance!'),
     ]
 
-    @api.depends('instance_id', 'name')
-    def _compute_display_name(self):
+    def name_get(self):
+        result = []
         for record in self:
-            record.display_name = f'{record.instance_id.name}: {record.name}'
+            result.append((record.id, f'{record.instance_id.name}: {record.name}'))
+        return result
 
 
     def action_restore(self):
