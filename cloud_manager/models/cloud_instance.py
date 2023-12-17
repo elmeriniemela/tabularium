@@ -167,6 +167,8 @@ class CloudInstance(models.Model):
             'args': (self.uid,),
         })
         self.message_post(body="Backup created.")
+        backup_list = globals_dict['obj']
+        self.parse_backups(backup_list)
         return globals_dict.get('action', None)
 
     def action_reset(self):
