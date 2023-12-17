@@ -6,7 +6,6 @@
         <field name="state">code</field>
         <field name="code">model.cron_run(frequency='low')</field>
         <field name="user_id" ref="base.user_root"/>
-        <field name="interval_number">1</field>
         <field name="numbercall">-1</field>
     </record>
 
@@ -16,7 +15,6 @@
         <field name="state">code</field>
         <field name="code">model.cron_run(frequency='mid')</field>
         <field name="user_id" ref="base.user_root"/>
-        <field name="interval_number">1</field>
         <field name="numbercall">-1</field>
     </record>
 
@@ -26,7 +24,6 @@
         <field name="state">code</field>
         <field name="code">model.cron_run(frequency='high')</field>
         <field name="user_id" ref="base.user_root"/>
-        <field name="interval_number">1</field>
         <field name="numbercall">-1</field>
     </record>
 
