@@ -19,6 +19,7 @@
         'views/cloud_instance.xml',
         'views/cloud_backup.xml',
         'views/dns_zone.xml',
+        'views/cloud_restore.xml',
         'views/menuitems.xml',
 
         'data/subtypes.xml',

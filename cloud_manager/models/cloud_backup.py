@@ -36,9 +36,9 @@ class CloudBackup(models.Model):
     ]
 
     def action_restore(self):
-        return {
-
-        }
+        action = self.env['ir.actions.act_window']._for_xml_id('cloud_manager.cloud_restore_action')
+        action['context'] = {'default_backup_id': self.id}
+        return action
 
 
     def _restore(self, dst_instance):
