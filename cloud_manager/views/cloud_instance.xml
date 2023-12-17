@@ -19,7 +19,7 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <field name="state" widget="statusbar" statusbar_visible="created,running,exited,removed"/>
+                    <field name="state" widget="statusbar" statusbar_visible="created,running,exited,removed" options="{'clickable': '1'}"/>
                     <button name="action_deploy" type="object" string="Deploy" states="draft,removed"/>
                     <button name="action_start" type="object" string="Start"  states="exited"/>
                     <button name="action_restart" type="object" string="Restart" states="running"/>
