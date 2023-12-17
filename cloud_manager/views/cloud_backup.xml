@@ -5,7 +5,8 @@
         <field name="arch" type="xml">
             <tree>
                 <field name="name" optional="show"/>
-                <field name="instance_id" optional="show"/>
+                <field name="instance_id" optional="hide"/>
+                <button name="action_restore" type="object" string="Restore"/>
             </tree>
         </field>
     </record>

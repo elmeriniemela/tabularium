@@ -24,6 +24,7 @@
                     <button name="action_start" type="object" string="Start"  states="exited"/>
                     <button name="action_restart" type="object" string="Restart" states="running"/>
                     <button name="action_reset" type="object" string="Reset" states="exited" confirm="Are you sure you want to RESET this instance?"/>
+                    <button name="action_restore" type="object" string="Restore" states="exited"/>
                     <button name="action_stop" type="object" string="Stop" states="running,restarting,paused"/>
                     <button name="action_backup" type="object" string="Backup" states="running,restarting,paused"/>
                     <button name="action_remove" type="object" string="Remove" states="exited,dead" confirm="Are you sure you want to REMOVE this instance?"/>
@@ -46,8 +47,14 @@
                             <field name="gevent_port" required="0" attrs="{'invisible': [('gevent_port', '=', 0)]}"/>
                         </group>
                     </group>
-                    <label for="config"/>
-                    <field name="config" widget="ace"/>
+                    <notebook>
+                        <page string="Config">
+                            <field name="config" widget="ace"/>
+                        </page>
+                        <page string="Backups">
+                            <field name="backup_ids"/>
+                        </page>
+                    </notebook>
                 </sheet>
                 <div class="o_attachment_preview"/>
                 <div class="oe_chatter">

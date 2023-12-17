@@ -181,6 +181,17 @@ class CloudInstance(models.Model):
         self.message_post(body="Resetted.")
         return globals_dict.get('action', None)
 
+    def action_restore(self):
+        self.ensure_one()
+        if self.protected:
+            raise exceptions.ValidationError(_("Unable to proceed with the action. This server is protected."))
+
+        return {
+
+        }
+
+
+
     def action_config(self):
         self.ensure_one()
         globals_dict = self.endpoint_id.produce({
@@ -239,14 +250,14 @@ class CloudInstance(models.Model):
                 'endpoint_id': endpoint.id,
                 'uid': uid,
             }
-            vals.update(docker_vals(vals['docker']))
+            vals.update(docker_vals(cloud['docker']))
 
             if inst:
                 inst.write(vals)
             else:
                 inst = inst.create(vals)
 
-            inst.parse_backups(vals['backups'])
+            inst.parse_backups(cloud['backups'])
             found += inst
 
         (all_insts - found).write({'state': 'removed'})
