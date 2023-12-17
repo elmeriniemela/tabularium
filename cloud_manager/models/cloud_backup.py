@@ -35,6 +35,12 @@ class CloudBackup(models.Model):
         ('uniq_name', 'UNIQUE(instance_id, name)', 'Backup name should be unique within an instance!'),
     ]
 
+    @api.depends('instance_id', 'name')
+    def _compute_display_name(self):
+        for record in self:
+            record.display_name = f'{record.instance_id.name}: {record.name}'
+
+
     def action_restore(self):
         action = self.env['ir.actions.act_window']._for_xml_id('cloud_manager.cloud_restore_action')
         action['context'] = {'default_backup_id': self.id}
