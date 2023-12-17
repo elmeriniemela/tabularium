@@ -17,6 +17,12 @@ class CloudBackup(models.Model):
         readonly=True,
     )
 
+    timestamp = fields.Datetime(
+        required=True,
+        tracking=True,
+        readonly=True,
+    )
+
     instance_id = fields.Many2one(
         comodel_name='cloud.instance',
         required=True,

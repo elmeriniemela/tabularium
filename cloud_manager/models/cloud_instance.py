@@ -2,6 +2,7 @@
 
 import logging
 import secrets
+import datetime
 from odoo import models, api, fields, exceptions, _
 from odoo.exceptions import ValidationError
 
@@ -214,6 +215,7 @@ class CloudInstance(models.Model):
             backup = existing.get(fname) or found.create({
                 'name': fname,
                 'instance_id': self.id,
+                'timestamp': datetime.datetime.strptime(fname, '%Y-%m-%dT%H-%M-%S.pgc'),
             })
             existing[fname] = backup
             found += backup
