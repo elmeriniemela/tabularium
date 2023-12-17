@@ -25,6 +25,10 @@ class CloudBackup(models.Model):
         ondelete='cascade',
     )
 
+    _sql_constraints = [
+        ('uniq_name', 'UNIQUE(instance_id, name)', 'Backup name should be unique within an instance!'),
+    ]
+
     def action_restore(self):
         return {
 

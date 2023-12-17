@@ -191,19 +191,27 @@ class CloudInstance(models.Model):
         return globals_dict.get('action', None)
 
 
+    def parse_backups(self, backup_list):
+        self.ensure_one()
+        existing = {b.name: b for b in self.backup_ids}
+        found = self.env['could.backup']
+
+        for backupfile in backup_list:
+            fname = backupfile['fname']
+            backup = existing.get(fname) or found.create({
+                'name': fname,
+                'instance_id': self.id,
+            })
+            existing[fname] = backup
+            found += backup
+
+        (self.backup_ids - found).unlink()
+
     @api.model
     def parse_status(self, endpoint, obj):
-        all_insts = self.with_context(active_test=False).search([('endpoint_id', '=', endpoint.id)])
-        existing = {i.uid: i for i in all_insts}
-        found = self.browse()
-        _logger.info("Parse %s containers.", len(obj))
-        for vals in obj:
-            uid = vals['uid']
-            container = vals['docker']
-            vals = {
-                'endpoint_id': endpoint.id,
-                'uid': uid,
-            }
+
+        def docker_vals(container):
+            vals = {}
             ports = {p['PublicPort'] for p in container["Ports"]}
 
             for port in ports:
@@ -216,13 +224,29 @@ class CloudInstance(models.Model):
             state = container['State']
             assert state in {'created', 'running', 'restarting', 'exited', 'paused', 'dead'}, state
             vals['state'] = state
+            return vals
 
-            inst = existing.get(vals['uid']) or self.browse()
+
+
+        all_insts = self.with_context(active_test=False).search([('endpoint_id', '=', endpoint.id)])
+        existing = {i.uid: i for i in all_insts}
+        found = self.browse()
+        _logger.info("Parse %s containers.", len(obj))
+        for cloud in obj:
+            uid = cloud['uid']
+            inst = existing.get(uid) or self.browse()
+            vals = {
+                'endpoint_id': endpoint.id,
+                'uid': uid,
+            }
+            vals.update(docker_vals(vals['docker']))
+
             if inst:
                 inst.write(vals)
             else:
                 inst = inst.create(vals)
 
+            inst.parse_backups(vals['backups'])
             found += inst
 
         (all_insts - found).write({'state': 'removed'})
