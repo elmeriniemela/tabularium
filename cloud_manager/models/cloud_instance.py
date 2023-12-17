@@ -205,7 +205,7 @@ class CloudInstance(models.Model):
     def parse_backups(self, backup_list):
         self.ensure_one()
         existing = {b.name: b for b in self.backup_ids}
-        found = self.env['could.backup']
+        found = self.env['cloud.backup']
 
         for backupfile in backup_list:
             fname = backupfile['fname']
