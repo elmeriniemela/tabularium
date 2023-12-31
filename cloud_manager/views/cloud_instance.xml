@@ -5,7 +5,7 @@
         <field name="arch" type="xml">
             <tree>
                 <field name="name" optional="show"/>
-                <field name="endpoint_id" optional="show"/>
+                <field name="server_id" optional="show"/>
                 <field name="uid" optional="show"/>
                 <field name="http_port" optional="show"/>
                 <field name="gevent_port" optional="show"/>
@@ -39,7 +39,7 @@
                     </div>
                     <group>
                         <group>
-                            <field name="endpoint_id"/>
+                            <field name="server_id"/>
                             <field name="http_port" required="0" attrs="{'invisible': [('http_port', '=', 0)]}"/>
                             <field name="protected" widget="boolean_toggle"/>
                         </group>
@@ -71,7 +71,7 @@
         <field name="arch" type="xml">
             <search>
                 <field name="name"/>
-                <field name="endpoint_id"/>
+                <field name="server_id"/>
                 <group expand="1" string="Group by">
                     <filter string="Create Date" name="group_create_date" context="{'group_by': 'create_date:year'}"/>
                 </group>

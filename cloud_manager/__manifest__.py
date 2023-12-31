@@ -17,6 +17,7 @@
     'data': [
         'security/ir.model.access.csv',
         'views/cloud_instance.xml',
+        'views/cloud_server.xml',
         'views/cloud_backup.xml',
         'views/dns_zone.xml',
         'wizards/cloud_restore.xml',
