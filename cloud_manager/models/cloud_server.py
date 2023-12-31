@@ -14,7 +14,6 @@ class CloudServer(models.Model):
     name = fields.Char(
         required=True,
         tracking=True,
-        readonly=True,
     )
 
     endpoint_id = fields.Many2one(
@@ -40,6 +39,7 @@ class CloudServer(models.Model):
     ]
 
     def action_agent_restart(self):
+        self.ensure_one()
         self._rpc(method='agent_restart')
 
 
