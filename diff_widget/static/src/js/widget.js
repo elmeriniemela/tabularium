@@ -20,6 +20,9 @@ export class DiffField extends Component {
             synchronisedScroll: true,
             highlight: true,
             renderNothingWhenEmpty: false,
+            diffMaxChanges: 500,
+            diffMaxLineLength: 500,
+            diffTooBigMessage: "Diff is too big to show.",
         };
         if (this.props.value) {
             var diffHtml = Diff2Html.html(this.props.value, configuration);
