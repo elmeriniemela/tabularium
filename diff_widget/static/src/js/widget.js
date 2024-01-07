@@ -21,8 +21,12 @@ export class DiffField extends Component {
             highlight: true,
             renderNothingWhenEmpty: false,
         };
-        var diffHtml = Diff2Html.html(this.props.value, configuration);
-        return markup(diffHtml);
+        if (this.props.value) {
+            var diffHtml = Diff2Html.html(this.props.value, configuration);
+            return markup(diffHtml);
+        } else {
+            return '';
+        }
     }
 }
 DiffField.template = "diff_widget.DiffField";

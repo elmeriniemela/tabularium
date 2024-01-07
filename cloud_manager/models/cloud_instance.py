@@ -41,6 +41,10 @@ class CloudInstance(models.Model):
         required=True,
     )
 
+    restart_needed = fields.Boolean(
+        tracking=True,
+    )
+
     http_port = fields.Integer(
         string="HTTP Port",
         required=True,
@@ -142,6 +146,7 @@ class CloudInstance(models.Model):
     def action_restart(self):
         self.ensure_one()
         self.server_id._rpc(method='restart', args=(self.uid,))
+        self.restart_needed = False
         self.message_post(body="Restarted.")
 
     def action_backup(self):
