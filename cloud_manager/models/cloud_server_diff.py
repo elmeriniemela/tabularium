@@ -45,7 +45,7 @@ class CloudServerDiff(models.Model):
 
     def action_fetch_diff(self):
         s = self.server_id
-        self.diff = s._rpc(method='agent_diff', args=(self.name,))
+        self.diff = s._rpc(method='agent_diff', args=(self.name.strip(),))
         return {
             'type': 'ir.actions.act_window',
             'name': _('Diff'),
