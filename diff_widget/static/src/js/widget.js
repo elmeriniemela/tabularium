@@ -15,8 +15,7 @@ export class DiffField extends Component {
             return '';
         }
         if (this.props.maxLength && this.props.value.length > this.props.maxLength) {
-            console.log(`diff: maxLength ${this.props.maxLength} exceeded: ${this.props.value.length}`);
-            return '';
+            return `<p>diff: maxLength ${this.props.maxLength} exceeded: ${this.props.value.length}</p>`;
         }
         var configuration = {
             drawFileList: true,
