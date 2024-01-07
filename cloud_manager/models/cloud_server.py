@@ -93,6 +93,7 @@ class CloudServer(models.Model):
 
 
         server = self.with_context(active_test=False).search([('endpoint_id', '=', endpoint.id)])
+        server.commit = obj['agent']['commit']
 
         all_insts = server.instance_ids
 
