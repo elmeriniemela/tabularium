@@ -2,7 +2,8 @@
 
 import { _lt } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { Component, onWillStart, markup } from "@odoo/owl";
+import { Component, markup } from "@odoo/owl";
+import { standardFieldProps } from "@web/views/fields/standard_field_props";
 
 export class DiffField extends Component {
 
@@ -10,6 +11,13 @@ export class DiffField extends Component {
     }
 
     get formattedValue() {
+        if (!this.props.value) {
+            return '';
+        }
+        if (this.props.maxLength && this.props.value.length > this.props.maxLength) {
+            console.log(`diff: maxLength ${this.props.maxLength} exceeded: ${this.props.value.length}`);
+            return '';
+        }
         var configuration = {
             drawFileList: true,
             fileListToggle: false,
@@ -24,14 +32,21 @@ export class DiffField extends Component {
             diffMaxLineLength: 500,
             diffTooBigMessage: "Diff is too big to show.",
         };
-        if (this.props.value) {
-            var diffHtml = Diff2Html.html(this.props.value, configuration);
-            return markup(diffHtml);
-        } else {
-            return '';
-        }
+        var diffHtml = Diff2Html.html(this.props.value, configuration);
+        return markup(diffHtml);
     }
 }
 DiffField.template = "diff_widget.DiffField";
 DiffField.displayName = _lt("Diff");
+DiffField.supportedTypes = ["text"];
+DiffField.props = {
+    ...standardFieldProps,
+    maxLength: { type: Number, optional: true },
+};
+
+DiffField.extractProps = ({ attrs }) => {
+    return {
+        maxLength: attrs.options.maxLength,
+    };
+};
 registry.category("fields").add("diff", DiffField);

@@ -25,7 +25,7 @@
                     <field name="create_date" attrs="{'invisible': [('create_date', '=', False)]}"/>
                 </group>
                 <div>
-                    <field name="diff" widget="diff" attrs="{'invisible': [('diff', '=', False)]}"/>
+                    <field name="diff" widget="diff" options="{'maxLength': 2000000}" attrs="{'invisible': [('diff', '=', False)]}"/>
                 </div>
                 <footer>
                     <button name="action_fetch_diff" string="Fetch" type="object" class="oe_highlight" attrs="{'invisible': [('diff', '!=', False)]}"/>
