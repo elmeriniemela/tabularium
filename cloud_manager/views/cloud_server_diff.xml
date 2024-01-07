@@ -18,10 +18,17 @@
                 <header>
                     <button name="action_update_server" string="Update Server" type="object" attrs="{'invisible': [('allow_update', '=', False)]}"/>
                 </header>
+                <field name="server_id" invisible="1"/>
+                <field name="allow_update" invisible="1"/>
                 <group>
-                    <field name="server_id" invisible="1"/>
-                    <field name="allow_update" invisible="1"/>
-                    <field name="name"/>
+                    <group>
+                        <field name="name"/>
+                    </group>
+                    <group>
+                        <field name="create_date"/>
+                    </group>
+                </group>
+                <group>
                     <field name="diff" widget="diff"/>
                 </group>
                 <footer>
