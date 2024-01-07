@@ -22,8 +22,8 @@
                     <field name="server_id" invisible="1"/>
                     <field name="allow_update" invisible="1"/>
                     <field name="name"/>
+                    <field name="diff" widget="diff"/>
                 </group>
-                <field name="diff"/>
                 <footer>
                     <button name="action_fetch_diff" string="Fetch" type="object" class="oe_highlight" attrs="{'invisible': [('diff', '!=', False)]}"/>
                     <button special="cancel" string="Cancel" type="object"/>

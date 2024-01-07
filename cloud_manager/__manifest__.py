@@ -11,6 +11,7 @@
         'base',
         'mail',
         'api_endpoint',
+        'diff_widget',
     ],
     'installable': True,
     'application': True,
