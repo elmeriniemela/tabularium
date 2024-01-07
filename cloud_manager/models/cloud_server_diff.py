@@ -41,7 +41,7 @@ class CloudServerDiff(models.Model):
     def _compute_name(self):
         for record in self:
             s = record.server_id
-            record.name = record.name or f'{s.commit}...origin/{s.branch}'
+            record.name = record.name or f'{s.commit.strip()}...origin/{s.branch.strip()}'
 
     def action_fetch_diff(self):
         s = self.server_id
