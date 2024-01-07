@@ -28,15 +28,37 @@ class CloudServer(models.Model):
         ],
     )
 
+    commit = fields.Char(
+        tracking=True,
+    )
+
+    branch = fields.Char(
+        tracking=True,
+    )
+
     instance_ids = fields.One2many(
         comodel_name='cloud.instance',
         inverse_name='server_id',
+    )
+
+    diff_ids = fields.One2many(
+        comodel_name='cloud.server.diff',
+        inverse_name='server_id',
+    )
+
+    diff_count = fields.Integer(
+        compute='_compute_diff_count'
     )
 
 
     _sql_constraints = [
         ('uniq_name', 'UNIQUE(name)', 'Server name should be unique.'),
     ]
+
+    @api.depends('diff_ids')
+    def _compute_diff_count(self):
+        for record in self:
+            record.diff_count = len(record.diff_ids)
 
     def action_agent_restart(self):
         self.ensure_one()
