@@ -61,11 +61,11 @@ class CashflowImport(models.TransientModel):
         active_model = ctx.get('active_model', '')
         for record in self:
             if active_model == 'cashflow.parser' and active_ids:
-                record.parser_id = active_ids[0]
-                record.account_id = record.parser_id.account_ids[:1]
+                record.parser_id = record.parser_id or active_ids[0]
+                record.account_id = record.account_id or record.parser_id.account_ids[:1]
             if active_model == 'cashflow.account' and active_ids:
-                record.account_id = active_ids[0]
-                record.parser_id = record.account_id.parser_ids[:1]
+                record.account_id = record.account_id or active_ids[0]
+                record.parser_id = record.parser_id or record.account_id.parser_ids[:1]
 
 
     def import_file(self):
