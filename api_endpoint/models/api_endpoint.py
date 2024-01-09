@@ -8,6 +8,7 @@ import xmlrpc.client
 import ssl
 from lxml import etree
 from odoo import models, exceptions, fields, api, _
+import datetime as realdt
 from odoo.tools.safe_eval import safe_eval, test_python_expr, wrap_module, datetime, dateutil
 
 requests = wrap_module(__import__('requests'), ['get', 'post', 'put', 'delete'])
@@ -32,7 +33,7 @@ _logger = logging.getLogger(__name__)
 
 
 def json_encoder(o):
-    if isinstance(o, (datetime.date, datetime.datetime)):
+    if isinstance(o, (realdt.date, realdt.datetime)):
         return repr(o)
     raise TypeError(f'Object of type {o.__class__.__name__} is not JSON serializable')
 
@@ -46,9 +47,9 @@ def json_decoder(d):
             return (int(a) for a in args)
 
         if value.startswith('datetime.datetime'):
-            d[key] = datetime.datetime(*dtargs(value))
+            d[key] = realdt.datetime(*dtargs(value))
         elif value.startswith('datetime.date'):
-            d[key] = datetime.date(*dtargs(value))
+            d[key] = realdt.date(*dtargs(value))
     return d
 
 
