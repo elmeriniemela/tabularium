@@ -187,7 +187,8 @@ class CloudInstance(models.Model):
             backup = existing.get(fname) or found.create({
                 'name': fname,
                 'instance_id': self.id,
-                'timestamp': datetime.datetime.strptime(fname, '%Y-%m-%dT%H-%M-%S.pgc'),
+                'timestamp': backupfile['timestamp'],
+                'trigger': backupfile['trigger'],
             })
             existing[fname] = backup
             found += backup

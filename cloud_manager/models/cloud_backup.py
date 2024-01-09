@@ -17,6 +17,12 @@ class CloudBackup(models.Model):
         readonly=True,
     )
 
+    trigger = fields.Char(
+        required=True,
+        tracking=True,
+        readonly=True,
+    )
+
     timestamp = fields.Datetime(
         required=True,
         tracking=True,
@@ -52,7 +58,7 @@ class CloudBackup(models.Model):
         self.ensure_one()
         globals_dict = dst_instance.endpoint_id.produce({
             'method': 'restore',
-            'args': (self.instance_id.uid, dst_instance.uid, self.name),
+            'args': (self.instance_id.uid, dst_instance.uid, self.trigger, self.name),
         })
         self.message_post(body="Restored to %s on server %s." % (dst_instance.display_name, dst_instance.endpoint_id.display_name))
         return globals_dict.get('action', None)

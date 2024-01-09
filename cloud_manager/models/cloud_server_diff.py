@@ -46,6 +46,9 @@ class CloudServerDiff(models.Model):
     def action_fetch_diff(self):
         s = self.server_id
         self.diff = s._rpc(method='agent_diff', args=(self.name.strip(),))
+        if not self.diff:
+            raise ValidationError(_("No changes."))
+
         return {
             'type': 'ir.actions.act_window',
             'name': _('Diff'),
