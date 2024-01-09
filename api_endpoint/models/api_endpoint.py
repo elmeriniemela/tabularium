@@ -30,6 +30,28 @@ lxml = wrap_module(__import__('lxml'), {mod: getattr(lxml, mod).__all__ for mod 
 _logger = logging.getLogger(__name__)
 
 
+
+def json_encoder(o):
+    if isinstance(o, (datetime.date, datetime.datetime)):
+        return repr(o)
+    raise TypeError(f'Object of type {o.__class__.__name__} is not JSON serializable')
+
+def json_decoder(d):
+    for key, value in d.items():
+        if not isinstance(value, str):
+            continue
+
+        def dtargs(v):
+            args = re.findall(r'\d+', value)
+            return (int(a) for a in args)
+
+        if value.startswith('datetime.datetime'):
+            d[key] = datetime.datetime(*dtargs(value))
+        elif value.startswith('datetime.date'):
+            d[key] = datetime.date(*dtargs(value))
+    return d
+
+
 class ApiEndpoint(models.Model):
     _name = 'api.endpoint'
     _description = 'API Endpoint'
@@ -470,7 +492,7 @@ class ApiEndpoint(models.Model):
     def bytes_to_obj(self, bytesdata):
         self.ensure_one()
         if self.file_format == 'json':
-            obj = json.loads(bytesdata)
+            obj = json.loads(bytesdata, object_hook=json_decoder)
         elif self.file_format == 'xml':
             obj = lxml.etree.fromstring(bytesdata)
         elif self.file_format == 'csv':
@@ -486,7 +508,7 @@ class ApiEndpoint(models.Model):
     def obj_to_bytes(self, obj):
         self.ensure_one()
         if self.file_format == 'json':
-            bytesdata = json.dumps(obj, sort_keys=True, indent=4).encode('utf-8')
+            bytesdata = json.dumps(obj, sort_keys=True, indent=4, default=json_encoder).encode('utf-8')
         elif self.file_format == 'xml':
             bytesdata = lxml.etree.tostring(obj, pretty_print=True, xml_declaration=True, encoding='utf-8')
         elif self.file_format == 'csv':
