@@ -65,3 +65,4 @@ class CloudServerDiff(models.Model):
         s = self.server_id
         s.instance_ids.restart_needed = True
         s.commit = s._rpc(method='agent_pull', args=(s.branch,))
+        s.action_agent_restart()

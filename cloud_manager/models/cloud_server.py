@@ -30,10 +30,16 @@ class CloudServer(models.Model):
 
     commit = fields.Char(
         tracking=True,
+        readonly=True,
     )
 
     branch = fields.Char(
         tracking=True,
+    )
+
+    restarted = fields.Datetime(
+        tracking=True,
+        readonly=True,
     )
 
     instance_ids = fields.One2many(
@@ -63,6 +69,7 @@ class CloudServer(models.Model):
     def action_agent_restart(self):
         self.ensure_one()
         self._rpc(method='agent_restart')
+        self.restarted = fields.Datetime.now()
 
 
     def _rpc(self, **kwargs):
