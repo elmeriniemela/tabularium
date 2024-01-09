@@ -10,6 +10,7 @@ _logger = logging.getLogger(__name__)
 class CloudServerDiff(models.Model):
     _name = 'cloud.server.diff'
     _description = 'Cloud Server Diff'
+    _order = 'id desc'
 
     name = fields.Char(
         required=True,
@@ -32,10 +33,19 @@ class CloudServerDiff(models.Model):
         compute='_compute_allow_update'
     )
 
-    @api.depends('diff')
+    update_done = fields.Boolean()
+
+    @api.depends('diff', 'update_done')
     def _compute_allow_update(self):
         for record in self:
-            record.allow_update = bool(record.diff)
+            s = record.server_id
+            conditions = [
+                not record.update_done, # Allowed only once.
+                bool(record.diff), # Diff required.
+                record == s.diff_ids[:1], # The latest diff for the server.
+                record.name.endswith(s.branch.strip()), # should compare to selected checkout/branch.
+            ]
+            record.allow_update = all(conditions)
 
     @api.depends('server_id')
     def _compute_name(self):
@@ -66,3 +76,4 @@ class CloudServerDiff(models.Model):
         s.instance_ids.restart_needed = True
         s.commit = s._rpc(method='agent_pull', args=(s.branch,))
         s.action_agent_restart()
+        self.update_done = True
