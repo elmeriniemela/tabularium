@@ -77,8 +77,8 @@ class Base(models.AbstractModel):
             field.text = val.strftime(DEFAULT_SERVER_DATE_FORMAT)
 
         elif isinstance(val, models.BaseModel):
-            val.ensure_one() # TODO: Many2many
             if val:
+                val.ensure_one() # TODO: Many2many
                 field.set('ref', str(val._get_xmlid_map()[val])) # TODO: Optimize the amount of calls?
             else:
                 field.set('eval', repr(False))
