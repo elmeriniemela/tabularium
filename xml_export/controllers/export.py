@@ -20,11 +20,6 @@ class Export(stdexp.Export):
 
     @http.route('/web/export/formats', type='json', auth="user")
     def formats(self):
-        """ Returns all valid export formats
-
-        :returns: for each export format, a pair of identifier and printable name
-        :rtype: [(str, str)]
-        """
         return super().formats() + [
             {'tag': 'xml', 'label': 'XML'},
         ]

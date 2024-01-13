@@ -33,7 +33,7 @@ _logger = logging.getLogger(__name__)
 
 
 def json_encoder(o):
-    if isinstance(o, (realdt.date, realdt.datetime)):
+    if isinstance(o, (datetime.date, datetime.datetime)):
         return repr(o)
     raise TypeError(f'Object of type {o.__class__.__name__} is not JSON serializable')
 
@@ -47,9 +47,9 @@ def json_decoder(d):
             return (int(a) for a in args)
 
         if value.startswith('datetime.datetime'):
-            d[key] = realdt.datetime(*dtargs(value))
+            d[key] = datetime.datetime(*dtargs(value))
         elif value.startswith('datetime.date'):
-            d[key] = realdt.date(*dtargs(value))
+            d[key] = datetime.date(*dtargs(value))
     return d
 
 
