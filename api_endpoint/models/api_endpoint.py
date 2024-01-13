@@ -355,7 +355,12 @@ class ApiEndpoint(models.Model):
             hardcoded_producer = ''
             hardcoded_consumer = ''
             if rec.auto_code:
-                if rec.comm_method == 'http' and rec.http_method in ['post', 'put', 'delete'] and rec.direction == 'inbound' and rec.role == 'passive':
+                if rec.comm_method == 'http' and rec.http_method in ['post', 'put', 'delete', 'get'] and rec.direction == 'inbound':
+                    if rec.role == 'active':
+                        hardcoded_producer += "resp = requests.request(self.http_method, self.location, headers={'Authorization': self.authorization})\n"
+                        hardcoded_producer += "data = resp.content\n"
+
+
                     if rec.file_format == 'json':
                         hardcoded_producer += "obj = json.loads(data)\n"
                     elif rec.file_format == 'xml':
