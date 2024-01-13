@@ -185,6 +185,7 @@ class ApiEndpoint(models.Model):
             ('xml', 'XML'),
             ('csv', 'CSV'),
             ('zip', 'ZIP'),
+            ('bytes', 'Bytes'),
         ],
         required=True,
         tracking=True,
@@ -508,6 +509,8 @@ class ApiEndpoint(models.Model):
             obj = pandas.read_csv(io.BytesIO(bytesdata))
         elif self.file_format == 'zip':
             obj = zipfile.ZipFile(io.BytesIO(bytesdata))
+        elif self.file_format == 'bytes':
+            obj = bytesdata
         else:
             raise NotImplementedError(f"Invalid file format: {self.file_format}")
         self.assert_obj_type(obj)
@@ -526,6 +529,8 @@ class ApiEndpoint(models.Model):
             fp = obj.fp
             fp.seek(0)
             bytesdata = fp.read()
+        elif self.file_format == 'bytes':
+            bytesdata = obj
         else:
             raise NotImplementedError(f"Invalid file format: {self.file_format}")
         assert isinstance(bytesdata, bytes)
