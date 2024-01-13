@@ -11,7 +11,7 @@ from odoo import models, exceptions, fields, api, _
 import datetime as realdt
 from odoo.tools.safe_eval import safe_eval, test_python_expr, wrap_module, datetime, dateutil
 
-requests = wrap_module(__import__('requests'), ['get', 'post', 'put', 'delete'])
+requests = wrap_module(__import__('requests'), ['get', 'post', 'put', 'delete', 'request'])
 io = wrap_module(__import__('io'), ['StringIO', 'BytesIO'])
 pandas = wrap_module(__import__('pandas'), ['read_csv', 'read_excel', 'DataFrame'])
 re = wrap_module(__import__('re'), ['findall', 'sub'])
