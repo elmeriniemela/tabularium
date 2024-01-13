@@ -2,6 +2,7 @@
 import json
 import logging
 import operator
+from lxml import etree
 
 from werkzeug.exceptions import InternalServerError
 
@@ -66,7 +67,9 @@ class XMLExport(stdexp.ExportFormat, http.Controller):
             raise UserError(_("Exporting grouped data to XML is not supported."))
 
         records = Model.browse(ids) if ids else Model.search(domain, offset=0, limit=False, order=False)
-        response_data = records.xml_export(field_names)
+        root = records.xml_export(field_names)
+        etree.indent(root, space="    ")
+        response_data = etree.tostring(root, pretty_print=True, encoding='utf-8', xml_declaration=True)
         return request.make_response(response_data,
             headers=[('Content-Disposition',
                             content_disposition(
