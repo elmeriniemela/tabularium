@@ -345,7 +345,7 @@ class ApiEndpoint(models.Model):
         base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url').rstrip('/')
         for rec in self:
             url = False
-            if rec.comm_method == 'http' and rec.http_method in ['post', 'put', 'delete']  and rec.direction == 'inbound' and rec.role == 'passive' and rec.location:
+            if rec.comm_method == 'http' and rec.http_method in ['post', 'put', 'delete', 'get'] and rec.role == 'passive' and rec.location:
                 url = f'{base_url}/api-endpoint/v1/{rec.location}'
             rec.url = url
 
