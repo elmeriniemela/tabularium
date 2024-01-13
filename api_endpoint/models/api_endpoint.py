@@ -355,23 +355,26 @@ class ApiEndpoint(models.Model):
             hardcoded_producer = ''
             hardcoded_consumer = ''
             if rec.auto_code:
-                if rec.comm_method == 'http' and rec.http_method in ['post', 'put', 'delete', 'get'] and rec.direction == 'inbound':
-                    if rec.role == 'active':
-                        hardcoded_producer += "resp = requests.request(self.http_method, self.location, headers={'Authorization': self.authorization})\n"
-                        hardcoded_producer += "data = resp.content\n"
+                if rec.comm_method == 'http':
+                    if rec.direction == 'inbound':
+                        if rec.role == 'active':
+                            hardcoded_producer += "resp = requests.request(self.http_method, self.location, headers={'Authorization': self.authorization}, timeout=10)\n"
+                            hardcoded_producer += "data = resp.content\n"
 
-
-                    if rec.file_format == 'json':
-                        hardcoded_producer += "obj = json.loads(data)\n"
-                    elif rec.file_format == 'xml':
-                        hardcoded_producer += "obj = lxml.etree.fromstring(data)\n"
-                        if (rec.xslt or '').strip():
-                            hardcoded_consumer += 'obj = lxml.etree.XSLT(lxml.etree.XML(self.xslt))(obj)\n'
-                    elif rec.file_format == 'csv':
-                        hardcoded_producer += "obj = pandas.read_csv(io.BytesIO(data))\n"
-                    elif rec.file_format == 'zip':
-                        hardcoded_producer += "obj = zipfile.ZipFile(io.BytesIO(data))\n"
-
+                        if rec.file_format == 'json':
+                            hardcoded_producer += "obj = json.loads(data)\n"
+                        elif rec.file_format == 'xml':
+                            hardcoded_producer += "obj = lxml.etree.fromstring(data)\n"
+                            if (rec.xslt or '').strip():
+                                hardcoded_consumer += 'obj = lxml.etree.XSLT(lxml.etree.XML(self.xslt))(obj)\n'
+                        elif rec.file_format == 'csv':
+                            hardcoded_producer += "obj = pandas.read_csv(io.BytesIO(data))\n"
+                        elif rec.file_format == 'zip':
+                            hardcoded_producer += "obj = zipfile.ZipFile(io.BytesIO(data))\n"
+                    else:
+                        hardcoded_producer += "records = self.env['res.partner'].search([('name', '=', ticker)])\n"
+                        if rec.file_format == 'xml':
+                            hardcoded_producer += "obj = records.xml_export(['name', 'vat'])\n"
 
                 elif rec.comm_method == 'xmlrpc' and rec.direction == 'outbound' and rec.role == 'active':
                     hardcoded_producer += (
