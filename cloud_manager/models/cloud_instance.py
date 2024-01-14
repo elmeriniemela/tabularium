@@ -3,7 +3,7 @@
 import logging
 import secrets
 import threading
-from odoo import models, api, fields, exceptions, _
+from odoo import models, api, fields, exceptions, registry, _
 from odoo.exceptions import ValidationError
 
 _logger = logging.getLogger(__name__)
@@ -172,7 +172,15 @@ class CloudInstance(models.Model):
         if self.is_self:
             self.restart_needed = False
             self.message_post(body="Restarted.")
-            threading.Thread(target=self._irpc, kwargs=dict(method='restart', args=(self.uid,))).start()
+            db = self.env.cr.dbname
+            user_id = self.env.user.id
+            id = self.id
+            def target(**kwargs):
+                with registry(db).cursor() as cr:
+                    env = api.Environment(cr, user_id)
+                    env['cloud.instance'].browse(id)._irpc(**kwargs)
+
+            threading.Thread(target=target, kwargs=dict(method='restart', args=(self.uid,))).start()
         else:
             self._irpc(method='restart', args=(self.uid,))
             self.restart_needed = False
