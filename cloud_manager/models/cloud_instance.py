@@ -121,6 +121,9 @@ class CloudInstance(models.Model):
         if self.protected and method not in is_protected_allowed:
             raise exceptions.ValidationError(_("Unable to proceed with the action. This server is protected."))
 
+        self.server_id._rpc(**kwargs)
+
+
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
