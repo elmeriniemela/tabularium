@@ -71,6 +71,12 @@ class CloudServer(models.Model):
         self._rpc(method='agent_restart')
         self.restarted = fields.Datetime.now()
 
+    def action_restart_instances(self):
+        instances = self.instance_ids.filtered(lambda i: i.restart_needed)
+        norm = instances.filtered(lambda i: not i.is_self)
+        for n in norm: n.action_restart()
+        for i in (instances - norm): i.action_restart()
+
 
     def _rpc(self, **kwargs):
         self.ensure_one()

@@ -52,6 +52,5 @@ class CloudBackup(models.Model):
 
     def _restore(self, dst_instance):
         self.ensure_one()
-        s = dst_instance.server_id
-        s._rpc(method='restore', args=(self.instance_id.uid, dst_instance.uid, self.trigger, self.name))
-        self.message_post(body="Restored to %s on server %s." % (dst_instance.display_name, s.display_name))
+        dst_instance._irpc(method='restore', args=(self.instance_id.uid, dst_instance.uid, self.trigger, self.name))
+        self.message_post(body="Restored to %s on server %s." % (dst_instance.display_name, dst_instance.server_id.display_name))

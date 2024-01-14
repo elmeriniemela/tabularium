@@ -2,7 +2,7 @@
 
 import logging
 import secrets
-import datetime
+import threading
 from odoo import models, api, fields, exceptions, _
 from odoo.exceptions import ValidationError
 
@@ -60,6 +60,10 @@ class CloudInstance(models.Model):
         tracking=True,
     )
 
+    is_self = fields.Boolean(
+        tracking=True,
+    )
+
     config = fields.Text()
 
 
@@ -98,6 +102,25 @@ class CloudInstance(models.Model):
         self.ensure_one()
         return self.env.ref('cloud_manager.mt_field_changed')
 
+    def _irpc(self, **kwargs):
+        method = kwargs['method']
+        is_self_allowed = [
+            'restart',
+            'backup',
+            'config',
+        ]
+        if self.is_self and method not in is_self_allowed:
+            raise exceptions.ValidationError(_("This action can't be performed on self."))
+
+        is_protected_allowed = [
+            'rebuild',
+            'start',
+            'stop',
+        ] + is_self_allowed
+
+        if self.protected and method not in is_protected_allowed:
+            raise exceptions.ValidationError(_("Unable to proceed with the action. This server is protected."))
+
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
@@ -117,49 +140,50 @@ class CloudInstance(models.Model):
 
     def action_deploy(self):
         self.ensure_one()
-        self.config = self.server_id._rpc(method='create', args=(self.uid, self.name, self.http_port, self.gevent_port))
+        self.config = self._irpc(method='create', args=(self.uid, self.name, self.http_port, self.gevent_port))
         self.state = 'running'
 
     def action_rebuild(self):
         self.ensure_one()
-        self.server_id._rpc(method='rebuild', args=(self.uid, self.http_port, self.gevent_port))
+        self._irpc(method='rebuild', args=(self.uid, self.http_port, self.gevent_port))
         self.state = 'running'
         self.message_post(body="Rebuilt.")
 
     def action_remove(self):
         self.ensure_one()
-        if self.protected:
-            raise exceptions.ValidationError(_("Unable to proceed with the action. This server is protected."))
-        self.server_id._rpc(method='remove', args=(self.uid, self.name))
+        self._irpc(method='remove', args=(self.uid, self.name))
         self.state = 'removed'
 
     def action_stop(self):
         self.ensure_one()
-        self.server_id._rpc(method='stop', args=(self.uid,))
+        self._irpc(method='stop', args=(self.uid,))
         self.state = 'exited'
 
     def action_start(self):
         self.ensure_one()
-        self.server_id._rpc(method='start', args=(self.uid,))
+        self._irpc(method='start', args=(self.uid,))
         self.state = 'running'
 
     def action_restart(self):
         self.ensure_one()
-        self.server_id._rpc(method='restart', args=(self.uid,))
-        self.restart_needed = False
-        self.message_post(body="Restarted.")
+        if self.is_self:
+            self.restart_needed = False
+            self.message_post(body="Restarted.")
+            threading.Thread(target=self._irpc, kwargs=dict(method='restart', args=(self.uid,))).start()
+        else:
+            self._irpc(method='restart', args=(self.uid,))
+            self.restart_needed = False
+            self.message_post(body="Restarted.")
 
     def action_backup(self):
         self.ensure_one()
-        backup_list = self.server_id._rpc(method='backup', args=(self.uid,))
+        backup_list = self._irpc(method='backup', args=(self.uid,))
         self.message_post(body="Backup created.")
         self.parse_backups(backup_list)
 
     def action_reset(self):
         self.ensure_one()
-        if self.protected:
-            raise exceptions.ValidationError(_("Unable to proceed with the action. This server is protected."))
-        self.server_id._rpc(method='reset', args=(self.uid,))
+        self._irpc(method='reset', args=(self.uid,))
         self.state = 'running'
         self.message_post(body="Resetted.")
 
@@ -174,7 +198,7 @@ class CloudInstance(models.Model):
 
     def action_config(self):
         self.ensure_one()
-        self.server_id._rpc(method='config', args=(self.uid, self.config))
+        self._irpc(method='config', args=(self.uid, self.config))
         self.message_post(body="Config updated.")
 
     def parse_backups(self, backup_list):

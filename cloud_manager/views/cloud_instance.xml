@@ -3,12 +3,13 @@
     <record id="cloud_instance_list" model="ir.ui.view">
         <field name="model">cloud.instance</field>
         <field name="arch" type="xml">
-            <tree>
+            <tree decoration-warning="restart_needed == True">
                 <field name="name" optional="show"/>
                 <field name="server_id" optional="show"/>
                 <field name="uid" optional="show"/>
                 <field name="http_port" optional="show"/>
                 <field name="gevent_port" optional="show"/>
+                <field name="restart_needed" optional="show"/>
                 <field name="state" optional="show"/>
             </tree>
         </field>
@@ -46,6 +47,7 @@
                         <group>
                             <field name="uid" required="0" attrs="{'invisible': [('uid', '=', False)]}"/>
                             <field name="gevent_port" required="0" attrs="{'invisible': [('gevent_port', '=', 0)]}"/>
+                            <field name="is_self" widget="boolean_toggle"/>
                         </group>
                     </group>
                     <notebook>
