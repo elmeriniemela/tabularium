@@ -373,7 +373,9 @@ class ApiEndpoint(models.Model):
                         elif rec.file_format == 'xml':
                             hardcoded_producer += "obj = lxml.etree.fromstring(data)\n"
                             if (rec.xslt or '').strip():
-                                hardcoded_consumer += 'obj = lxml.etree.XSLT(lxml.etree.XML(self.xslt))(obj)\n'
+                                hardcoded_consumer += 'xslt = lxml.etree.XSLT(lxml.etree.XML(self.xslt))\n'
+                                hardcoded_consumer += 'obj = xslt(obj, test=lxml.etree.XSLT.strparam("test")).getroot()\n'
+                            hardcoded_consumer += 'import_xml(obj)\n'
                         elif rec.file_format == 'csv':
                             hardcoded_producer += "obj = pandas.read_csv(io.BytesIO(data))\n"
                         elif rec.file_format == 'zip':
