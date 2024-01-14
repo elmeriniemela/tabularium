@@ -6,11 +6,13 @@ import base64
 import json
 import xmlrpc.client
 import ssl
+import functools
 from lxml import etree
 import html
 from odoo import models, exceptions, fields, api, _
 import datetime as realdt
 from odoo.tools.safe_eval import safe_eval, test_python_expr, wrap_module, datetime, dateutil
+from odoo.tools.convert import xml_import as XMLImport
 
 requests = wrap_module(__import__('requests'), ['get', 'post', 'put', 'delete', 'request'])
 io = wrap_module(__import__('io'), ['StringIO', 'BytesIO'])
@@ -53,6 +55,9 @@ def json_decoder(d):
             d[key] = datetime.date(*dtargs(value))
     return d
 
+def import_xml(cr, root, noupdate=True, mode='init', module='__export__'):
+    obj = XMLImport(cr, module=module, idref=None, mode=mode, noupdate=noupdate, xml_filename=None)
+    obj.parse(root)
 
 class ApiEndpoint(models.Model):
     _name = 'api.endpoint'
@@ -79,6 +84,7 @@ class ApiEndpoint(models.Model):
             'ValidationError': exceptions.ValidationError,
             'UserError': exceptions.UserError,
             'AccessError': exceptions.AccessError,
+            'import_xml': functools.partial(import_xml, self.env.cr),
         }
 
 
