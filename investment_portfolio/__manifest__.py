@@ -18,6 +18,7 @@
         'data/decimal.xml',
         'data/ir_cron_data.xml',
         'data/import.xml',
+        'data/export.xml',
         'views/investment_timeseries.xml',
         'views/investment_category.xml',
         'views/investment_milestone.xml',

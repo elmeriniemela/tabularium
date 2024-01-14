@@ -1,0 +1,57 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <record id="investment_portfolio.export_profile_template" model="ir.exports">
+        <field name="name">API endpoint template</field>
+        <field name="resource">api.endpoint</field>
+        <field name="export_fields">
+            <record id="ir_exports_line_name" model="ir.exports.line">
+                <field name="name">name</field>
+            </record>
+            <record id="ir_exports_line_location" model="ir.exports.line">
+                <field name="name">location</field>
+            </record>
+            <record id="ir_exports_line_usage_field_id" model="ir.exports.line">
+                <field name="name">usage_field_id</field>
+            </record>
+            <record id="ir_exports_line_direction" model="ir.exports.line">
+                <field name="name">direction</field>
+            </record>
+            <record id="ir_exports_line_role" model="ir.exports.line">
+                <field name="name">role</field>
+            </record>
+            <record id="ir_exports_line_comm_method" model="ir.exports.line">
+                <field name="name">comm_method</field>
+            </record>
+            <record id="ir_exports_line_http_method" model="ir.exports.line">
+                <field name="name">http_method</field>
+            </record>
+            <record id="ir_exports_line_file_format" model="ir.exports.line">
+                <field name="name">file_format</field>
+            </record>
+            <record id="ir_exports_line_response_format" model="ir.exports.line">
+                <field name="name">response_format</field>
+            </record>
+            <record id="ir_exports_line_auto_code" model="ir.exports.line">
+                <field name="name">auto_code</field>
+            </record>
+            <record id="ir_exports_line_documentation" model="ir.exports.line">
+                <field name="name">documentation</field>
+            </record>
+            <record id="ir_exports_line_test_example" model="ir.exports.line">
+                <field name="name">test_example</field>
+            </record>
+            <record id="ir_exports_line_xslt" model="ir.exports.line">
+                <field name="name">xslt</field>
+            </record>
+            <record id="ir_exports_line_initiator" model="ir.exports.line">
+                <field name="name">initiator</field>
+            </record>
+            <record id="ir_exports_line_producer" model="ir.exports.line">
+                <field name="name">producer</field>
+            </record>
+            <record id="ir_exports_line_consumer" model="ir.exports.line">
+                <field name="name">consumer</field>
+            </record>
+        </field>
+    </record>
+</odoo>
