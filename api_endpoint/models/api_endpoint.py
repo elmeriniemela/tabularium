@@ -7,6 +7,7 @@ import json
 import xmlrpc.client
 import ssl
 from lxml import etree
+import html
 from odoo import models, exceptions, fields, api, _
 import datetime as realdt
 from odoo.tools.safe_eval import safe_eval, test_python_expr, wrap_module, datetime, dateutil
@@ -418,7 +419,7 @@ class ApiEndpoint(models.Model):
             if self.auto_commit:
                 if self.state != 'error':
                     self.state = 'error'
-                self.message_post(body=str(error))
+                self.message_post(body=html.escape(str(error)))
                 self.env.cr.commit()
             raise error
         else:
@@ -468,7 +469,7 @@ class ApiEndpoint(models.Model):
         except Exception as error:
             if commit:
                 globals_dict['msg'].write({'state': 'error'})
-                globals_dict['msg'].message_post(body=str(error))
+                globals_dict['msg'].message_post(body=html.escape(str(error)))
                 self.env.cr.commit()
             if not commit or raise_exc: # Commit required, silent bypass is not allowed
                 raise error
@@ -574,7 +575,7 @@ class ApiEndpoint(models.Model):
                 except Exception as error:
                     # NO ROLLBACK NEEDED.
                     msg.write({'state': 'error'})
-                    msg.message_post(body=str(error))
+                    msg.message_post(body=html.escape(str(error)))
                 else:
                     msg.endpoint_id._consume(globals_dict, force_commit=True, raise_exc=False) # method _consume already has error handling.
                 finally:
