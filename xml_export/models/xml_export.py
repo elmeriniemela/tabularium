@@ -19,15 +19,23 @@ class Base(models.AbstractModel):
         Helper to generate XML-ID for export. Used in API endpoints.
         """
         Model = self.env['ir.model.data']
+
+        xmlid_map = {}
         for record in self:
             xmlid = idformat(record)
-            if self.env.ref(f'{module}.{xmlid}', raise_if_not_found=False) != record:
-                Model.create({
+            modeldata = Model.search([
+                ('model', '=', record._name),
+                ('res_id', '=', record.id),
+            ], order='id asc', limit=1)
+            if not modeldata:
+                modeldata = Model.create({
                     'name': xmlid,
                     'module': module,
                     'model': record._name,
                     'res_id': record.id,
                 })
+            xmlid_map[record] = modeldata.complete_name
+        return xmlid_map
 
 
     def xml_export(self, field_names):
@@ -50,7 +58,7 @@ class Base(models.AbstractModel):
 
             _logger.warning("Unable to export %s on %s", f, self._name)
 
-        xmlid_map = self._get_xmlid_map()
+        xmlid_map = self.ensure_xmlid()
         for r in self:
             xmlid = xmlid_map[r]
             record = etree.Element('record')
@@ -96,10 +104,7 @@ class Base(models.AbstractModel):
         elif isinstance(val, models.BaseModel):
             if val:
                 val.ensure_one() # TODO: Many2many
-                field.set('ref', str(val._get_xmlid_map()[val])) # TODO: Optimize the amount of calls?
+                field.set('ref', str(val.ensure_xmlid()[val])) # TODO: Optimize the amount of calls?
             else:
                 field.set('eval', repr(False))
-
-    def _get_xmlid_map(self):
-        return dict(self._BaseModel__ensure_xml_id())
 
