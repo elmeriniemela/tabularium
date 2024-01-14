@@ -17,8 +17,8 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <button name="action_agent_restart" type="object" string="Restart Agent"/>
                     <button string="Diff" type="action" name="%(cloud_server_diff_form_action)d" context="{'default_server_id': active_id, 'search_default_server_id': active_id}"/>
+                    <button name="action_agent_restart" type="object" string="Restart Agent"/>
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
