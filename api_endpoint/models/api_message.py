@@ -54,20 +54,26 @@ class ApiMessage(models.Model):
     def _compute_response_preview(self):
         for record in self.with_context(bin_size=False):
             response_preview = False
-            if record.endpoint_id.response_format in ['json', 'xml', 'csv']:
+            if record.endpoint_id.response_format in ['json', 'xml', 'csv', 'bytes']:
                 response = record.response
                 if response:
-                    response_preview = base64.b64decode(response)
+                    try:
+                        response_preview = base64.b64decode(response)
+                    except:
+                        pass
             record.response_preview = response_preview
 
 
     def _compute_content_preview(self):
         for record in self.with_context(bin_size=False):
             content_preview = False
-            if record.endpoint_id.file_format in ['json', 'xml', 'csv']:
+            if record.endpoint_id.file_format in ['json', 'xml', 'csv', 'bytes']:
                 content = record.content
                 if content:
-                    content_preview = base64.b64decode(content)
+                    try:
+                        content_preview = base64.b64decode(content)
+                    except:
+                        pass
             record.content_preview = content_preview
 
 
