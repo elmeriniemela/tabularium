@@ -62,7 +62,6 @@ class ApiEndpoint(models.Model):
     def _get_globals(self):
         return {
             'self': self.with_user(self.user_id),
-            'response': 'Message received.',
             'json': json,
             'xmltodict': xmltodict,
             'dicttoxml': dicttoxml,
