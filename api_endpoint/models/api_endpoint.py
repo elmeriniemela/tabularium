@@ -464,7 +464,7 @@ class ApiEndpoint(models.Model):
         commit = force_commit or self.auto_commit
         try:
             with self.env.cr.savepoint():
-                safe_eval((self.hardcoded_consumer or '') + (self.consumer or ''), globals_dict, mode="exec", nocopy=False)
+                safe_eval((self.hardcoded_consumer or '') + (self.consumer or ''), globals_dict, mode="exec", nocopy=True)
         except Exception as error:
             if commit:
                 globals_dict['msg'].write({'state': 'error'})
@@ -478,12 +478,16 @@ class ApiEndpoint(models.Model):
                 self.env.cr.commit()
 
             if self.response_format:
+                self.ensure_response(globals_dict)
                 globals_dict['msg'].write({
                     'response': base64.b64encode(globals_dict['response'])
                 })
                 if commit:
                     self.env.cr.commit()
 
+    def ensure_response(self, globals_dict):
+        if 'response' not in globals_dict:
+            raise RuntimeError("The consumer code did not assign variable 'response'.")
 
     def assert_obj_type(self, obj):
         if self.file_format == 'json':
@@ -554,6 +558,7 @@ class ApiEndpoint(models.Model):
             raise RuntimeError(f"Endpoint not found: {method=}, {location=} {auth=}")
 
         globals_dict = endpoint.produce(variables)
+        self.ensure_response(globals_dict)
         return globals_dict['response']
 
 

@@ -1,6 +1,8 @@
 
 import logging
+import json
 
+from werkzeug.exceptions import InternalServerError
 
 from odoo import http, exceptions
 from odoo.http import request
@@ -21,4 +23,17 @@ class ApiController(http.Controller):
         data = request.httprequest.data
         _logger.info(f"{method=}, {location=} {auth=}, {variables=}, {data=}")
         variables['data'] = data
-        return request.env['api.endpoint'].process_inbound_http(method, location, auth, variables)
+        try:
+            return request.env['api.endpoint'].process_inbound_http(method, location, auth, variables)
+        except Exception as exc:
+            args = ', '.join(str(a) for a in exc.args)
+            msg = f"{type(exc).__name__}: {args}"
+            _logger.error(msg)
+            raise InternalServerError(
+                description=msg,
+                response=http.Response(
+                    response=json.dumps({'error': msg}),
+                    content_type='application/json',
+                    status=500,
+                )
+            )
