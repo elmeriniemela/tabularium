@@ -13,6 +13,23 @@ _logger = logging.getLogger(__name__)
 class Base(models.AbstractModel):
     _inherit = 'base'
 
+
+    def ensure_xmlid(self, idformat=lambda record: f'{record._table}_{record.id}', module='__export__'):
+        """
+        Helper to generate XML-ID for export. Used in API endpoints.
+        """
+        Model = self.env['ir.model.data']
+        for record in self:
+            xmlid = idformat(record)
+            if self.env.ref(f'{module}.{xmlid}', raise_if_not_found=False) != record:
+                Model.create({
+                    'name': xmlid,
+                    'module': module,
+                    'model': record._name,
+                    'res_id': record.id,
+                })
+
+
     def xml_export(self, field_names):
         root = etree.Element('odoo')
         self._xml_recursive_export(field_names, root)
