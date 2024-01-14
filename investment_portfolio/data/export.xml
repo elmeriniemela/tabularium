@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <odoo>
-    <record id="investment_portfolio.export_profile_template" model="ir.exports">
+    <record id="export_profile_template" model="ir.exports">
         <field name="name">API endpoint template</field>
         <field name="resource">api.endpoint</field>
         <field name="export_fields">
