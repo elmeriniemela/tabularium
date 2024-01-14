@@ -3,17 +3,36 @@ import logging
 import json
 
 from werkzeug.exceptions import InternalServerError
+from werkzeug.routing import BaseConverter
 
-from odoo import http, exceptions
+from odoo import http, models
 from odoo.http import request
 
 
 _logger = logging.getLogger(__name__)
 
 
+class WildcardConverter(BaseConverter):
+    regex = r'(.*?)'
+    weight = 200
+
+
+class IrHttp(models.AbstractModel):
+    _inherit = 'ir.http'
+
+    @classmethod
+    def _get_converters(cls):
+        """ Get the converters list for custom url pattern werkzeug need to
+            match Rule. This override adds the website ones.
+        """
+        return dict(
+            super(IrHttp, cls)._get_converters(),
+            wildcard=WildcardConverter,
+        )
+
 class ApiController(http.Controller):
 
-    @http.route('/api-endpoint/v1/<location>', type='http', auth="public", csrf=False)
+    @http.route('/api-endpoint/v1/<wildcard:location>', type='http', auth="public", csrf=False)
     def api_endopoint(self, location, **variables):
         return self._process(location, **variables)
 
