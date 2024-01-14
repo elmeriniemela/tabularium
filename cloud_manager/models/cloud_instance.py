@@ -168,19 +168,24 @@ class CloudInstance(models.Model):
         self.state = 'running'
 
     def action_restart(self):
+        def cr_restart(db, uid, ctx, id, **kwargs):
+            with registry(db).cursor() as cr:
+                env = api.Environment(cr, uid, ctx)
+                env['cloud.instance'].browse(id)._irpc(**kwargs)
+
         self.ensure_one()
         if self.is_self:
             self.restart_needed = False
             self.message_post(body="Restarted.")
             db = self.env.cr.dbname
-            user_id = self.env.user.id
+            uid = self.env.user.id
+            ctx = self.env.context.copy()
             id = self.id
-            def target(**kwargs):
-                with registry(db).cursor() as cr:
-                    env = api.Environment(cr, user_id)
-                    env['cloud.instance'].browse(id)._irpc(**kwargs)
-
-            threading.Thread(target=target, kwargs=dict(method='restart', args=(self.uid,))).start()
+            threading.Thread(
+                target=cr_restart,
+                args=(db, uid, ctx, id),
+                kwargs=dict(method='restart', args=(self.uid,))
+            ).start()
         else:
             self._irpc(method='restart', args=(self.uid,))
             self.restart_needed = False
