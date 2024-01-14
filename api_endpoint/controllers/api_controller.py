@@ -1,6 +1,7 @@
 
 import logging
 import json
+from lxml import etree
 
 from werkzeug.exceptions import InternalServerError
 from werkzeug.routing import BaseConverter
@@ -48,11 +49,21 @@ class ApiController(http.Controller):
             args = ', '.join(str(a) for a in exc.args)
             msg = f"{type(exc).__name__}: {args}"
             _logger.error(msg)
+
+            content_type = request.httprequest.headers.get('Content-Type')
+            if content_type == 'text/xml':
+                elem = etree.Element('error')
+                elem.text = msg
+                resp_bytes = etree.tostring(elem, encoding='utf-8', xml_declaration=True)
+            else:
+                resp_bytes = json.dumps({'error': msg})
+                content_type = 'application/json' # This is the default if a non supported content type is asked for.
+
             raise InternalServerError(
                 description=msg,
                 response=http.Response(
-                    response=json.dumps({'error': msg}),
-                    content_type='application/json',
+                    response=resp_bytes,
+                    content_type=content_type,
                     status=500,
                 )
             )
