@@ -10,6 +10,9 @@
     'depends': [
         'base'
     ],
+    'data': [
+        'views/ir_exports.xml',
+    ],
     'installable': True,
     'application': True,
 }

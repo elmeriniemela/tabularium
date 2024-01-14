@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="ir_exports_action" model="ir.actions.act_window">
+        <field name="name">Export Profiles</field>
+        <field name="res_model">ir.exports</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <menuitem
+        id="ir_exports_menu"
+        parent="base.next_id_2"
+        name="Export Profiles"
+        action="ir_exports_action"
+    />
+    <record id="ir_exports_tree_view" model="ir.ui.view">
+        <field name="name">Export Profile tree</field>
+        <field name="model">ir.exports</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="resource"/>
+            </tree>
+        </field>
+    </record>
+    <record id="ir_exports_form_view" model="ir.ui.view">
+        <field name="name">Export Profile form</field>
+        <field name="model">ir.exports</field>
+        <field name="arch" type="xml">
+            <form string="Export Profile">
+                <sheet>
+                    <group col="4">
+                        <field name="name"/>
+                        <field name="resource"/>
+                    </group>
+                    <notebook>
+                        <page string="Export Fields">
+                            <field name="export_fields" readonly="1">
+                                <tree>
+                                    <field name="name" readonly="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

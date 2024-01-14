@@ -1,0 +1,65 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <record id="investment_portfolio.import_asset_prices" model="api.endpoint">
+        <field name="name">Import asset prices from another system</field>
+        <field name="location">https://odoo.eniemela.fi/api-endpoint/v1/asset/prices</field>
+        <field name="usage_field_id" ref="investment_portfolio.field_investment_asset__endpoint_id"/>
+        <field name="direction">inbound</field>
+        <field name="role">active</field>
+        <field name="comm_method">http</field>
+        <field name="http_method">get</field>
+        <field name="file_format">xml</field>
+        <field name="response_format" eval="False"/>
+        <field name="auto_code" eval="False"/>
+        <field name="documentation" type="xml">
+            <p>Fetches asset prices from another Odoo instance, and imports them here. The asset ticker is used as the identifier between two systems.</p>
+        </field>
+        <field name="test_example" eval="False"/>
+        <field name="xslt" type="xml">
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
+    <xsl:template match="node()|@*">
+        <xsl:copy>
+            <xsl:apply-templates select="node()|@*"/>
+        </xsl:copy>
+    </xsl:template>
+    <xsl:template match="record">
+        <xsl:copy>
+            <xsl:apply-templates select="node()|@*"/>
+            <field name="asset_id">
+                <xsl:value-of select="$asset_id"/>
+            </field>
+        </xsl:copy>
+    </xsl:template>
+</xsl:stylesheet>
+</field>
+        <field name="initiator">
+for asset in self.env['investment.asset'].search([('endpoint_id', '=', self.id)]):
+  _logger.info("Run integration on %s", asset.name)
+  self.produce(variables={'asset': asset})
+</field>
+        <field name="producer">
+resp = requests.request(
+  self.http_method,
+  self.location,
+  headers={
+    'Authorization': self.authorization,
+    'Content-Type': 'text/xml',
+  },
+  params={
+    'ticker': asset.ticker
+  },
+  timeout=10,
+)
+if resp.status_code != 200:
+  raise UserError(resp.text)
+
+data = resp.content
+obj = lxml.etree.fromstring(data)
+</field>
+        <field name="consumer">
+xslt = lxml.etree.XSLT(lxml.etree.XML(self.xslt))
+obj = xslt(obj, asset_id=lxml.etree.XSLT.strparam(str(asset.id))).getroot()
+import_xml(obj)
+</field>
+    </record>
+</odoo>
