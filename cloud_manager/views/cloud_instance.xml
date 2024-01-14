@@ -54,6 +54,9 @@
                         <page string="Config">
                             <field name="config" widget="ace"/>
                         </page>
+                        <page string="Upgrade">
+                            <field name="upgrade"/>
+                        </page>
                         <page string="Backups">
                             <field name="backup_ids"/>
                         </page>

@@ -65,6 +65,7 @@ class CloudInstance(models.Model):
     )
 
     config = fields.Text()
+    upgrade = fields.Text()
 
 
     server_id = fields.Many2one(
@@ -168,12 +169,18 @@ class CloudInstance(models.Model):
         self.state = 'running'
 
     def action_restart(self):
+        self.ensure_one()
+
+        upgrade = self._irpc(method='upgrade', args=(self.uid,))
+        if upgrade:
+            self.message_post(body="Upgraded.")
+            self.upgrade = upgrade
+
         def thread_restart(db, uid, ctx, id, **kwargs):
             with registry(db).cursor() as cr:
                 env = api.Environment(cr, uid, ctx)
                 env['cloud.instance'].browse(id)._irpc(**kwargs)
 
-        self.ensure_one()
         restart_kwargs = dict(method='restart', args=(self.uid,))
         if self.is_self:
             self.restart_needed = False
