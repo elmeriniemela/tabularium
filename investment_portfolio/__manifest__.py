@@ -17,7 +17,7 @@
         'security/ir.model.access.csv',
         'data/decimal.xml',
         'data/ir_cron_data.xml',
-        'data/import.xml',
+        'data/endpoints.xml',
         'data/export.xml',
         'views/investment_timeseries.xml',
         'views/investment_category.xml',
