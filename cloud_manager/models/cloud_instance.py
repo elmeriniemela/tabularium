@@ -172,27 +172,26 @@ class CloudInstance(models.Model):
     def action_restart(self):
         self.ensure_one()
 
-        upgrade = self._irpc(method='upgrade', args=(self.uid,))
-        if upgrade:
-            self.message_post(body="Upgraded.")
-            self.upgrade = upgrade
 
-        def thread_restart(db, uid, ctx, id, **kwargs):
+        def self_upgrade(db, uid, ctx, id, instuid):
             with registry(db).cursor() as cr:
                 env = api.Environment(cr, uid, ctx)
-                env['cloud.instance'].browse(id)._irpc(**kwargs)
+                env['cloud.instance'].browse(id)._irpc(method='upgrade', args=(instuid,))
+                env['cloud.instance'].browse(id)._irpc(method='restart', args=(instuid,))
 
-        restart_kwargs = dict(method='restart', args=(self.uid,))
         if self.is_self:
             self.restart_needed = False
             self.message_post(body="Restarted.")
             threading.Thread(
-                target=thread_restart,
-                args=(self.env.cr.dbname, self.env.user.id, self.env.context.copy(), self.id),
-                kwargs=restart_kwargs,
+                target=self_upgrade,
+                args=(self.env.cr.dbname, self.env.user.id, self.env.context.copy(), self.id, self.uid),
             ).start()
         else:
-            self._irpc(**restart_kwargs)
+            upgrade = self._irpc(method='upgrade', args=(self.uid,))
+            if upgrade:
+                self.message_post(body="Upgraded.")
+                self.upgrade = upgrade
+            self._irpc(method='restart', args=(self.uid,))
             self.restart_needed = False
             self.message_post(body="Restarted.")
 
