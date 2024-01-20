@@ -4,6 +4,7 @@
         <field name="name">Yahoo Finance (stocks)</field>
         <field name="location">https://query1.finance.yahoo.com/v8/finance/chart</field>
         <field name="usage_field_id" ref="investment_portfolio.field_investment_asset__endpoint_id"/>
+        <field name="user_id" ref="investment_portfolio.user_asset_integration"/>
         <field name="direction">outbound</field>
         <field name="role">active</field>
         <field name="comm_method">http</field>
@@ -18,7 +19,7 @@
   _logger.info("Run integration on %s", asset.name)
   self.produce(variables={'asset': asset})</field>
         <field name="producer">resp = requests.get(
-  url=f"{self.location}/{asset.ticker}", 
+  url=f"{self.location}/{asset.ticker}",
   headers={'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.115 Safari/537.36'},
   params={
     'region': 'US',
@@ -38,6 +39,7 @@ asset.price_upsert(time=time, price= meta['regularMarketPrice'])</field>
         <field name="name">CNBC</field>
         <field name="location">https://quote.cnbc.com/quote-html-webservice/restQuote/symbolType/symbol</field>
         <field name="usage_field_id" ref="investment_portfolio.field_investment_asset__endpoint_id"/>
+        <field name="user_id" ref="investment_portfolio.user_asset_integration"/>
         <field name="direction">outbound</field>
         <field name="role">active</field>
         <field name="comm_method">http</field>
@@ -72,6 +74,7 @@ asset.price_upsert(time=time, price=price)</field>
         <field name="name">Financial Times (stocks)</field>
         <field name="location">https://markets.ft.com/data/funds/tearsheet/summary</field>
         <field name="usage_field_id" ref="investment_portfolio.field_investment_asset__endpoint_id"/>
+        <field name="user_id" ref="investment_portfolio.user_asset_integration"/>
         <field name="direction">outbound</field>
         <field name="role">active</field>
         <field name="comm_method">http</field>
@@ -104,6 +107,7 @@ asset.price_upsert(time=time, price=float(price_str))</field>
         <field name="name">Bitstamp</field>
         <field name="location">https://www.bitstamp.net/api/v2/ticker</field>
         <field name="usage_field_id" ref="investment_portfolio.field_investment_asset__endpoint_id"/>
+        <field name="user_id" ref="investment_portfolio.user_asset_integration"/>
         <field name="direction">outbound</field>
         <field name="role">active</field>
         <field name="comm_method">http</field>
@@ -126,6 +130,7 @@ obj = resp.json()</field>
         <field name="name">Yahoo Finance (historical daily prices for max 10 years)</field>
         <field name="location">https://query1.finance.yahoo.com/v7/finance/download</field>
         <field name="usage_field_id" ref="investment_portfolio.field_investment_asset__endpoint_id"/>
+        <field name="user_id" ref="investment_portfolio.user_asset_integration"/>
         <field name="direction">outbound</field>
         <field name="role">active</field>
         <field name="comm_method">http</field>
@@ -140,7 +145,7 @@ obj = resp.json()</field>
   _logger.info("Run integration on %s", asset.name)
   self.produce(variables={'asset': asset})</field>
         <field name="producer">resp = requests.get(
-  url=f"{self.location}/{asset.ticker}", 
+  url=f"{self.location}/{asset.ticker}",
     params={
     'period1': int((datetime.datetime.now() - dateutil.relativedelta.relativedelta(years=10)).timestamp()),
     'period2': int(datetime.datetime.now().timestamp()),
@@ -160,6 +165,7 @@ obj.dropna(inplace=True)
         <field name="name">AlphaVantage (daily stocks)</field>
         <field name="location">https://www.alphavantage.co/query</field>
         <field name="usage_field_id" ref="investment_portfolio.field_investment_asset__endpoint_id"/>
+        <field name="user_id" ref="investment_portfolio.user_asset_integration"/>
         <field name="direction">outbound</field>
         <field name="role">active</field>
         <field name="comm_method">http</field>
@@ -189,7 +195,7 @@ vals_list = []
 key = "Time Series (Daily)"
 if key not in obj:
   raise ValidationError(str(obj))
-  
+
 for date_str, price_data in obj[key].items():
     date = dateutil.parser.parse(date_str)
     time = datetime.datetime.combine(date, datetime.datetime.min.time()).replace(hour=20)
@@ -206,6 +212,7 @@ asset.write({'price_ids': [(0, 0, values) for values in vals_list]})</field>
         <field name="name">AlphaVantage (weekly stocks)</field>
         <field name="location">https://www.alphavantage.co/query</field>
         <field name="usage_field_id" ref="investment_portfolio.field_investment_asset__endpoint_id"/>
+        <field name="user_id" ref="investment_portfolio.user_asset_integration"/>
         <field name="direction">outbound</field>
         <field name="role">active</field>
         <field name="comm_method">http</field>
@@ -236,7 +243,7 @@ vals_list = []
 key = "Weekly Time Series"
 if key not in obj:
   raise ValidationError(str(obj))
-  
+
 for date_str, price_data in obj[key].items():
     date = dateutil.parser.parse(date_str)
     time = datetime.datetime.combine(date, datetime.datetime.min.time()).replace(hour=20)
@@ -253,6 +260,7 @@ asset.write({'price_ids': [(0, 0, values) for values in vals_list]})</field>
         <field name="name">AlphaVantage (monthly stocks)</field>
         <field name="location">https://www.alphavantage.co/query</field>
         <field name="usage_field_id" ref="investment_portfolio.field_investment_asset__endpoint_id"/>
+        <field name="user_id" ref="investment_portfolio.user_asset_integration"/>
         <field name="direction">outbound</field>
         <field name="role">active</field>
         <field name="comm_method">http</field>
@@ -282,7 +290,7 @@ vals_list = []
 key = "Monthly Time Series"
 if key not in obj:
   raise ValidationError(str(obj))
-  
+
 for date_str, price_data in obj[key].items():
     date = dateutil.parser.parse(date_str)
     time = datetime.datetime.combine(date, datetime.datetime.min.time()).replace(hour=20)
@@ -299,6 +307,7 @@ asset.write({'price_ids': [(0, 0, values) for values in vals_list]})</field>
         <field name="name">AlphaVantage Currency Update</field>
         <field name="location">https://www.alphavantage.co/query</field>
         <field name="usage_field_id" ref="investment_portfolio.field_investment_asset__endpoint_id"/>
+        <field name="user_id" ref="investment_portfolio.user_asset_integration"/>
         <field name="direction">outbound</field>
         <field name="role">active</field>
         <field name="comm_method">http</field>
@@ -318,7 +327,7 @@ for to_currency, currency_id in currencies.items():
   for mode in modes:
     try:
       self.produce(variables={
-        'mode': mode, 
+        'mode': mode,
         'from_currency': from_currency,
         'to_currency': to_currency,
         'currency_id': currency_id,
@@ -363,7 +372,7 @@ elif mode == 'daily':
 elif mode == 'weekly':
     vals = call_api({'function': 'FX_WEEKLY'}, 'Time Series FX (Weekly)')
     obj = {dateutil.parser.parse(d_str).date(): float(w['4. close']) for d_str, w in vals.items() }
-    
+
 obj = {k.strftime('%Y-%m-%d'):v for k, v in obj.items()}</field>
         <field name="consumer"># _logger.info(f"Update {mode} rates on {to_currency}")
 Rate = self.env['res.currency.rate']
@@ -386,6 +395,7 @@ self.env['investment.asset'].search([('currency_id', '=', currency_id.id)])._com
         <field name="name">Euribor Rates</field>
         <field name="location">https://www.euribor-rates.eu/umbraco/api/euriborpageapi/highchartsdata</field>
         <field name="usage_field_id" ref="investment_portfolio.field_investment_asset__endpoint_id"/>
+        <field name="user_id" ref="investment_portfolio.user_asset_integration"/>
         <field name="direction">outbound</field>
         <field name="role">active</field>
         <field name="comm_method">http</field>
@@ -412,7 +422,7 @@ stop = datetime.datetime.now().replace(hour=2, minute=0, microsecond=0)
 start = stop - dateutil.relativedelta.relativedelta(months=1)
 
 resp = requests.get(
-  url=self.location, 
+  url=self.location,
   headers={'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.115 Safari/537.36'},
   params={
     'series[0]': ticker_map[asset.ticker],
@@ -432,6 +442,7 @@ obj = resp.json()</field>
         <field name="name">Import asset prices from another system</field>
         <field name="location">https://odoo.eniemela.fi/api-endpoint/v1/asset/prices</field>
         <field name="usage_field_id" ref="investment_portfolio.field_investment_asset__endpoint_id"/>
+        <field name="user_id" ref="investment_portfolio.user_asset_integration"/>
         <field name="direction">inbound</field>
         <field name="role">active</field>
         <field name="comm_method">http</field>
