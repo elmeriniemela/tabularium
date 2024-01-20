@@ -15,6 +15,7 @@
     'application': True,
     'data': [
         'security/ir.model.access.csv',
+        'data/users.xml'
         'data/decimal.xml',
         'data/ir_cron_data.xml',
         'data/endpoints.xml',

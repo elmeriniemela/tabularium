@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+    <record id="partner_asset_integration" model="res.partner">
+        <field name="name">Asset Integration</field>
+        <field name="email">asset-integration@eniemela.fi</field>
+        <field name="active" eval="False"/>
+    </record>
+    <record id="user_asset_integration" model="res.users">
+        <field name="partner_id" ref="partner_asset_integration"/>
+        <field name="login">asset-integration@eniemela.fi</field>
+        <field name="active" eval="False"/>
+        <field name="lang">en_US</field>
+        <field name="groups_id" eval="[Command.link(ref('base.group_user'))]"/>
+    </record>
+</odoo>

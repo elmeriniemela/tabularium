@@ -1,33 +1,434 @@
 <?xml version='1.0' encoding='utf-8'?>
 <odoo>
-    <record id="export_asset_prices" model="api.endpoint">
-        <field name="name">Export asset prices to another system</field>
-        <field name="location">asset/prices</field>
-        <field name="usage_field_id" eval="False"/>
+    <record id="investment_portfolio.integration_yahoo" model="api.endpoint">
+        <field name="name">Yahoo Finance (stocks)</field>
+        <field name="location">https://query1.finance.yahoo.com/v8/finance/chart</field>
+        <field name="usage_field_id" ref="investment_portfolio.field_investment_asset__endpoint_id"/>
         <field name="direction">outbound</field>
-        <field name="role">passive</field>
+        <field name="role">active</field>
+        <field name="comm_method">http</field>
+        <field name="http_method">get</field>
+        <field name="file_format">json</field>
+        <field name="response_format" eval="False"/>
+        <field name="auto_code" eval="False"/>
+        <field name="documentation" eval="False"/>
+        <field name="test_example" eval="False"/>
+        <field name="xslt" eval="False"/>
+        <field name="initiator">for asset in self.env['investment.asset'].search([('endpoint_id', '=', self.id)]):
+  _logger.info("Run integration on %s", asset.name)
+  self.produce(variables={'asset': asset})</field>
+        <field name="producer">resp = requests.get(
+  url=f"{self.location}/{asset.ticker}", 
+  headers={'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.115 Safari/537.36'},
+  params={
+    'region': 'US',
+    'interval': '2m',
+    'includePrePost': False,
+    'useYfid': True,
+    'range': '1d',
+  }
+)
+resp.raise_for_status()
+obj = resp.json()</field>
+        <field name="consumer">meta = obj['chart']['result'][0]['meta']
+time = datetime.datetime.fromtimestamp(int(meta['regularMarketTime']))
+asset.price_upsert(time=time, price= meta['regularMarketPrice'])</field>
+    </record>
+    <record id="investment_portfolio.integration_cnbc" model="api.endpoint">
+        <field name="name">CNBC</field>
+        <field name="location">https://quote.cnbc.com/quote-html-webservice/restQuote/symbolType/symbol</field>
+        <field name="usage_field_id" ref="investment_portfolio.field_investment_asset__endpoint_id"/>
+        <field name="direction">outbound</field>
+        <field name="role">active</field>
+        <field name="comm_method">http</field>
+        <field name="http_method">get</field>
+        <field name="file_format">json</field>
+        <field name="response_format" eval="False"/>
+        <field name="auto_code" eval="False"/>
+        <field name="documentation" eval="False"/>
+        <field name="test_example" eval="False"/>
+        <field name="xslt" eval="False"/>
+        <field name="initiator">for asset in self.env['investment.asset'].search([('endpoint_id', '=', self.id)]):
+  _logger.info("Run integration on %s", asset.name)
+  self.produce(variables={'asset': asset})</field>
+        <field name="producer">resp = requests.get(
+  url=self.location,
+  params={
+    'output': 'json',
+    'symbols': asset.ticker,
+  },
+  headers={'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.115 Safari/537.36'}
+)
+resp.raise_for_status()
+obj = resp.json()</field>
+        <field name="consumer">vals = obj['FormattedQuoteResult']['FormattedQuote'][0]
+
+time = dateutil.parser.parse(vals['last_time'])
+price = vals['last'].strip('%')
+
+asset.price_upsert(time=time, price=price)</field>
+    </record>
+    <record id="investment_portfolio.integration_ft" model="api.endpoint">
+        <field name="name">Financial Times (stocks)</field>
+        <field name="location">https://markets.ft.com/data/funds/tearsheet/summary</field>
+        <field name="usage_field_id" ref="investment_portfolio.field_investment_asset__endpoint_id"/>
+        <field name="direction">outbound</field>
+        <field name="role">active</field>
         <field name="comm_method">http</field>
         <field name="http_method">get</field>
         <field name="file_format">xml</field>
-        <field name="response_format">xml</field>
+        <field name="response_format" eval="False"/>
         <field name="auto_code" eval="False"/>
-        <field name="documentation" type="xml">
-            <p>Allow other systems to fetch asset prices from this system. The ticker must match in both systems.</p>
-        </field>
-        <field name="test_example">
-resp = requests.get(self.url, params={'ticker': 'BTC-EUR'}, headers={'Authorization': self.authorization, 'Content-Type': 'text/xml'})
-if resp.status_code != 200:
-  raise UserError(resp.text)
-</field>
+        <field name="documentation" eval="False"/>
+        <field name="test_example" eval="False"/>
         <field name="xslt" eval="False"/>
-        <field name="initiator">self.produce(variables={})</field>
-        <field name="producer">
-prices = self.env['investment.asset.price'].search([('asset_id.ticker', '=', ticker), ('prediction', '=', False)], limit=5, order='time desc')
-obj = prices.xml_export(['time', 'price'])
-</field>
-        <field name="consumer">response = lxml.etree.tostring(obj, encoding='utf-8', xml_declaration=True)</field>
+        <field name="initiator">for asset in self.env['investment.asset'].search([('endpoint_id', '=', self.id)]):
+  _logger.info("Run integration on %s", asset.name)
+  self.produce(variables={'asset': asset})</field>
+        <field name="producer">resp = requests.get(
+  url=self.location,
+  params={
+    's': '{}:{}'.format(asset.ticker, asset.currency_id.name),
+  },
+  headers={'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.115 Safari/537.36'}
+)
+resp.raise_for_status()
+obj = lxml.etree.parse(io.StringIO(resp.text), lxml.etree.HTMLParser()).getroot()</field>
+        <field name="consumer">price_str = obj.xpath('.//ul[@class="mod-tearsheet-overview__quote__bar"]//span[@class="mod-ui-data-list__value"]')[0].text
+
+time = datetime.datetime.now().replace(hour=20, minute=0, second=0, microsecond=0)
+
+asset.price_upsert(time=time, price=float(price_str))</field>
     </record>
-    <record id="import_asset_prices" model="api.endpoint">
+    <record id="investment_portfolio.integration_bitstamp" model="api.endpoint">
+        <field name="name">Bitstamp</field>
+        <field name="location">https://www.bitstamp.net/api/v2/ticker</field>
+        <field name="usage_field_id" ref="investment_portfolio.field_investment_asset__endpoint_id"/>
+        <field name="direction">outbound</field>
+        <field name="role">active</field>
+        <field name="comm_method">http</field>
+        <field name="http_method">get</field>
+        <field name="file_format">json</field>
+        <field name="response_format" eval="False"/>
+        <field name="auto_code" eval="False"/>
+        <field name="documentation" eval="False"/>
+        <field name="test_example" eval="False"/>
+        <field name="xslt" eval="False"/>
+        <field name="initiator">for asset in self.env['investment.asset'].search([('endpoint_id', '=', self.id)]):
+  _logger.info("Run integration on %s", asset.name)
+  self.produce(variables={'asset': asset})</field>
+        <field name="producer">resp = requests.get(f'{asset.location}/{asset.ticker}/')
+resp.raise_for_status()
+obj = resp.json()</field>
+        <field name="consumer">asset.price_upsert(time=datetime.datetime.fromtimestamp(int(obj['timestamp'])), price=obj['last'])</field>
+    </record>
+    <record id="investment_portfolio.integration_yahoo_historical" model="api.endpoint">
+        <field name="name">Yahoo Finance (historical daily prices for max 10 years)</field>
+        <field name="location">https://query1.finance.yahoo.com/v7/finance/download</field>
+        <field name="usage_field_id" ref="investment_portfolio.field_investment_asset__endpoint_id"/>
+        <field name="direction">outbound</field>
+        <field name="role">active</field>
+        <field name="comm_method">http</field>
+        <field name="http_method">get</field>
+        <field name="file_format">csv</field>
+        <field name="response_format" eval="False"/>
+        <field name="auto_code" eval="False"/>
+        <field name="documentation" eval="False"/>
+        <field name="test_example" eval="False"/>
+        <field name="xslt" eval="False"/>
+        <field name="initiator">for asset in self.env['investment.asset'].search([('endpoint_id', '=', self.id)]):
+  _logger.info("Run integration on %s", asset.name)
+  self.produce(variables={'asset': asset})</field>
+        <field name="producer">resp = requests.get(
+  url=f"{self.location}/{asset.ticker}", 
+    params={
+    'period1': int((datetime.datetime.now() - dateutil.relativedelta.relativedelta(years=10)).timestamp()),
+    'period2': int(datetime.datetime.now().timestamp()),
+    'includeAdjustedClose': True,
+  },
+  headers={'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.115 Safari/537.36'}
+)
+resp.raise_for_status()
+obj = pandas.read_csv(io.StringIO(resp.text), sep=',', decimal='.')
+obj.dropna(inplace=True)
+</field>
+        <field name="consumer">for index, row in obj.iterrows():
+  time = datetime.datetime.strptime(row['Date'], '%Y-%m-%d')
+  asset.price_upsert(time=time, price= row['Close'])</field>
+    </record>
+    <record id="investment_portfolio.integration_alphavantage_daily" model="api.endpoint">
+        <field name="name">AlphaVantage (daily stocks)</field>
+        <field name="location">https://www.alphavantage.co/query</field>
+        <field name="usage_field_id" ref="investment_portfolio.field_investment_asset__endpoint_id"/>
+        <field name="direction">outbound</field>
+        <field name="role">active</field>
+        <field name="comm_method">http</field>
+        <field name="http_method">get</field>
+        <field name="file_format">json</field>
+        <field name="response_format" eval="False"/>
+        <field name="auto_code" eval="False"/>
+        <field name="documentation" eval="False"/>
+        <field name="test_example">self.produce(variables={'asset': self.env['investment.asset'].search([('ticker', '=', 'TSLA')])})</field>
+        <field name="xslt" eval="False"/>
+        <field name="initiator">for asset in self.env['investment.asset'].search([('endpoint_id', '=', self.id)]):
+  _logger.info("Run integration on %s", asset.name)
+  self.produce(variables={'asset': asset})</field>
+        <field name="producer">resp = requests.get(
+  url=self.location,
+  params={
+    'function': 'TIME_SERIES_DAILY',
+    'symbol': asset.ticker,
+    'apikey': self.authorization,
+  },
+)
+obj = resp.json()</field>
+        <field name="consumer">existing = {
+    p.time: p for p in asset.price_ids
+}
+vals_list = []
+key = "Time Series (Daily)"
+if key not in obj:
+  raise ValidationError(str(obj))
+  
+for date_str, price_data in obj[key].items():
+    date = dateutil.parser.parse(date_str)
+    time = datetime.datetime.combine(date, datetime.datetime.min.time()).replace(hour=20)
+    if time in existing:
+      continue
+    vals_list.append({
+        'price': float(price_data['4. close']),
+        'time': time,
+    })
+
+asset.write({'price_ids': [(0, 0, values) for values in vals_list]})</field>
+    </record>
+    <record id="investment_portfolio.integration_alphavantage_weekly" model="api.endpoint">
+        <field name="name">AlphaVantage (weekly stocks)</field>
+        <field name="location">https://www.alphavantage.co/query</field>
+        <field name="usage_field_id" ref="investment_portfolio.field_investment_asset__endpoint_id"/>
+        <field name="direction">outbound</field>
+        <field name="role">active</field>
+        <field name="comm_method">http</field>
+        <field name="http_method">get</field>
+        <field name="file_format">json</field>
+        <field name="response_format" eval="False"/>
+        <field name="auto_code" eval="False"/>
+        <field name="documentation" eval="False"/>
+        <field name="test_example">self.produce(variables={'asset': self.env['investment.asset'].search([('ticker', '=', 'TSLA')])})</field>
+        <field name="xslt" eval="False"/>
+        <field name="initiator">for asset in self.env['investment.asset'].search([('endpoint_id', '=', self.id)]):
+  _logger.info("Run integration on %s", asset.name)
+  self.produce(variables={'asset': asset})</field>
+        <field name="producer">resp = requests.get(
+  url=self.location,
+  params={
+    'function': 'TIME_SERIES_WEEKLY',
+    'symbol': asset.ticker,
+    'apikey': self.authorization,
+  },
+)
+resp.raise_for_status()
+obj = resp.json()</field>
+        <field name="consumer">existing = {
+    p.time: p for p in asset.price_ids
+}
+vals_list = []
+key = "Weekly Time Series"
+if key not in obj:
+  raise ValidationError(str(obj))
+  
+for date_str, price_data in obj[key].items():
+    date = dateutil.parser.parse(date_str)
+    time = datetime.datetime.combine(date, datetime.datetime.min.time()).replace(hour=20)
+    if time in existing:
+      continue
+    vals_list.append({
+        'price': float(price_data['4. close']),
+        'time': time,
+    })
+
+asset.write({'price_ids': [(0, 0, values) for values in vals_list]})</field>
+    </record>
+    <record id="investment_portfolio.integration_alphavantage_monthly" model="api.endpoint">
+        <field name="name">AlphaVantage (monthly stocks)</field>
+        <field name="location">https://www.alphavantage.co/query</field>
+        <field name="usage_field_id" ref="investment_portfolio.field_investment_asset__endpoint_id"/>
+        <field name="direction">outbound</field>
+        <field name="role">active</field>
+        <field name="comm_method">http</field>
+        <field name="http_method">get</field>
+        <field name="file_format">json</field>
+        <field name="response_format" eval="False"/>
+        <field name="auto_code" eval="False"/>
+        <field name="documentation" eval="False"/>
+        <field name="test_example">self.produce(variables={'asset': self.env['investment.asset'].search([('ticker', '=', 'TSLA')])})</field>
+        <field name="xslt" eval="False"/>
+        <field name="initiator">for asset in self.env['investment.asset'].search([('endpoint_id', '=', self.id)]):
+  _logger.info("Run integration on %s", asset.name)
+  self.produce(variables={'asset': asset})</field>
+        <field name="producer">resp = requests.get(
+  url=self.location,
+  params={
+    'function': 'TIME_SERIES_MONTHLY',
+    'symbol': asset.ticker,
+    'apikey': self.authorization,
+  },
+)
+obj = resp.json()</field>
+        <field name="consumer">existing = {
+    p.time: p for p in asset.price_ids
+}
+vals_list = []
+key = "Monthly Time Series"
+if key not in obj:
+  raise ValidationError(str(obj))
+  
+for date_str, price_data in obj[key].items():
+    date = dateutil.parser.parse(date_str)
+    time = datetime.datetime.combine(date, datetime.datetime.min.time()).replace(hour=20)
+    if time in existing:
+      continue
+    vals_list.append({
+        'price': float(price_data['4. close']),
+        'time': time,
+    })
+
+asset.write({'price_ids': [(0, 0, values) for values in vals_list]})</field>
+    </record>
+    <record id="investment_portfolio.integration_alphavantage_currency" model="api.endpoint">
+        <field name="name">AlphaVantage Currency Update</field>
+        <field name="location">https://www.alphavantage.co/query</field>
+        <field name="usage_field_id" ref="investment_portfolio.field_investment_asset__endpoint_id"/>
+        <field name="direction">outbound</field>
+        <field name="role">active</field>
+        <field name="comm_method">http</field>
+        <field name="http_method">get</field>
+        <field name="file_format">json</field>
+        <field name="response_format" eval="False"/>
+        <field name="auto_code" eval="False"/>
+        <field name="documentation">&lt;p&gt;AlphaVantage&amp;nbsp;API rate limit is 25 requests per day. We are trying different modes to see which works.&lt;/p&gt;</field>
+        <field name="test_example" eval="False"/>
+        <field name="xslt" eval="False"/>
+        <field name="initiator">modes = ['realtime', 'intraday', 'daily']
+from_currency = self.company_id.currency_id.name
+currencies = {c.name: c for c in self.env['res.currency'].search([('name', '!=', from_currency)])}
+
+alert = ''
+for to_currency, currency_id in currencies.items():
+  for mode in modes:
+    try:
+      self.produce(variables={
+        'mode': mode, 
+        'from_currency': from_currency,
+        'to_currency': to_currency,
+        'currency_id': currency_id,
+      })
+    except ValidationError as error:
+      _logger.exception(error)
+      alert = error.args[0]
+    else:
+      break
+  else:
+    raise ValidationError("Unable to fetch currencies: %s" % alert)</field>
+        <field name="producer">def call_api(params, key):
+  params.update({
+    'from_currency': from_currency,
+    'to_currency': to_currency,
+    'from_symbol': from_currency,
+    'to_symbol': to_currency,
+    'apikey': self.authorization,
+  })
+  resp = requests.get(
+    url=self.location,
+    params=params,
+  )
+  json_data = resp.json()
+  if key not in json_data:
+      raise ValidationError(str(json_data))
+  return json_data[key]
+
+if mode == 'realtime':
+  vals = call_api({'function': 'CURRENCY_EXCHANGE_RATE'}, 'Realtime Currency Exchange Rate')
+  obj = {dateutil.parser.parse(vals['6. Last Refreshed']).date(): float(vals['5. Exchange Rate'])}
+elif mode == 'intraday':
+  vals = call_api({'function': 'FX_INTRADAY', 'interval': '5min'}, 'Time Series FX (5min)')
+  obj = {}
+  for d_str, w in vals.items():
+      date = dateutil.parser.parse(d_str).date()
+      if date not in obj:
+          obj[date] = float(w['4. close'])
+elif mode == 'daily':
+    vals = call_api({'function': 'FX_DAILY'}, 'Time Series FX (Daily)')
+    obj = {dateutil.parser.parse(d_str).date(): float(w['4. close']) for d_str, w in vals.items() }
+elif mode == 'weekly':
+    vals = call_api({'function': 'FX_WEEKLY'}, 'Time Series FX (Weekly)')
+    obj = {dateutil.parser.parse(d_str).date(): float(w['4. close']) for d_str, w in vals.items() }
+    
+obj = {k.strftime('%Y-%m-%d'):v for k, v in obj.items()}</field>
+        <field name="consumer"># _logger.info(f"Update {mode} rates on {to_currency}")
+Rate = self.env['res.currency.rate']
+for date, rate in obj.items():
+    rate_record = Rate.search([
+        ('currency_id', '=', currency_id.id),
+        ('name', '=', date),
+    ])
+    if rate_record:
+        rate_record.write({'rate': rate})
+    else:
+        Rate.create({
+            'name': date,
+            'currency_id': currency_id.id,
+            'rate': rate,
+        })
+self.env['investment.asset'].search([('currency_id', '=', currency_id.id)])._compute_aggregate()</field>
+    </record>
+    <record id="investment_portfolio.integration_euribor_rates" model="api.endpoint">
+        <field name="name">Euribor Rates</field>
+        <field name="location">https://www.euribor-rates.eu/umbraco/api/euriborpageapi/highchartsdata</field>
+        <field name="usage_field_id" ref="investment_portfolio.field_investment_asset__endpoint_id"/>
+        <field name="direction">outbound</field>
+        <field name="role">active</field>
+        <field name="comm_method">http</field>
+        <field name="http_method">get</field>
+        <field name="file_format">json</field>
+        <field name="response_format" eval="False"/>
+        <field name="auto_code" eval="False"/>
+        <field name="documentation" eval="False"/>
+        <field name="test_example" eval="False"/>
+        <field name="xslt" eval="False"/>
+        <field name="initiator">for asset in self.env['investment.asset'].search([('endpoint_id', '=', self.id)]):
+  _logger.info("Run integration on %s", asset.name)
+  self.produce(variables={'asset': asset})</field>
+        <field name="producer">ticker_map = {
+  'EURIBOR-1WEEK': 5,
+  'EURIBOR-1MONTH': 1,
+  'EURIBOR-3MONTH': 2,
+  'EURIBOR-6MONTH': 3,
+  'EURIBOR-1YEAR': 4,
+}
+
+
+stop = datetime.datetime.now().replace(hour=2, minute=0, microsecond=0)
+start = stop - dateutil.relativedelta.relativedelta(months=1)
+
+resp = requests.get(
+  url=self.location, 
+  headers={'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.115 Safari/537.36'},
+  params={
+    'series[0]': ticker_map[asset.ticker],
+    'minticks': int(datetime.datetime.timestamp(start)*1000),
+    'maxticks': int(datetime.datetime.timestamp(stop)*1000),
+  }
+)
+resp.raise_for_status()
+obj = resp.json()</field>
+        <field name="consumer">for (timestamp, price) in obj[0]['Data']:
+  _logger.info(timestamp)
+  time = datetime.datetime.fromtimestamp(int(timestamp/1000))
+  asset.price_upsert(time=time, price=price)
+</field>
+    </record>
+    <record id="investment_portfolio.import_asset_prices" model="api.endpoint">
         <field name="name">Import asset prices from another system</field>
         <field name="location">https://odoo.eniemela.fi/api-endpoint/v1/asset/prices</field>
         <field name="usage_field_id" ref="investment_portfolio.field_investment_asset__endpoint_id"/>
@@ -43,22 +444,22 @@ obj = prices.xml_export(['time', 'price'])
         </field>
         <field name="test_example" eval="False"/>
         <field name="xslt" type="xml">
-<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
-    <xsl:template match="node()|@*">
-        <xsl:copy>
-            <xsl:apply-templates select="node()|@*"/>
-        </xsl:copy>
-    </xsl:template>
-    <xsl:template match="record">
-        <xsl:copy>
-            <xsl:apply-templates select="node()|@*"/>
-            <field name="asset_id">
-                <xsl:value-of select="$asset_id"/>
-            </field>
-        </xsl:copy>
-    </xsl:template>
-</xsl:stylesheet>
-</field>
+            <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
+                <xsl:template match="node()|@*">
+                    <xsl:copy>
+                        <xsl:apply-templates select="node()|@*"/>
+                    </xsl:copy>
+                </xsl:template>
+                <xsl:template match="record">
+                    <xsl:copy>
+                        <xsl:apply-templates select="node()|@*"/>
+                        <field name="asset_id">
+                            <xsl:value-of select="$asset_id"/>
+                        </field>
+                    </xsl:copy>
+                </xsl:template>
+            </xsl:stylesheet>
+        </field>
         <field name="initiator">
 for asset in self.env['investment.asset'].search([('endpoint_id', '=', self.id)]):
   _logger.info("Run integration on %s", asset.name)
