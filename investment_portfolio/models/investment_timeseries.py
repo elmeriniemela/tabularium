@@ -183,7 +183,7 @@ class InvestmentTimeseries(models.Model):
                     at_price_id = record.env['investment.asset.price'].create({
                         'time': time_cutoff,
                         'asset_id': record.asset_id.id,
-                        'prediction': is_prediction,
+                        'prediction': True,
                         'price': interpolated_price,
                     })
                 else:
