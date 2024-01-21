@@ -67,7 +67,7 @@ class ApiEndpoint(models.Model):
 
     def _get_globals(self):
         return {
-            'self': self.with_user(self.user_id),
+            'self': self.with_user(self.user_id).sudo(flag=False),
             'json': json,
             'xmltodict': xmltodict,
             'dicttoxml': dicttoxml,
@@ -573,7 +573,7 @@ class ApiEndpoint(models.Model):
 
     @api.model
     def cron_run(self, frequency):
-        for rec in self.search([('cron_frequency', '=', frequency),('role', '=', 'active')]):
+        for rec in self.search([('cron_frequency', '=', frequency),('role', '=', 'active')]).sudo():
             _logger.info("Execute %s", rec.name)
             rec.action_execute()
             rec.env.cr.commit()
