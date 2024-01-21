@@ -5,7 +5,7 @@
         <field name="model_id" ref="model_investment_asset"/>
         <field name="state">code</field>
         <field name="code">model.cron_create_time_series()</field>
-        <field name="user_id" ref="base.user_root" />
+        <field name="user_id" ref="investment_portfolio.user_asset_integration"/>
         <field name="interval_number">1</field>
         <field name="interval_type">hours</field>
         <field name="numbercall">-1</field>
