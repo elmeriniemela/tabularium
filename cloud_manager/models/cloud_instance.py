@@ -176,12 +176,13 @@ class CloudInstance(models.Model):
         def self_upgrade(db, uid, ctx, id, instuid):
             with registry(db).cursor() as cr:
                 env = api.Environment(cr, uid, ctx)
-                env['cloud.instance'].browse(id)._irpc(method='upgrade', args=(instuid,))
-                env['cloud.instance'].browse(id)._irpc(method='restart', args=(instuid,))
+                inst = env['cloud.instance'].browse(id)
+                inst._irpc(method='upgrade', args=(instuid,))
+                inst._irpc(method='restart', args=(instuid,))
+                inst.restart_needed = False
+                inst.message_post(body="Restarted.")
 
         if self.is_self:
-            self.restart_needed = False
-            self.message_post(body="Restarted.")
             threading.Thread(
                 target=self_upgrade,
                 args=(self.env.cr.dbname, self.env.user.id, self.env.context.copy(), self.id, self.uid),
