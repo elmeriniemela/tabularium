@@ -462,7 +462,7 @@ class ApiEndpoint(models.Model):
         self.ensure_one()
         obj = globals_dict['obj']
         bytesdata = self.obj_to_bytes(obj)
-        globals_dict['msg'] = self.env['api.message'].create({
+        globals_dict['msg'] = self.sudo().env['api.message'].create({
             'endpoint_id': self.id,
             'content': base64.b64encode(bytesdata),
             'variables': variables,

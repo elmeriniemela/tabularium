@@ -169,11 +169,11 @@ class InvestmentTimeseries(models.Model):
 
             if not at_price_id:
                 after_price_id = record.env['investment.asset.price'].search([
-                        ('time', '>=', time_cutoff),
+                        ('time', '>', date_utils.end_of(time_cutoff, "day")),
                         ('asset_id', '=', record.asset_id.id),
                     ], limit=1, order='time asc') # earliest but after time_cutoff
                 before_price_id = record.env['investment.asset.price'].search([
-                        ('time', '<=', time_cutoff),
+                        ('time', '<=', date_utils.start_of(time_cutoff, "day")),
                         ('asset_id', '=', record.asset_id.id),
                     ], limit=1, order='time desc') # latest but before time_cutoff
                 if before_price_id and after_price_id:
