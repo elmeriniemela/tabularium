@@ -179,7 +179,7 @@ class CloudInstance(models.Model):
                 inst = env['cloud.instance'].browse(id)
                 inst._irpc(method='upgrade', args=(instuid,))
                 inst.restart_needed = False
-                inst.message_post(body="Restarted.")
+                inst.message_post(body="Restart initiated.")
                 inst.env.cr.commit() # Commit before the following restart will kill the thread
                 inst._irpc(method='restart', args=(instuid,)) # Kills the thread
 
