@@ -168,6 +168,14 @@ class InvestmentTimeseries(models.Model):
                 ], limit=1, order='time desc') # latest = closing price for the day
 
             if not at_price_id:
+                # This time allow predictions.
+                at_price_id = record.env['investment.asset.price'].search([
+                    ('time', '<=', date_utils.end_of(time_cutoff, "day")),
+                    ('time', '>=', date_utils.start_of(time_cutoff, "day")),
+                    ('asset_id', '=', record.asset_id.id),
+                ], limit=1, order='time desc') # latest = closing price for the day
+
+            if not at_price_id:
                 after_price_id = record.env['investment.asset.price'].search([
                         ('time', '>', time_cutoff),
                         ('asset_id', '=', record.asset_id.id),

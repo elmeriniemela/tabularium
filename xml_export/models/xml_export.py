@@ -18,7 +18,7 @@ class Base(models.AbstractModel):
         """
         Helper to generate XML-ID for export. Used in API endpoints.
         """
-        Model = self.env['ir.model.data']
+        Model = self.env['ir.model.data'].sudo()
 
         xmlid_map = {}
         for record in self:
