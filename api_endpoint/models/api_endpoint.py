@@ -410,6 +410,7 @@ class ApiEndpoint(models.Model):
 
     def produce(self, variables):
         self.ensure_one()
+        self = self.sudo() # All the internals of this function should be run as root, but the _get_globals will demote the user.
         try:
             with self.env.cr.savepoint():
                 globals_dict = self._get_globals()
