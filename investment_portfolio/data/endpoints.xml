@@ -4,7 +4,7 @@
         <field name="name">Export asset prices to another system</field>
         <field name="location">asset/prices</field>
         <field name="usage_field_id" eval="False"/>
-        <field name="user_id" ref="base.user_admin"/>
+        <field name="user_id" ref="investment_portfolio.user_asset_integration"/>
         <field name="direction">outbound</field>
         <field name="role">passive</field>
         <field name="comm_method">http</field>
