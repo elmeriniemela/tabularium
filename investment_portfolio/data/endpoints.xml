@@ -1,5 +1,27 @@
 <?xml version='1.0' encoding='utf-8'?>
 <odoo>
+    <record id="investment_portfolio.export_asset_prices" model="api.endpoint">
+        <field name="name">Export asset prices to another system</field>
+        <field name="location">asset/prices</field>
+        <field name="usage_field_id" eval="False"/>
+        <field name="user_id" ref="base.user_admin"/>
+        <field name="direction">outbound</field>
+        <field name="role">passive</field>
+        <field name="comm_method">http</field>
+        <field name="http_method">get</field>
+        <field name="file_format">xml</field>
+        <field name="response_format">xml</field>
+        <field name="auto_code" eval="False"/>
+        <field name="documentation" eval="False"/>
+        <field name="test_example">resp = requests.get(self.url, params={'ticker': 'BTC-EUR'}, headers={'Authorization': self.authorization, 'Content-Type': 'text/xml'})
+if resp.status_code != 200:
+  raise UserError(resp.text)</field>
+        <field name="xslt" eval="False"/>
+        <field name="initiator">self.produce(variables={})</field>
+        <field name="producer">prices = self.env['investment.asset.price'].search([('asset_id.ticker', '=', ticker), ('prediction', '=', False)], limit=5, order='time desc')
+obj = prices.xml_export(['time', 'price'])</field>
+        <field name="consumer">response = lxml.etree.tostring(obj, encoding='utf-8', xml_declaration=True)</field>
+    </record>
     <record id="investment_portfolio.integration_yahoo" model="api.endpoint">
         <field name="name">Yahoo Finance (stocks)</field>
         <field name="location">https://query1.finance.yahoo.com/v8/finance/chart</field>
