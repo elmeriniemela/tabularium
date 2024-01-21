@@ -178,9 +178,10 @@ class CloudInstance(models.Model):
                 env = api.Environment(cr, uid, ctx)
                 inst = env['cloud.instance'].browse(id)
                 inst._irpc(method='upgrade', args=(instuid,))
-                inst._irpc(method='restart', args=(instuid,))
                 inst.restart_needed = False
                 inst.message_post(body="Restarted.")
+                inst.env.cr.commit() # Commit before the following restart will kill the thread
+                inst._irpc(method='restart', args=(instuid,)) # Kills the thread
 
         if self.is_self:
             threading.Thread(
