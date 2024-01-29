@@ -86,7 +86,7 @@
 
 
     <record id="cloud_instance_action" model="ir.actions.act_window">
-        <field name="name">Cloud</field>
+        <field name="name">Instances</field>
         <field name="res_model">cloud.instance</field>
         <field name="view_mode">tree,kanban,form</field>
         <field name="context"></field>
