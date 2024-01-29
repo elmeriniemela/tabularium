@@ -24,6 +24,7 @@
                     <button name="action_deploy" type="object" string="Deploy" states="draft,removed"/>
                     <button name="action_start" type="object" string="Start"  states="exited"/>
                     <button name="action_restart" type="object" string="Restart" states="running"/>
+                    <button name="action_upgrade" type="object" string="Upgrade" states="running"/>
                     <button name="action_rebuild" type="object" string="Rebuild" states="exited"/>
                     <button name="action_restore" type="object" string="Restore" states="exited"/>
                     <button name="action_config" type="object" string="Config" states="running,exited,paused" confirm="Are you sure you want to overwrite the config on this instance?"/>
