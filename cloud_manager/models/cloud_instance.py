@@ -65,7 +65,12 @@ class CloudInstance(models.Model):
     )
 
     config = fields.Text()
+
     upgrade = fields.Text()
+
+    fshealth = fields.Text(
+        string="Filestore Health",
+    )
 
 
     server_id = fields.Many2one(
@@ -177,7 +182,7 @@ class CloudInstance(models.Model):
             with registry(db).cursor() as cr:
                 env = api.Environment(cr, uid, ctx)
                 inst = env['cloud.instance'].browse(id)
-                inst._irpc(method='upgrade', args=(instuid,))
+                inst.action_upgrade()
                 inst.restart_needed = False
                 inst.message_post(body="Restart initiated.")
                 inst.env.cr.commit() # Commit before the following restart will kill the thread
@@ -189,13 +194,21 @@ class CloudInstance(models.Model):
                 args=(self.env.cr.dbname, self.env.user.id, self.env.context.copy(), self.id, self.uid),
             ).start()
         else:
-            upgrade = self._irpc(method='upgrade', args=(self.uid,))
-            if upgrade:
-                self.message_post(body="Upgraded.")
-                self.upgrade = upgrade
+            self.action_upgrade()
             self._irpc(method='restart', args=(self.uid,))
             self.restart_needed = False
             self.message_post(body="Restarted.")
+
+    def action_upgrade(self):
+        upgrade = self._irpc(method='upgrade', args=(self.uid,))
+        if upgrade:
+            self.message_post(body="Upgraded.")
+            self.upgrade = upgrade
+
+
+    def action_fshealth(self):
+        self.fshealth = self._irpc(method='fshealth', args=(self.uid,))
+
 
     def action_backup(self):
         self.ensure_one()

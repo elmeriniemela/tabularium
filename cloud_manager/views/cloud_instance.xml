@@ -58,6 +58,8 @@
                             <field name="upgrade"/>
                         </page>
                         <page string="Backups">
+                            <button name="action_fshealth" type="object" string="Fetch Filestore Health" states="running,restarting,paused,exited"/>
+                            <field name="fshealth"/>
                             <field name="backup_ids"/>
                         </page>
                     </notebook>
