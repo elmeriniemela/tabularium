@@ -199,9 +199,9 @@ class CloudInstance(models.Model):
 
     def action_backup(self):
         self.ensure_one()
-        backup_list = self._irpc(method='backup', args=(self.uid,))
+        resp = self._irpc(method='backup', args=(self.uid,))
         self.message_post(body="Backup created.")
-        self.parse_backups(backup_list)
+        self.parse_backups(resp['backups'])
 
     def action_reset(self):
         self.ensure_one()
