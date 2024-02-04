@@ -490,7 +490,7 @@ class ApiEndpoint(models.Model):
 
             if self.response_format:
                 self.ensure_response(globals_dict)
-                bytesdata = self.obj_to_bytes(obj, self.response_format)
+                bytesdata = self.obj_to_bytes(globals_dict['response'], self.response_format)
                 globals_dict['msg'].write({
                     'response': base64.b64encode(bytesdata)
                 })
