@@ -125,7 +125,7 @@ class CloudServer(models.Model):
             if inst:
                 inst.write(vals)
             else:
-                inst = inst.create(vals)
+                inst = inst.with_context(default_name=uid).create(vals)
 
             inst.parse_backups(cloud['backups'])
             found += inst
