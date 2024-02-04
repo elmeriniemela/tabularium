@@ -101,7 +101,7 @@ class ApiMessage(models.Model):
         variables = safe_eval(msg.variables, literal_globals)
         globals_dict = msg.endpoint_id._get_globals()
         globals_dict.update(variables)
-        obj = msg.endpoint_id.bytes_to_obj(base64.b64decode(msg.content))
+        obj = msg.endpoint_id.bytes_to_obj(base64.b64decode(msg.content), msg.endpoint_id.file_format)
         globals_dict['obj'] = obj
         globals_dict['msg'] = msg
         return globals_dict

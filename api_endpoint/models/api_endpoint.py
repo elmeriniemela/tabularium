@@ -13,6 +13,7 @@ from odoo import models, exceptions, fields, api, _
 import datetime as realdt
 from odoo.tools.safe_eval import safe_eval, test_python_expr, wrap_module, datetime, dateutil
 from odoo.tools.convert import xml_import as XMLImport
+from odoo.http import request
 
 requests = wrap_module(__import__('requests'), ['get', 'post', 'put', 'delete', 'request'])
 io = wrap_module(__import__('io'), ['StringIO', 'BytesIO'])
@@ -74,12 +75,12 @@ class ApiEndpoint(models.Model):
             'zipfile': zipfile,
             'pandas': pandas,
             'requests': requests,
+            'request': request,
             'datetime': datetime,
             'dateutil': dateutil,
             'io': io,
             're': re,
             'lxml': lxml,
-            'getattr': getattr,
             '_logger': _logger,
             'ValidationError': exceptions.ValidationError,
             'UserError': exceptions.UserError,
@@ -462,7 +463,7 @@ class ApiEndpoint(models.Model):
     def _store(self, globals_dict, variables, context):
         self.ensure_one()
         obj = globals_dict['obj']
-        bytesdata = self.obj_to_bytes(obj)
+        bytesdata = self.obj_to_bytes(obj, self.file_format)
         globals_dict['msg'] = self.sudo().env['api.message'].create({
             'endpoint_id': self.id,
             'content': base64.b64encode(bytesdata),
@@ -499,77 +500,55 @@ class ApiEndpoint(models.Model):
         if 'response' not in globals_dict:
             raise RuntimeError("The consumer code did not assign variable 'response'.")
 
-    def assert_obj_type(self, obj):
-        if self.file_format == 'json':
+    def assert_obj_type(self, obj, fmt):
+        if fmt == 'json':
             assert isinstance(obj, (list, dict)), str(type(obj))
-        elif self.file_format == 'xml':
+        elif fmt == 'xml':
             assert isinstance(obj, (etree._Element)), str(type(obj)) # the wrapped module does not have attr ._Element
-        elif self.file_format == 'csv':
+        elif fmt == 'csv':
             assert isinstance(obj, (pandas.DataFrame)), str(type(obj))
-        elif self.file_format == 'zip':
+        elif fmt == 'zip':
             assert isinstance(obj, (zipfile.ZipFile)), str(type(obj))
         else:
-            raise NotImplementedError(f"Invalid file format: {self.file_format}")
+            raise NotImplementedError(f"Invalid file format: {fmt}")
 
 
-    def bytes_to_obj(self, bytesdata):
+    def bytes_to_obj(self, bytesdata, fmt):
         self.ensure_one()
-        if self.file_format == 'json':
+        if fmt == 'json':
             obj = json.loads(bytesdata, object_hook=json_decoder)
-        elif self.file_format == 'xml':
+        elif fmt == 'xml':
             obj = lxml.etree.fromstring(bytesdata)
-        elif self.file_format == 'csv':
+        elif fmt == 'csv':
             obj = pandas.read_csv(io.BytesIO(bytesdata))
-        elif self.file_format == 'zip':
+        elif fmt == 'zip':
             obj = zipfile.ZipFile(io.BytesIO(bytesdata))
-        elif self.file_format == 'bytes':
+        elif fmt == 'bytes':
             obj = bytesdata
         else:
-            raise NotImplementedError(f"Invalid file format: {self.file_format}")
-        self.assert_obj_type(obj)
+            raise NotImplementedError(f"Invalid file format: {fmt}")
+        self.assert_obj_type(obj, fmt)
         return obj
 
 
-    def obj_to_bytes(self, obj):
+    def obj_to_bytes(self, obj, fmt):
         self.ensure_one()
-        if self.file_format == 'json':
+        if fmt == 'json':
             bytesdata = json.dumps(obj, sort_keys=True, indent=4, default=json_encoder).encode('utf-8')
-        elif self.file_format == 'xml':
+        elif fmt == 'xml':
             bytesdata = lxml.etree.tostring(obj, pretty_print=True, xml_declaration=True, encoding='utf-8')
-        elif self.file_format == 'csv':
+        elif fmt == 'csv':
             bytesdata = obj.to_csv().encode('utf-8')
-        elif self.file_format == 'zip':
+        elif fmt == 'zip':
             fp = obj.fp
             fp.seek(0)
             bytesdata = fp.read()
-        elif self.file_format == 'bytes':
+        elif fmt == 'bytes':
             bytesdata = obj
         else:
-            raise NotImplementedError(f"Invalid file format: {self.file_format}")
+            raise NotImplementedError(f"Invalid file format: {fmt}")
         assert isinstance(bytesdata, bytes)
         return bytesdata
-
-
-
-    @api.model
-    def process_inbound_http(self, method, location, auth, variables):
-        assert method in ['get', 'post', 'delete', 'put']
-        endpoint = self.sudo().search([
-                ('role', '=', 'passive'),
-                ('comm_method', '=', 'http'),
-                ('http_method', 'in', [method, False]),
-                ('location', '=', location),
-                ('authorization', 'in', [auth, False]),
-                ('direction', '=', 'outbound' if method == 'get' else 'inbound'),
-            ],
-            limit=1,
-        )
-        if not endpoint:
-            raise RuntimeError(f"Endpoint not found: {method=}, {location=} {auth=}")
-
-        globals_dict = endpoint.produce(variables)
-        self.ensure_response(globals_dict)
-        return globals_dict['response']
 
 
     @api.model

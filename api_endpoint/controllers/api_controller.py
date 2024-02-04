@@ -44,26 +44,67 @@ class ApiController(http.Controller):
         _logger.info(f"{method=}, {location=} {auth=}, {variables=}, {data=}")
         variables['data'] = data
         try:
-            return request.env['api.endpoint'].process_inbound_http(method, location, auth, variables)
+            endpoint = self._match_to_endpoint(method, location, auth, variables)
         except Exception as exc:
-            args = ', '.join(str(a) for a in exc.args)
-            msg = f"{type(exc).__name__}: {args}"
-            _logger.error(msg)
+            return self._raise_error(exc)
 
-            content_type = request.httprequest.headers.get('Content-Type')
-            if content_type == 'text/xml':
-                elem = etree.Element('error')
-                elem.text = msg
-                resp_bytes = etree.tostring(elem, encoding='utf-8', xml_declaration=True)
-            else:
-                resp_bytes = json.dumps({'error': msg})
-                content_type = 'application/json' # This is the default if a non supported content type is asked for.
+        try:
+            globals_dict = endpoint.produce(variables)
+            self.ensure_response(globals_dict)
+            obj = globals_dict['response']
+            bytesdata = endpoint.obj_to_bytes(obj, endpoint.response_format)
+        except Exception as exc:
+            return self._raise_error(exc)
 
-            raise InternalServerError(
-                description=msg,
-                response=http.Response(
-                    response=resp_bytes,
-                    content_type=content_type,
-                    status=500,
-                )
+
+
+        if endpoint.response_format == 'xml':
+            content_type = 'text/xml'
+        else: # TODO zip, csv, bytes
+            content_type = 'application/json'
+
+        return http.Response(
+            response=bytesdata,
+            content_type=content_type,
+            status=200,
+        )
+
+
+    def _match_to_endpoint(self, method, location, auth, variables):
+        assert method in ['get', 'post', 'delete', 'put']
+        domain = [
+            ('role', '=', 'passive'),
+            ('comm_method', '=', 'http'),
+            ('http_method', 'in', [method, False]),
+            ('location', '=', location),
+            ('authorization', 'in', [auth, False]),
+            ('direction', '=', 'outbound' if method == 'get' else 'inbound'),
+        ]
+        endpoint = request.env['api.endpoint'].sudo().search(domain, limit=1)
+        if not endpoint:
+            raise RuntimeError(f"Endpoint not found: {domain}")
+        return endpoint
+
+
+    def _raise_error(self, exc):
+        args = ', '.join(str(a) for a in exc.args)
+        msg = f"{type(exc).__name__}: {args}"
+        _logger.error(msg)
+
+        content_type = request.httprequest.headers.get('Content-Type')
+        if content_type == 'text/xml':
+            elem = etree.Element('error')
+            elem.text = msg
+            resp_bytes = etree.tostring(elem, encoding='utf-8', xml_declaration=True)
+        else:
+            resp_bytes = json.dumps({'error': msg})
+            content_type = 'application/json' # This is the default if a non supported content type is asked for.
+
+        raise InternalServerError(
+            description=msg,
+            response=http.Response(
+                response=resp_bytes,
+                content_type=content_type,
+                status=500,
             )
+        )
