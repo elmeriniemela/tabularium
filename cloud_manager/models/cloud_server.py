@@ -115,7 +115,7 @@ class CloudServer(models.Model):
         _logger.info("Parse %s containers.", len(obj))
         for cloud in obj['instances']:
             uid = cloud['uid']
-            inst = existing.get(uid) or self.browse()
+            inst = existing.get(uid) or self.env['cloud.instance'].browse()
             vals = {
                 'server_id': server.id,
                 'uid': uid,
