@@ -50,10 +50,11 @@ class ApiController(http.Controller):
 
         try:
             globals_dict = endpoint.produce(variables)
-            self.ensure_response(globals_dict)
+            endpoint.ensure_response(globals_dict)
             obj = globals_dict['response']
             bytesdata = endpoint.obj_to_bytes(obj, endpoint.response_format)
         except Exception as exc:
+            _logger.exception(exc)
             return self._raise_error(exc)
 
 
