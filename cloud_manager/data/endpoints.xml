@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <record id="cloud_manager.endpoint_cloud_v16" model="api.endpoint">
+        <field name="name">Odoo V16 Cloud</field>
+        <field name="location">agent16.eniemela.fi:9000</field>
+        <field name="usage_field_id" ref="cloud_manager.field_cloud_server__endpoint_id"/>
+        <field name="direction">outbound</field>
+        <field name="role">active</field>
+        <field name="comm_method">xmlrpc</field>
+        <field name="http_method" eval="False"/>
+        <field name="file_format">json</field>
+        <field name="response_format" eval="False"/>
+        <field name="auto_code" eval="False"/>
+        <field name="documentation" eval="False"/>
+        <field name="test_example" eval="False"/>
+        <field name="xslt" eval="False"/>
+        <field name="initiator">self.produce(variables={'method': 'status', 'args': tuple()})</field>
+        <field name="producer">
+url = 'https://%s@%s' % (self.authorization, self.location)
+obj = self.xmlrpc(url, method, args)
+</field>
+        <field name="consumer">
+if method == 'status':
+  self.env['cloud.server'].parse_status(self, obj)
+  </field>
+    </record>
+</odoo>
