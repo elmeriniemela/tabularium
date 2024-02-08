@@ -36,7 +36,10 @@ class InvestmentTimeseries(models.Model):
         index=True,
     )
 
-    prediction = fields.Boolean(related='price_id.prediction')
+    prediction = fields.Boolean(
+        string="Price Interpolated",
+        related='price_id.prediction',
+    )
 
     date = fields.Date(
         store=True,

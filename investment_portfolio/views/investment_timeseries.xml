@@ -5,6 +5,8 @@
         <field name="arch" type="xml">
             <tree>
                 <field name="asset_id" optional="show" />
+                <field name="prediction" optional="show"/>
+                <field name="date" optional="show" />
                 <field name="position" optional="show" sum="Total Position" />
                 <field name="profit" widget="monetary" decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0" optional="show" sum="Total Profit" />
                 <field name="profit_percent" widget="percentage" decoration-danger="profit_percent &lt; 0" decoration-success="profit_percent &gt; 0" optional="show" />
@@ -91,6 +93,8 @@
                 <filter string="Realized" name="realized" domain="[('prediction', '=', False)]" />
                 <filter string="Prediction" name="prediction" domain="[('prediction', '=', True)]" />
                 <separator />
+                <filter string="Until Today" name="until_today" domain="[('date','&lt;=',context_today())]" />
+                <separator />
                 <filter string="1 year" name="1_year" domain="[('date','&gt;',(context_today() + relativedelta(days=-365)).strftime('%Y-%m-%d')),('date','&lt;',(context_today() + relativedelta(days=365)).strftime('%Y-%m-%d'))]" />
                 <filter string="2 years" name="2_years" domain="[('date','&gt;',(context_today() + relativedelta(days=-2*365)).strftime('%Y-%m-%d')),('date','&lt;',(context_today() + relativedelta(days=2*365)).strftime('%Y-%m-%d'))]" />
                 <filter string="3 years" name="3_years" domain="[('date','&gt;',(context_today() + relativedelta(days=-3*365)).strftime('%Y-%m-%d')),('date','&lt;',(context_today() + relativedelta(days=3*365)).strftime('%Y-%m-%d'))]" />
@@ -125,7 +129,7 @@
         <field name="res_model">investment.timeseries</field>
         <field name="view_mode">graph,tree,form</field>
         <field name="domain" eval="False"/>
-        <field name="context">{'search_default_group_day': 1, 'search_default_liquid': 1, 'search_default_4_years': 1, 'search_default_realized': 1}</field>
+        <field name="context">{'search_default_group_day': 1, 'search_default_liquid': 1, 'search_default_4_years': 1, 'search_default_until_today': 1}</field>
         <field
             name="view_ids"
             eval="[
@@ -139,7 +143,7 @@
         <field name="res_model">investment.timeseries</field>
         <field name="view_mode">graph,tree,form</field>
         <field name="domain" eval="False"/>
-        <field name="context">{'search_default_group_day': 1, 'search_default_liquid': 1, 'search_default_4_years': 1, 'search_default_realized': 1}</field>
+        <field name="context">{'search_default_group_day': 1, 'search_default_liquid': 1, 'search_default_4_years': 1, 'search_default_until_today': 1}</field>
         <field
             name="view_ids"
             eval="[
@@ -155,7 +159,7 @@
         <field name="res_model">investment.timeseries</field>
         <field name="view_mode">graph,tree,form</field>
         <field name="domain" eval="False"/>
-        <field name="context">{'search_default_group_week': 1, 'search_default_group_asset_id': 1, 'search_default_liquid': 1, 'search_default_4_years': 1, 'search_default_realized': 1}</field>
+        <field name="context">{'search_default_group_week': 1, 'search_default_group_asset_id': 1, 'search_default_liquid': 1, 'search_default_4_years': 1, 'search_default_until_today': 1}</field>
         <field
             name="view_ids"
             eval="[
@@ -169,7 +173,7 @@
         <field name="res_model">investment.timeseries</field>
         <field name="view_mode">graph,tree,form</field>
         <field name="domain" eval="False"/>
-        <field name="context">{'search_default_group_week': 1, 'search_default_group_asset_id': 1, 'search_default_liquid': 1, 'search_default_4_years': 1, 'search_default_realized': 1}</field>
+        <field name="context">{'search_default_group_week': 1, 'search_default_group_asset_id': 1, 'search_default_liquid': 1, 'search_default_4_years': 1, 'search_default_until_today': 1}</field>
         <field
             name="view_ids"
             eval="[
