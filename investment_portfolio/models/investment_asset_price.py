@@ -27,6 +27,8 @@ class InvestmentAssetPrice(models.Model):
 
     extrapolated = fields.Boolean()
 
+    interpolated = fields.Boolean()
+
     transaction_id = fields.Many2one(
         comodel_name='investment.asset.transaction',
         index=True,

@@ -6,6 +6,7 @@
             <tree>
                 <field name="asset_id" optional="show" />
                 <field name="prediction" optional="show"/>
+                <field name="interpolated" optional="show"/>
                 <field name="date" optional="show" />
                 <field name="position" optional="show" sum="Total Position" />
                 <field name="profit" widget="monetary" decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0" optional="show" sum="Total Profit" />
