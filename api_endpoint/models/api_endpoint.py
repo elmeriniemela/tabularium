@@ -413,19 +413,19 @@ class ApiEndpoint(models.Model):
         self.ensure_one()
         self = self.sudo() # All the internals of this function should be run as root, but the _get_globals will demote the user.
         try:
-            with self.env.cr.savepoint():
-                globals_dict = self._get_globals()
-                serialized_vars = self._serialize_dict(globals_dict, variables)
-                serialized_ctx = self._serialize_dict(globals_dict, self.env.context)
-                globals_dict.update(variables)
-                copied_globals_dict = globals_dict.copy() # To prevent sharing new vars between Producer and Consumer. These vars are not stored in message queue.
-                safe_eval((self.hardcoded_producer or '') + (self.producer or ''), copied_globals_dict, mode="exec", nocopy=True)
-                if 'obj' in copied_globals_dict:
-                    globals_dict['obj'] = copied_globals_dict['obj']
-                else:
-                    raise RuntimeError("No obj to store! The producer code should assign a variable called 'obj'!")
-                self._store(globals_dict, serialized_vars, serialized_ctx)
+            globals_dict = self._get_globals()
+            serialized_vars = self._serialize_dict(globals_dict, variables)
+            serialized_ctx = self._serialize_dict(globals_dict, self.env.context)
+            globals_dict.update(variables)
+            copied_globals_dict = globals_dict.copy() # To prevent sharing new vars between Producer and Consumer. These vars are not stored in message queue.
+            safe_eval((self.hardcoded_producer or '') + (self.producer or ''), copied_globals_dict, mode="exec", nocopy=True)
+            if 'obj' in copied_globals_dict:
+                globals_dict['obj'] = copied_globals_dict['obj']
+            else:
+                raise RuntimeError("No obj to store! The producer code should assign a variable called 'obj'!")
+            self._store(globals_dict, serialized_vars, serialized_ctx)
         except Exception as error:
+            self.env.cr.rollback()
             if self.auto_commit:
                 if self.state != 'error':
                     self.state = 'error'
@@ -474,9 +474,9 @@ class ApiEndpoint(models.Model):
     def _consume(self, globals_dict, force_commit=False, raise_exc=True):
         commit = force_commit or self.auto_commit
         try:
-            with self.env.cr.savepoint():
-                safe_eval((self.hardcoded_consumer or '') + (self.consumer or ''), globals_dict, mode="exec", nocopy=True)
+            safe_eval((self.hardcoded_consumer or '') + (self.consumer or ''), globals_dict, mode="exec", nocopy=True)
         except Exception as error:
+            self.env.cr.rollback()
             if commit:
                 globals_dict['msg'].write({'state': 'error'})
                 globals_dict['msg'].message_post(body=html.escape(str(error)))
