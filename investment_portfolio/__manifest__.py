@@ -5,7 +5,7 @@
     'website': "https://eniemela.fi",
     'license': 'LGPL-3',
     'category': 'Uncategorized',
-    'version': '1.3.4',
+    'version': '1.3.5',
     'depends': [
         'mail',
         'timeago_widget',
@@ -35,5 +35,6 @@
         'demo/portfolios.xml',
         'demo/assets.xml',
         'demo/investment.asset.price.csv',
+        'demo/investment.asset.transaction.csv',
     ],
 }
