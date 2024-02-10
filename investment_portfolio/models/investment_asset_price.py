@@ -25,8 +25,6 @@ class InvestmentAssetPrice(models.Model):
 
     prediction = fields.Boolean()
 
-    extrapolated = fields.Boolean()
-
     interpolated = fields.Boolean()
 
     transaction_id = fields.Many2one(
@@ -39,7 +37,7 @@ class InvestmentAssetPrice(models.Model):
     ]
 
 
-    def extrapolate_cagr(self):
+    def interpolate_cagr(self):
         assert len(self) == 2, "Two prices required"
         Price = self.env['investment.asset.price']
         first, last = self.sorted('time')
@@ -52,7 +50,7 @@ class InvestmentAssetPrice(models.Model):
             time += relativedelta(months=1)
             price *= (1+cagr)**(1/12)
             base_vals = {
-                'extrapolated': True,
+                'interpolated': True,
                 'asset_id': first.asset_id.id,
                 'time': time,
             }
