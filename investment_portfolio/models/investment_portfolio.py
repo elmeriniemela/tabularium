@@ -3,11 +3,10 @@
 from odoo import models, fields, _
 
 
-class InvestmentCategory(models.Model):
-    _name = 'investment.category'
-    _description = 'Investment Category'
+class InvestmentPortfolio(models.Model):
+    _name = 'investment.portfolio'
+    _description = 'Investment Portfolio'
     _order = 'sequence, id'
 
     name = fields.Char(required=True)
     sequence = fields.Integer(string='Sequence')
-    liquid = fields.Boolean()

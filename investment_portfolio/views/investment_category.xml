@@ -1,20 +1,18 @@
 <odoo>
-    <record id="category_tree" model="ir.ui.view">
-        <field name="name">investment.category.tree</field>
-        <field name="model">investment.category</field>
+    <record id="portfolio_tree" model="ir.ui.view">
+        <field name="name">investment.portfolio.tree</field>
+        <field name="model">investment.portfolio</field>
         <field name="arch" type="xml">
             <tree>
                 <field name="sequence" widget="handle"/>
                 <field name="name" optional="show"/>
-                <field name="parent_id" optional="show"/>
-                <field name="liquid" optional="show" widget="boolean_toggle"/>
             </tree>
         </field>
     </record>
 
-    <record id="category_form" model="ir.ui.view">
-        <field name="name">investment.category.form</field>
-        <field name="model">investment.category</field>
+    <record id="portfolio_form" model="ir.ui.view">
+        <field name="name">investment.portfolio.form</field>
+        <field name="model">investment.portfolio</field>
         <field name="arch" type="xml">
             <form>
                 <sheet>
@@ -23,32 +21,27 @@
                             <field name="name"/>
                         </h1>
                     </div>
-                    <group>
-                        <field name="liquid"/>
-                        <field name="parent_id" required="0"/>
-                    </group>
                 </sheet>
             </form>
         </field>
     </record>
 
-    <record id="category_search" model="ir.ui.view">
-        <field name="name">investment.category.search</field>
-        <field name="model">investment.category</field>
+    <record id="portfolio_search" model="ir.ui.view">
+        <field name="name">investment.portfolio.search</field>
+        <field name="model">investment.portfolio</field>
         <field name="arch" type="xml">
             <search>
                 <field name="name"/>
-                <field name="parent_id"/>
             </search>
         </field>
     </record>
 
 
-    <record id="action_categories" model="ir.actions.act_window">
-        <field name="name">Categories</field>
-        <field name="res_model">investment.category</field>
+    <record id="action_portfolios" model="ir.actions.act_window">
+        <field name="name">Portfolios</field>
+        <field name="res_model">investment.portfolio</field>
         <field name="view_mode">tree,form,graph</field>
-        <field name="context">{'search_default_group_category_id': 1}</field>
+        <field name="context">{'search_default_group_portfolio_id': 1}</field>
     </record>
 
 </odoo>

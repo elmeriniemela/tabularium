@@ -3,6 +3,7 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_investment_asset,access_investment_asset,model_investment_asset,base.group_user,1,1,1,1
 access_investment_timeseries,access_investment_timeseries,model_investment_timeseries,base.group_user,1,1,1,1
 access_investment_category,access_investment_category,model_investment_category,base.group_user,1,1,1,1
+access_investment_portfolio,access_investment_portfolio,model_investment_portfolio,base.group_user,1,1,1,1
 access_investment_milestone,access_investment_milestone,model_investment_milestone,base.group_user,1,1,1,1
 access_investment_asset_price,access_investment_asset_price,model_investment_asset_price,base.group_user,1,1,1,1
 access_investment_asset_realized,access_investment_asset_realized,model_investment_asset_realized,base.group_user,1,1,1,1

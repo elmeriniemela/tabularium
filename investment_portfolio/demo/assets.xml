@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <record id="investment_portfolio.investment_asset_8" model="investment.asset">
+        <field name="id" eval="8"/>
+        <field name="name">Bitcoin</field>
+        <field name="sequence" eval="False"/>
+        <field name="follow" eval="True"/>
+        <field name="category_id" ref="investment_portfolio.category_crypto"/>
+        <field name="portfolio_id" ref="investment_portfolio.liquid_portfolio"/>
+        <field name="currency_id" ref="base.EUR"/>
+        <field name="ticker">BTC-EUR</field>
+    </record>
+    <record id="investment_portfolio.investment_asset_16" model="investment.asset">
+        <field name="id" eval="16"/>
+        <field name="name">iShares S&amp;P 500 UCITS ETF USD (Acc)</field>
+        <field name="sequence" eval="1"/>
+        <field name="follow" eval="True"/>
+        <field name="category_id" ref="investment_portfolio.category_stocks"/>
+        <field name="portfolio_id" ref="investment_portfolio.liquid_portfolio"/>
+        <field name="currency_id" ref="base.EUR"/>
+        <field name="ticker">SXR8.DE</field>
+    </record>
+</odoo>

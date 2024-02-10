@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <record id="investment_portfolio.liquid_portfolio" model="investment.portfolio">
+        <field name="name">Liquid portfolio</field>
+        <field name="sequence" eval="1"/>
+    </record>
+</odoo>
