@@ -159,7 +159,6 @@ class InvestmentTimeseries(models.Model):
             if not record.asset_id:
                 continue
 
-            is_future = record.date > fields.Date.today()
             t = record.date
             time_cutoff = datetime.datetime(t.year, t.month, t.day, 0, 0, 0) # This has to be the end of day.
             record.transaction_ids = record.env['investment.asset.transaction'].search([
@@ -173,7 +172,7 @@ class InvestmentTimeseries(models.Model):
                     ('time', '<=', date_utils.end_of(time_cutoff, "day")),
                     ('time', '>=', date_utils.start_of(time_cutoff, "day")),
                     ('asset_id', '=', record.asset_id.id),
-                    ('prediction', '=', is_future),
+                    ('prediction', '=', record.date > fields.Date.today()),
                 ], limit=1, order='time desc') # latest = closing price for the day
 
             if not at_price_id:
@@ -199,7 +198,7 @@ class InvestmentTimeseries(models.Model):
                     at_price_id = record.env['investment.asset.price'].create({
                         'time': time_cutoff,
                         'asset_id': record.asset_id.id,
-                        'prediction': is_future,
+                        'prediction': after_price_id.prediction or before_price_id.prediction,
                         'interpolated': True,
                         'price': interpolated_price,
                     })
