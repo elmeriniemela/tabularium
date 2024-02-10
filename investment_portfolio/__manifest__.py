@@ -34,5 +34,6 @@
         'demo/categories.xml',
         'demo/portfolios.xml',
         'demo/assets.xml',
+        'demo/investment.asset.price.csv',
     ],
 }
