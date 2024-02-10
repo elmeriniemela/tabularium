@@ -82,6 +82,8 @@ class CloudServer(models.Model):
         self.ensure_one()
         if 'args' not in kwargs:
             kwargs['args'] = tuple()
+        if 'commit_before' not in kwargs:
+            kwargs['commit_before'] = False
         return self.endpoint_id.produce(kwargs)['obj']
 
     @api.model

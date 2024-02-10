@@ -201,7 +201,7 @@ class CloudInstance(models.Model):
             self.message_post(body="Restarted.")
 
     def action_upgrade(self):
-        upgrade = self._irpc(method='upgrade', args=(self.uid,))
+        upgrade = self._irpc(method='upgrade', args=(self.uid,) commit_before=True)
         if upgrade:
             self.message_post(body="Upgraded.")
             self.upgrade = upgrade
