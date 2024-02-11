@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import datetime
+import dateutil.parser
 from odoo import models, api, fields, exceptions, _
 
 _logger = logging.getLogger(__name__)
@@ -116,7 +116,7 @@ class CloudServer(models.Model):
             state = container['State']
             assert state in {'created', 'running', 'restarting', 'exited', 'paused', 'dead'}, state
             vals['state'] = state
-            vals['restarted'] = datetime.datetime.fromisoformat(container['inspect']['State']['StartedAt']).replace(tzinfo=None)
+            vals['restarted'] = dateutil.parser.isoparse(container['inspect']['State']['StartedAt']).replace(tzinfo=None)
             return vals
 
 
