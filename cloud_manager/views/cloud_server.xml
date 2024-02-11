@@ -35,6 +35,7 @@
                     <group>
                         <group>
                             <field name="endpoint_id"/>
+                            <field name="ip_address"/>
                             <field name="restarted"/>
                         </group>
                         <group>

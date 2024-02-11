@@ -116,6 +116,7 @@ class CloudInstance(models.Model):
             'config',
             'upgrade',
             'fshealth',
+            'self_upgrade',
         ]
         if self.is_self and method not in is_self_allowed:
             raise exceptions.ValidationError(_("This action can't be performed on self."))
