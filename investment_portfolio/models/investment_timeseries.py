@@ -18,9 +18,6 @@ class InvestmentTimeseries(models.Model):
 
     position = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
     quantity = fields.Float(compute='_compute_aggregate', store=True, digits='Investment Asset quantity')
-
-    position = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
-
     cost_basis = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
 
 
@@ -95,7 +92,7 @@ class InvestmentTimeseries(models.Model):
     )
 
     _sql_constraints = [
-        ('date_position_unique', 'unique(date, asset_id)', 'This position already exists!'),
+        ('date_timeseries_unique', 'unique(date, asset_id)', 'This timeseries already exists!'),
     ]
 
     @api.depends('date')
