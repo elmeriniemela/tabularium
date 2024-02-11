@@ -224,6 +224,11 @@ class InvestmentAsset(models.Model):
         # Remove old predictions.
 
         for asset_id in self:
+            if not asset_id.quantity:
+                _logger.info("Skip plan for %s as we have no position on it.", asset_id.name)
+                continue
+
+            _logger.info("Generate plan for %s.", asset_id.name)
             if asset_id.plan_auto_realize:
                 asset_id.plan_transaction_ids.filtered(lambda t: t.time.date() <= today).prediction = False
 
