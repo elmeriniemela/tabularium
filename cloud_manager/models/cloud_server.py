@@ -28,6 +28,12 @@ class CloudServer(models.Model):
         ],
     )
 
+    ip_address = fields.Char(
+        required=True,
+        tracking=True,
+        default='127.0.0.1',
+    )
+
     commit = fields.Char(
         tracking=True,
         readonly=True,

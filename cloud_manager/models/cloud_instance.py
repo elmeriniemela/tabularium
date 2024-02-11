@@ -177,26 +177,10 @@ class CloudInstance(models.Model):
 
     def action_restart(self):
         self.ensure_one()
-
-
-        def self_upgrade(db, uid, ctx, id, instuid):
-            with registry(db).cursor() as cr:
-                env = api.Environment(cr, uid, ctx)
-                inst = env['cloud.instance'].browse(id)
-                cr.execute(
-                    "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = %s AND usename = %s AND pid <> pg_backend_pid()", (instuid, instuid),
-                )
-                inst.action_upgrade()
-                inst.restart_needed = False
-                inst.message_post(body="Restart initiated.")
-                inst.env.cr.commit() # Commit before the following restart will kill the thread
-                inst._irpc(method='restart', args=(instuid,)) # Kills the thread
-
         if self.is_self:
-            threading.Thread(
-                target=self_upgrade,
-                args=(self.env.cr.dbname, self.env.user.id, self.env.context.copy(), self.id, self.uid),
-            ).start()
+            callback_url = self.env.ref('cloud_manager.endpoint_agent_callback').url
+            assert callback_url
+            self._irpc(method='self_upgrade', args=(self.uid, callback_url), commit_before=True)
         else:
             self.action_upgrade()
             self._irpc(method='restart', args=(self.uid,))
@@ -204,8 +188,7 @@ class CloudInstance(models.Model):
             self.message_post(body="Restarted.")
 
     def action_upgrade(self):
-        kill_queries = not self.is_self
-        upgrade = self._irpc(method='upgrade', args=(self.uid, kill_queries), commit_before=True)
+        upgrade = self._irpc(method='upgrade', args=(self.uid,))
         if upgrade:
             self.message_post(body="Upgraded.")
             self.upgrade = upgrade
@@ -240,6 +223,10 @@ class CloudInstance(models.Model):
         self.ensure_one()
         self._irpc(method='config', args=(self.uid, self.config))
         self.message_post(body="Config updated.")
+
+    def parse_callback(self, vals):
+        self.ensure_one()
+        _logger.info(vals)
 
     def parse_backups(self, backup_list):
         self.ensure_one()

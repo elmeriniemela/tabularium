@@ -14,16 +14,55 @@
         <field name="documentation" eval="False"/>
         <field name="test_example" eval="False"/>
         <field name="xslt" eval="False"/>
-        <field name="initiator">self.produce(variables={'method': 'status', 'args': tuple()})</field>
+        <field name="initiator">self.produce(variables={'method': 'status', 'args': tuple(), 'commit_before': False})</field>
         <field name="producer">
 url = 'https://%s@%s' % (self.authorization, self.location)
 if commit_before:
-    self.env.cr.commit()
+  self.env.cr.commit()
 obj = self.xmlrpc(url, method, args)
 </field>
         <field name="consumer">
 if method == 'status':
   self.env['cloud.server'].parse_status(self, obj)
   </field>
+    </record>
+    <record id="cloud_manager.endpoint_agent_callback" model="api.endpoint">
+        <field name="name">Cloud Agent Callback</field>
+        <field name="location">agent-callback</field>
+        <field name="usage_field_id" eval="False"/>
+        <field name="direction">inbound</field>
+        <field name="role">passive</field>
+        <field name="comm_method">http</field>
+        <field name="http_method">post</field>
+        <field name="file_format">json</field>
+        <field name="response_format">json</field>
+        <field name="auto_code" eval="False"/>
+        <field name="documentation" eval="False"/>
+        <field name="test_example">
+resp = requests.post(
+    url=self.url,
+    json={
+        'method': 'restart'
+    },
+)
+resp.raise_for_status()
+</field>
+        <field name="xslt" eval="False"/>
+        <field name="initiator">self.produce(variables={})</field>
+        <field name="producer">
+obj = json.loads(data)
+obj['ip'] = request.httprequest.remote_addr
+</field>
+        <field name="consumer">
+server = self.env['cloud.server'].search([('ip_address', '=', obj['ip'])], limit=1)
+status = 'unauthorized'
+if server: # Before checking uid, ensure the call comes from an authorized IP.
+  instance = server.instance_ids.filtered(lambda i: i.uid == obj['uid'])
+  if instance:
+    instance.parse_callback(obj)
+    status = 'ok'
+
+response = {'status': status}
+</field>
     </record>
 </odoo>
