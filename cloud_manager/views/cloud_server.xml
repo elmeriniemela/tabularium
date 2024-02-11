@@ -35,10 +35,11 @@
                     <group>
                         <group>
                             <field name="endpoint_id"/>
-                            <field name="ip_address"/>
-                            <field name="restarted"/>
+                            <field name="ipv4_address"/>
+                            <field name="ipv6_address"/>
                         </group>
                         <group>
+                            <field name="restarted"/>
                             <field name="branch"/>
                             <field name="commit"/>
                         </group>

@@ -3,13 +3,13 @@
     <record id="cloud_instance_list" model="ir.ui.view">
         <field name="model">cloud.instance</field>
         <field name="arch" type="xml">
-            <tree decoration-warning="restart_needed == True" decoration-muted="state == 'removed'" decoration-info="state in ('draft', 'created')" decoration-danger="state in ('exited', 'dead')">
+            <tree decoration-warning="restart_requested != False" decoration-muted="state == 'removed'" decoration-info="state in ('draft', 'created')" decoration-danger="state in ('exited', 'dead')">
                 <field name="name" optional="show"/>
                 <field name="server_id" optional="show"/>
                 <field name="uid" optional="show"/>
                 <field name="http_port" optional="show"/>
                 <field name="gevent_port" optional="show"/>
-                <field name="restart_needed" optional="show"/>
+                <field name="restart_requested" optional="show"/>
                 <field name="state" optional="show"/>
             </tree>
         </field>

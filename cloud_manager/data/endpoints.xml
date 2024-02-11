@@ -54,7 +54,7 @@ obj = json.loads(data)
 obj['ip'] = request.httprequest.remote_addr
 </field>
         <field name="consumer">
-server = self.env['cloud.server'].search([('ip_address', '=', obj['ip'])], limit=1)
+server = self.env['cloud.server'].search(['|', ('ipv4_address', '=', obj['ip']), ('ipv6_address', '=', obj['ip'])], limit=1)
 status = 'unauthorized'
 if server: # Before checking uid, ensure the call comes from an authorized IP.
   instance = server.instance_ids.filtered(lambda i: i.uid == obj['uid'])

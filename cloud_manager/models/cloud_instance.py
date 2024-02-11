@@ -41,8 +41,15 @@ class CloudInstance(models.Model):
         required=True,
     )
 
-    restart_needed = fields.Boolean(
+    restart_requested = fields.Datetime(
         tracking=True,
+        store=True,
+        compute='_compute_restart_requested',
+    )
+
+    restarted = fields.Datetime(
+        tracking=True,
+        readonly=True,
     )
 
     http_port = fields.Integer(
@@ -95,6 +102,15 @@ class CloudInstance(models.Model):
         ('uniq_http_port', 'UNIQUE(server_id, http_port)', 'The HTTP port must be unique within the same server!'),
         ('uniq_gevent_port', 'UNIQUE(server_id, gevent_port)', 'The Gevent port must be unique within the same server!'),
     ]
+
+    @api.depends('restarted')
+    def _compute_restart_requested(self):
+        for record in self:
+            if not record.restart_requested:
+                continue
+
+            if record.restarted >= record.restart_requested:
+                record.restart_requested = False
 
     def _track_subtype(self, initial_values):
         """ Give the subtypes triggered by the changes on the record according
@@ -185,8 +201,7 @@ class CloudInstance(models.Model):
         else:
             self.action_upgrade()
             self._irpc(method='restart', args=(self.uid,))
-            self.restart_needed = False
-            self.message_post(body="Restarted.")
+            self.restarted = fields.Datetime.now()
 
     def action_upgrade(self):
         upgrade = self._irpc(method='upgrade', args=(self.uid,))
@@ -229,8 +244,10 @@ class CloudInstance(models.Model):
         self.ensure_one()
         if vals.get('method') == 'upgrade':
             self.message_post(body="Upgraded.")
+            _logger.info("Posted msg on %s", self)
             if vals.get('logs'):
                 self.upgrade = vals.get('logs')
+                _logger.info("Saved logs on %s", self)
         _logger.info(vals)
 
     def parse_backups(self, backup_list):

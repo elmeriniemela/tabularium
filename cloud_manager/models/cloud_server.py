@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import datetime
 from odoo import models, api, fields, exceptions, _
 
 _logger = logging.getLogger(__name__)
@@ -28,10 +29,16 @@ class CloudServer(models.Model):
         ],
     )
 
-    ip_address = fields.Char(
+    ipv4_address = fields.Char(
         required=True,
         tracking=True,
         default='127.0.0.1',
+    )
+
+    ipv6_address = fields.Char(
+        required=True,
+        tracking=True,
+        default='0:0:0:0:0:0:0:1',
     )
 
     commit = fields.Char(
@@ -78,7 +85,7 @@ class CloudServer(models.Model):
         self.restarted = fields.Datetime.now()
 
     def action_restart_instances(self):
-        instances = self.instance_ids.filtered(lambda i: i.restart_needed)
+        instances = self.instance_ids.filtered(lambda i: i.restart_requested)
         norm = instances.filtered(lambda i: not i.is_self)
         for n in norm: n.action_restart()
         for i in (instances - norm): i.action_restart()
@@ -109,6 +116,7 @@ class CloudServer(models.Model):
             state = container['State']
             assert state in {'created', 'running', 'restarting', 'exited', 'paused', 'dead'}, state
             vals['state'] = state
+            vals['restarted'] = datetime.datetime.fromisoformat(container['inspect']['State']['StartedAt']).replace(tzinfo=None)
             return vals
 
 
