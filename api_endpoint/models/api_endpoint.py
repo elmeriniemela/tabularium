@@ -355,6 +355,8 @@ class ApiEndpoint(models.Model):
             url = False
             if rec.comm_method == 'http' and rec.http_method in ['post', 'put', 'delete', 'get'] and rec.role == 'passive' and rec.location:
                 url = f'{base_url}/api-endpoint/v1/{rec.location}'
+                if rec.authorization:
+                    url += f'?Authorization={rec.authorization}'
             rec.url = url
 
     @api.depends('comm_method', 'role', 'direction', 'file_format')

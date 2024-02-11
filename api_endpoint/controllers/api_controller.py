@@ -39,7 +39,7 @@ class ApiController(http.Controller):
 
     def _process(self, location, **variables):
         method = request.httprequest.method.lower()
-        auth = request.httprequest.headers.get('Authorization') or ''
+        auth = request.httprequest.headers.get('Authorization') or variables.get('Authorization') or ''
         data = request.httprequest.data
         _logger.info(f"{method=}, {location=} {auth=}, {variables=}, {data=}")
         variables['data'] = data
