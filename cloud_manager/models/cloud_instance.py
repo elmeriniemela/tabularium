@@ -227,6 +227,10 @@ class CloudInstance(models.Model):
 
     def parse_callback(self, vals):
         self.ensure_one()
+        if vals.get('method') == 'upgrade':
+            self.message_post(body="Upgraded.")
+            if vals.get('logs'):
+                self.upgrade = vals.get('logs')
         _logger.info(vals)
 
     def parse_backups(self, backup_list):
