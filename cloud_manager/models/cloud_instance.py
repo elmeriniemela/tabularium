@@ -183,6 +183,9 @@ class CloudInstance(models.Model):
             with registry(db).cursor() as cr:
                 env = api.Environment(cr, uid, ctx)
                 inst = env['cloud.instance'].browse(id)
+                cr.execute(
+                    "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = %s AND usename = %s AND pid <> pg_backend_pid()", (instuid, instuid),
+                )
                 inst.action_upgrade()
                 inst.restart_needed = False
                 inst.message_post(body="Restart initiated.")
@@ -201,7 +204,8 @@ class CloudInstance(models.Model):
             self.message_post(body="Restarted.")
 
     def action_upgrade(self):
-        upgrade = self._irpc(method='upgrade', args=(self.uid,), commit_before=True)
+        kill_queries = not self.is_self
+        upgrade = self._irpc(method='upgrade', args=(self.uid, kill_queries), commit_before=True)
         if upgrade:
             self.message_post(body="Upgraded.")
             self.upgrade = upgrade
