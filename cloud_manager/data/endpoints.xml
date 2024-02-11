@@ -30,7 +30,7 @@ if method == 'status':
         <field name="name">Cloud Agent Callback</field>
         <field name="location">agent-callback</field>
         <field name="usage_field_id" eval="False"/>
-        <field name="direction">outbound</field>
+        <field name="direction">inbound</field>
         <field name="role">passive</field>
         <field name="comm_method">http</field>
         <field name="http_method">post</field>
