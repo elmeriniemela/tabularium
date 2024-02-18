@@ -34,7 +34,10 @@ class CloudBackup(models.Model):
         ondelete='cascade',
     )
 
-    display_name = fields.Char(store=True)
+    display_name = fields.Char(
+        compute="_compute_display_name",
+        store=True,
+    )
 
     _sql_constraints = [
         ('uniq_name', 'UNIQUE(instance_id, name)', 'Backup name should be unique within an instance!'),
