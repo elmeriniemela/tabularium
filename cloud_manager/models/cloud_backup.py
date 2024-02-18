@@ -11,6 +11,7 @@ class CloudBackup(models.Model):
     _description = 'Cloud Backup'
     _inherit = ['mail.thread']
     _order = 'instance_id, timestamp desc'
+    _rec_name = 'display_name'
 
     name = fields.Char(
         required=True,
