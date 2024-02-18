@@ -10,6 +10,7 @@ class CloudBackup(models.Model):
     _name = 'cloud.backup'
     _description = 'Cloud Backup'
     _inherit = ['mail.thread']
+    _order = 'instance_id, timestamp desc'
 
     name = fields.Char(
         required=True,
@@ -33,15 +34,16 @@ class CloudBackup(models.Model):
         ondelete='cascade',
     )
 
+    display_name = fields.Char(store=True)
+
     _sql_constraints = [
         ('uniq_name', 'UNIQUE(instance_id, name)', 'Backup name should be unique within an instance!'),
     ]
 
-    def name_get(self):
-        result = []
+    @api.depends('name', 'instance_id.name')
+    def _compute_display_name(self):
         for record in self:
-            result.append((record.id, f'{record.instance_id.name}: {record.name}'))
-        return result
+            record.display_name = f'{record.instance_id.name}: {record.name}'
 
 
     def action_restore(self):

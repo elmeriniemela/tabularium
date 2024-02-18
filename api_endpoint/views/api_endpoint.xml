@@ -4,7 +4,7 @@
         <field name="model">api.endpoint</field>
         <field name="priority">2</field>
         <field name="arch" type="xml">
-            <tree decoration-danger="state == 'error'" decoration-muted="state == 'archived'">
+            <tree expand="1" decoration-danger="state == 'error'" decoration-muted="state == 'archived'">
                 <field name="sequence" widget="handle"/>
                 <field name="name" optional="show"/>
                 <field name="company_id" groups="base.group_multi_company" optional="hide"/>
@@ -101,6 +101,7 @@
             <search>
                 <field name="name"/>
                 <group expand="1" string="Group by">
+                    <filter string="Used in" name="group_usage_field_id" context="{'group_by': 'usage_field_id'}"/>
                     <filter string="Create Date" name="group_create_date" context="{'group_by': 'create_date:year'}"/>
                 </group>
             </search>
@@ -112,7 +113,7 @@
         <field name="name">APIs</field>
         <field name="res_model">api.endpoint</field>
         <field name="view_mode">tree,kanban,form</field>
-        <field name="context"></field>
+        <field name="context">{'search_default_group_usage_field_id': 1,}</field>
     </record>
 
 
