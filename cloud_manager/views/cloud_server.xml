@@ -6,6 +6,9 @@
             <tree>
                 <field name="name" optional="show"/>
                 <field name="endpoint_id" optional="hide"/>
+                <field name="ipv4_address"/>
+                <field name="ipv6_address"/>
+                <field name="restarted"/>
                 <field name="branch" optional="show"/>
                 <field name="commit" optional="show"/>
             </tree>
