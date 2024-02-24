@@ -61,6 +61,10 @@ class InvestmentAsset(models.Model):
         index=True,
     )
 
+    is_company_currency = fields.Boolean(
+        compute='_compute_is_company_currency'
+    )
+
     price_ids = fields.One2many(
         comodel_name='investment.asset.price',
         inverse_name='asset_id',
@@ -91,7 +95,12 @@ class InvestmentAsset(models.Model):
 
 
     last_update = fields.Datetime(compute='_compute_aggregate', store=True)
-    last_price = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id', group_operator=None)
+    last_price_id = fields.Many2one(
+        string='Last Price Record',
+        comodel_name='investment.asset.price',
+        compute='_compute_aggregate', store=True)
+    last_price = fields.Monetary(string="Last Price (own currency)", compute='_compute_aggregate', store=True, currency_field='company_currency_id', group_operator=None)
+    last_price_currency = fields.Monetary(string="Last Price", related='last_price_id.price', store=True, currency_field='currency_id', group_operator=None)
     profit = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id', group_operator='sum')
     profit_percent = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg')
     daily_price = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg', string="1 Day")
@@ -152,6 +161,7 @@ class InvestmentAsset(models.Model):
     plan_total_cash_flow = fields.Monetary(readonly=True)
     plan_auto_realize = fields.Boolean()
     plan_allow_past = fields.Boolean()
+
 
 
     @api.model
@@ -323,6 +333,11 @@ class InvestmentAsset(models.Model):
                 line['profit_percent'] = total_profits / total_investment if total_investment else 0.0
         return res
 
+    @api.depends('currency_id', 'company_id')
+    def _compute_is_company_currency(self):
+        for rec in self:
+            rec.is_company_currency = rec.currency_id == rec.company_currency_id
+
 
     def _compute_is_cash(self):
         currency_ticker = self.env.company.currency_id.name
@@ -367,16 +382,16 @@ class InvestmentAsset(models.Model):
 
 
         for record in self:
-            price_id = record.price_ids[:1]
-            record.last_price = price_id.currency_id._convert(
-                from_amount=price_id.price or 0.0,
+            record.last_price_id = record.price_ids[:1]
+            record.last_price = record.last_price_id.currency_id._convert(
+                from_amount=record.last_price_id.price or 0.0,
                 to_currency=self.company_currency_id,
                 company=self.env.company,
-                date=price_id.time or fields.Datetime.now(),
+                date=record.last_price_id.time or fields.Datetime.now(),
             )
             record.update(record._get_position(record.last_price, record.transaction_ids))
 
-            record.last_update = price_id.time
+            record.last_update = record.last_price_id.time
             record.daily_price = percent_change(record, fields.Datetime.now().replace(hour=0, minute=0, second=0), record.last_price)
             record.weekly_price = percent_change(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(weeks=1), record.last_price)
             record.monthly_price = percent_change(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(months=1), record.last_price)
