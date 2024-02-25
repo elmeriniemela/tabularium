@@ -5,7 +5,7 @@
         <menuitem name="Assets" id="menu_assets" sequence="10">
             <menuitem id="menu_current_positions" action="action_current_positions" sequence="10"/>
             <menuitem id="menu_liquid_allocations" action="action_liquid_allocations" sequence="20"/>
-            <menuitem id="menu_allocations_by_asset_class" action="action_allocations_by_asset_class" sequence="30"/>
+            <menuitem id="menu_allocations_by_asset_class" action="action_allocations_by_portfolio" sequence="30"/>
         </menuitem>
 
         <menuitem name="Transactions" id="menu_transactions" sequence="20">

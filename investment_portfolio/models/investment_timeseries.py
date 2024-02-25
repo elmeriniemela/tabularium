@@ -50,15 +50,17 @@ class InvestmentTimeseries(models.Model):
     )
 
 
-    company_currency_id = fields.Many2one(related='asset_id.company_currency_id', string="Company Currency")
+    company_currency_id = fields.Many2one(related='position_id.company_currency_id', string="Company Currency")
 
 
-    asset_id = fields.Many2one(
-        comodel_name='investment.asset',
+    position_id = fields.Many2one(
+        comodel_name='investment.position',
         required=True,
         ondelete='cascade',
         index=True,
     )
+
+    asset_id = fields.Many2one(related='position_id.asset_id')
 
     category_id = fields.Many2one(
         related='asset_id.category_id',

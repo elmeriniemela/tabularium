@@ -1,0 +1,272 @@
+<odoo>
+    <record id="position_tree" model="ir.ui.view">
+        <field name="name">investment.position.tree</field>
+        <field name="model">investment.position</field>
+        <field name="arch" type="xml">
+            <tree expand="1" default_order="portfolio_id, sequence, id">
+                <field name="sequence" widget="handle"/>
+                <field name="name" optional="show"/>
+                <field name="ticker" optional="hide"/>
+                <field name="last_price_currency" optional="show"/>
+                <field name="last_update" optional="show" widget="timeago"/>
+                <field name="daily_price" widget="percentage" decoration-danger="daily_price &lt; 0" decoration-success="daily_price &gt; 0" optional="show"/>
+                <field name="weekly_price" widget="percentage" decoration-danger="weekly_price &lt; 0" decoration-success="weekly_price &gt; 0" optional="show"/>
+                <field name="monthly_price" widget="percentage" decoration-danger="monthly_price &lt; 0" decoration-success="monthly_price &gt; 0" optional="show"/>
+                <field name="three_month_price" widget="percentage" decoration-danger="three_month_price &lt; 0" decoration-success="three_month_price &gt; 0" optional="show"/>
+                <field name="six_month_price" widget="percentage" decoration-danger="six_month_price &lt; 0" decoration-success="six_month_price &gt; 0" optional="show"/>
+                <field name="ytd_price" widget="percentage" decoration-danger="ytd_price &lt; 0" decoration-success="ytd_price &gt; 0" optional="show"/>
+                <field name="one_year_price" widget="percentage" decoration-danger="one_year_price &lt; 0" decoration-success="one_year_price &gt; 0" optional="show"/>
+                <field name="three_year_price" widget="percentage" decoration-danger="three_year_price &lt; 0" decoration-success="three_year_price &gt; 0" optional="show"/>
+                <field name="five_year_price" widget="percentage" decoration-danger="five_year_price &lt; 0" decoration-success="five_year_price &gt; 0" optional="show"/>
+
+                <field name="quantity" optional="show"/>
+                <field name="position" optional="show" sum="Total Position"/>
+                <field name="investment" optional="hide"/>
+                <field name="max_investment" optional="hide"/>
+                <field name="cost_basis" optional="hide"/>
+
+                <field name="profit" widget="monetary" decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0" optional="show" sum="Total Profit"/>
+                <field name="profit_percent" widget="percentage" decoration-danger="profit_percent &lt; 0" decoration-success="profit_percent &gt; 0" optional="show"/>
+
+                <field name="currency_id" optional="hide"/>
+                <field name="endpoint_id" optional="hide"/>
+                <field name="company_currency_id" optional="hide"/>
+
+
+                <field name="follow" widget="boolean_toggle" optional="hide"/>
+                <field name="plan_type" optional="hide"/>
+                <field name="plan_start_date" optional="hide"/>
+                <field name="plan_months" optional="hide"/>
+                <field name="plan_payment" attrs="{'readonly': [('plan_type', '!=', 'acquire')]}" optional="hide"/>
+                <field name="plan_yield" optional="hide"/>
+                <field name="plan_cost" optional="hide"/>
+                <field name="plan_fee" optional="hide"/>
+                <field name="plan_yearly_appreciation" widget="percentage" optional="hide"/>
+                <field name="plan_yearly_interest" widget="percentage" optional="hide"/>
+                <field name="plan_total_cash_flow" optional="hide"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="position_pie_graph" model="ir.ui.view">
+        <field name="name">investment.position.graph</field>
+        <field name="model">investment.position</field>
+        <field name="priority" eval="1"/>
+        <field name="arch" type="xml">
+            <graph type="pie">
+                <field name="position" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="position_bar_graph" model="ir.ui.view">
+        <field name="name">investment.position.graph</field>
+        <field name="model">investment.position</field>
+        <field name="priority" eval="2"/>
+        <field name="arch" type="xml">
+            <graph type="bar">
+                <field name="position" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="position_form" model="ir.ui.view">
+        <field name="name">investment.position.form</field>
+        <field name="model">investment.position</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="run_integration" type="object" string="Run Integration" icon="fa-cogs"/>
+                    <button name="%(action_prices)d"
+                        string="Prices"
+                        type="action"
+                        context="{'search_default_position_id': id, 'search_default_realized': 1, 'search_default_group_time': 1}"
+                        class="oe_stat_button"
+                        icon="fa-usd">
+                    </button>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="ticker"/>
+                            <field name="company_id"/>
+                            <field name="currency_id"/>
+                            <field name="category_id"/>
+                            <field name="portfolio_id"/>
+                            <field name="endpoint_id"/>
+                            <field name="daily_price" widget="percentage" decoration-danger="daily_price &lt; 0" decoration-success="daily_price &gt; 0"/>
+                            <field name="weekly_price" widget="percentage" decoration-danger="weekly_price &lt; 0" decoration-success="weekly_price &gt; 0"/>
+                            <field name="monthly_price" widget="percentage" decoration-danger="monthly_price &lt; 0" decoration-success="monthly_price &gt; 0"/>
+                            <field name="three_month_price" widget="percentage" decoration-danger="three_month_price &lt; 0" decoration-success="three_month_price &gt; 0"/>
+                            <field name="six_month_price" widget="percentage" decoration-danger="six_month_price &lt; 0" decoration-success="six_month_price &gt; 0"/>
+                            <field name="ytd_price" widget="percentage" decoration-danger="ytd_price &lt; 0" decoration-success="ytd_price &gt; 0"/>
+                        </group>
+                        <group>
+                            <field name="company_currency_id" invisible="1"/>
+                            <field name="is_company_currency" invisible="1"/>
+                            <label for="last_price_currency"/>
+                            <div>
+                                <field name="last_price_currency" class="oe_inline"/>
+                                <span attrs="{'invisible': [('is_company_currency', '=', True)]}"> / <field name="last_price" class="oe_inline"/> </span>
+                                <span> (<field name="last_update" widget="timeago" class="oe_inline"/>) </span>
+                            </div>
+                            <field name="cost_basis"/>
+                            <field name="quantity"/>
+                            <field name="position"/>
+                            <field name="investment"/>
+                            <field name="profit" decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0"/>
+                            <field name="profit_percent" widget="percentage" decoration-danger="profit_percent &lt; 0" decoration-success="profit_percent &gt; 0"/>
+                            <field name="one_year_price" widget="percentage" decoration-danger="one_year_price &lt; 0" decoration-success="one_year_price &gt; 0"/>
+                            <field name="three_year_price" widget="percentage" decoration-danger="three_year_price &lt; 0" decoration-success="three_year_price &gt; 0"/>
+                            <field name="five_year_price" widget="percentage" decoration-danger="five_year_price &lt; 0" decoration-success="five_year_price &gt; 0"/>
+                            <field name="follow" widget="boolean_toggle"/>
+                        </group>
+                        <field name="notes"/>
+                    </group>
+                    <notebook>
+                        <page string="Transactions">
+                            <field name="transaction_ids" context="{'default_position_id': id}"/>
+                        </page>
+                        <page string="Realized Gains/Losses">
+                            <field name="realized_ids" context="{'default_position_id': id}"/>
+                        </page>
+                        <page string="Plans">
+                            <group>
+                                <group>
+                                    <field name="plan_type"/>
+                                    <field name="plan_start_date"/>
+                                    <field name="plan_months"/>
+                                    <field name="plan_payment" attrs="{'readonly': [('plan_type', '!=', 'acquire')]}"/>
+                                    <field name="plan_yield"/>
+                                    <field name="plan_cost"/>
+                                    <field name="plan_fee"/>
+                                </group>
+                                <group>
+                                    <field name="plan_yearly_appreciation" widget="percentage"/>
+                                    <field name="plan_yearly_interest" widget="percentage"/>
+                                    <field name="plan_total_cash_flow"/>
+                                    <field name="plan_allow_past" widget="boolean_toggle"/>
+                                    <field name="plan_auto_realize" widget="boolean_toggle"/>
+                                    <button name="generate_plan" type="object" string="Generate Plan" icon="fa-cogs"/>
+                                </group>
+                            </group>
+                            <field name="plan_transaction_ids" context="{'default_position_id': id, 'default_prediction': True}"/>
+                        </page>
+                        <page string="Thesis">
+                            <field name="thesis"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="o_attachment_preview"/>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="position_search" model="ir.ui.view">
+        <field name="name">investment.position.search</field>
+        <field name="model">investment.position</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="category_id"/>
+                <field name="portfolio_id"/>
+                <separator/>
+                <filter string="Long" name="long" domain="[('quantity', '>', 0.0)]"/>
+                <filter string="Short" name="short" domain="[('quantity', '&lt;', 0.0)]"/>
+                <filter string="Closed" name="closed" domain="[('quantity', '=', 0.0)]"/>
+                <separator/>
+                <filter string="Transactions" name="transactions" domain="[('transaction_ids', '!=', False)]"/>
+                <filter string="No Transactions" name="no_transactions" domain="[('transaction_ids', '=', False)]"/>
+                <separator/>
+                <filter string="Follow" name="follow" domain="[('follow', '=', True)]"/>
+                <filter string="No Follow" name="no_follow" domain="[('follow', '=', False)]"/>
+                <separator/>
+                <filter string="Liquid" name="liquid" domain="[('liquid', '=', True)]"/>
+                <filter string="Illiquid" name="illiquid" domain="[('liquid', '=', False)]"/>
+                <separator/>
+                <group expand="1" string="Group by">
+                    <filter string="Portfolio" name="group_portfolio_id" context="{'group_by': 'portfolio_id'}"/>
+                    <filter string="Category" name="group_category_id" context="{'group_by': 'category_id'}"/>
+                    <filter string="Name" name="group_name" context="{'group_by': 'name'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_compute_aggregate_position" model="ir.actions.server">
+        <field name="name">Re-compute Value</field>
+        <field name="model_id" ref="model_investment_position"/>
+        <field name="binding_model_id" ref="model_investment_position"/>
+        <field name="state">code</field>
+        <field name="code">records._compute_aggregate()</field>
+    </record>
+
+    <record id="action_update_realized_fifo_position" model="ir.actions.server">
+        <field name="name">Update Realized Gains/Losses</field>
+        <field name="model_id" ref="model_investment_position"/>
+        <field name="binding_model_id" ref="model_investment_position"/>
+        <field name="state">code</field>
+        <field name="code">records.update_realized_fifo()</field>
+    </record>
+
+    <record id="action_position_generate_plan" model="ir.actions.server">
+        <field name="name">Generate Plan</field>
+        <field name="model_id" ref="model_investment_position"/>
+        <field name="binding_model_id" ref="model_investment_position"/>
+        <field name="state">code</field>
+        <field name="code">records.generate_plan()</field>
+    </record>
+
+    <record id="action_position_generate_timeseries" model="ir.actions.server">
+        <field name="name">Generate Timeseries</field>
+        <field name="model_id" ref="model_investment_position"/>
+        <field name="binding_model_id" ref="model_investment_position"/>
+        <field name="state">code</field>
+        <field name="code">records.with_context(force_recompute=True).generate_timeseries()</field>
+    </record>
+
+    <record id="action_current_positions" model="ir.actions.act_window">
+        <field name="name">Current positions</field>
+        <field name="res_model">investment.position</field>
+        <field name="view_mode">tree,form,graph</field>
+        <field name="context">{'search_default_group_portfolio_id': 1, 'search_default_follow': 1}</field>
+    </record>
+
+    <record id="action_liquid_allocations" model="ir.actions.act_window">
+        <field name="name">Liquid Allocations</field>
+        <field name="res_model">investment.position</field>
+        <field name="view_mode">graph,tree,form</field>
+        <field name="context">{'search_default_group_name': 1, 'search_default_long': 1, 'search_default_liquid': 1,}</field>
+        <field
+            name="view_ids"
+            eval="[
+                (5, 0, 0),
+            ]"
+        />
+    </record>
+
+    <record id="action_allocations_by_portfolio" model="ir.actions.act_window">
+        <field name="name">Allocations per portfolio</field>
+        <field name="res_model">investment.position</field>
+        <field name="view_mode">graph,tree,form</field>
+        <field name="context">{'search_default_group_portfolio_id': 1, 'search_default_group_name': 1,}</field>
+        <field
+            name="view_ids"
+            eval="[
+                (5, 0, 0),
+                (0, 0, {'view_mode': 'graph', 'view_id': ref('position_bar_graph')}),
+            ]"
+        />
+    </record>
+
+</odoo>

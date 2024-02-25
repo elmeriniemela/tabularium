@@ -16,14 +16,16 @@ class InvestmentAssetTransaction(models.Model):
     _description = 'Asset Transaction'
     _order = 'time desc, ttype'
 
-    asset_id = fields.Many2one(
-        comodel_name='investment.asset',
+    position_id = fields.Many2one(
+        comodel_name='investment.position',
         required=True,
         ondelete='cascade',
         index=True,
     )
 
-    currency_id = fields.Many2one(related='asset_id.company_currency_id')
+    asset_id = fields.Many2one(related='position_id.asset_id')
+
+    currency_id = fields.Many2one(related='position_id.company_currency_id')
 
     payment = fields.Monetary(required=True)
 
@@ -127,14 +129,14 @@ class InvestmentAssetTransaction(models.Model):
 
 
 
-    @api.depends('payment', 'quantity', 'asset_id.last_price')
+    @api.depends('payment', 'quantity', 'position_id.last_price')
     def _compute_profit(self):
         for tx in self:
             quantity = tx.quantity
             if not quantity: # if quantity is 0, the cash flow will be profit.
                 tx.profit = tx.payment
             else:
-                tx.profit = (tx.asset_id.last_price - (tx.payment / abs(quantity))) * quantity
+                tx.profit = (tx.position_id.last_price - (tx.payment / abs(quantity))) * quantity
 
 
     @api.depends('exchange_rate', 'payment', 'quantity')

@@ -7,14 +7,16 @@ class InvestmentAssetRealized(models.Model):
     _description = 'Asset Realized'
     _order = 'sell_date desc, buy_date desc'
 
-    asset_id = fields.Many2one(
-        comodel_name='investment.asset',
+    position_id = fields.Many2one(
+        comodel_name='investment.position',
         required=True,
         ondelete='cascade',
         index=True,
     )
 
-    currency_id = fields.Many2one(related='asset_id.company_currency_id')
+    asset_id = fields.Many2one(related='position_id.asset_id')
+
+    currency_id = fields.Many2one(related='position_id.company_currency_id')
     category_id = fields.Many2one(related='asset_id.category_id', store=True)
 
     sell_batch_id = fields.Many2one(
