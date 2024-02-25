@@ -14,20 +14,20 @@ _logger = logging.getLogger(__name__)
 class InvestmentTimeseries(models.Model):
     _name = 'investment.timeseries'
     _description = 'Investment Time Series'
-    _rec_name = 'asset_id'
+    _rec_name = 'position_id'
 
-    position = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
-    quantity = fields.Float(compute='_compute_aggregate', store=True, digits='Investment Asset quantity')
-    cost_basis = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
+    position = fields.Monetary(compute='_compute_timeseries_aggregate', store=True, currency_field='company_currency_id')
+    quantity = fields.Float(compute='_compute_timeseries_aggregate', store=True, digits='Investment Asset quantity')
+    cost_basis = fields.Monetary(compute='_compute_timeseries_aggregate', store=True, currency_field='company_currency_id')
 
 
-    last_price = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
-    profit = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id', group_operator='sum')
-    profit_percent = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg')
-    transaction_ids = fields.Many2many(comodel_name='investment.asset.transaction', compute='_compute_aggregate', store=True)
+    last_price = fields.Monetary(compute='_compute_timeseries_aggregate', store=True, currency_field='company_currency_id')
+    profit = fields.Monetary(compute='_compute_timeseries_aggregate', store=True, currency_field='company_currency_id', group_operator='sum')
+    profit_percent = fields.Float(compute='_compute_timeseries_aggregate', store=True, group_operator='avg')
+    transaction_ids = fields.Many2many(comodel_name='investment.asset.transaction', compute='_compute_timeseries_aggregate', store=True)
     price_id = fields.Many2one(
         comodel_name='investment.asset.price',
-        compute='_compute_aggregate',
+        compute='_compute_timeseries_aggregate',
         store=True,
         ondelete='cascade',
         index=True,
@@ -54,16 +54,15 @@ class InvestmentTimeseries(models.Model):
 
 
     position_id = fields.Many2one(
+        string="Asset",
         comodel_name='investment.position',
         required=True,
         ondelete='cascade',
         index=True,
     )
 
-    asset_id = fields.Many2one(related='position_id.asset_id')
-
     category_id = fields.Many2one(
-        related='asset_id.category_id',
+        related='position_id.asset_id.category_id',
         store=True,
         readonly=True,
         index=True,
@@ -94,7 +93,7 @@ class InvestmentTimeseries(models.Model):
     )
 
     _sql_constraints = [
-        ('date_timeseries_unique', 'unique(date, asset_id)', 'This timeseries already exists!'),
+        ('date_timeseries_unique', 'unique(date, position_id)', 'This timeseries already exists!'),
     ]
 
     @api.depends('date')
@@ -151,61 +150,29 @@ class InvestmentTimeseries(models.Model):
                        lazy=lazy, expand=expand, expand_limit=expand_limit, expand_orderby=expand_orderby)
 
 
-    @api.depends('asset_id', 'date')
-    def _compute_aggregate(self):
-        _logger.info(f"Compute time series aggregate on {self.mapped('asset_id.name')} for {len(self)} records.")
+    @api.depends('position_id', 'date')
+    def _compute_timeseries_aggregate(self):
+        _logger.info(f"Compute time series aggregate on {self.mapped('position_id.name')} for {len(self)} records.")
+        precision = self.env['decimal.precision'].precision_get('Investment Asset quantity')
         for record in self:
-            if not record.asset_id:
+            if not record.position_id:
                 continue
 
-            t = record.date
-            time_cutoff = datetime.datetime(t.year, t.month, t.day, 0, 0, 0) # This has to be the end of day.
+            time_cutoff = datetime.datetime(record.date.year, record.date.month, record.date.day, 0, 0, 0) # This has to be the end of day.
             record.transaction_ids = record.env['investment.asset.transaction'].search([
                 ('time', '<=', time_cutoff),
-                ('asset_id', '=', record.asset_id.id),
+                ('position_id', '=', record.position_id.id),
                 ('usage', 'in', ('record', 'prediction')),
             ]) # latest but before date
 
-            # Determine the best estimate for market price at 'record.date'.
-            at_price_id = record.env['investment.asset.price'].search([
-                    ('time', '<=', date_utils.end_of(time_cutoff, "day")),
-                    ('time', '>=', date_utils.start_of(time_cutoff, "day")),
-                    ('asset_id', '=', record.asset_id.id),
-                    ('prediction', '=', record.date > fields.Date.today()),
-                ], limit=1, order='time desc') # latest = closing price for the day
+            if float_is_zero(sum(record.transaction_ids.mapped('quantity')), precision_digits=precision):
+                record.price_id = before_price_id = self.env['investment.asset.price'].search([
+                    ('prediction', '=', False),
+                    ('asset_id', '=', record.position_id.asset_id.id),
+                ], limit=1, order='time desc') # position is zero, just use latest instead of making predictions.
+            else:
+                record.price_id = record.position_id.asset_id.price_at_date(record.date)
 
-            if not at_price_id:
-                # This time allow predictions.
-                at_price_id = record.env['investment.asset.price'].search([
-                    ('time', '<=', date_utils.end_of(time_cutoff, "day")),
-                    ('time', '>=', date_utils.start_of(time_cutoff, "day")),
-                    ('asset_id', '=', record.asset_id.id),
-                ], limit=1, order='time desc') # latest = closing price for the day
-
-            if not at_price_id:
-                after_price_id = record.env['investment.asset.price'].search([
-                        ('time', '>', time_cutoff),
-                        ('asset_id', '=', record.asset_id.id),
-                    ], limit=1, order='time asc') # earliest but after time_cutoff
-                before_price_id = record.env['investment.asset.price'].search([
-                        ('time', '<=', time_cutoff),
-                        ('asset_id', '=', record.asset_id.id),
-                    ], limit=1, order='time desc') # latest but before time_cutoff
-                if before_price_id and after_price_id:
-                    slope = (after_price_id.price - before_price_id.price) / (after_price_id.time - before_price_id.time).days
-                    interpolated_price = before_price_id.price + slope*(time_cutoff-before_price_id.time).days
-                    at_price_id = record.env['investment.asset.price'].create({
-                        'time': time_cutoff,
-                        'asset_id': record.asset_id.id,
-                        'prediction': after_price_id.prediction or before_price_id.prediction,
-                        'interpolated': True,
-                        'price': interpolated_price,
-                    })
-                else:
-                    _logger.warning("No price for %s at %s.", record.asset_id.name, time_cutoff)
-
-
-            record.price_id = at_price_id
             record.last_price = record.price_id.currency_id._convert(
                 from_amount=record.price_id.price,
                 to_currency=self.company_currency_id,
@@ -213,7 +180,7 @@ class InvestmentTimeseries(models.Model):
                 date=record.price_id.time or fields.Datetime.now(),
             )
 
-            vals = record.asset_id._get_position(record.last_price, record.transaction_ids).items()
+            vals = record.position_id._get_position(record.last_price, record.transaction_ids).items()
             vals = {k: v for k, v in vals if k in record._fields}
             assert vals, "Filtering with record._fields failed."
             record.update(vals)

@@ -41,7 +41,6 @@
                 <field name="plan_yield" optional="hide"/>
                 <field name="plan_cost" optional="hide"/>
                 <field name="plan_fee" optional="hide"/>
-                <field name="plan_yearly_appreciation" widget="percentage" optional="hide"/>
                 <field name="plan_yearly_interest" widget="percentage" optional="hide"/>
                 <field name="plan_total_cash_flow" optional="hide"/>
             </tree>
@@ -147,7 +146,6 @@
                                     <field name="plan_fee"/>
                                 </group>
                                 <group>
-                                    <field name="plan_yearly_appreciation" widget="percentage"/>
                                     <field name="plan_yearly_interest" widget="percentage"/>
                                     <field name="plan_total_cash_flow"/>
                                     <field name="plan_allow_past" widget="boolean_toggle"/>
@@ -203,12 +201,12 @@
         </field>
     </record>
 
-    <record id="action_compute_aggregate_position" model="ir.actions.server">
+    <record id="action_compute_position_aggregate" model="ir.actions.server">
         <field name="name">Re-compute Value</field>
         <field name="model_id" ref="model_investment_position"/>
         <field name="binding_model_id" ref="model_investment_position"/>
         <field name="state">code</field>
-        <field name="code">records._compute_aggregate()</field>
+        <field name="code">records._compute_position_aggregate()</field>
     </record>
 
     <record id="action_update_realized_fifo_position" model="ir.actions.server">

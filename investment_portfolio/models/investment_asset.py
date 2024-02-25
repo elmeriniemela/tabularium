@@ -2,7 +2,7 @@
 
 from odoo import api, models, fields, _
 from odoo.exceptions import ValidationError
-from odoo.tools import float_is_zero, float_compare
+from odoo.tools import float_is_zero, float_compare, date_utils
 import traceback
 from dateutil.relativedelta import relativedelta
 from dateutil import rrule
@@ -24,7 +24,7 @@ class InvestmentAsset(models.Model):
 
     active = fields.Boolean(default=True)
 
-    ticker = fields.Char(required=True)
+    ticker = fields.Char(required=True, string="Ticker / ID")
 
     category_id = fields.Many2one(
         comodel_name='investment.category',
@@ -52,6 +52,7 @@ class InvestmentAsset(models.Model):
         compute='_compute_last_price', store=True)
     last_update = fields.Datetime(related='last_price_id.time', store=True)
     last_price_currency = fields.Monetary(string="Last Price", related='last_price_id.price', store=True, currency_field='currency_id', group_operator=None)
+    expected_yearly_appreciation = fields.Float(group_operator='avg', default=0.0, digits='Investment Asset Interest', tracking=True)
 
 
     daily_price = fields.Float(compute='_compute_last_price', store=True, group_operator='avg', string="1 Day")
@@ -75,6 +76,67 @@ class InvestmentAsset(models.Model):
             ('usage_field_id.model_id.model', '=', 'investment.asset'),
         ],
     )
+
+    @api.onchange('expected_yearly_appreciation')
+    def invalidate_predicted_prices(self):
+        self.env['investment.asset.price'].search([
+            ('asset_id', '=', self.id),
+            ('prediction', '=', True),
+        ]).unlink()
+
+
+    def price_at_date(self, date):
+        self.ensure_one()
+        time_cutoff = datetime.datetime(date.year, date.month, date.day, 0, 0, 0) # This has to be the end of day.
+        at_price_id = self.env['investment.asset.price'].search([
+                ('time', '<=', date_utils.end_of(time_cutoff, "day")),
+                ('time', '>=', date_utils.start_of(time_cutoff, "day")),
+                ('asset_id', '=', self.id),
+                ('prediction', '=', date > fields.Date.today()),
+            ], limit=1, order='time desc') # latest = closing price for the day
+
+        if not at_price_id:
+            # This time allow predictions.
+            at_price_id = self.env['investment.asset.price'].search([
+                ('time', '<=', date_utils.end_of(time_cutoff, "day")),
+                ('time', '>=', date_utils.start_of(time_cutoff, "day")),
+                ('asset_id', '=', self.id),
+            ], limit=1, order='time desc') # latest = closing price for the day
+
+        if not at_price_id:
+            after_price_id = self.env['investment.asset.price'].search([
+                    ('time', '>', time_cutoff),
+                    ('asset_id', '=', self.id),
+                ], limit=1, order='time asc') # earliest but after time_cutoff
+            before_price_id = self.env['investment.asset.price'].search([
+                    ('time', '<=', time_cutoff),
+                    ('asset_id', '=', self.id),
+                ], limit=1, order='time desc') # latest but before time_cutoff
+            if before_price_id and after_price_id:
+                slope = (after_price_id.price - before_price_id.price) / (after_price_id.time - before_price_id.time).days
+                interpolated_price = before_price_id.price + slope*(time_cutoff-before_price_id.time).days
+                at_price_id = self.env['investment.asset.price'].create({
+                    'time': time_cutoff,
+                    'asset_id': self.id,
+                    'prediction': after_price_id.prediction or before_price_id.prediction,
+                    'interpolated': True,
+                    'price': interpolated_price,
+                })
+            elif before_price_id:
+                days = (date - before_price_id.time.date()).days
+                predicted_price = before_price_id.price * (1+self.expected_yearly_appreciation)**(days/365)
+                at_price_id = self.env['investment.asset.price'].create({
+                    'time': time_cutoff,
+                    'asset_id': self.id,
+                    'prediction': True,
+                    'price': predicted_price,
+                })
+            else:
+                raise RuntimeError("No price for %s at %s.", self.ticker, time_cutoff)
+
+        assert at_price_id, "No price for %s at %s." % (self.ticker, time_cutoff)
+        return at_price_id
+
 
     @api.depends(
         'price_ids',

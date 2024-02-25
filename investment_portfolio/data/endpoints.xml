@@ -411,7 +411,7 @@ for date, rate in obj.items():
             'currency_id': currency_id.id,
             'rate': rate,
         })
-self.env['investment.asset'].search([('currency_id', '=', currency_id.id)])._compute_aggregate()</field>
+self.env['investment.position'].search([('asset_id.currency_id', '=', currency_id.id)])._compute_position_aggregate()</field>
     </record>
     <record id="investment_portfolio.integration_euribor_rates" model="api.endpoint">
         <field name="name">Euribor Rates</field>

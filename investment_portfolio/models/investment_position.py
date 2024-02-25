@@ -59,13 +59,13 @@ class InvestmentPosition(models.Model):
 
     transaction_ids = fields.One2many(
         comodel_name='investment.asset.transaction',
-        inverse_name='asset_id',
+        inverse_name='position_id',
         domain=[('usage', '=', 'record')],
     )
 
     realized_ids = fields.One2many(
         comodel_name='investment.asset.realized',
-        inverse_name='asset_id',
+        inverse_name='position_id',
         readonly=True,
     )
 
@@ -73,15 +73,15 @@ class InvestmentPosition(models.Model):
 
     follow = fields.Boolean(compute='_compute_follow', store=True, readonly=False)
 
-    quantity = fields.Float(compute='_compute_aggregate', store=True, digits='Investment Asset quantity', group_operator=None)
-    position = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
-    investment = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
-    max_investment = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
-    cost_basis = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id')
-    last_price = fields.Monetary(string="Last Price (own currency)", compute='_compute_aggregate', store=True, currency_field='company_currency_id', group_operator=None)
+    quantity = fields.Float(compute='_compute_position_aggregate', store=True, digits='Investment Asset quantity', group_operator=None)
+    position = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id')
+    investment = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id')
+    max_investment = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id')
+    cost_basis = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id')
+    last_price = fields.Monetary(string="Last Price (own currency)", compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', group_operator=None)
 
-    profit = fields.Monetary(compute='_compute_aggregate', store=True, currency_field='company_currency_id', group_operator='sum')
-    profit_percent = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg')
+    profit = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', group_operator='sum')
+    profit_percent = fields.Float(compute='_compute_position_aggregate', store=True, group_operator='avg')
 
 
     is_cash = fields.Boolean(
@@ -90,14 +90,8 @@ class InvestmentPosition(models.Model):
 
     plan_transaction_ids = fields.One2many(
         comodel_name='investment.asset.transaction',
-        inverse_name='asset_id',
+        inverse_name='position_id',
         domain=[('usage', '=', 'prediction')],
-    )
-
-    plan_price_ids = fields.One2many(
-        comodel_name='investment.asset.price',
-        inverse_name='asset_id',
-        domain=[('prediction', '=', True)],
     )
 
     plan_type = fields.Selection(
@@ -120,18 +114,43 @@ class InvestmentPosition(models.Model):
     plan_auto_realize = fields.Boolean()
     plan_allow_past = fields.Boolean()
 
+    @api.depends(
+        'transaction_ids',
+        'transaction_ids.quantity',
+        'transaction_ids.payment',
+        'last_price_id',
+        'currency_id',
+        'company_currency_id',
+    )
+    def _compute_position_aggregate(self):
+        for record in self:
+            record.last_price = record.last_price_id.currency_id._convert(
+                from_amount=record.last_price_id.price or 0.0,
+                to_currency=self.company_currency_id,
+                company=self.company_id,
+                date=record.last_price_id.time or fields.Datetime.now(),
+            )
+            record.update(record._get_position(record.last_price, record.transaction_ids))
+
+
 
     def run_integration(self):
         self.mapped('asset_id').run_integration()
 
     @api.model
     def cron_create_time_series(self):
-        self.env['investment.asset'].search([]).generate_timeseries()
+        self.env['investment.position'].search([]).generate_timeseries()
 
     def generate_timeseries(self):
         # Re-generate plans first, as this removes price ids and cascades existing timeseries.
-        for asset_id in self:
-            asset_id.generate_plan()
+
+        for position_id in self:
+            predicted = self.env['investment.asset.price'].search([
+                ('asset_id', '=', position_id.asset_id.id),
+                ('prediction', '=', True),
+            ])
+            predicted.unlink()
+            position_id.generate_plan()
 
         today = datetime.date.today()
 
@@ -140,32 +159,32 @@ class InvestmentPosition(models.Model):
 
         Timeseries = self.env['investment.timeseries']
 
-        existing = {(p.asset_id.id, p.date): p for p in Timeseries.search([])}
+        existing = {(t.position_id.id, t.date): t for t in Timeseries.search([])}
         recompute = Timeseries.browse()
 
-        for asset_id in self:
-            first = self.env['investment.asset.transaction'].search([('asset_id', '=', asset_id.id)], order='time asc', limit=1)
+        for position_id in self:
+            first = self.env['investment.asset.transaction'].search([('position_id', '=', position_id.id)], order='time asc', limit=1)
             if not first:
-                _logger.info(f"No transactions on {asset_id.name}")
+                _logger.info(f"No transactions on {position_id.name}")
                 continue
 
             date = first.time.date()
-            _logger.info(f"Make time series for {asset_id.name} starting from {date}")
+            _logger.info(f"Make time series for {position_id.name} starting from {date}")
 
             while date <= today + relativedelta(years=predict_years):
-                prediction = bool(date > today)
-                if prediction and float_is_zero(asset_id.quantity, precision_digits=precision):
+                prediction = bool(date > position_id.asset_id.last_update.date())
+                if prediction and float_is_zero(position_id.quantity, precision_digits=precision):
                     break
 
-                serie = existing.get((asset_id.id, date), None)
+                serie = existing.get((position_id.id, date), None)
                 if not serie:
                     serie = Timeseries.create({
-                        'asset_id': asset_id.id,
+                        'position_id': position_id.id,
                         'date': date,
                     })
-                    existing[(asset_id.id, date)] = serie
+                    existing[(position_id.id, date)] = serie
                     recompute += serie
-                elif asset_id.env.context.get('force_recompute'):
+                elif position_id.env.context.get('force_recompute'):
                     recompute += serie
                 elif prediction:
                     recompute += serie
@@ -179,98 +198,101 @@ class InvestmentPosition(models.Model):
                 else:
                     date += datetime.timedelta(days=1)
 
-            yesterday = datetime.date.today() - relativedelta(days=1)
-            if first.time.date() <= yesterday:
-                recompute += existing[(asset_id.id, yesterday)]
 
-        recompute.exists()._compute_aggregate()
+            yesterday = datetime.date.today() - relativedelta(days=1)
+            yestkey = (position_id.id, yesterday)
+            if first.time.date() <= yesterday and yestkey in existing:
+                recompute += existing[yestkey]
+
+            todaykey = (position_id.id, today)
+            if not todaykey in existing:
+                serie = Timeseries.create({
+                    'position_id': position_id.id,
+                    'date': today,
+                })
+                existing[todaykey] = serie
+                recompute += serie
+
+        recompute.exists()._compute_timeseries_aggregate()
 
     def generate_plan(self):
-        Price = self.env['investment.asset.price']
         Transaction = self.env['investment.asset.transaction']
         predict_years = int(self.env['ir.config_parameter'].sudo().get_param('investment_portfolio.predict_years', '25'))
         today = datetime.date.today()
 
         # Remove old predictions.
 
-        for asset_id in self:
-            if not asset_id.quantity:
-                _logger.info("Skip plan for %s as we have no position on it.", asset_id.name)
+        for position_id in self:
+            if not position_id.quantity:
+                _logger.info("Skip plan for %s as we have no position on it.", position_id.name)
                 continue
 
-            _logger.info("Generate plan for %s.", asset_id.name)
-            if asset_id.plan_auto_realize:
-                asset_id.plan_transaction_ids.filtered(lambda t: t.time.date() <= today).prediction = False
+            _logger.info("Generate plan for %s.", position_id.name)
+            if position_id.plan_auto_realize:
+                position_id.plan_transaction_ids.filtered(lambda t: t.time.date() <= today).prediction = False
 
-            Price.search([('prediction', '=', True), ('asset_id', '=', asset_id.id)]).unlink()
-            Transaction.search([('prediction', '=', True), ('asset_id', '=', asset_id.id)]).unlink()
-            n = asset_id.plan_months or 0
-            date = banking_date(asset_id.plan_start_date or today)
-            if not asset_id.plan_allow_past:
+            Transaction.search([('prediction', '=', True), ('position_id', '=', position_id.id)]).unlink()
+            n = position_id.plan_months or 0
+            date = banking_date(position_id.plan_start_date or today)
+            if not position_id.plan_allow_past:
                 while date <= today:
                     date = banking_date(date+relativedelta(months=1))
-                    if asset_id.plan_start_date:
+                    if position_id.plan_start_date:
                         n -= 1
             if n <= 0:
                 continue
 
             end = banking_date(date+relativedelta(months=n))
-            r = (asset_id.plan_yearly_interest or 0 + asset_id.plan_yearly_appreciation or 0)/12
+            r = (position_id.plan_yearly_interest or 0 + position_id.expected_yearly_appreciation or 0)/12
             i = 0
-            PV = asset_id.position
-            P = ((r*PV) / (1-(1+r)**(-n)) if r else 0) - asset_id.plan_fee
-            if asset_id.plan_type == 'exit':
-                asset_id.plan_payment = P
+            PV = position_id.position
+            P = ((r*PV) / (1-(1+r)**(-n)) if r else 0) - position_id.plan_fee
+            if position_id.plan_type == 'exit':
+                position_id.plan_payment = P
 
 
-            curr_price = asset_id.last_price
-            price = asset_id.last_price
+            curr_price = position_id.last_price
+            price = position_id.last_price
             while date <= max(today + relativedelta(years=predict_years), end):
                 i += 1
-                price *= (1+asset_id.plan_yearly_appreciation)**(1/12)
+                price *= (1+position_id.expected_yearly_appreciation)**(1/12)
                 base_vals = {
                     'prediction': True,
-                    'asset_id': asset_id.id,
+                    'position_id': position_id.id,
                     'time': date,
                 }
 
                 if date < end:
-                    if asset_id.plan_type == 'acquire':
-                        if asset_id.plan_payment:
-                            trans = {'description': f'{i}: Acquisition', 'quantity': asset_id.plan_payment/price, 'payment': asset_id.plan_payment, 'exchange_rate': price, 'fee': asset_id.plan_fee}
+                    if position_id.plan_type == 'acquire':
+                        if position_id.plan_payment:
+                            trans = {'description': f'{i}: Acquisition', 'quantity': position_id.plan_payment/price, 'payment': position_id.plan_payment, 'exchange_rate': price, 'fee': position_id.plan_fee}
                             Transaction.create({**base_vals, **trans})
-                        if asset_id.plan_yield:
-                            trans = {'description': f'{i}', 'quantity': 0, 'payment': asset_id.plan_yield, 'exchange_rate': price}
+                        if position_id.plan_yield:
+                            trans = {'description': f'{i}', 'quantity': 0, 'payment': position_id.plan_yield, 'exchange_rate': price}
                             Transaction.create({**base_vals, **trans})
-                        if asset_id.plan_cost:
-                            trans = {'description': f'{i}', 'quantity': 0, 'payment': -asset_id.plan_cost, 'exchange_rate': price}
+                        if position_id.plan_cost:
+                            trans = {'description': f'{i}', 'quantity': 0, 'payment': -position_id.plan_cost, 'exchange_rate': price}
                             Transaction.create({**base_vals, **trans})
 
-                    elif asset_id.plan_type == 'exit':
+                    elif position_id.plan_type == 'exit':
                         # Korkopäivät lasketaan todellisten päivien mukaan ja vuodessa on 360 päivää
                         days = (date - banking_date(date-relativedelta(months=1))).days
-                        rate = asset_id.plan_yearly_interest*(days/360)
+                        rate = position_id.plan_yearly_interest*(days/360)
                         interest = PV*rate
-                        reduction = P-interest+asset_id.plan_fee
-                        dsum = (-reduction) + (-interest) + (asset_id.plan_fee)
+                        reduction = P-interest+position_id.plan_fee
+                        dsum = (-reduction) + (-interest) + (position_id.plan_fee)
                         reduction_vals = {
-                            'description': f'{i}: {-reduction:.2f} + {-interest:.2f} + {asset_id.plan_fee:.2f} = {dsum:.2f}',
-                            'quantity': float(f'{-reduction/curr_price:.2f}'), 'payment': abs(P), 'fee': asset_id.plan_fee, 'exchange_rate': 1}
+                            'description': f'{i}: {-reduction:.2f} + {-interest:.2f} + {position_id.plan_fee:.2f} = {dsum:.2f}',
+                            'quantity': float(f'{-reduction/curr_price:.2f}'), 'payment': abs(P), 'fee': position_id.plan_fee, 'exchange_rate': 1}
                         tr = Transaction.create({**base_vals, **reduction_vals})
                         PV -= reduction
                     else:
-                        raise ValueError(f"Invalid plan type {asset_id.plan_type}")
-
-                price_id = Price.search([(key, '=', value) for key, value in base_vals.items()])
-                if not price_id:
-                    price_id = Price.create({**base_vals, **{'price': price}})
-                else:
-                    price_id.price = price
+                        raise ValueError(f"Invalid plan type {position_id.plan_type}")
 
                 date = banking_date(date+relativedelta(months=1))
 
 
-            asset_id.plan_total_cash_flow = sum(Transaction.search([('prediction', '=', True), ('asset_id', '=', asset_id.id)]).mapped('cash_flow'))
+            position_id.plan_total_cash_flow = sum(Transaction.search([('prediction', '=', True), ('position_id', '=', position_id.id)]).mapped('cash_flow'))
 
     @api.model
     def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
@@ -282,12 +304,12 @@ class InvestmentPosition(models.Model):
         if 'profit_percent' in fields:
             for line in res:
                 domain = line.get('__domain') or []
-                assets = self.search(line['__domain'])
+                positions = self.search(line['__domain'])
                 total_profits = 0.0
                 total_investment = 0.0
-                for asset in assets:
-                    total_profits += asset.profit
-                    total_investment += asset.investment
+                for position in positions:
+                    total_profits += position.profit
+                    total_investment += position.investment
                 line['profit_percent'] = total_profits / total_investment if total_investment else 0.0
         return res
 
@@ -332,25 +354,25 @@ class InvestmentPosition(models.Model):
                 return s['sell']['tx'], s['buy']['tx'], min(s['buy']['qty'], s['sell']['qty'])
 
         qty_precision = self.env['decimal.precision'].precision_get('Investment Asset quantity')
-        for asset in self:
+        for position in self:
             valid = self.env['investment.asset.realized'].browse()
 
-            existing = {(r.sell_batch_id, r.buy_batch_id): r for r in asset.realized_ids}
-            transactions = asset.transaction_ids.sorted(key=lambda s: s.time)
+            existing = {(r.sell_batch_id, r.buy_batch_id): r for r in position.realized_ids}
+            transactions = position.transaction_ids.sorted(key=lambda s: s.time)
             sells = transactions.filtered(lambda t: t.ttype == 'sell')
             sell_vals = {
                 'description': 'Simulated Realization',
-                'quantity': asset.quantity,
-                'payment': asset.quantity * asset.last_price,
-                'exchange_rate': asset.last_price,
+                'quantity': position.quantity,
+                'payment': position.quantity * position.last_price,
+                'exchange_rate': position.last_price,
                 'usage': 'realized',
-                'asset_id': asset.id,
+                'position_id': position.id,
                 'time': fields.Datetime.now(),
             }
-            simulated = sells.search([('asset_id', '=', asset.id), ('usage', '=', 'realized')])
+            simulated = sells.search([('position_id', '=', position.id), ('usage', '=', 'realized')])
             assert len(simulated) <= 1
 
-            if asset.quantity:
+            if position.quantity:
                 if simulated:
                     simulated.write(sell_vals)
                 else:
@@ -364,7 +386,7 @@ class InvestmentPosition(models.Model):
                 for (sell, buy, quantity) in TxJoin(buys, sells, qty_precision):
                     key = (sell, buy)
                     vals = {
-                        'asset_id': asset.id,
+                        'position_id': position.id,
                         'sell_batch_id': sell.id,
                         'buy_batch_id': buy.id,
                         'quantity': quantity,
@@ -372,12 +394,12 @@ class InvestmentPosition(models.Model):
                     if key in existing:
                         existing[key].write(vals)
                     else:
-                        existing[key] = asset.realized_ids.create(vals)
+                        existing[key] = position.realized_ids.create(vals)
 
                     existing[key]._compute_profit()
                     valid |= existing[key]
 
-            (asset.realized_ids - valid).unlink()
+            (position.realized_ids - valid).unlink()
 
 
     def _get_position(self, market_price, transaction_ids):

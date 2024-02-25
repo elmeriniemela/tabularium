@@ -7,6 +7,7 @@ def migrate(cr, version):
     cr.execute("ALTER TABLE investment_position ADD COLUMN asset_id INTEGER")
     cr.execute("UPDATE investment_position SET asset_id=id")
     cr.execute("UPDATE investment_asset SET message_main_attachment_id=NULL")
+    cr.execute("ALTER TABLE investment_asset RENAME COLUMN plan_yearly_appreciation TO expected_yearly_appreciation")
 
     cr.execute("ALTER TABLE investment_asset_realized RENAME COLUMN asset_id TO position_id")
     cr.execute("ALTER TABLE investment_asset_realized DROP CONSTRAINT investment_asset_realized_asset_id_fkey")

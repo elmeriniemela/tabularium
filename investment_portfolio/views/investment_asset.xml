@@ -19,6 +19,7 @@
                 <field name="five_year_price" widget="percentage" decoration-danger="five_year_price &lt; 0" decoration-success="five_year_price &gt; 0" optional="show"/>
                 <field name="currency_id" optional="hide"/>
                 <field name="endpoint_id" optional="hide"/>
+                <field name="expected_yearly_appreciation" widget="percentage" optional="hide"/>
             </tree>
         </field>
     </record>
@@ -49,6 +50,7 @@
                             <field name="currency_id"/>
                             <field name="category_id"/>
                             <field name="endpoint_id"/>
+                            <field name="expected_yearly_appreciation" widget="percentage"/>
                             <field name="daily_price" widget="percentage" decoration-danger="daily_price &lt; 0" decoration-success="daily_price &gt; 0"/>
                             <field name="weekly_price" widget="percentage" decoration-danger="weekly_price &lt; 0" decoration-success="weekly_price &gt; 0"/>
                             <field name="monthly_price" widget="percentage" decoration-danger="monthly_price &lt; 0" decoration-success="monthly_price &gt; 0"/>
