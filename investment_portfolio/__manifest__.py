@@ -4,8 +4,8 @@
     'author': "Elmeri Niemelä",
     'website': "https://eniemela.fi",
     'license': 'LGPL-3',
-    'category': 'Uncategorized',
-    'version': '2.0.1',
+    'category': 'Investment Portfolio',
+    'version': '2.0.2',
     'depends': [
         'mail',
         'timeago_widget',
@@ -14,6 +14,7 @@
     'installable': True,
     'application': True,
     'data': [
+        'security/security.xml',
         'security/ir.model.access.csv',
         'data/users.xml',
         'data/decimal.xml',
