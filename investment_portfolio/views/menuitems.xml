@@ -14,7 +14,7 @@
             <menuitem id="menu_realized" action="action_realized" sequence="30"/>
         </menuitem>
 
-        <menuitem name="Timeseries" id="menu_timeseries">
+        <menuitem name="Timeseries" id="menu_timeseries" sequence="40">
             <menuitem id="menu_timeseries_profits" action="action_profits" sequence="10"/>
             <menuitem id="menu_timeseries_positions" action="action_positions" sequence="20"/>
             <menuitem id="menu_timeseries_profits_per_asset" action="action_profits_per_asset" sequence="30"/>
@@ -22,7 +22,7 @@
             <menuitem id="menu_timeseries_prediction_growth" action="action_prediction_growth" sequence="50"/>
         </menuitem>
 
-        <menuitem name="Configuration" id="configuration_menu" sequence="40">
+        <menuitem name="Configuration" id="configuration_menu" sequence="50">
             <menuitem id="menu_assets" action="action_assets" sequence="5"/>
             <menuitem id="menu_categories" action="action_categories" sequence="10"/>
             <menuitem id="menu_portfolios" action="action_portfolios" sequence="20"/>
