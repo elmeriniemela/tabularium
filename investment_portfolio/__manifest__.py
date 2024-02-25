@@ -27,6 +27,7 @@
         'views/investment_asset_price.xml',
         'views/investment_asset_realized.xml',
         'views/investment_asset_transaction.xml',
+        'views/investment_asset.xml',
         'views/investment_position.xml',
         'views/menuitems.xml',
     ],

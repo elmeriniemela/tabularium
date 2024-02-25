@@ -80,7 +80,7 @@
                     <button name="%(action_prices)d"
                         string="Prices"
                         type="action"
-                        context="{'search_default_position_id': id, 'search_default_realized': 1, 'search_default_group_time': 1}"
+                        context="{'search_default_asset_id': asset_id, 'search_default_realized': 1, 'search_default_group_time': 1}"
                         class="oe_stat_button"
                         icon="fa-usd">
                     </button>
@@ -93,7 +93,7 @@
                     </div>
                     <group>
                         <group>
-                            <field name="ticker"/>
+                            <field name="asset_id"/>
                             <field name="company_id"/>
                             <field name="currency_id"/>
                             <field name="category_id"/>

@@ -17,11 +17,10 @@ class InvestmentAsset(models.Model):
     _name = 'investment.asset'
     _description = 'Investment Asset'
     _inherit = ['mail.thread', 'mail.activity.mixin']
-    _order = 'portfolio_id, sequence, id'
+    _order = 'sequence, id'
+    _rec_name = 'ticker'
 
     sequence = fields.Integer(string='Sequence')
-
-    name = fields.Char(required=True)
 
     active = fields.Boolean(default=True)
 
@@ -50,20 +49,20 @@ class InvestmentAsset(models.Model):
     last_price_id = fields.Many2one(
         string='Last Price Record',
         comodel_name='investment.asset.price',
-        compute='_compute_aggregate', store=True)
+        compute='_compute_last_price', store=True)
     last_update = fields.Datetime(related='last_price_id.time', store=True)
     last_price_currency = fields.Monetary(string="Last Price", related='last_price_id.price', store=True, currency_field='currency_id', group_operator=None)
 
 
-    daily_price = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg', string="1 Day")
-    weekly_price = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg', string="1 Week")
-    monthly_price = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg', string="1 Month")
-    three_month_price = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg', string="3 Months")
-    six_month_price = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg', string="6 Months")
-    ytd_price = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg', string="YTD")
-    one_year_price = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg', string="1 Year")
-    three_year_price = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg', string="3 Year")
-    five_year_price = fields.Float(compute='_compute_aggregate', store=True, group_operator='avg', string="5 Year")
+    daily_price = fields.Float(compute='_compute_last_price', store=True, group_operator='avg', string="1 Day")
+    weekly_price = fields.Float(compute='_compute_last_price', store=True, group_operator='avg', string="1 Week")
+    monthly_price = fields.Float(compute='_compute_last_price', store=True, group_operator='avg', string="1 Month")
+    three_month_price = fields.Float(compute='_compute_last_price', store=True, group_operator='avg', string="3 Months")
+    six_month_price = fields.Float(compute='_compute_last_price', store=True, group_operator='avg', string="6 Months")
+    ytd_price = fields.Float(compute='_compute_last_price', store=True, group_operator='avg', string="YTD")
+    one_year_price = fields.Float(compute='_compute_last_price', store=True, group_operator='avg', string="1 Year")
+    three_year_price = fields.Float(compute='_compute_last_price', store=True, group_operator='avg', string="3 Year")
+    five_year_price = fields.Float(compute='_compute_last_price', store=True, group_operator='avg', string="5 Year")
 
 
     endpoint_id = fields.Many2one(
@@ -81,7 +80,7 @@ class InvestmentAsset(models.Model):
         'price_ids',
         'price_ids.price',
     )
-    def _compute_aggregate(self):
+    def _compute_last_price(self):
 
         def percent_change(record, time, market_price):
             closing_price_id = record.env['investment.asset.price'].search([
@@ -116,7 +115,7 @@ class InvestmentAsset(models.Model):
     def run_integration(self):
         for asset in self:
             asset.endpoint_id.produce({'asset': asset})
-            asset._compute_aggregate() # For some reason, the depends on price_ids does not work...
+            asset._compute_last_price() # For some reason, the depends on price_ids does not work...
 
 
     def price_upsert(self, time, price):

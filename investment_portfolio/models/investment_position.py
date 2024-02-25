@@ -28,7 +28,7 @@ class InvestmentPosition(models.Model):
     active = fields.Boolean(default=True)
 
     asset_id = fields.Many2one(
-        comodel_name='investment.asset', string='Asset',
+        comodel_name='investment.asset', string='Ticker',
         auto_join=True, index=True, ondelete='cascade', required=True)
 
     name = fields.Char(required=True)
