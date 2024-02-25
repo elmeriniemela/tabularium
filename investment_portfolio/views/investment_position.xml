@@ -94,10 +94,7 @@
                         <group>
                             <field name="asset_id"/>
                             <field name="company_id"/>
-                            <field name="currency_id"/>
-                            <field name="category_id"/>
                             <field name="portfolio_id"/>
-                            <field name="endpoint_id"/>
                             <field name="daily_price" widget="percentage" decoration-danger="daily_price &lt; 0" decoration-success="daily_price &gt; 0"/>
                             <field name="weekly_price" widget="percentage" decoration-danger="weekly_price &lt; 0" decoration-success="weekly_price &gt; 0"/>
                             <field name="monthly_price" widget="percentage" decoration-danger="monthly_price &lt; 0" decoration-success="monthly_price &gt; 0"/>
