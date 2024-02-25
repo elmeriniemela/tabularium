@@ -5,7 +5,7 @@
     'website': "https://eniemela.fi",
     'license': 'LGPL-3',
     'category': 'Uncategorized',
-    'version': '2.0.0',
+    'version': '2.0.1',
     'depends': [
         'mail',
         'timeago_widget',

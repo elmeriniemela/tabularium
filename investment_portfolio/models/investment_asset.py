@@ -51,7 +51,7 @@ class InvestmentAsset(models.Model):
         comodel_name='investment.asset.price',
         compute='_compute_last_price', store=True)
     last_update = fields.Datetime(related='last_price_id.time', store=True)
-    last_price_currency = fields.Monetary(string="Last Price", related='last_price_id.price', store=True, currency_field='currency_id', group_operator=None)
+    last_price = fields.Monetary(string="Last Price", related='last_price_id.price', store=True, currency_field='currency_id', group_operator=None)
     expected_yearly_appreciation = fields.Float(group_operator='avg', default=0.0, digits='Investment Asset Interest', tracking=True)
 
 
@@ -88,6 +88,7 @@ class InvestmentAsset(models.Model):
     def price_at_date(self, date):
         self.ensure_one()
         time_cutoff = datetime.datetime(date.year, date.month, date.day, 0, 0, 0) # This has to be the end of day.
+        err_msg = "No price for %s at %s." % (self.ticker, time_cutoff)
         at_price_id = self.env['investment.asset.price'].search([
                 ('time', '<=', date_utils.end_of(time_cutoff, "day")),
                 ('time', '>=', date_utils.start_of(time_cutoff, "day")),
@@ -132,9 +133,9 @@ class InvestmentAsset(models.Model):
                     'price': predicted_price,
                 })
             else:
-                raise RuntimeError("No price for %s at %s.", self.ticker, time_cutoff)
+                raise RuntimeError(err_msg)
 
-        assert at_price_id, "No price for %s at %s." % (self.ticker, time_cutoff)
+        assert at_price_id, err_msg
         return at_price_id
 
 

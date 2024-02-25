@@ -21,7 +21,7 @@ class InvestmentTimeseries(models.Model):
     cost_basis = fields.Monetary(compute='_compute_timeseries_aggregate', store=True, currency_field='company_currency_id')
 
 
-    last_price = fields.Monetary(compute='_compute_timeseries_aggregate', store=True, currency_field='company_currency_id')
+    last_price_own_currency = fields.Monetary(compute='_compute_timeseries_aggregate', store=True, currency_field='company_currency_id')
     profit = fields.Monetary(compute='_compute_timeseries_aggregate', store=True, currency_field='company_currency_id', group_operator='sum')
     profit_percent = fields.Float(compute='_compute_timeseries_aggregate', store=True, group_operator='avg')
     transaction_ids = fields.Many2many(comodel_name='investment.asset.transaction', compute='_compute_timeseries_aggregate', store=True)
@@ -50,7 +50,8 @@ class InvestmentTimeseries(models.Model):
     )
 
 
-    company_currency_id = fields.Many2one(related='position_id.company_currency_id', string="Company Currency")
+    company_currency_id = fields.Many2one(related='position_id.company_currency_id')
+    company_id = fields.Many2one(related='position_id.company_id')
 
 
     position_id = fields.Many2one(
@@ -165,14 +166,14 @@ class InvestmentTimeseries(models.Model):
                 ('usage', 'in', ('record', 'prediction')),
             ]) # latest but before date
 
-            record.last_price = record.price_id.currency_id._convert(
+            record.last_price_own_currency = record.price_id.currency_id._convert(
                 from_amount=record.price_id.price,
-                to_currency=self.company_currency_id,
-                company=self.env.company,
+                to_currency=record.company_currency_id,
+                company=record.company_id,
                 date=record.price_id.time or fields.Datetime.now(),
             )
 
-            vals = record.position_id._get_position(record.last_price, record.transaction_ids).items()
+            vals = record.position_id._get_position(record.last_price_own_currency, record.transaction_ids).items()
             vals = {k: v for k, v in vals if k in record._fields}
             assert vals, "Filtering with record._fields failed."
             record.update(vals)

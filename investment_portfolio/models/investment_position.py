@@ -78,7 +78,7 @@ class InvestmentPosition(models.Model):
     investment = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id')
     max_investment = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id')
     cost_basis = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id')
-    last_price = fields.Monetary(string="Last Price (own currency)", compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', group_operator=None)
+    last_price_own_currency = fields.Monetary(string="Last Price (own currency)", compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', group_operator=None)
 
     profit = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', group_operator='sum')
     profit_percent = fields.Float(compute='_compute_position_aggregate', store=True, group_operator='avg')
@@ -124,13 +124,13 @@ class InvestmentPosition(models.Model):
     )
     def _compute_position_aggregate(self):
         for record in self:
-            record.last_price = record.last_price_id.currency_id._convert(
+            record.last_price_own_currency = record.last_price_id.currency_id._convert(
                 from_amount=record.last_price_id.price or 0.0,
-                to_currency=self.company_currency_id,
-                company=self.company_id,
+                to_currency=record.company_currency_id,
+                company=record.company_id,
                 date=record.last_price_id.time or fields.Datetime.now(),
             )
-            record.update(record._get_position(record.last_price, record.transaction_ids))
+            record.update(record._get_position(record.last_price_own_currency, record.transaction_ids))
 
 
 
@@ -163,12 +163,23 @@ class InvestmentPosition(models.Model):
         recompute = Timeseries.browse()
 
         for position_id in self:
-            first = self.env['investment.asset.transaction'].search([('position_id', '=', position_id.id)], order='time asc', limit=1)
-            if not first:
+            first_tx = self.env['investment.asset.transaction'].search([('position_id', '=', position_id.id)], order='time asc', limit=1)
+            first_pr = self.env['investment.asset.price'].search([('asset_id', '=', position_id.asset_id.id)], order='time asc', limit=1)
+            if not first_tx:
                 _logger.info(f"No transactions on {position_id.name}")
                 continue
 
-            date = first.time.date()
+            if not first_pr:
+                _logger.warning(f"No prices for {position_id.name}")
+                continue
+
+            if first_tx.time < first_pr.time:
+                _logger.warning(f"Position {position_id.name} has a transaction before any price information.")
+                date = start_date = first_pr.time.date()
+            else:
+                date = start_date = first_tx.time.date()
+
+
             _logger.info(f"Make time series for {position_id.name} starting from {date}")
 
             while date <= today + relativedelta(years=predict_years):
@@ -212,7 +223,7 @@ class InvestmentPosition(models.Model):
 
             yesterday = datetime.date.today() - relativedelta(days=1)
             yestkey = (position_id.id, yesterday)
-            if first.time.date() <= yesterday and yestkey in existing:
+            if start_date <= yesterday and yestkey in existing:
                 recompute += existing[yestkey]
 
             todaykey = (position_id.id, today)
@@ -374,7 +385,7 @@ class InvestmentPosition(models.Model):
             sell_vals = {
                 'description': 'Simulated Realization',
                 'quantity': position.quantity,
-                'payment': position.quantity * position.last_price,
+                'payment': position.quantity * position.last_price_own_currency,
                 'exchange_rate': position.last_price,
                 'usage': 'realized',
                 'position_id': position.id,

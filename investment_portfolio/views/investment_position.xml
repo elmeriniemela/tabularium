@@ -7,7 +7,7 @@
                 <field name="sequence" widget="handle"/>
                 <field name="name" optional="show"/>
                 <field name="ticker" optional="hide"/>
-                <field name="last_price_currency" optional="show"/>
+                <field name="last_price" optional="show"/>
                 <field name="last_update" optional="show" widget="timeago"/>
                 <field name="daily_price" widget="percentage" decoration-danger="daily_price &lt; 0" decoration-success="daily_price &gt; 0" optional="show"/>
                 <field name="weekly_price" widget="percentage" decoration-danger="weekly_price &lt; 0" decoration-success="weekly_price &gt; 0" optional="show"/>
@@ -108,10 +108,10 @@
                         <group>
                             <field name="company_currency_id" invisible="1"/>
                             <field name="is_company_currency" invisible="1"/>
-                            <label for="last_price_currency"/>
+                            <label for="last_price"/>
                             <div>
-                                <field name="last_price_currency" class="oe_inline"/>
-                                <span attrs="{'invisible': [('is_company_currency', '=', True)]}"> / <field name="last_price" class="oe_inline"/> </span>
+                                <field name="last_price" class="oe_inline"/>
+                                <span attrs="{'invisible': [('is_company_currency', '=', True)]}"> / <field name="last_price_own_currency" class="oe_inline"/> </span>
                                 <span> (<field name="last_update" widget="timeago" class="oe_inline"/>) </span>
                             </div>
                             <field name="cost_basis"/>

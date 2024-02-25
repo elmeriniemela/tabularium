@@ -25,21 +25,29 @@ class InvestmentAssetTransaction(models.Model):
 
     asset_id = fields.Many2one(related='position_id.asset_id')
 
-    currency_id = fields.Many2one(related='position_id.company_currency_id')
+    currency_id = fields.Many2one(related='position_id.currency_id')
+    company_currency_id = fields.Many2one(related='position_id.company_currency_id')
+    company_id = fields.Many2one(related='position_id.company_id')
 
-    payment = fields.Monetary(required=True)
+    payment = fields.Monetary(required=True, currency_field='company_currency_id')
 
     description = fields.Char()
 
     exchange_rate = fields.Float(digits='Investment Asset quantity')
 
-    fee = fields.Monetary(store=True, readonly=False,  compute='_compute_fee', inverse='_inverse_fee')
+    currency_rate_id = fields.Many2one(
+        comodel_name='res.currency.rate',
+        compute='_compute_currency_rate_id',
+        store=True,
+    )
+
+    fee = fields.Monetary(store=True, readonly=True,  compute='_compute_fee', currency_field='company_currency_id')
 
     quantity = fields.Float(digits='Investment Asset quantity')
 
     time = fields.Datetime(required=True, default=fields.Datetime.now)
 
-    profit = fields.Monetary(compute='_compute_profit')
+    profit = fields.Monetary(compute='_compute_profit', currency_field='company_currency_id')
 
     prediction = fields.Boolean(
         compute='_compute_prediction',
@@ -75,6 +83,7 @@ class InvestmentAssetTransaction(models.Model):
     cash_flow = fields.Monetary(
         compute='_compute_report',
         store=True,
+        currency_field='company_currency_id'
     )
 
 
@@ -96,13 +105,19 @@ class InvestmentAssetTransaction(models.Model):
             stop_time = transaction.time.replace(hour=23, minute=59, microsecond=0)
             exists = Price.search([('time', '>=', start_time),('time', '<=', stop_time),('asset_id', '=', transaction.asset_id.id),('prediction', '=', False)])
             if transaction.exchange_rate and transaction.quantity and not exists:
+                price = transaction.currency_id._convert(
+                    from_amount=transaction.exchange_rate,
+                    to_currency=transaction.company_currency_id,
+                    company=transaction.company_id,
+                    date=transaction.time,
+                )
                 Price.create({
                     'time': start_time.replace(hour=12),
-                    'asset_id': transaction.asset_id.id,
-                    'price': transaction.exchange_rate,
+                    'asset_id': transaction.position_id.asset_id.id,
+                    'price': price,
                     'transaction_id': transaction.id,
                 })
-                _logger.info("%s (%s): %s", transaction.asset_id.name, transaction.time, transaction.exchange_rate)
+                _logger.info("%s (%s): %s", transaction.asset_id.name, transaction.time, price)
 
 
 
@@ -127,33 +142,63 @@ class InvestmentAssetTransaction(models.Model):
                 _logger.error("Invalid type: %s", record)
 
 
+    @api.depends('currency_id', 'time')
+    def _compute_currency_rate_id(self):
+        for tx in self:
+            if tx.currency_id != tx.company_currency_id:
+                tx.currency_rate_id = tx.env['res.currency.rate'].search([
+                    ('currency_id', '=', tx.currency_id.id),
+                    ('name', '=', tx.time.date()),
+                ]) or tx.env['res.currency.rate'].create({
+                    'currency_id': tx.currency_id.id,
+                    'name': tx.time.date(),
+                    'rate': 1.0,
+                })
 
 
-    @api.depends('payment', 'quantity', 'position_id.last_price')
+    @api.depends('payment', 'quantity', 'position_id.last_price_own_currency')
     def _compute_profit(self):
         for tx in self:
             quantity = tx.quantity
             if not quantity: # if quantity is 0, the cash flow will be profit.
                 tx.profit = tx.payment
             else:
-                tx.profit = (tx.position_id.last_price - (tx.payment / abs(quantity))) * quantity
+                tx.profit = (tx.position_id.last_price_own_currency - (tx.payment / abs(quantity))) * quantity
 
 
-    @api.depends('exchange_rate', 'payment', 'quantity')
+    @api.depends('exchange_rate', 'payment', 'quantity', 'time', 'currency_rate_id.rate')
     def _compute_fee(self):
         for tx in self:
             quantity = abs(tx.quantity)
             if not (quantity and tx.payment and tx.exchange_rate):
                 tx.fee = 0.0
             else:
-                tx.fee = (tx.payment/quantity - tx.exchange_rate) * quantity
+                cmp_exchange_rate = tx.currency_id._convert(
+                    from_amount=tx.exchange_rate,
+                    to_currency=tx.company_currency_id,
+                    company=tx.company_id,
+                    date=tx.time,
+                )
+                tx.fee = (tx.payment/quantity - cmp_exchange_rate) * quantity
 
-    def _inverse_fee(self):
-        for tx in self:
-            quantity = abs(tx.quantity)
-            if not (quantity and tx.payment and tx.exchange_rate):
-                tx.exchange_rate = 0.0
-            else:
-                tx.exchange_rate = (tx.payment/quantity - tx.fee/quantity)
+    # def _inverse_fee(self):
+    #     for tx in self:
+    #         quantity = abs(tx.quantity)
+    #         if not (quantity and tx.payment and tx.exchange_rate):
+    #             tx.exchange_rate = 0.0
+    #         else:
+    #             fee = tx.company_currency_id._convert(
+    #                 from_amount=tx.fee,
+    #                 to_currency=tx.currency_id,
+    #                 company=tx.company_id,
+    #                 date=tx.time,
+    #             )
+    #             payment = tx.company_currency_id._convert(
+    #                 from_amount=tx.payment,
+    #                 to_currency=tx.currency_id,
+    #                 company=tx.company_id,
+    #                 date=tx.time,
+    #             )
+    #             tx.exchange_rate = (payment/quantity - fee/quantity)
 
 

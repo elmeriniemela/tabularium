@@ -13,7 +13,7 @@
                 <field name="profit_percent" widget="percentage" decoration-danger="profit_percent &lt; 0" decoration-success="profit_percent &gt; 0" optional="show" />
                 <field name="company_currency_id" invisible="1" />
 
-                <field name="last_price" optional="hide" />
+                <field name="last_price_own_currency" optional="hide" />
             </tree>
         </field>
     </record>
@@ -59,7 +59,7 @@
                         <group>
                             <field name="category_id" />
                             <field name="quantity" />
-                            <field name="last_price" />
+                            <field name="last_price_own_currency" />
                             <field name="profit" decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0" />
                             <field name="profit_percent" widget="percentage" decoration-danger="profit_percent &lt; 0" decoration-success="profit_percent &gt; 0" />
                             <field name="prediction"/>
