@@ -4,14 +4,15 @@
     'author': "Elmeri Niemelä",
     'website': "https://eniemela.fi",
     'license': 'LGPL-3',
-    'category': 'Uncategorized',
-    'version': '0.1',
+    'category': 'Cash Flow',
+    'version': '0.1.1',
     'depends': [
         'mail',
     ],
     'installable': True,
     'application': True,
     'data': [
+        'security/security.xml',
         'security/ir.model.access.csv',
         'data/parser.xml',
 

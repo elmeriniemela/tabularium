@@ -5,14 +5,15 @@
     'author': "Elmeri Niemelä",
     'website': "https://eniemela.fi",
     'license': 'LGPL-3',
-    'category': 'Uncategorized',
-    'version': '1.0',
+    'category': 'Flight Log',
+    'version': '1.0.1',
     'depends': [
         'base', 'mail',
     ],
     'installable': True,
     'application': True,
     'data': [
+        'security/security.xml',
         'security/ir.model.access.csv',
         'views/flight_log.xml',
         'views/flight_plane.xml',
