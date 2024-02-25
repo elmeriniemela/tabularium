@@ -248,7 +248,8 @@ class CloudInstance(models.Model):
             if vals.get('logs'):
                 self.upgrade = vals.get('logs')
                 _logger.info("Saved logs on %s", self)
-        _logger.info(vals)
+            self.restart_requested = False
+
 
     def parse_backups(self, backup_list):
         self.ensure_one()
