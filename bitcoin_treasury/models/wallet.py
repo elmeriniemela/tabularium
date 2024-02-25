@@ -5,6 +5,7 @@ import hashlib
 from bitcoinlib.scripts import Script
 from bitcoinlib.keys import Address, deserialize_address
 import socket
+import ssl
 import json
 from contextlib import contextmanager
 from odoo import api, exceptions, fields, models, Command, _
@@ -13,8 +14,15 @@ from ..electrum.bitcoin import address_to_scripthash
 _logger = logging.getLogger(__name__)
 
 @contextmanager
-def electumx_jsonrpc(host, port):
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+def electumx_jsonrpc(host, port, use_ssl):
+    if use_ssl:
+        context = ssl.create_default_context()
+        context.check_hostname = False
+        context.verify_mode = ssl.CERT_NONE
+        sock = context.wrap_socket(socket.socket(socket.AF_INET, socket.SOCK_STREAM))
+    else:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
     sock.settimeout(10)
     sock.connect((host, port))
     def send(content):
@@ -28,7 +36,10 @@ def electumx_jsonrpc(host, port):
             responselist.append(data)
             if len(data) < buffer:
                 break
-        return json.loads(b''.join(responselist))
+
+        resp = b''.join(responselist)
+        assert resp, f"Empty response: {host}:{port} ({use_ssl=})"
+        return json.loads(resp)
 
     try:
         yield send
@@ -127,8 +138,9 @@ class BitcoinWallet(models.Model):
         get_param = self.env['ir.config_parameter'].sudo().get_param
         host = get_param('electrumx.host', '127.0.0.1')
         port = int(get_param('electrumx.port', '50001'))
+        use_ssl = int(get_param('electrumx.use_ssl', '0'))
 
-        with electumx_jsonrpc(host, port) as send:
+        with electumx_jsonrpc(host, port, use_ssl) as send:
             for wallet in self:
                 for addr in wallet.address_ids:
                     sh = address_to_scripthash(addr.address)
