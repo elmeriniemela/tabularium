@@ -38,7 +38,7 @@ obj = prices.xml_export(['time', 'price'])</field>
         <field name="test_example" eval="False"/>
         <field name="xslt" eval="False"/>
         <field name="initiator">for asset in self.env['investment.asset'].search([('endpoint_id', '=', self.id)]):
-  _logger.info("Run integration on %s", asset.name)
+  _logger.info("Run integration on %s", asset.ticker)
   self.produce(variables={'asset': asset})</field>
         <field name="producer">resp = requests.get(
   url=f"{self.location}/{asset.ticker}",
@@ -73,7 +73,7 @@ asset.price_upsert(time=time, price= meta['regularMarketPrice'])</field>
         <field name="test_example" eval="False"/>
         <field name="xslt" eval="False"/>
         <field name="initiator">for asset in self.env['investment.asset'].search([('endpoint_id', '=', self.id)]):
-  _logger.info("Run integration on %s", asset.name)
+  _logger.info("Run integration on %s", asset.ticker)
   self.produce(variables={'asset': asset})</field>
         <field name="producer">resp = requests.get(
   url=self.location,
@@ -108,7 +108,7 @@ asset.price_upsert(time=time, price=price)</field>
         <field name="test_example" eval="False"/>
         <field name="xslt" eval="False"/>
         <field name="initiator">for asset in self.env['investment.asset'].search([('endpoint_id', '=', self.id)]):
-  _logger.info("Run integration on %s", asset.name)
+  _logger.info("Run integration on %s", asset.ticker)
   self.produce(variables={'asset': asset})</field>
         <field name="producer">resp = requests.get(
   url=self.location,
@@ -141,7 +141,7 @@ asset.price_upsert(time=time, price=float(price_str))</field>
         <field name="test_example" eval="False"/>
         <field name="xslt" eval="False"/>
         <field name="initiator">for asset in self.env['investment.asset'].search([('endpoint_id', '=', self.id)]):
-  _logger.info("Run integration on %s", asset.name)
+  _logger.info("Run integration on %s", asset.ticker)
   self.produce(variables={'asset': asset})</field>
         <field name="producer">resp = requests.get(f'{asset.location}/{asset.ticker}/')
 resp.raise_for_status()
@@ -164,7 +164,7 @@ obj = resp.json()</field>
         <field name="test_example" eval="False"/>
         <field name="xslt" eval="False"/>
         <field name="initiator">for asset in self.env['investment.asset'].search([('endpoint_id', '=', self.id)]):
-  _logger.info("Run integration on %s", asset.name)
+  _logger.info("Run integration on %s", asset.ticker)
   self.produce(variables={'asset': asset})</field>
         <field name="producer">resp = requests.get(
   url=f"{self.location}/{asset.ticker}",
@@ -199,7 +199,7 @@ obj.dropna(inplace=True)
         <field name="test_example">self.produce(variables={'asset': self.env['investment.asset'].search([('ticker', '=', 'TSLA')])})</field>
         <field name="xslt" eval="False"/>
         <field name="initiator">for asset in self.env['investment.asset'].search([('endpoint_id', '=', self.id)]):
-  _logger.info("Run integration on %s", asset.name)
+  _logger.info("Run integration on %s", asset.ticker)
   self.produce(variables={'asset': asset})</field>
         <field name="producer">resp = requests.get(
   url=self.location,
@@ -246,7 +246,7 @@ asset.write({'price_ids': [(0, 0, values) for values in vals_list]})</field>
         <field name="test_example">self.produce(variables={'asset': self.env['investment.asset'].search([('ticker', '=', 'TSLA')])})</field>
         <field name="xslt" eval="False"/>
         <field name="initiator">for asset in self.env['investment.asset'].search([('endpoint_id', '=', self.id)]):
-  _logger.info("Run integration on %s", asset.name)
+  _logger.info("Run integration on %s", asset.ticker)
   self.produce(variables={'asset': asset})</field>
         <field name="producer">resp = requests.get(
   url=self.location,
@@ -294,7 +294,7 @@ asset.write({'price_ids': [(0, 0, values) for values in vals_list]})</field>
         <field name="test_example">self.produce(variables={'asset': self.env['investment.asset'].search([('ticker', '=', 'TSLA')])})</field>
         <field name="xslt" eval="False"/>
         <field name="initiator">for asset in self.env['investment.asset'].search([('endpoint_id', '=', self.id)]):
-  _logger.info("Run integration on %s", asset.name)
+  _logger.info("Run integration on %s", asset.ticker)
   self.produce(variables={'asset': asset})</field>
         <field name="producer">resp = requests.get(
   url=self.location,
@@ -429,7 +429,7 @@ self.env['investment.position'].search([('asset_id.currency_id', '=', currency_i
         <field name="test_example" eval="False"/>
         <field name="xslt" eval="False"/>
         <field name="initiator">for asset in self.env['investment.asset'].search([('endpoint_id', '=', self.id)]):
-  _logger.info("Run integration on %s", asset.name)
+  _logger.info("Run integration on %s", asset.ticker)
   self.produce(variables={'asset': asset})</field>
         <field name="producer">ticker_map = {
   'EURIBOR-1WEEK': 5,
@@ -495,7 +495,7 @@ obj = resp.json()</field>
         </field>
         <field name="initiator">
 for asset in self.env['investment.asset'].search([('endpoint_id', '=', self.id)]):
-  _logger.info("Run integration on %s", asset.name)
+  _logger.info("Run integration on %s", asset.ticker)
   self.produce(variables={'asset': asset})
 </field>
         <field name="producer">
