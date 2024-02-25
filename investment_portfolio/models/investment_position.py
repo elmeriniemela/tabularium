@@ -172,23 +172,34 @@ class InvestmentPosition(models.Model):
             _logger.info(f"Make time series for {position_id.name} starting from {date}")
 
             while date <= today + relativedelta(years=predict_years):
-                prediction = bool(date > position_id.asset_id.last_update.date())
+                prediction = bool(date > today)
                 if prediction and float_is_zero(position_id.quantity, precision_digits=precision):
                     break
 
                 serie = existing.get((position_id.id, date), None)
                 if not serie:
+                    if (not prediction) and (date >= position_id.asset_id.last_update.date()):
+                        price_id = self.env['investment.asset.price'].search([
+                            ('prediction', '=', False),
+                            ('asset_id', '=', position_id.asset_id.id),
+                        ], limit=1, order='time desc') # just use latest instead of making predictions for assets without recent price updates.
+                    else:
+                        price_id = position_id.asset_id.price_at_date(date)
+
                     serie = Timeseries.create({
                         'position_id': position_id.id,
                         'date': date,
+                        'price_id': price_id.id,
                     })
                     existing[(position_id.id, date)] = serie
                     recompute += serie
-                elif position_id.env.context.get('force_recompute'):
-                    recompute += serie
                 elif prediction:
                     recompute += serie
-                elif date == today:
+                elif position_id.env.context.get('force_recompute') or (date == today):
+                    serie.price_id = self.env['investment.asset.price'].search([
+                        ('prediction', '=', False),
+                        ('asset_id', '=', position_id.asset_id.id),
+                    ], limit=1, order='time desc') # update the latest price when not doing predictions.
                     recompute += serie
 
                 if date == today:

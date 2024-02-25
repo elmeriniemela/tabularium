@@ -130,7 +130,7 @@
         <field name="res_model">investment.timeseries</field>
         <field name="view_mode">graph,tree,form</field>
         <field name="domain" eval="False"/>
-        <field name="context">{'search_default_group_day': 1, 'search_default_liquid': 1, 'search_default_4_years': 1, 'search_default_until_today': 1}</field>
+        <field name="context">{'search_default_group_day': 1, 'search_default_liquid': 1, 'search_default_1_year': 1, 'search_default_until_today': 1}</field>
         <field
             name="view_ids"
             eval="[
@@ -144,7 +144,7 @@
         <field name="res_model">investment.timeseries</field>
         <field name="view_mode">graph,tree,form</field>
         <field name="domain" eval="False"/>
-        <field name="context">{'search_default_group_day': 1, 'search_default_liquid': 1, 'search_default_4_years': 1, 'search_default_until_today': 1}</field>
+        <field name="context">{'search_default_group_day': 1, 'search_default_liquid': 1, 'search_default_1_year': 1, 'search_default_until_today': 1}</field>
         <field
             name="view_ids"
             eval="[

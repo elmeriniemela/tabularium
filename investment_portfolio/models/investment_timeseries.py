@@ -27,8 +27,8 @@ class InvestmentTimeseries(models.Model):
     transaction_ids = fields.Many2many(comodel_name='investment.asset.transaction', compute='_compute_timeseries_aggregate', store=True)
     price_id = fields.Many2one(
         comodel_name='investment.asset.price',
-        compute='_compute_timeseries_aggregate',
         store=True,
+        required=True,
         ondelete='cascade',
         index=True,
     )
@@ -164,14 +164,6 @@ class InvestmentTimeseries(models.Model):
                 ('position_id', '=', record.position_id.id),
                 ('usage', 'in', ('record', 'prediction')),
             ]) # latest but before date
-
-            if float_is_zero(sum(record.transaction_ids.mapped('quantity')), precision_digits=precision):
-                record.price_id = before_price_id = self.env['investment.asset.price'].search([
-                    ('prediction', '=', False),
-                    ('asset_id', '=', record.position_id.asset_id.id),
-                ], limit=1, order='time desc') # position is zero, just use latest instead of making predictions.
-            else:
-                record.price_id = record.position_id.asset_id.price_at_date(record.date)
 
             record.last_price = record.price_id.currency_id._convert(
                 from_amount=record.price_id.price,
