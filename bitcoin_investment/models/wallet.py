@@ -1,0 +1,55 @@
+# -*- coding: utf-8 -*-
+
+from odoo import api, exceptions, fields, models, Command, _
+
+
+class BitcoinWallet(models.Model):
+    _inherit = 'bitcoin.wallet'
+
+    position_id = fields.Many2one(
+        comodel_name='investment.position',
+        index=True,
+    )
+
+
+
+    def refresh(self):
+        super().refresh()
+        self.sync_investments()
+
+
+    def sync_investments(self):
+        for wallet in self:
+            if not wallet.position_id:
+                continue
+
+            for hist in wallet.history_ids:
+                if hist.position_transaction_id:
+                    continue
+
+                price = hist.env['investment.asset.price'].search([
+                    ('asset_id', '=', wallet.position_id.asset_id.id),
+                    ('time', '<=', hist.date),
+                ], order='time desc', limit=1)
+                if price.time.date() != hist.date.date():
+                    raise exceptions.UserError(_("Unable to find daily price for %s") % (hist.date))
+
+                hist.position_transaction_id = hist.env['investment.asset.transaction'].create({
+                    'position_id': wallet.position_id.id,
+                    'time': hist.date,
+                    'payment': hist.amount * price.price,
+                    'quantity': hist.amount,
+                    'exchange_rate': price.price,
+                    'description': 'Automatically generated',
+                })
+
+
+
+class BitcoinWalletHistory(models.Model):
+    _inherit = 'bitcoin.wallet.history'
+
+
+    position_transaction_id = fields.Many2one(
+        comodel_name='investment.asset.transaction',
+        index=True,
+    )
