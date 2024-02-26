@@ -4,6 +4,7 @@
         <field name="model">investment.asset.transaction</field>
         <field name="arch" type="xml">
             <tree editable="top" limit="1000">
+                <field name="position_id" optional="hide"/>
                 <field name="time"/>
                 <field name="quantity" sum="Total"/>
                 <field name="payment" sum="Total"/>
@@ -15,7 +16,6 @@
                 <field name="currency_rate_id" optional="hide"/>
                 <field name="fee" sum="Total Fee"/>
                 <field name="profit" decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0" optional="show"/>
-                <field name="asset_id" optional="hide"/>
                 <field name="liquid" optional="hide"/>
                 <field name="category_id" optional="hide"/>
                 <field name="prediction" optional="hide" widget="boolean_toggle"/>
@@ -51,7 +51,7 @@
                         </group>
                         <group>
                             <field name="currency_id" invisible="not context.get('show_all')"/>
-                            <field name="asset_id" invisible="not context.get('show_all')"/>
+                            <field name="position_id" invisible="not context.get('show_all')"/>
                             <field name="description"/>
                             <field name="prediction" widget="boolean_toggle"/>
                         </group>
@@ -117,7 +117,7 @@
         <field name="model">investment.asset.transaction</field>
         <field name="arch" type="xml">
             <search>
-                <field name="asset_id"/>
+                <field name="position_id"/>
                 <separator/>
                 <filter name="date_filter" date="time"/>
                 <separator/>
@@ -152,7 +152,7 @@
                     <filter string="Date" name="group_year" context="{'group_by': 'time:year'}" invisible="not context.get('search_default_group_year')"/>
                     <filter string="Category" name="group_category_id" context="{'group_by': 'category_id'}"/>
                     <filter string="Type" name="group_ttype" context="{'group_by': 'ttype'}"/>
-                    <filter string="Asset" name="group_asset_id" context="{'group_by': 'asset_id'}"/>
+                    <filter string="Position" name="group_position_id" context="{'group_by': 'position_id'}"/>
                 </group>
             </search>
         </field>
@@ -171,7 +171,7 @@
         <field name="name">Transactions per month</field>
         <field name="res_model">investment.asset.transaction</field>
         <field name="view_mode">graph,tree,kanban,form</field>
-        <field name="context">{'search_default_group_month': 1, 'search_default_group_asset_id': 1, 'search_default_liquid': 1, 'search_default_1_year': 1, 'search_default_realized': 1}</field>
+        <field name="context">{'search_default_group_month': 1, 'search_default_group_position_id': 1, 'search_default_liquid': 1, 'search_default_1_year': 1, 'search_default_realized': 1}</field>
     </record>
 
     <record id="action_yearly_savings" model="ir.actions.act_window">
