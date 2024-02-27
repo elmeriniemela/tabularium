@@ -103,7 +103,7 @@
                             <field name="ytd_price" widget="percentage" decoration-danger="ytd_price &lt; 0" decoration-success="ytd_price &gt; 0"/>
                         </group>
                         <group>
-                            <field name="currency_id" invisible="1"/>
+                            <field name="currency_id" invisible="1" readonly="1"/>
                             <field name="company_currency_id" invisible="1"/>
                             <field name="is_company_currency" invisible="1"/>
                             <label for="last_price"/>

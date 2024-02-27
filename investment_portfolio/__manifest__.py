@@ -5,7 +5,7 @@
     'website': "https://eniemela.fi",
     'license': 'LGPL-3',
     'category': 'Investment Portfolio',
-    'version': '2.0.6',
+    'version': '2.0.7',
     'depends': [
         'mail',
         'timeago_widget',
