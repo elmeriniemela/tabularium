@@ -21,11 +21,19 @@
 
 
     <record id="action_sync_investments" model="ir.actions.server">
-        <field name="name">sync_investments</field>
+        <field name="name">Sync Investments</field>
         <field name="model_id" ref="model_bitcoin_wallet"/>
         <field name="binding_model_id" ref="model_bitcoin_wallet"/>
         <field name="state">code</field>
         <field name="code">records.sync_investments()</field>
+    </record>
+
+    <record id="action_show_investment_transactions" model="ir.actions.server">
+        <field name="name">Show investment transactions</field>
+        <field name="model_id" ref="model_bitcoin_wallet"/>
+        <field name="binding_model_id" ref="model_bitcoin_wallet"/>
+        <field name="state">code</field>
+        <field name="code">records.show_investment_transactions()</field>
     </record>
 
 </odoo>
