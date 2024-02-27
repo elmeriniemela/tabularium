@@ -33,7 +33,7 @@
         <field name="model_id" ref="model_bitcoin_wallet"/>
         <field name="binding_model_id" ref="model_bitcoin_wallet"/>
         <field name="state">code</field>
-        <field name="code">records.show_investment_transactions()</field>
+        <field name="code">action = records.show_investment_transactions()</field>
     </record>
 
 </odoo>

@@ -64,6 +64,7 @@ class InvestmentAsset(models.Model):
     one_year_price = fields.Float(compute='_compute_last_price', store=True, group_operator='avg', string="1 Year")
     three_year_price = fields.Float(compute='_compute_last_price', store=True, group_operator='avg', string="3 Year")
     five_year_price = fields.Float(compute='_compute_last_price', store=True, group_operator='avg', string="5 Year")
+    ten_year_price = fields.Float(compute='_compute_last_price', store=True, group_operator='avg', string="10 Year")
 
 
     endpoint_id = fields.Many2one(
@@ -173,6 +174,7 @@ class InvestmentAsset(models.Model):
             record.one_year_price = percent_change(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(years=1), record.last_price_id.price)
             record.three_year_price = percent_change(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(years=3), record.last_price_id.price)
             record.five_year_price = percent_change(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(years=5), record.last_price_id.price)
+            record.ten_year_price = percent_change(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(years=10), record.last_price_id.price)
 
 
     def run_integration(self):
