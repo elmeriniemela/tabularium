@@ -21,14 +21,14 @@ class InvestmentAssetRealized(models.Model):
     category_id = fields.Many2one(related='asset_id.category_id', store=True)
 
     sell_batch_id = fields.Many2one(
-        comodel_name='investment.asset.transaction',
+        comodel_name='investment.position.transaction',
         required=True,
         ondelete='cascade',
         index=True,
     )
 
     buy_batch_id = fields.Many2one(
-        comodel_name='investment.asset.transaction',
+        comodel_name='investment.position.transaction',
         required=True,
         ondelete='cascade',
         index=True,

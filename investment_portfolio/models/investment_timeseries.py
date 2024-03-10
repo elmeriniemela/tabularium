@@ -24,7 +24,7 @@ class InvestmentTimeseries(models.Model):
     last_price_own_currency = fields.Monetary(compute='_compute_timeseries_aggregate', store=True, currency_field='company_currency_id')
     profit = fields.Monetary(compute='_compute_timeseries_aggregate', store=True, currency_field='company_currency_id', group_operator='sum')
     profit_percent = fields.Float(compute='_compute_timeseries_aggregate', store=True, group_operator='avg')
-    transaction_ids = fields.Many2many(comodel_name='investment.asset.transaction', compute='_compute_timeseries_aggregate', store=True)
+    transaction_ids = fields.Many2many(comodel_name='investment.position.transaction', compute='_compute_timeseries_aggregate', store=True)
     price_id = fields.Many2one(
         comodel_name='investment.asset.price',
         store=True,
@@ -134,18 +134,19 @@ class InvestmentTimeseries(models.Model):
             'length': total number of groups
         }
         """
-        map_group = {
-            'day': [('granularity', 'in', ['4_daily', '3_monthly', '2_quaterly', '1_yearly'])],
-            'week': [('is_sunday', '=', True)],
-            'month': [('granularity', 'in', ['3_monthly', '2_quaterly', '1_yearly'])],
-            'quarter': [('granularity', 'in', ['2_quaterly', '1_yearly'])],
-            'year': [('granularity', 'in', ['1_yearly'])],
-        }
-        for group in groupby:
-            match = 'date:'
-            if group.startswith(match):
-                domain = expression.AND([domain, map_group[group[len(match):]]])
-                break
+        if not any(c[0] in ('date', 'granularity', 'is_sunday') for c in domain):
+            map_group = {
+                'day': [('granularity', 'in', ['4_daily', '3_monthly', '2_quaterly', '1_yearly'])],
+                'week': [('is_sunday', '=', True)],
+                'month': [('granularity', 'in', ['3_monthly', '2_quaterly', '1_yearly'])],
+                'quarter': [('granularity', 'in', ['2_quaterly', '1_yearly'])],
+                'year': [('granularity', 'in', ['1_yearly'])],
+            }
+            for group in groupby:
+                match = 'date:'
+                if group.startswith(match):
+                    domain = expression.AND([domain, map_group[group[len(match):]]])
+                    break
 
         return super().web_read_group(domain, fields, groupby, limit=limit, offset=offset, orderby=orderby,
                        lazy=lazy, expand=expand, expand_limit=expand_limit, expand_orderby=expand_orderby)
@@ -160,7 +161,7 @@ class InvestmentTimeseries(models.Model):
                 continue
 
             time_cutoff = datetime.datetime(record.date.year, record.date.month, record.date.day, 0, 0, 0) # This has to be the end of day.
-            record.transaction_ids = record.env['investment.asset.transaction'].search([
+            record.transaction_ids = record.env['investment.position.transaction'].search([
                 ('time', '<=', time_cutoff),
                 ('position_id', '=', record.position_id.id),
                 ('usage', 'in', ('record', 'prediction')),

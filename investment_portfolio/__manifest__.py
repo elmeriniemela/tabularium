@@ -5,7 +5,7 @@
     'website': "https://eniemela.fi",
     'license': 'LGPL-3',
     'category': 'Investment Portfolio',
-    'version': '2.0.8',
+    'version': '2.1.0',
     'depends': [
         'mail',
         'timeago_widget',
@@ -27,7 +27,7 @@
         'views/investment_milestone.xml',
         'views/investment_asset_price.xml',
         'views/investment_asset_realized.xml',
-        'views/investment_asset_transaction.xml',
+        'views/investment_position_transaction.xml',
         'views/investment_asset.xml',
         'views/investment_position.xml',
         'views/menuitems.xml',
@@ -37,6 +37,6 @@
         'demo/portfolios.xml',
         'demo/assets.xml',
         'demo/investment.asset.price.csv',
-        'demo/investment.asset.transaction.csv',
+        'demo/investment.position.transaction.csv',
     ],
 }

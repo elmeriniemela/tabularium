@@ -11,9 +11,9 @@ _logger = logging.getLogger(__name__)
 
 
 
-class InvestmentAssetTransaction(models.Model):
-    _name = 'investment.asset.transaction'
-    _description = 'Asset Transaction'
+class InvestmentPositionTransaction(models.Model):
+    _name = 'investment.position.transaction'
+    _description = 'Position Transaction'
     _order = 'time desc, ttype'
 
     position_id = fields.Many2one(

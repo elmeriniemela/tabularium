@@ -58,7 +58,7 @@ class InvestmentPosition(models.Model):
     )
 
     transaction_ids = fields.One2many(
-        comodel_name='investment.asset.transaction',
+        comodel_name='investment.position.transaction',
         inverse_name='position_id',
         domain=[('usage', '=', 'record')],
     )
@@ -89,7 +89,7 @@ class InvestmentPosition(models.Model):
     )
 
     plan_transaction_ids = fields.One2many(
-        comodel_name='investment.asset.transaction',
+        comodel_name='investment.position.transaction',
         inverse_name='position_id',
         domain=[('usage', '=', 'prediction')],
     )
@@ -163,7 +163,7 @@ class InvestmentPosition(models.Model):
         recompute = Timeseries.browse()
 
         for position_id in self:
-            first_tx = self.env['investment.asset.transaction'].search([('position_id', '=', position_id.id)], order='time asc', limit=1)
+            first_tx = self.env['investment.position.transaction'].search([('position_id', '=', position_id.id)], order='time asc', limit=1)
             first_pr = self.env['investment.asset.price'].search([('asset_id', '=', position_id.asset_id.id)], order='time asc', limit=1)
             if not first_tx:
                 _logger.info(f"No transactions on {position_id.name}")
@@ -238,7 +238,7 @@ class InvestmentPosition(models.Model):
         recompute.exists()._compute_timeseries_aggregate()
 
     def generate_plan(self):
-        Transaction = self.env['investment.asset.transaction']
+        Transaction = self.env['investment.position.transaction']
         predict_years = int(self.env['ir.config_parameter'].sudo().get_param('investment_portfolio.predict_years', '25'))
         today = datetime.date.today()
 
