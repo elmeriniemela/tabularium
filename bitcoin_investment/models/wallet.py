@@ -16,7 +16,7 @@ class BitcoinWallet(models.Model):
         return {
             'type': 'ir.actions.act_window',
             'name': _('Investment Transactions'),
-            'res_model': 'investment.asset.transaction',
+            'res_model': 'investment.position.transaction',
             'view_type': 'list',
             'view_mode': 'list',
             'views': [[False, 'list'], [False, 'form']],
@@ -44,7 +44,7 @@ class BitcoinWallet(models.Model):
                 if price.time.date() != hist.date.date():
                     raise exceptions.UserError(_("Unable to find daily price for %s") % (hist.date))
 
-                hist.position_transaction_id = hist.env['investment.asset.transaction'].create({
+                hist.position_transaction_id = hist.env['investment.position.transaction'].create({
                     'position_id': wallet.position_id.id,
                     'time': hist.date,
                     'payment': hist.amount * price.price,
@@ -60,6 +60,6 @@ class BitcoinWalletHistory(models.Model):
 
 
     position_transaction_id = fields.Many2one(
-        comodel_name='investment.asset.transaction',
+        comodel_name='investment.position.transaction',
         index=True,
     )
