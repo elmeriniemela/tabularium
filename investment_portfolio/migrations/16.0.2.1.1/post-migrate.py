@@ -5,7 +5,11 @@ def migrate(cr, version):
     env = api.Environment(cr, SUPERUSER_ID, {})
 
 
-    CONSUME = env['investment.asset'].search([('ticker', '=', 'CONSUME')])
+    CONSUME = env['investment.asset'].search([('ticker', '=', 'CONSUME')]) or env['investment.asset'].create({
+        'ticker': 'CONSUME',
+        'category_id': env['investment.category'].search([], limit=1).id,
+        'currency_id': env.user.company_id.currency_id.id,
+    })
     CONSUME.ensure_one()
 
     EUR = env['investment.asset'].search([('ticker', '=', 'EUR')])
