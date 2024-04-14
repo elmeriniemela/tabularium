@@ -98,6 +98,7 @@ class InvestmentPosition(models.Model):
         selection=[
             ('acquire', 'Acquire'),
             ('exit', 'Exit'),
+            ('cashflow', 'Yield/Cost'),
         ],
         default='acquire',
         required=True,
@@ -245,7 +246,7 @@ class InvestmentPosition(models.Model):
         # Remove old predictions.
 
         for position_id in self:
-            if not position_id.quantity:
+            if not position_id.quantity and position_id.plan_type != 'cashflow':
                 _logger.info("Skip plan for %s as we have no position on it.", position_id.name)
                 continue
 
@@ -256,7 +257,7 @@ class InvestmentPosition(models.Model):
             Transaction.search([('prediction', '=', True), ('position_id', '=', position_id.id)]).unlink()
             n = position_id.plan_months or 0
             date = banking_date(position_id.plan_start_date or today)
-            if not position_id.plan_allow_past:
+            if position_id.plan_auto_realize or not position_id.plan_allow_past:
                 while date <= today:
                     date = banking_date(date+relativedelta(months=1))
                     if position_id.plan_start_date:
@@ -307,7 +308,15 @@ class InvestmentPosition(models.Model):
                             'description': f'{i}: {-reduction:.2f} + {-interest:.2f} + {position_id.plan_fee:.2f} = {dsum:.2f}',
                             'quantity': float(f'{-reduction/curr_price:.2f}'), 'payment': abs(P), 'fee': position_id.plan_fee, 'exchange_rate': 1}
                         tr = Transaction.create({**base_vals, **reduction_vals})
+                        tr.fee = position_id.plan_fee
                         PV -= reduction
+                    elif position_id.plan_type == 'cashflow':
+                        if position_id.plan_yield:
+                            trans = {'description': f'{i}', 'quantity': 0, 'payment': position_id.plan_yield, 'exchange_rate': price}
+                            tr = Transaction.create({**base_vals, **trans})
+                        if position_id.plan_cost:
+                            trans = {'description': f'{i}', 'quantity': 0, 'payment': -position_id.plan_cost, 'exchange_rate': price}
+                            tr = Transaction.create({**base_vals, **trans})
                     else:
                         raise ValueError(f"Invalid plan type {position_id.plan_type}")
 

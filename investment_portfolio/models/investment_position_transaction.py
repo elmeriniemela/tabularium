@@ -41,7 +41,7 @@ class InvestmentPositionTransaction(models.Model):
         store=True,
     )
 
-    fee = fields.Monetary(store=True, readonly=True,  compute='_compute_fee', currency_field='company_currency_id')
+    fee = fields.Monetary(store=True, readonly=True,  compute='_compute_fee', inverse='_inverse_fee', currency_field='company_currency_id')
 
     quantity = fields.Float(digits='Investment Asset quantity')
 
@@ -181,24 +181,24 @@ class InvestmentPositionTransaction(models.Model):
                 )
                 tx.fee = (tx.payment/quantity - cmp_exchange_rate) * quantity
 
-    # def _inverse_fee(self):
-    #     for tx in self:
-    #         quantity = abs(tx.quantity)
-    #         if not (quantity and tx.payment and tx.exchange_rate):
-    #             tx.exchange_rate = 0.0
-    #         else:
-    #             fee = tx.company_currency_id._convert(
-    #                 from_amount=tx.fee,
-    #                 to_currency=tx.currency_id,
-    #                 company=tx.company_id,
-    #                 date=tx.time,
-    #             )
-    #             payment = tx.company_currency_id._convert(
-    #                 from_amount=tx.payment,
-    #                 to_currency=tx.currency_id,
-    #                 company=tx.company_id,
-    #                 date=tx.time,
-    #             )
-    #             tx.exchange_rate = (payment/quantity - fee/quantity)
+    def _inverse_fee(self):
+        for tx in self:
+            quantity = abs(tx.quantity)
+            if not (quantity and tx.payment and tx.exchange_rate):
+                tx.exchange_rate = 0.0
+            else:
+                fee = tx.company_currency_id._convert(
+                    from_amount=tx.fee,
+                    to_currency=tx.currency_id,
+                    company=tx.company_id,
+                    date=tx.time,
+                )
+                payment = tx.company_currency_id._convert(
+                    from_amount=tx.payment,
+                    to_currency=tx.currency_id,
+                    company=tx.company_id,
+                    date=tx.time,
+                )
+                tx.exchange_rate = (payment/quantity - fee/quantity)
 
 

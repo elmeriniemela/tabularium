@@ -36,7 +36,7 @@ class TogglTask(models.Model):
     )
 
     _sql_constraints = [
-        ('task_id_uniq', 'unique(task_id)', 'The task_id must be unique!'),
+        ('task_id_uniq', 'unique(task_id, company_id)', 'The task_id must be unique within a company!'),
     ]
 
     def fetch(self):
@@ -309,12 +309,15 @@ class TogglEntry(models.Model):
 
         for record in daily_entries:
             ids = [int(m) for m in re.findall(record.task_id_regex, record.name or '')]
+            if len(ids) > 1:
+                raise UserError(_("A timesheet can't be linked to multiple tasks: %s") % record.name)
             if ids:
                 [task_id] = ids
                 record.task_id = Task.search([('task_id', '=', task_id),('company_id', '=', record.company_id.id)], limit=1) \
                     or Task.create({
                         'name': record.name,
-                        'task_id': task_id
+                        'task_id': task_id,
+                        'company_id': record.company_id.id,
                     })
             else:
                 record.task_id = False
