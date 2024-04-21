@@ -58,7 +58,7 @@ class InvestmentAsset(models.Model):
         comodel_name='investment.asset.price',
         compute='_compute_last_price', store=True)
     last_update = fields.Datetime(related='last_price_id.time', store=True)
-    last_price = fields.Monetary(string="Last Price", related='last_price_id.price', store=True, currency_field='currency_id', group_operator=None)
+    last_price = fields.Monetary(string="Last Price", related='last_price_id.price', store=True, currency_field='currency_id', group_operator=None, inverse='_inverse_last_price')
     expected_yearly_appreciation = fields.Float(group_operator='avg', default=0.0, digits='Investment Asset Interest', tracking=True)
 
 
@@ -183,6 +183,10 @@ class InvestmentAsset(models.Model):
             record.five_year_price = percent_change(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(years=5), record.last_price_id.price)
             record.ten_year_price = percent_change(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(years=10), record.last_price_id.price)
 
+
+    def _inverse_last_price(self):
+        for record in self:
+            record.last_price_id.price = record.last_price
 
     def run_integration(self):
         for asset in self:
