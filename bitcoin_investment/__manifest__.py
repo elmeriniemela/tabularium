@@ -15,5 +15,6 @@
     'application': False,
     'data': [
         'views/bitcoin_wallet.xml',
+        'views/position.xml',
     ],
 }

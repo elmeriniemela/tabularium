@@ -1,0 +1,87 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* bitcoin_investment
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 16.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-04-21 18:25+0000\n"
+"PO-Revision-Date: 2024-04-21 18:25+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: bitcoin_investment
+#: model:ir.model,name:bitcoin_investment.model_bitcoin_wallet
+msgid "Bitcoin Wallet"
+msgstr ""
+
+#. module: bitcoin_investment
+#: model:ir.model,name:bitcoin_investment.model_bitcoin_wallet_history
+msgid "Bitcoin Wallet History"
+msgstr ""
+
+#. module: bitcoin_investment
+#: model_terms:ir.ui.view,arch_db:bitcoin_investment.position_form
+msgid "Fetch Bitcoin Transactions"
+msgstr "Hae bitcoin siirrot"
+
+#. module: bitcoin_investment
+#: model:ir.model,name:bitcoin_investment.model_investment_position
+msgid "Investment Position"
+msgstr "Sijoitus positio"
+
+#. module: bitcoin_investment
+#. odoo-python
+#: code:addons/bitcoin_investment/models/wallet.py:0
+#: code:addons/models/wallet.py:0
+#, python-format
+msgid "Investment Transactions"
+msgstr ""
+
+#. module: bitcoin_investment
+#: model:ir.model.fields,field_description:bitcoin_investment.field_bitcoin_wallet__position_id
+msgid "Position"
+msgstr ""
+
+#. module: bitcoin_investment
+#: model:ir.model.fields,field_description:bitcoin_investment.field_bitcoin_wallet_history__position_transaction_id
+msgid "Position Transaction"
+msgstr ""
+
+#. module: bitcoin_investment
+#: model:ir.actions.server,name:bitcoin_investment.action_show_investment_transactions
+msgid "Show investment transactions"
+msgstr ""
+
+#. module: bitcoin_investment
+#: model:ir.actions.server,name:bitcoin_investment.action_sync_investments
+msgid "Sync Investments"
+msgstr ""
+
+#. module: bitcoin_investment
+#. odoo-python
+#: code:addons/bitcoin_investment/models/wallet.py:0
+#: code:addons/models/wallet.py:0
+#, python-format
+msgid "Unable to find daily price for %s"
+msgstr ""
+
+#. module: bitcoin_investment
+#: model:ir.model.fields,field_description:bitcoin_investment.field_investment_position__wallet_ids
+msgid "Wallet"
+msgstr ""
+
+#. module: bitcoin_investment
+#: model:ir.model.fields,field_description:bitcoin_investment.field_investment_position__wallet_count
+msgid "Wallet Count"
+msgstr ""
+
+#. module: bitcoin_investment
+#: model_terms:ir.ui.view,arch_db:bitcoin_investment.position_form
+msgid "Wallets"
+msgstr ""
