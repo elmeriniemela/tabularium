@@ -8,6 +8,6 @@ class InvestmentCategory(models.Model):
     _description = 'Investment Category'
     _order = 'sequence, id'
 
-    name = fields.Char(required=True)
+    name = fields.Char(required=True, translate=True)
     sequence = fields.Integer(string='Sequence')
     liquid = fields.Boolean()
