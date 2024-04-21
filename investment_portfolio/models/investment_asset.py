@@ -185,8 +185,16 @@ class InvestmentAsset(models.Model):
 
 
     def _inverse_last_price(self):
+        Price = self.env['investment.asset.price']
         for record in self:
-            record.last_price_id.price = record.last_price
+            if not record.last_price_id:
+                record.last_price_id = Price.create({
+                    'asset_id': self.id,
+                    'time': datetime.datetime.fromtimestamp(0),
+                    'price': record.last_price,
+                })
+            else:
+                record.last_price_id.price = record.last_price
 
     def run_integration(self):
         for asset in self:
