@@ -1310,7 +1310,7 @@ msgstr "Määrä yhteensä"
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__transaction_ids
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_timeseries__transaction_ids
 msgid "Transaction"
-msgstr "Transaktio"
+msgstr "Tapahtuma"
 
 #. module: investment_portfolio
 #: model:ir.ui.menu,name:investment_portfolio.menu_transactions
@@ -1318,13 +1318,13 @@ msgstr "Transaktio"
 #: model_terms:ir.ui.view,arch_db:investment_portfolio.position_search
 #: model_terms:ir.ui.view,arch_db:investment_portfolio.timeseries_form
 msgid "Transactions"
-msgstr "Transaktiot"
+msgstr "Tapahtumat"
 
 #. module: investment_portfolio
 #: model:ir.actions.act_window,name:investment_portfolio.action_transactions_per_month
 #: model:ir.ui.menu,name:investment_portfolio.menu_transactions_per_month
 msgid "Transactions per month"
-msgstr "Transaktiot per kuukausi"
+msgstr "Tapahtumat per kuukausi"
 
 #. module: investment_portfolio
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__ttype
