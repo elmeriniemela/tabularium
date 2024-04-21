@@ -205,7 +205,7 @@ class InvestmentAsset(models.Model):
     def price_upsert(self, time, price):
         "Used by investment integrations."
         self.ensure_one()
-        Price = self.env['investment.asset.price']
+        Price = self.env['investment.asset.price'].sudo()
         time = time.astimezone(pytz.utc).replace(tzinfo=None)
         price_id = Price.search([
             ('asset_id', '=', self.id),
