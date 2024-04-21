@@ -123,7 +123,7 @@ class InvestmentPositionTransaction(models.Model):
                     'price': price,
                     'transaction_id': transaction.id,
                 })
-                _logger.info("%s (%s): %s", transaction.asset_id.name, transaction.time, price)
+                _logger.info("%s (%s): %s", transaction.asset_id.ticker, transaction.time, price)
 
 
 
