@@ -135,7 +135,9 @@ class InvestmentPosition(models.Model):
             )
             record.update(record._get_position(record.last_price_own_currency, record.transaction_ids))
 
-
+    def recompute_value(self):
+        self.mapped('asset_id')._compute_last_price()
+        self._compute_position_aggregate()
 
     def run_integration(self):
         self.mapped('asset_id').run_integration()

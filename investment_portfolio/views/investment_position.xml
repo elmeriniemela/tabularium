@@ -205,12 +205,12 @@
         </field>
     </record>
 
-    <record id="action_compute_position_aggregate" model="ir.actions.server">
+    <record id="action_recompute_value" model="ir.actions.server">
         <field name="name">Re-compute Value</field>
         <field name="model_id" ref="model_investment_position"/>
         <field name="binding_model_id" ref="model_investment_position"/>
         <field name="state">code</field>
-        <field name="code">records._compute_position_aggregate()</field>
+        <field name="code">records.recompute_value()</field>
     </record>
 
     <record id="action_update_realized_fifo_position" model="ir.actions.server">
