@@ -14,6 +14,7 @@ _logger = logging.getLogger(__name__)
 class InvestmentPositionTransaction(models.Model):
     _name = 'investment.position.transaction'
     _description = 'Position Transaction'
+    _inherit = ['mail.thread']
     _order = 'time desc, ttype'
 
     position_id = fields.Many2one(
@@ -21,6 +22,7 @@ class InvestmentPositionTransaction(models.Model):
         required=True,
         ondelete='cascade',
         index=True,
+        tracking=True,
     )
 
     asset_id = fields.Many2one(related='position_id.asset_id')
@@ -29,11 +31,11 @@ class InvestmentPositionTransaction(models.Model):
     company_currency_id = fields.Many2one(related='position_id.company_currency_id')
     company_id = fields.Many2one(related='position_id.company_id')
 
-    payment = fields.Monetary(required=True, currency_field='company_currency_id')
+    payment = fields.Monetary(required=True, currency_field='company_currency_id', tracking=True)
 
     description = fields.Char()
 
-    exchange_rate = fields.Float(digits='Investment Asset quantity')
+    exchange_rate = fields.Float(digits='Investment Asset quantity', tracking=True)
 
     currency_rate_id = fields.Many2one(
         comodel_name='res.currency.rate',
@@ -44,9 +46,9 @@ class InvestmentPositionTransaction(models.Model):
 
     fee = fields.Monetary(readonly=False,  compute='_compute_fee', inverse='_inverse_fee', currency_field='company_currency_id')
 
-    quantity = fields.Float(digits='Investment Asset quantity')
+    quantity = fields.Float(digits='Investment Asset quantity', tracking=True)
 
-    time = fields.Datetime(required=True, default=fields.Datetime.now)
+    time = fields.Datetime(required=True, default=fields.Datetime.now, tracking=True)
 
     profit = fields.Monetary(compute='_compute_profit', currency_field='company_currency_id')
 
@@ -54,6 +56,7 @@ class InvestmentPositionTransaction(models.Model):
         compute='_compute_prediction',
         inverse='_inverse_prediction',
         store=True,
+        tracking=True,
     )
 
     usage = fields.Selection(
@@ -64,6 +67,7 @@ class InvestmentPositionTransaction(models.Model):
         ],
         required=True,
         default='record',
+        tracking=True,
     )
 
     category_id = fields.Many2one(related='asset_id.category_id', store=True, readonly=True)
@@ -79,6 +83,7 @@ class InvestmentPositionTransaction(models.Model):
         string='Type',
         compute='_compute_report',
         store=True,
+        tracking=True,
     )
 
     cash_flow = fields.Monetary(
