@@ -39,9 +39,10 @@ class InvestmentPositionTransaction(models.Model):
         comodel_name='res.currency.rate',
         compute='_compute_currency_rate_id',
         store=True,
+        readonly=False,
     )
 
-    fee = fields.Monetary(store=True, readonly=True,  compute='_compute_fee', inverse='_inverse_fee', currency_field='company_currency_id')
+    fee = fields.Monetary(store=True, readonly=False,  compute='_compute_fee', inverse='_inverse_fee', currency_field='company_currency_id')
 
     quantity = fields.Float(digits='Investment Asset quantity')
 
@@ -148,11 +149,13 @@ class InvestmentPositionTransaction(models.Model):
             if tx.currency_id != tx.company_currency_id:
                 tx.currency_rate_id = tx.env['res.currency.rate'].search([
                     ('currency_id', '=', tx.currency_id.id),
+                    ('company_id', '=', tx.company_id.id),
                     ('name', '=', tx.time.date()),
                 ]) or tx.env['res.currency.rate'].create({
                     'currency_id': tx.currency_id.id,
                     'name': tx.time.date(),
                     'rate': 1.0,
+                    'company_id': tx.company_id.id,
                 })
 
 
