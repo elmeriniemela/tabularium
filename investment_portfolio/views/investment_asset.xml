@@ -3,7 +3,7 @@
         <field name="name">investment.asset.tree</field>
         <field name="model">investment.asset</field>
         <field name="arch" type="xml">
-            <tree>
+            <tree multi_edit="1">
                 <field name="sequence" widget="handle"/>
                 <field name="ticker"/>
                 <field name="last_price" optional="show"/>
@@ -20,6 +20,7 @@
                 <field name="ten_year_price" widget="percentage" decoration-danger="ten_year_price &lt; 0" decoration-success="ten_year_price &gt; 0" optional="hide"/>
                 <field name="currency_id" optional="hide"/>
                 <field name="endpoint_id" optional="hide"/>
+                <field name="owner_ids" widget="many2many_tags" optional="hide"/>
                 <field name="expected_yearly_appreciation" widget="percentage" optional="hide"/>
             </tree>
         </field>
@@ -31,7 +32,7 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <button name="run_integration" type="object" string="Run Integration" icon="fa-cogs"/>
+                    <button name="run_integration" type="object" string="Run Integration" icon="fa-cogs" attrs="{'invisible': [('endpoint_id', '=', False)]}"/>
                     <button name="%(action_prices)d"
                         string="Prices"
                         type="action"
@@ -51,6 +52,7 @@
                             <field name="currency_id"/>
                             <field name="category_id"/>
                             <field name="endpoint_id"/>
+                            <field name="owner_ids" widget="many2many_tags"/>
                             <field name="expected_yearly_appreciation" widget="percentage"/>
                             <field name="daily_price" widget="percentage" decoration-danger="daily_price &lt; 0" decoration-success="daily_price &gt; 0"/>
                             <field name="weekly_price" widget="percentage" decoration-danger="weekly_price &lt; 0" decoration-success="weekly_price &gt; 0"/>
@@ -89,6 +91,7 @@
             <search>
                 <field name="ticker"/>
                 <field name="category_id"/>
+                <field name="owner_ids"/>
                 <separator/>
                 <group expand="1" string="Group by">
                     <filter string="Category" name="group_category_id" context="{'group_by': 'category_id'}"/>

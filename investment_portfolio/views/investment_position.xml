@@ -76,7 +76,7 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <button name="run_integration" type="object" string="Run Integration" icon="fa-cogs"/>
+                    <button name="run_integration" type="object" string="Run Integration" icon="fa-cogs" attrs="{'invisible': [('endpoint_id', '=', False)]}"/>
                     <button name="%(action_prices)d"
                         string="Prices"
                         type="action"
@@ -97,6 +97,7 @@
                             <field name="company_id"/>
                             <field name="portfolio_id"/>
 
+                            <field name="endpoint_id" invisible="1"/>
                             <field name="currency_id" invisible="1" readonly="1"/>
                             <field name="company_currency_id" invisible="1"/>
                             <field name="is_company_currency" invisible="1"/>
@@ -234,6 +235,14 @@
         <field name="binding_model_id" ref="model_investment_position"/>
         <field name="state">code</field>
         <field name="code">records.with_context(force_recompute=True).generate_timeseries()</field>
+    </record>
+
+    <record id="action_create_prices_from_rates" model="ir.actions.server">
+        <field name="name">Create prices based on exchange rates</field>
+        <field name="model_id" ref="model_investment_position"/>
+        <field name="binding_model_id" ref="model_investment_position"/>
+        <field name="state">code</field>
+        <field name="code">records.mapped('transaction_ids')._fill_daily_price()</field>
     </record>
 
     <record id="action_current_positions" model="ir.actions.act_window">

@@ -50,4 +50,28 @@
         <field name="domain_force">['|',('company_id','=',False),('company_id', 'in', company_ids)]</field>
     </record>
 
+
+    <record id="owner_rule_investment_asset" model="ir.rule">
+        <field name="name">investment_asset owner rule</field>
+        <field name="model_id" ref="model_investment_asset"/>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+        <field name="domain_force">[('owner_ids', '=', user.id)]</field>
+    </record>
+
+
+
+    <record id="owner_rule_investment_asset_price" model="ir.rule">
+        <field name="name">investment_asset_price owner rule</field>
+        <field name="model_id" ref="model_investment_asset_price"/>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+        <field name="domain_force">[('asset_id.owner_ids', '=', user.id)]</field>
+    </record>
+
+
 </odoo>

@@ -78,7 +78,7 @@ class InvestmentTimeseries(models.Model):
     granularity = fields.Selection(
         selection=[
             ('1_yearly', 'Yearly'),
-            ('2_quaterly', 'Quaterly'),
+            ('2_quaterly', 'Quarterly'),
             ('3_monthly', 'Monthly'),
             ('4_daily', 'Daily'),
         ],

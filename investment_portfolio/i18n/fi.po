@@ -1,0 +1,1378 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* investment_portfolio
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 16.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-04-21 13:34+0000\n"
+"PO-Revision-Date: 2024-04-21 13:34+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__daily_price
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__daily_price
+msgid "1 Day"
+msgstr "1 päivä"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__monthly_price
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__monthly_price
+msgid "1 Month"
+msgstr "1 kuukausi"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__weekly_price
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__weekly_price
+msgid "1 Week"
+msgstr "1 viikko"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__one_year_price
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__one_year_price
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_transaction_search
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.timeseries_search
+msgid "1 Year"
+msgstr "1 vuosi"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__ten_year_price
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__ten_year_price
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_transaction_search
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.timeseries_search
+msgid "10 Years"
+msgstr "10 vuotta"
+
+#. module: investment_portfolio
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_transaction_search
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.timeseries_search
+msgid "2 Years"
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__three_month_price
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__three_month_price
+msgid "3 Months"
+msgstr "3 kuukautta"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__three_year_price
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__three_year_price
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_transaction_search
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.timeseries_search
+msgid "3 Years"
+msgstr "3 vuotta"
+
+#. module: investment_portfolio
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_transaction_search
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.timeseries_search
+msgid "4 Years"
+msgstr "4 vuotta"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__five_year_price
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__five_year_price
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_transaction_search
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.timeseries_search
+msgid "5 Years"
+msgstr "5 vuotta"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__six_month_price
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__six_month_price
+msgid "6 Months"
+msgstr "6 kuukautta"
+
+#. module: investment_portfolio
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_transaction_search
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.timeseries_search
+msgid "6 Years"
+msgstr "6 vuotta"
+
+#. module: investment_portfolio
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_transaction_search
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.timeseries_search
+msgid "7 Years"
+msgstr "7 vuotta"
+
+#. module: investment_portfolio
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_transaction_search
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.timeseries_search
+msgid "8 Years"
+msgstr "8 vuotta"
+
+#. module: investment_portfolio
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_transaction_search
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.timeseries_search
+msgid "9 Years"
+msgstr "9 vuotta"
+
+#. module: investment_portfolio
+#: model:ir.model.constraint,message:investment_portfolio.constraint_investment_position_transaction_check_exchange_rate
+msgid "A buy/sell transaction can not be encoded without an exchange rate."
+msgstr "Myyntiä/ostoa ei voida tallentaa ilman vaihtokurssia."
+
+#. module: investment_portfolio
+#: model:ir.model.constraint,message:investment_portfolio.constraint_investment_asset_realized_unique_realized
+msgid "A realization for this aquisition/sell link already exists!"
+msgstr "Toteutumistapahtuma tälle hankinta/myynnille on jo olemassa!"
+
+#. module: investment_portfolio
+#: model:ir.model.fields.selection,name:investment_portfolio.selection__investment_position__plan_type__acquire
+msgid "Acquire"
+msgstr "Hankinta"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__message_needaction
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__message_needaction
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__message_needaction
+msgid "Action Needed"
+msgstr "Toimenpide tarvitaan"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__active
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__active
+msgid "Active"
+msgstr "Aktiivinen"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__activity_ids
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__activity_ids
+msgid "Activities"
+msgstr "Aktiviteetit"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__activity_exception_decoration
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__activity_exception_decoration
+msgid "Activity Exception Decoration"
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__activity_state
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__activity_state
+msgid "Activity State"
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__activity_type_icon
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__activity_type_icon
+msgid "Activity Type Icon"
+msgstr ""
+
+#. module: investment_portfolio
+#: model:res.groups,name:investment_portfolio.group_investment_admin
+msgid "Administrator"
+msgstr ""
+
+#. module: investment_portfolio
+#: model:res.groups,comment:investment_portfolio.group_investment_admin
+msgid "Administrator."
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.model.fields.selection,name:investment_portfolio.selection__investment_milestone__state__ahead
+msgid "Ahead"
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.actions.act_window,name:investment_portfolio.action_allocations_by_portfolio
+#: model:ir.ui.menu,name:investment_portfolio.menu_allocations_by_asset_class
+msgid "Allocations per portfolio"
+msgstr "Allokaatiot per salkku"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_price__asset_id
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_timeseries__position_id
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_price_search
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_realized_search
+msgid "Asset"
+msgstr "Omaisuus"
+
+#. module: investment_portfolio
+#: model:ir.model,name:investment_portfolio.model_investment_asset_price
+msgid "Asset Price"
+msgstr "Omaisuuden hinta"
+
+#. module: investment_portfolio
+#: model:ir.actions.act_window,name:investment_portfolio.action_prices
+#: model:ir.ui.menu,name:investment_portfolio.menu_prices
+msgid "Asset Prices"
+msgstr "Omaisuuden hinnat"
+
+#. module: investment_portfolio
+#: model:ir.model,name:investment_portfolio.model_investment_asset_realized
+msgid "Asset Realized"
+msgstr "Omaisuuden toteutumat"
+
+#. module: investment_portfolio
+#: model:ir.actions.act_window,name:investment_portfolio.action_assets
+#: model:ir.ui.menu,name:investment_portfolio.menu_assets
+msgid "Assets"
+msgstr "Omaisuudet"
+
+#. module: investment_portfolio
+#: model:ir.actions.act_window,name:investment_portfolio.action_realized
+#: model:ir.ui.menu,name:investment_portfolio.menu_realized
+msgid "Assets Realized"
+msgstr "Omaisuuden toteutumat"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__message_attachment_count
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__message_attachment_count
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__message_attachment_count
+msgid "Attachment Count"
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.model.fields,help:investment_portfolio.field_investment_position__cost_basis
+msgid "Average price across every purchase."
+msgstr "Keskihinta kaikista ostoista."
+
+#. module: investment_portfolio
+#: model:ir.model.fields.selection,name:investment_portfolio.selection__investment_milestone__state__behind
+msgid "Behind"
+msgstr "Jäljessä"
+
+#. module: investment_portfolio
+#: model:ir.model.fields.selection,name:investment_portfolio.selection__investment_position_transaction__ttype__buy
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_transaction_search
+msgid "Buy"
+msgstr "Osto"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_realized__buy_batch_id
+msgid "Buy Batch"
+msgstr "Ostoerä"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_realized__buy_date
+msgid "Buy Date"
+msgstr "Ostopäivämäärä"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_realized__buy_fee
+msgid "Buy Fee"
+msgstr "Ostokulu"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_realized__buy_price
+msgid "Buy Price"
+msgstr "Ostohinta"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__cash_flow
+msgid "Cash Flow"
+msgstr "Kassavirta"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_res_company__cash_position_id
+msgid "Cash Position"
+msgstr "Kassapositio"
+
+#. module: investment_portfolio
+#: model:ir.actions.act_window,name:investment_portfolio.action_categories
+#: model:ir.ui.menu,name:investment_portfolio.menu_categories
+msgid "Categories"
+msgstr "Kategoriat"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__category_id
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_realized__category_id
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__category_id
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__category_id
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_timeseries__category_id
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_realized_search
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_search
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_transaction_search
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.position_search
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.timeseries_search
+msgid "Category"
+msgstr "Kategoria"
+
+#. module: investment_portfolio
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_transaction_search
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.position_search
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.timeseries_search
+msgid "Closed"
+msgstr "Suljettu"
+
+#. module: investment_portfolio
+#: model:ir.model,name:investment_portfolio.model_res_company
+msgid "Companies"
+msgstr "Yritykset"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_realized__company_id
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__company_id
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__company_id
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__company_id
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_timeseries__company_id
+msgid "Company"
+msgstr "Yritys"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_realized__currency_id
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__company_currency_id
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__company_currency_id
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__company_currency_id
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_timeseries__company_currency_id
+msgid "Company Currency"
+msgstr "Yrityksen valuutta"
+
+#. module: investment_portfolio
+#: model:ir.ui.menu,name:investment_portfolio.configuration_menu
+msgid "Configuration"
+msgstr "Konfiguraatio"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_res_company__consumption_position_id
+msgid "Consumption Position"
+msgstr "Kulutus positio"
+
+#. module: investment_portfolio
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.milestone_tree
+msgid "Copy"
+msgstr "Kopio"
+
+#. module: investment_portfolio
+#: model:ir.model.fields.selection,name:investment_portfolio.selection__investment_position_transaction__ttype__cost
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_transaction_search
+msgid "Cost"
+msgstr "Kustannus"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__cost_basis
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_timeseries__cost_basis
+msgid "Cost Basis"
+msgstr "Keskihinta"
+
+#. module: investment_portfolio
+#: model:ir.actions.server,name:investment_portfolio.cron_create_time_series_ir_actions_server
+#: model:ir.cron,cron_name:investment_portfolio.cron_create_time_series
+msgid "Create Investment Time Series"
+msgstr "Luo sijoitus aikasarja"
+
+#. module: investment_portfolio
+#: model:ir.actions.server,name:investment_portfolio.action_create_prices_from_rates
+#: model:ir.actions.server,name:investment_portfolio.action_fill_daily_price
+msgid "Create prices based on exchange rates"
+msgstr "Luo hinnat vaihtokurssien perusteella"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__create_uid
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_price__create_uid
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_realized__create_uid
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_category__create_uid
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__create_uid
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_portfolio__create_uid
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__create_uid
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__create_uid
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_timeseries__create_uid
+msgid "Created by"
+msgstr "Lounut"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__create_date
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_price__create_date
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_realized__create_date
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_category__create_date
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__create_date
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_portfolio__create_date
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__create_date
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__create_date
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_timeseries__create_date
+msgid "Created on"
+msgstr "Luotu"
+
+#. module: investment_portfolio
+#: model:ir.ui.menu,name:investment_portfolio.menu_currencies
+msgid "Currencies"
+msgstr "Valuutat"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__currency_id
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_price__currency_id
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__currency_id
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__currency_id
+msgid "Currency"
+msgstr "Valuutta"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__currency_rate_id
+msgid "Currency Rate"
+msgstr "Valuuttakurssi"
+
+#. module: investment_portfolio
+#: model:ir.actions.act_window,name:investment_portfolio.action_current_positions
+#: model:ir.ui.menu,name:investment_portfolio.menu_current_positions
+msgid "Current positions"
+msgstr "Nykyiset positiot"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,help:investment_portfolio.field_investment_position__position
+msgid "Current value of this position."
+msgstr "Nykinen arvo tälle positiolle."
+
+#. module: investment_portfolio
+#: model:ir.model.fields.selection,name:investment_portfolio.selection__investment_timeseries__granularity__4_daily
+msgid "Daily"
+msgstr "Päivittäinen"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__date
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_timeseries__date
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_transaction_search
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.timeseries_search
+msgid "Date"
+msgstr "Päivämäärä"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__description
+msgid "Description"
+msgstr "Kuvaus"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__difference
+msgid "Difference"
+msgstr "Ero"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__display_name
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_price__display_name
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_realized__display_name
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_category__display_name
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__display_name
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_portfolio__display_name
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__display_name
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__display_name
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_timeseries__display_name
+msgid "Display Name"
+msgstr "Näyttönimi"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__domain
+msgid "Domain"
+msgstr "Toimialue"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__exchange_rate
+msgid "Exchange Rate"
+msgstr "Vaihtokurssi"
+
+#. module: investment_portfolio
+#: model:ir.model.fields.selection,name:investment_portfolio.selection__investment_position__plan_type__exit
+msgid "Exit"
+msgstr "Poistu"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__expected_yearly_appreciation
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__expected_yearly_appreciation
+msgid "Expected Yearly Appreciation"
+msgstr "Odotettu vuosittainen arvonnousu"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__fee
+msgid "Fee"
+msgstr "Kulu"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__follow
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.position_search
+msgid "Follow"
+msgstr "Seuraa"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__message_follower_ids
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__message_follower_ids
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__message_follower_ids
+msgid "Followers"
+msgstr "Seuraajat"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__message_partner_ids
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__message_partner_ids
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__message_partner_ids
+msgid "Followers (Partners)"
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.model.fields,help:investment_portfolio.field_investment_asset__activity_type_icon
+#: model:ir.model.fields,help:investment_portfolio.field_investment_position__activity_type_icon
+msgid "Font awesome icon e.g. fa-tasks"
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_timeseries__prediction
+msgid "Future Price"
+msgstr "Tulevaisuuden hinta"
+
+#. module: investment_portfolio
+#: model:ir.actions.server,name:investment_portfolio.action_position_generate_plan
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.position_form
+msgid "Generate Plan"
+msgstr "Luo suunnitelma"
+
+#. module: investment_portfolio
+#: model:ir.actions.server,name:investment_portfolio.action_position_generate_timeseries
+msgid "Generate Timeseries"
+msgstr "Luo aikasarja"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_timeseries__granularity
+msgid "Granularity"
+msgstr "Tarkkuus"
+
+#. module: investment_portfolio
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_price_search
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_realized_search
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_search
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_transaction_search
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.position_search
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.timeseries_search
+msgid "Group by"
+msgstr "Ryhmittele"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__has_message
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__has_message
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__has_message
+msgid "Has Message"
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__id
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_price__id
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_realized__id
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_category__id
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__id
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_portfolio__id
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__id
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__id
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_timeseries__id
+msgid "ID"
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__activity_exception_icon
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__activity_exception_icon
+msgid "Icon"
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.model.fields,help:investment_portfolio.field_investment_asset__activity_exception_icon
+#: model:ir.model.fields,help:investment_portfolio.field_investment_position__activity_exception_icon
+msgid "Icon to indicate an exception activity."
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.model.fields,help:investment_portfolio.field_investment_asset__message_needaction
+#: model:ir.model.fields,help:investment_portfolio.field_investment_milestone__message_needaction
+#: model:ir.model.fields,help:investment_portfolio.field_investment_position__message_needaction
+msgid "If checked, new messages require your attention."
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.model.fields,help:investment_portfolio.field_investment_asset__message_has_error
+#: model:ir.model.fields,help:investment_portfolio.field_investment_milestone__message_has_error
+#: model:ir.model.fields,help:investment_portfolio.field_investment_position__message_has_error
+msgid "If checked, some messages have a delivery error."
+msgstr ""
+
+#. module: investment_portfolio
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.position_search
+msgid "Epälikvidi"
+msgstr ""
+
+#. module: investment_portfolio
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_transaction_search
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.timeseries_search
+msgid "Epälikvidit omistukset"
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__inflation_rate
+msgid "Inflaatio prosentti"
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__endpoint_id
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__endpoint_id
+msgid "Integration"
+msgstr "Integraatio"
+
+#. module: investment_portfolio
+#: model:ir.actions.server,name:investment_portfolio.action_price_interpolate_cagr
+msgid "Interpoloi CAGR"
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_price__interpolated
+msgid "Interpolated"
+msgstr "Interpoloitu"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_timeseries__interpolated
+msgid "Interpolated Price"
+msgstr "Interpoloitu hinta"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__investment
+msgid "Investment"
+msgstr "Sijoitus"
+
+#. module: investment_portfolio
+#: model:ir.model,name:investment_portfolio.model_investment_asset
+msgid "Investment Asset"
+msgstr "Sijoitus omaisuus"
+
+#. module: investment_portfolio
+#: model:ir.model,name:investment_portfolio.model_investment_category
+msgid "Investment Category"
+msgstr "Sijoitus kategoria"
+
+#. module: investment_portfolio
+#: model:ir.model,name:investment_portfolio.model_investment_milestone
+msgid "Investment Milestone"
+msgstr "Sijoitus virstanpylväs"
+
+#. module: investment_portfolio
+#: model:ir.model,name:investment_portfolio.model_investment_portfolio
+msgid "Investment Portfolio"
+msgstr "Sijoitus salkku"
+
+#. module: investment_portfolio
+#: model:ir.model,name:investment_portfolio.model_investment_position
+msgid "Investment Position"
+msgstr "Sijoitus positio"
+
+#. module: investment_portfolio
+#: model:ir.model,name:investment_portfolio.model_investment_timeseries
+msgid "Investment Time Series"
+msgstr "Sijoitus aikasarjat"
+
+#. module: investment_portfolio
+#: model:ir.ui.menu,name:investment_portfolio.root_menu
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.view_company_form
+msgid "Investments"
+msgstr "Sijoitukset"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__is_cash
+msgid "Is Cash"
+msgstr "On käteistä"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__is_company_currency
+msgid "Is Company Currency"
+msgstr "On yrityksen valuutta"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__message_is_follower
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__message_is_follower
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__message_is_follower
+msgid "Is Follower"
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_timeseries__is_sunday
+msgid "Is Sunday"
+msgstr "On sunnuntai"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset____last_update
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_price____last_update
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_realized____last_update
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_category____last_update
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone____last_update
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_portfolio____last_update
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position____last_update
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction____last_update
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_timeseries____last_update
+msgid "Last Modified on"
+msgstr "Viimeksi muokattu"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__last_price
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__last_price
+msgid "Last Price"
+msgstr "Viimeisin hinta"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__last_price_own_currency
+msgid "Last Price (own currency)"
+msgstr "Viimeisin hinta (oma valuutta)"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_timeseries__last_price_own_currency
+msgid "Last Price Own Currency"
+msgstr "Viimeisin hinta omassa valuutassa"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__last_price_id
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__last_price_id
+msgid "Last Price Record"
+msgstr "Viimeisin hinta tietue"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__write_uid
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_price__write_uid
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_realized__write_uid
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_category__write_uid
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__write_uid
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_portfolio__write_uid
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__write_uid
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__write_uid
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_timeseries__write_uid
+msgid "Last Updated by"
+msgstr "Viimeksi muokannut"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__write_date
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_price__write_date
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_realized__write_date
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_category__write_date
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__write_date
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_portfolio__write_date
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__write_date
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__write_date
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_timeseries__write_date
+msgid "Last Updated on"
+msgstr "Viimeksi muokattu"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__liquid
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_category__liquid
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__liquid
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__liquid
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_timeseries__liquid
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.position_search
+msgid "Liquid"
+msgstr "Likvidi"
+
+#. module: investment_portfolio
+#: model:ir.actions.act_window,name:investment_portfolio.action_liquid_allocations
+#: model:ir.ui.menu,name:investment_portfolio.menu_liquid_allocations
+msgid "Liquid Allocations"
+msgstr "Likvidit allokaatiot"
+
+#. module: investment_portfolio
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_transaction_search
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.timeseries_search
+msgid "Liquid Assets"
+msgstr "Likvidit omaisuudet"
+
+#. module: investment_portfolio
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_transaction_search
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.position_search
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.timeseries_search
+msgid "Long"
+msgstr "Pitkä"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__message_main_attachment_id
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__message_main_attachment_id
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__message_main_attachment_id
+msgid "Main Attachment"
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__max_investment
+msgid "Max Investment"
+msgstr "Maksimi sijoitus"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__message_has_error
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__message_has_error
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__message_has_error
+msgid "Message Delivery error"
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__message_ids
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__message_ids
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__message_ids
+msgid "Messages"
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.actions.act_window,name:investment_portfolio.action_milestones
+#: model:ir.ui.menu,name:investment_portfolio.menu_milestones
+msgid "Milestones"
+msgstr "Virstanpylväät"
+
+#. module: investment_portfolio
+#: model:ir.model.fields.selection,name:investment_portfolio.selection__investment_milestone__state__missed
+msgid "Missed"
+msgstr "Ohitettu"
+
+#. module: investment_portfolio
+#: model:ir.model.fields.selection,name:investment_portfolio.selection__investment_timeseries__granularity__3_monthly
+msgid "Monthly"
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__my_activity_date_deadline
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__my_activity_date_deadline
+msgid "My Activity Deadline"
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_category__name
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__name
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_portfolio__name
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__name
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.position_search
+msgid "Name"
+msgstr "Nimi"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__activity_date_deadline
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__activity_date_deadline
+msgid "Next Activity Deadline"
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__activity_summary
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__activity_summary
+msgid "Next Activity Summary"
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__activity_type_id
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__activity_type_id
+msgid "Next Activity Type"
+msgstr ""
+
+#. module: investment_portfolio
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.position_search
+msgid "No Follow"
+msgstr "Ei seurattu"
+
+#. module: investment_portfolio
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.position_search
+msgid "No Transactions"
+msgstr "Ei tapahtumia"
+
+#. module: investment_portfolio
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_realized_search
+msgid "Not Simulated"
+msgstr "Ei simuloitu"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__notes
+msgid "Notes"
+msgstr "Muistiinpanot"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__message_needaction_counter
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__message_needaction_counter
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__message_needaction_counter
+msgid "Number of Actions"
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__message_has_error_counter
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__message_has_error_counter
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__message_has_error_counter
+msgid "Number of errors"
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.model.fields,help:investment_portfolio.field_investment_asset__message_needaction_counter
+#: model:ir.model.fields,help:investment_portfolio.field_investment_milestone__message_needaction_counter
+#: model:ir.model.fields,help:investment_portfolio.field_investment_position__message_needaction_counter
+msgid "Number of messages requiring action"
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.model.fields,help:investment_portfolio.field_investment_asset__message_has_error_counter
+#: model:ir.model.fields,help:investment_portfolio.field_investment_milestone__message_has_error_counter
+#: model:ir.model.fields,help:investment_portfolio.field_investment_position__message_has_error_counter
+msgid "Number of messages with delivery error"
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__owner_ids
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__owner_ids
+msgid "Owner"
+msgstr "Omistaja"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__payment
+msgid "Payment"
+msgstr "Maksu"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__plan_allow_past
+msgid "Plan Allow Past"
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__plan_auto_realize
+msgid "Plan Auto Realize"
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__plan_payment
+msgid "Plan Cash Flow"
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__plan_cost
+msgid "Plan Cost"
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__plan_fee
+msgid "Plan Fee"
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__plan_months
+msgid "Plan Months"
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__plan_start_date
+msgid "Plan Start Date"
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__plan_total_cash_flow
+msgid "Plan Total Cash Flow"
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__plan_transaction_ids
+msgid "Plan Transaction"
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__plan_type
+msgid "Plan Type"
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__plan_yearly_appreciation
+msgid "Plan Yearly Appreciation"
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__plan_yearly_interest
+msgid "Plan Yearly Interest"
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__plan_yield
+msgid "Plan Yield"
+msgstr ""
+
+#. module: investment_portfolio
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.position_form
+msgid "Plans"
+msgstr "Suunnitelmat"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__portfolio_id
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.position_search
+msgid "Portfolio"
+msgstr "Salkku"
+
+#. module: investment_portfolio
+#: model:ir.actions.act_window,name:investment_portfolio.action_portfolios
+#: model:ir.ui.menu,name:investment_portfolio.menu_portfolios
+msgid "Portfolios"
+msgstr "Salkut"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_realized__position_id
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__position
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__position_id
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_timeseries__position
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_transaction_search
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.timeseries_search
+msgid "Position"
+msgstr "Positio"
+
+#. module: investment_portfolio
+#: model:ir.model,name:investment_portfolio.model_investment_position_transaction
+msgid "Position Transaction"
+msgstr "Positio tapahtuma"
+
+#. module: investment_portfolio
+#: model:ir.actions.act_window,name:investment_portfolio.action_positions
+#: model:ir.ui.menu,name:investment_portfolio.menu_positions
+#: model:ir.ui.menu,name:investment_portfolio.menu_timeseries_positions
+msgid "Positions"
+msgstr "Positiot"
+
+#. module: investment_portfolio
+#: model:ir.actions.act_window,name:investment_portfolio.action_positions_per_asset
+#: model:ir.ui.menu,name:investment_portfolio.menu_timeseries_positions_per_asset
+msgid "Positions per asset"
+msgstr "Positiot per omaisuus"
+
+#. module: investment_portfolio
+#: model:ir.actions.act_window,name:investment_portfolio.action_prediction_growth
+#: model:ir.ui.menu,name:investment_portfolio.menu_timeseries_prediction_growth
+msgid "Predicted growth"
+msgstr "Ennustettu kasvu"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__predicted_position
+msgid "Predicted/Actual Position"
+msgstr "Ennustettu/todellinen positio"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_price__prediction
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__prediction
+#: model:ir.model.fields.selection,name:investment_portfolio.selection__investment_position_transaction__usage__prediction
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_transaction_search
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.timeseries_search
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_price_search
+msgid "Prediction"
+msgstr "Ennustus"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__price_ids
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_price__price
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__price_ids
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_timeseries__price_id
+msgid "Price"
+msgstr "Hinta"
+
+#. module: investment_portfolio
+#: model:ir.model.constraint,message:investment_portfolio.constraint_investment_asset_price_unique_price
+msgid "Price for this time is already configured!"
+msgstr "Hinta tälle ajankohdalle on jo olemassa!"
+
+#. module: investment_portfolio
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_form
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.position_form
+msgid "Prices"
+msgstr "Hinnat"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__profit
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__profit
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_timeseries__profit
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_transaction_kanban
+msgid "Profit"
+msgstr "Tuotto"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__profit_percent
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_timeseries__profit_percent
+msgid "Profit Percent"
+msgstr "Tuottoprosentti"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_realized__profit
+msgid "Profit/Loss"
+msgstr "Tuotto/tappio"
+
+#. module: investment_portfolio
+#: model:ir.actions.act_window,name:investment_portfolio.action_profits
+#: model:ir.ui.menu,name:investment_portfolio.menu_timeseries_profits
+msgid "Profits"
+msgstr "Tuotot"
+
+#. module: investment_portfolio
+#: model:ir.actions.act_window,name:investment_portfolio.action_profits_per_asset
+#: model:ir.ui.menu,name:investment_portfolio.menu_timeseries_profits_per_asset
+msgid "Profits per asset"
+msgstr "Tuotot per omaisuus"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_realized__quantity
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__quantity
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__quantity
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_timeseries__quantity
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_transaction_kanban
+msgid "Quantity"
+msgstr "Määrä"
+
+#. module: investment_portfolio
+#: model:ir.model.fields.selection,name:investment_portfolio.selection__investment_timeseries__granularity__2_quaterly
+msgid "Quarterly"
+msgstr "Neljännesvuosittain"
+
+#. module: investment_portfolio
+#: model:ir.actions.server,name:investment_portfolio.action_compute_position_aggregate
+#: model:ir.actions.server,name:investment_portfolio.action_compute_timeseries_aggregate
+msgid "Re-compute Value"
+msgstr "Lasku arvo uudestaan"
+
+#. module: investment_portfolio
+#: model:ir.model.fields.selection,name:investment_portfolio.selection__investment_milestone__state__reached
+msgid "Reached"
+msgstr "Saavutettu"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__real_position
+msgid "Real Position"
+msgstr "Todellinen positio"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__realized_ids
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_price_search
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_transaction_search
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.timeseries_search
+msgid "Realized"
+msgstr "Toteutunut"
+
+#. module: investment_portfolio
+#: model:ir.model.fields.selection,name:investment_portfolio.selection__investment_position_transaction__usage__realized
+msgid "Realized Calculation"
+msgstr "Toteutuneiden laskenta"
+
+#. module: investment_portfolio
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.position_form
+msgid "Realized Gains/Losses"
+msgstr "Toteutuneet voitot/tappiot"
+
+#. module: investment_portfolio
+#: model:ir.model.fields.selection,name:investment_portfolio.selection__investment_position_transaction__usage__record
+msgid "Record"
+msgstr "Tietue"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__activity_user_id
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__activity_user_id
+msgid "Responsible User"
+msgstr ""
+
+#. module: investment_portfolio
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_form
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.position_form
+msgid "Run Integration"
+msgstr "Aja integraatio"
+
+#. module: investment_portfolio
+#: model:ir.model.fields.selection,name:investment_portfolio.selection__investment_position_transaction__ttype__sell
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_transaction_search
+msgid "Sell"
+msgstr "Myy"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_realized__sell_batch_id
+msgid "Sell Batch"
+msgstr "Myyntierä"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_realized__sell_date
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_realized_search
+msgid "Sell Date"
+msgstr "Myyntipäivä"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_realized__sell_fee
+msgid "Sell Fee"
+msgstr "Myyntikulu"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_realized__sell_price
+msgid "Sell Price"
+msgstr "Myyntihinta"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__sequence
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_category__sequence
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_portfolio__sequence
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__sequence
+msgid "Sequence"
+msgstr "Sekvenssi"
+
+#. module: investment_portfolio
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_transaction_search
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.position_search
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.timeseries_search
+msgid "Short"
+msgstr "Lyhyt"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_realized__simulated
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_realized_search
+msgid "Simulated"
+msgstr "Simuloitu"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__state
+msgid "State"
+msgstr "Tila"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,help:investment_portfolio.field_investment_asset__activity_state
+#: model:ir.model.fields,help:investment_portfolio.field_investment_position__activity_state
+msgid ""
+"Status based on activities\n"
+"Overdue: Due date is already passed\n"
+"Today: Activity date is today\n"
+"Planned: Future activities."
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__position
+msgid "Target Position"
+msgstr "Tavoite positio"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__thesis
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.position_form
+msgid "Thesis"
+msgstr "Sijoitustutkielma"
+
+#. module: investment_portfolio
+#: model:ir.model.constraint,message:investment_portfolio.constraint_investment_timeseries_date_timeseries_unique
+msgid "This timeseries already exists!"
+msgstr "Tämä aikasarja on jo olemassa!"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_realized__asset_id
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__asset_id
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__asset_id
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_search
+msgid "Ticker"
+msgstr "Tunniste"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__ticker
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__ticker
+msgid "Ticker / ID"
+msgstr "Tunniste"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__last_update
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_price__time
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__last_update
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__time
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_price_search
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_transaction_kanban
+msgid "Time"
+msgstr "Aika"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__timeseries_ids
+#: model:ir.ui.menu,name:investment_portfolio.menu_timeseries
+msgid "Timeseries"
+msgstr "Aikasarja"
+
+#. module: investment_portfolio
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_transaction_tree
+msgid "Total"
+msgstr "Yhteensä"
+
+#. module: investment_portfolio
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_transaction_tree
+msgid "Total Fee"
+msgstr "Kulut yhteensä"
+
+#. module: investment_portfolio
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.position_tree
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.timeseries_tree
+msgid "Total Position"
+msgstr "Positio yhteensä"
+
+#. module: investment_portfolio
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_realized_tree
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.position_tree
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.timeseries_tree
+msgid "Total Profit"
+msgstr "Tuotto yhteensä"
+
+#. module: investment_portfolio
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_realized_tree
+msgid "Total Volume"
+msgstr "Määrä yhteensä"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_price__transaction_id
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__transaction_ids
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_timeseries__transaction_ids
+msgid "Transaction"
+msgstr "Transaktio"
+
+#. module: investment_portfolio
+#: model:ir.ui.menu,name:investment_portfolio.menu_transactions
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.position_form
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.position_search
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.timeseries_form
+msgid "Transactions"
+msgstr "Transaktiot"
+
+#. module: investment_portfolio
+#: model:ir.actions.act_window,name:investment_portfolio.action_transactions_per_month
+#: model:ir.ui.menu,name:investment_portfolio.menu_transactions_per_month
+msgid "Transactions per month"
+msgstr "Transaktiot per kuukausi"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__ttype
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_transaction_search
+msgid "Type"
+msgstr "Tyyppi"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,help:investment_portfolio.field_investment_asset__activity_exception_decoration
+#: model:ir.model.fields,help:investment_portfolio.field_investment_position__activity_exception_decoration
+msgid "Type of the exception activity on record."
+msgstr ""
+
+#. module: investment_portfolio
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.timeseries_search
+msgid "Until Today"
+msgstr "Tähän saakka"
+
+#. module: investment_portfolio
+#: model:ir.actions.server,name:investment_portfolio.action_update_realized_fifo_position
+msgid "Update Realized Gains/Losses"
+msgstr "Päivitä toteutuneet voitot/tappiot"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__usage
+msgid "Usage"
+msgstr "Käyttö"
+
+#. module: investment_portfolio
+#: model:res.groups,name:investment_portfolio.group_investment_user
+msgid "User"
+msgstr "Käyttäjä"
+
+#. module: investment_portfolio
+#: model:res.groups,comment:investment_portfolio.group_investment_user
+msgid "User."
+msgstr "Käyttäjä."
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__ytd_price
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__ytd_price
+msgid "YTD"
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.model.fields.selection,name:investment_portfolio.selection__investment_timeseries__granularity__1_yearly
+msgid "Yearly"
+msgstr "Vuosittainen"
+
+#. module: investment_portfolio
+#: model:ir.actions.act_window,name:investment_portfolio.action_yearly_savings
+#: model:ir.ui.menu,name:investment_portfolio.menu_yearly_savings
+msgid "Yearly savings"
+msgstr "Vuosittaiset säästöt"
+
+#. module: investment_portfolio
+#: model:ir.model.fields.selection,name:investment_portfolio.selection__investment_position_transaction__ttype__yield
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_transaction_search
+msgid "Yield"
+msgstr "Tuotto"
+
+#. module: investment_portfolio
+#: model:ir.model.fields.selection,name:investment_portfolio.selection__investment_position__plan_type__cashflow
+msgid "Yield/Cost"
+msgstr "Tuotto/kustannus"

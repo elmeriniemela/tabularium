@@ -57,6 +57,8 @@ class InvestmentPosition(models.Model):
         compute='_compute_is_company_currency'
     )
 
+    endpoint_id = fields.Many2one(related='asset_id.endpoint_id')
+
     transaction_ids = fields.One2many(
         comodel_name='investment.position.transaction',
         inverse_name='position_id',
@@ -74,10 +76,10 @@ class InvestmentPosition(models.Model):
     follow = fields.Boolean(compute='_compute_follow', store=True, readonly=False)
 
     quantity = fields.Float(compute='_compute_position_aggregate', store=True, digits='Investment Asset quantity', group_operator=None)
-    position = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id')
+    position = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', help="Current value of this position.")
     investment = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id')
     max_investment = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id')
-    cost_basis = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id')
+    cost_basis = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', help="Average price across every purchase.")
     last_price_own_currency = fields.Monetary(string="Last Price (own currency)", compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', group_operator=None)
 
     profit = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', group_operator='sum')

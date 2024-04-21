@@ -44,7 +44,7 @@
                 <filter name="time" date="time"/>
                 <separator/>
                 <filter string="Realized" name="realized" domain="[('prediction', '=', False)]"/>
-                <filter string="Predicion" name="prediction" domain="[('prediction', '=', True)]"/>
+                <filter string="Prediction" name="prediction" domain="[('prediction', '=', True)]"/>
                 <separator/>
                 <group expand="1" string="Group by">
                     <filter string="Time" name="group_time" context="{'group_by': 'time:week'}"/>

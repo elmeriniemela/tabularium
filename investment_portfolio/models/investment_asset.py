@@ -30,6 +30,7 @@ class InvestmentAsset(models.Model):
         comodel_name='investment.category',
         required=True,
         index=True,
+        default=lambda self: self.env['investment.category'].search([], limit=1)
     )
 
     liquid = fields.Boolean(related='category_id.liquid', store=True, readonly=True)
@@ -38,12 +39,18 @@ class InvestmentAsset(models.Model):
         comodel_name='res.currency',
         required=True,
         index=True,
+        default=lambda self: self.env.company.currency_id,
     )
 
     price_ids = fields.One2many(
         comodel_name='investment.asset.price',
         inverse_name='asset_id',
         domain=[('prediction', '=', False)],
+    )
+
+    owner_ids = fields.Many2many(
+        comodel_name='res.users',
+        default=lambda self: self.env.user,
     )
 
     last_price_id = fields.Many2one(
@@ -62,9 +69,9 @@ class InvestmentAsset(models.Model):
     six_month_price = fields.Float(compute='_compute_last_price', store=True, group_operator='avg', string="6 Months")
     ytd_price = fields.Float(compute='_compute_last_price', store=True, group_operator='avg', string="YTD")
     one_year_price = fields.Float(compute='_compute_last_price', store=True, group_operator='avg', string="1 Year")
-    three_year_price = fields.Float(compute='_compute_last_price', store=True, group_operator='avg', string="3 Year")
-    five_year_price = fields.Float(compute='_compute_last_price', store=True, group_operator='avg', string="5 Year")
-    ten_year_price = fields.Float(compute='_compute_last_price', store=True, group_operator='avg', string="10 Year")
+    three_year_price = fields.Float(compute='_compute_last_price', store=True, group_operator='avg', string="3 Years")
+    five_year_price = fields.Float(compute='_compute_last_price', store=True, group_operator='avg', string="5 Years")
+    ten_year_price = fields.Float(compute='_compute_last_price', store=True, group_operator='avg', string="10 Years")
 
 
     endpoint_id = fields.Many2one(
