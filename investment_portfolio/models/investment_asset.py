@@ -197,7 +197,7 @@ class InvestmentAsset(models.Model):
                 record.last_price_id.price = record.last_price
 
     def run_integration(self):
-        for asset in self:
+        for asset in self.sudo():
             asset.endpoint_id.produce({'asset': asset})
             asset._compute_last_price() # For some reason, the depends on price_ids does not work...
 
