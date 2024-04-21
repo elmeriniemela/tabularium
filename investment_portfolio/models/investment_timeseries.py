@@ -134,7 +134,7 @@ class InvestmentTimeseries(models.Model):
             'length': total number of groups
         }
         """
-        if not any(c[0] in ('date', 'granularity', 'is_sunday') for c in domain):
+        if not any(c[0] in ('granularity', 'is_sunday') for c in domain):
             map_group = {
                 'day': [('granularity', 'in', ['4_daily', '3_monthly', '2_quaterly', '1_yearly'])],
                 'week': [('is_sunday', '=', True)],
@@ -145,7 +145,9 @@ class InvestmentTimeseries(models.Model):
             for group in groupby:
                 match = 'date:'
                 if group.startswith(match):
-                    domain = expression.AND([domain, map_group[group[len(match):]]])
+                    add_domain = map_group[group[len(match):]]
+                    domain = expression.AND([domain, add_domain])
+                    _logger.info("Additional domain: %s", add_domain)
                     break
 
         return super().web_read_group(domain, fields, groupby, limit=limit, offset=offset, orderby=orderby,
