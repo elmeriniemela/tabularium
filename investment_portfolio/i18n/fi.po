@@ -1105,7 +1105,7 @@ msgstr "Neljännesvuosittain"
 
 #. module: investment_portfolio
 #: model:ir.actions.server,name:investment_portfolio.action_compute_position_aggregate
-#: model:ir.actions.server,name:investment_portfolio.action_compute_timeseries_aggregate
+#: model:ir.actions.server,name:investment_portfolio.action_recompute_value
 msgid "Re-compute Value"
 msgstr "Lasku arvo uudestaan"
 
