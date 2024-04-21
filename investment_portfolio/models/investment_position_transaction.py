@@ -42,7 +42,7 @@ class InvestmentPositionTransaction(models.Model):
         readonly=False,
     )
 
-    fee = fields.Monetary(store=True, readonly=False,  compute='_compute_fee', inverse='_inverse_fee', currency_field='company_currency_id')
+    fee = fields.Monetary(readonly=False,  compute='_compute_fee', inverse='_inverse_fee', currency_field='company_currency_id')
 
     quantity = fields.Float(digits='Investment Asset quantity')
 
@@ -176,12 +176,10 @@ class InvestmentPositionTransaction(models.Model):
             if not (quantity and tx.payment and tx.exchange_rate):
                 tx.fee = 0.0
             else:
-                cmp_exchange_rate = tx.currency_id._convert(
-                    from_amount=tx.exchange_rate,
-                    to_currency=tx.company_currency_id,
-                    company=tx.company_id,
-                    date=tx.time,
-                )
+                cmp_exchange_rate = tx.exchange_rate
+                if tx.currency_rate_id:
+                    cmp_exchange_rate *= tx.currency_rate_id.inverse_company_rate
+
                 tx.fee = (tx.payment/quantity - cmp_exchange_rate) * quantity
 
     def _inverse_fee(self):
@@ -190,18 +188,14 @@ class InvestmentPositionTransaction(models.Model):
             if not (quantity and tx.payment and tx.exchange_rate):
                 tx.exchange_rate = 0.0
             else:
-                fee = tx.company_currency_id._convert(
-                    from_amount=tx.fee,
-                    to_currency=tx.currency_id,
-                    company=tx.company_id,
-                    date=tx.time,
-                )
-                payment = tx.company_currency_id._convert(
-                    from_amount=tx.payment,
-                    to_currency=tx.currency_id,
-                    company=tx.company_id,
-                    date=tx.time,
-                )
-                tx.exchange_rate = (payment/quantity - fee/quantity)
+                cmp_fee = tx.fee
+                if tx.currency_rate_id:
+                    cmp_fee *= tx.currency_rate_id.company_rate
+
+                cmp_payment = tx.payment
+                if tx.currency_rate_id:
+                    cmp_payment *= tx.currency_rate_id.company_rate
+
+                tx.exchange_rate = (cmp_payment/quantity - cmp_fee/quantity)
 
 
