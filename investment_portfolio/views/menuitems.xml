@@ -10,9 +10,10 @@
         </menuitem>
 
         <menuitem name="Transactions" id="menu_transactions" sequence="20">
-            <menuitem id="menu_transactions_per_month" action="action_transactions_per_month" sequence="10"/>
-            <menuitem id="menu_yearly_savings" action="action_yearly_savings" sequence="20"/>
-            <menuitem id="menu_realized" action="action_realized" sequence="30"/>
+            <menuitem id="menu_transaction_list" action="action_transaction_list" sequence="10"/>
+            <menuitem id="menu_transactions_per_month" action="action_transactions_per_month" sequence="20"/>
+            <menuitem id="menu_yearly_savings" action="action_yearly_savings" sequence="30"/>
+            <menuitem id="menu_realized" action="action_realized" sequence="40"/>
         </menuitem>
 
         <menuitem name="Timeseries" id="menu_timeseries" sequence="40">

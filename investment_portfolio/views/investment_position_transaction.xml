@@ -20,6 +20,7 @@
                 <field name="category_id" optional="hide"/>
                 <field name="prediction" optional="hide" widget="boolean_toggle"/>
                 <field name="company_currency_id" invisible="1"/>
+                <button string="Details" name="open_form" type="object"/>
             </tree>
         </field>
     </record>
@@ -42,21 +43,28 @@
                 <sheet>
                     <group>
                         <group>
+                            <field name="position_id"/>
+                            <field name="move_id"/>
                             <field name="time"/>
                             <field name="quantity"/>
                             <field name="payment"/>
+                        </group>
+                        <group>
                             <field name="exchange_rate"/>
                             <field name="profit" decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0"/>
                             <field name="fee"/>
-                        </group>
-                        <group>
                             <field name="currency_id" invisible="not context.get('show_all')"/>
                             <field name="position_id" invisible="not context.get('show_all')"/>
                             <field name="description"/>
-                            <field name="prediction" widget="boolean_toggle"/>
+                            <field name="usage"/>
                         </group>
                     </group>
                 </sheet>
+                <div class="o_attachment_preview"/>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
             </form>
         </field>
     </record>
@@ -121,7 +129,6 @@
                 <separator/>
                 <filter name="date_filter" date="time"/>
                 <separator/>
-                <separator/>
                 <filter string="Long" name="long" domain="[('quantity', '>', 0.0)]"/>
                 <filter string="Short" name="short" domain="[('quantity', '&lt;', 0.0)]"/>
                 <filter string="Closed" name="closed" domain="[('quantity', '=', 0.0)]"/>
@@ -134,8 +141,12 @@
                 <filter string="Liquid Assets" name="liquid" domain="[('liquid', '=', True)]"/>
                 <filter string="Illiquid Assets" name="illiquid" domain="[('liquid', '=', False)]"/>
                 <separator/>
-                <filter string="Realized" name="realized" domain="[('usage', '=', 'record')]" />
-                <filter string="Prediction" name="prediction" domain="[('usage', '=', 'prediction')]" />
+                <filter string="Record" name="record" domain="[('usage', '=', 'record')]" />
+                <filter string="Prediction" name="prediction" domain="[('usage', '=', 'prediction')]"/>
+                <filter string="Realized Calculation" name="realized_calc" domain="[('usage', '=', 'realized')]"/>
+                <separator/>
+                <filter string="Move is set" name="move_set" domain="[('move_id', '!=', False)]" />
+                <filter string="Move is not set" name="move_not_set" domain="[('move_id', '=', False)]" />
                 <separator />
                 <filter string="1 Year" name="1_year" domain="[('time','&gt;',(context_today() + relativedelta(days=-365)).strftime('%Y-%m-%d')),('time','&lt;',(context_today() + relativedelta(days=365)).strftime('%Y-%m-%d'))]" />
                 <filter string="2 Years" name="2_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-2*365)).strftime('%Y-%m-%d')),('time','&lt;',(context_today() + relativedelta(days=2*365)).strftime('%Y-%m-%d'))]" />
@@ -167,18 +178,33 @@
         <field name="code">records._fill_daily_price()</field>
     </record>
 
+    <record id="action_make_move" model="ir.actions.server">
+        <field name="name">Make a move</field>
+        <field name="model_id" ref="model_investment_position_transaction"/>
+        <field name="binding_model_id" ref="model_investment_position_transaction"/>
+        <field name="state">code</field>
+        <field name="code">action = records.make_move()</field>
+    </record>
+
     <record id="action_transactions_per_month" model="ir.actions.act_window">
         <field name="name">Transactions per month</field>
         <field name="res_model">investment.position.transaction</field>
         <field name="view_mode">graph,tree,kanban,form</field>
-        <field name="context">{'search_default_group_month': 1, 'search_default_group_position_id': 1, 'search_default_liquid': 1, 'search_default_1_year': 1, 'search_default_realized': 1}</field>
+        <field name="context">{'search_default_group_month': 1, 'search_default_group_position_id': 1, 'search_default_liquid': 1, 'search_default_1_year': 1, 'search_default_record': 1}</field>
     </record>
 
     <record id="action_yearly_savings" model="ir.actions.act_window">
         <field name="name">Yearly savings</field>
         <field name="res_model">investment.position.transaction</field>
         <field name="view_mode">graph,tree,kanban,form</field>
-        <field name="context">{'search_default_liquid': 1, 'search_default_group_year': 1, 'search_default_realized': 1}</field>
+        <field name="context">{'search_default_liquid': 1, 'search_default_group_year': 1, 'search_default_record': 1}</field>
+    </record>
+
+    <record id="action_transaction_list" model="ir.actions.act_window">
+        <field name="name">Transaction list</field>
+        <field name="res_model">investment.position.transaction</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="context">{'search_default_record': 1}</field>
     </record>
 
 

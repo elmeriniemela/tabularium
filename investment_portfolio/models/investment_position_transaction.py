@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from odoo import api, models, fields, _
+from odoo import api, models, fields, Command, _
+from odoo.exceptions import ValidationError
 import logging
 
 
@@ -17,6 +18,8 @@ class InvestmentPositionTransaction(models.Model):
     _inherit = ['mail.thread']
     _order = 'time desc, ttype'
 
+    display_name = fields.Char(compute='_compute_display_name')
+
     position_id = fields.Many2one(
         comodel_name='investment.position',
         required=True,
@@ -27,7 +30,7 @@ class InvestmentPositionTransaction(models.Model):
 
     move_id = fields.Many2one(
         comodel_name='investment.position.move',
-        ondelete='restrict',
+        ondelete='set null',
         index=True,
         tracking=True,
     )
@@ -103,6 +106,53 @@ class InvestmentPositionTransaction(models.Model):
     _sql_constraints = [
         ('check_exchange_rate', "CHECK(payment = 0 OR exchange_rate <> 0 OR ttype not in ('buy', 'sell'))", "A buy/sell transaction can not be encoded without an exchange rate."),
     ]
+
+    def _compute_display_name(self):
+        for record in self:
+            record.display_name = f'{record.position_id.display_name} @ {record.time}'
+
+    def make_move(self):
+        if not self:
+            raise ValidationError(_("No transactions selected!"))
+
+        company = self.env.company
+
+        for record in self:
+            if record.move_id:
+                raise ValidationError(_("Trasaction '%s' already has a move!") % record.display_name)
+
+            if record.company_id != company:
+                raise ValidationError(_("Trasaction '%s' already belongs to a different company!") % record.display_name)
+
+        time = self[:1].time
+
+        move = self.env['investment.position.move'].create({
+            'time': time,
+            'company_id': company.id,
+            'transaction_ids': [Command.link(t.id) for t in self]
+        })
+        return {
+            'type': 'ir.actions.act_window',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': move._name,
+            'res_id': move.id,
+            'target': 'current',
+        }
+
+
+
+
+    def open_form(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': self._name,
+            'res_id': self.id,
+            'target': 'current',
+        }
 
     @api.depends('usage')
     def _compute_prediction(self):
