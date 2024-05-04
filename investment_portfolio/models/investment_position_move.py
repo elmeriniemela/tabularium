@@ -9,11 +9,12 @@ class InvestmentPositionMove(models.Model):
     _name = 'investment.position.move'
     _description = 'Position Move'
     _inherit = ['mail.thread']
-    _order = 'id desc'
+    _order = 'time desc, id desc'
 
     name = fields.Char(
         required=True,
         default='/',
+        tracking=True,
     )
 
     company_id = fields.Many2one(
@@ -21,13 +22,14 @@ class InvestmentPositionMove(models.Model):
         required=True,
         default=lambda self: self.env.company,
         index=True,
+        tracking=True,
     )
 
     company_currency_id = fields.Many2one(related='company_id.currency_id')
 
     cash_flow = fields.Monetary(
         compute='_compute_cash_flow',
-        help="Cash flow related to this transaction. Positive sum means that money went in to move, negative sum means that money came out of move.",
+        help="Net cash flow of this move. Positive sum means that money went in to move, negative sum means that money came out of move.",
         currency_field='company_currency_id'
     )
 
