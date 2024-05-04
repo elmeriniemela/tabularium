@@ -25,6 +25,13 @@ class InvestmentPositionTransaction(models.Model):
         tracking=True,
     )
 
+    move_id = fields.Many2one(
+        comodel_name='investment.position.move',
+        ondelete='restrict',
+        index=True,
+        tracking=True,
+    )
+
     asset_id = fields.Many2one(related='position_id.asset_id')
 
     currency_id = fields.Many2one(related='position_id.currency_id')
@@ -131,11 +138,20 @@ class InvestmentPositionTransaction(models.Model):
     def _compute_report(self):
         for record in self:
             if record.quantity > 0:
-                record.ttype = 'buy'
-                record.cash_flow = record.payment
+                if record.payment > 0:
+                    record.ttype = 'buy'
+                    record.cash_flow = record.payment
+                else:
+                    record.ttype = False
+                    record.cash_flow = False
+                    _logger.error("Invalid type: %s", record)
             elif record.quantity < 0:
-                record.ttype = 'sell'
-                record.cash_flow = -record.payment
+                if record.payment > 0:
+                    record.ttype = 'sell'
+                    record.cash_flow = -record.payment
+                else:
+                    record.ttype = 'cost'
+                    record.cash_flow = -record.payment # cost has a negative cashflow which needs to be flipped to positive as payment.
             elif record.payment > 0:
                 record.ttype = 'yield'
                 record.cash_flow = -record.payment

@@ -2,6 +2,7 @@
 
 from . import investment_asset_price
 from . import investment_asset_realized
+from . import investment_position_move
 from . import investment_position_transaction
 from . import investment_asset
 from . import investment_position
