@@ -82,6 +82,7 @@ class InvestmentPositionTransaction(models.Model):
 
     category_id = fields.Many2one(related='asset_id.category_id', store=True, readonly=True)
     liquid = fields.Boolean(related='category_id.liquid', store=True, readonly=True)
+    portfolio_id = fields.Many2one(related='position_id.portfolio_id', store=True, readonly=True)
 
     ttype = fields.Selection(
         selection=[
@@ -98,6 +99,7 @@ class InvestmentPositionTransaction(models.Model):
 
     cash_flow = fields.Monetary(
         compute='_compute_report',
+        help="Cash flow related to this transaction. Positive sum means that money went in to the position, negative sum means that money came out of the position.",
         store=True,
         currency_field='company_currency_id'
     )

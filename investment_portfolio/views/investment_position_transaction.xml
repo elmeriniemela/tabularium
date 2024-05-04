@@ -161,6 +161,7 @@
                 <group expand="1" string="Group by">
                     <filter string="Date" name="group_month" context="{'group_by': 'time:month'}" invisible="not context.get('search_default_group_month')"/>
                     <filter string="Date" name="group_year" context="{'group_by': 'time:year'}" invisible="not context.get('search_default_group_year')"/>
+                    <filter string="Portfolio" name="group_portfolio_id" context="{'group_by': 'portfolio_id'}"/>
                     <filter string="Category" name="group_category_id" context="{'group_by': 'category_id'}"/>
                     <filter string="Type" name="group_ttype" context="{'group_by': 'ttype'}"/>
                     <filter string="Position" name="group_position_id" context="{'group_by': 'position_id'}"/>

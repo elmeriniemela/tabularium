@@ -1,13 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from odoo import api, models, fields, _
-from odoo.tools import float_is_zero
 import logging
 
-
-
 _logger = logging.getLogger(__name__)
-
 
 class InvestmentPositionMove(models.Model):
     _name = 'investment.position.move'
@@ -27,6 +23,14 @@ class InvestmentPositionMove(models.Model):
         index=True,
     )
 
+    company_currency_id = fields.Many2one(related='company_id.currency_id')
+
+    cash_flow = fields.Monetary(
+        compute='_compute_cash_flow',
+        help="Cash flow related to this transaction. Positive sum means that money went in to move, negative sum means that money came out of move.",
+        currency_field='company_currency_id'
+    )
+
     time = fields.Datetime(required=True, default=fields.Datetime.now, tracking=True)
 
     transaction_ids = fields.One2many(
@@ -43,10 +47,6 @@ class InvestmentPositionMove(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         number = 0
-        company = self.env.company
-        consume = self.env['investment.position'].search([('asset_id.ticker', '=', 'CONSUME'), ('company_id', '=', company.id)])
-        consume.ensure_one()
-
         for vals in vals_list:
             if vals.get('name', '/') == '/':
                 time = vals.get('time') or fields.Datetime.now()
@@ -60,21 +60,12 @@ class InvestmentPositionMove(models.Model):
                 number += 1
                 vals['name'] = f'MOVE/{time.year}/{str(number).zfill(5)}'
 
-        moves = super().create(vals_list)
-        for move in moves:
-            cash_flow = sum(move.transaction_ids.mapped('cash_flow'))
-            if not float_is_zero(cash_flow, precision_digits=consume.currency_id.decimal_places):
-                self.env['investment.position.transaction'].create({
-                    'position_id': consume.id,
-                    'move_id': move.id,
-                    'time': move.transaction_ids[:1].time,
-                    'quantity': cash_flow * -1,
-                    'payment': cash_flow,
-                    'exchange_rate': 1,
-                })
+        return super().create(vals_list)
 
-        return moves
-
+    @api.depends('transaction_ids.cash_flow')
+    def _compute_cash_flow(self):
+        for move in self:
+            move.cash_flow = sum(move.transaction_ids.mapped('cash_flow'))
 
 
 
