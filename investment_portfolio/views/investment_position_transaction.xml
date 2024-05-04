@@ -51,12 +51,12 @@
                         </group>
                         <group>
                             <field name="exchange_rate"/>
-                            <field name="profit" decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0"/>
                             <field name="fee"/>
                             <field name="currency_id" invisible="not context.get('show_all')"/>
                             <field name="position_id" invisible="not context.get('show_all')"/>
                             <field name="description"/>
-                            <field name="usage"/>
+                            <field name="profit" decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0"/>
+                            <field name="usage" groups="base.group_no_one"/>
                         </group>
                     </group>
                 </sheet>
