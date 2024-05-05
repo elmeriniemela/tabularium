@@ -34,7 +34,7 @@
                     </group>
                     <notebook>
                         <page string="Transactions">
-                            <field name="transaction_ids" widget="many2many" context="{'default_move_id': id, 'default_time': time}"/>
+                            <field name="transaction_ids" widget="many2many" context="{'default_move_id': id, 'default_time': time, 'search_default_record': 1, 'search_default_move_not_set': 1}"/>
                         </page>
                     </notebook>
                 </sheet>
