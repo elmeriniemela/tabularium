@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-04 17:51+0000\n"
-"PO-Revision-Date: 2024-05-04 17:51+0000\n"
+"POT-Creation-Date: 2024-05-05 14:26+0000\n"
+"PO-Revision-Date: 2024-05-05 14:26+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -290,7 +290,9 @@ msgstr "Kassapositio"
 msgid ""
 "Cash flow related to this transaction. Positive sum means that money went in"
 " to the position, negative sum means that money came out of the position."
-msgstr "Tapahtumaan liittyvä kassavirta. Positiivinen summa tarkoittaa että rahaa meni sisään positioon, negatiivinen summa tarkoittaa että rahaa tuli ulos."
+msgstr ""
+"Tapahtumaan liittyvä kassavirta. Positiivinen summa tarkoittaa että rahaa "
+"meni sisään positioon, negatiivinen summa tarkoittaa että rahaa tuli ulos."
 
 #. module: investment_portfolio
 #: model:ir.actions.act_window,name:investment_portfolio.action_categories
@@ -914,7 +916,10 @@ msgstr "Nimi"
 msgid ""
 "Net cash flow of this move. Positive sum means that money went in to move, "
 "negative sum means that money came out of move."
-msgstr "Netto kassa virta tälle siirrolle. Positiivinen summa tarkoittaa että rahaa lisättiin sijoituksiin, negatiivinen summa tarkoittaa että rahaa otettiin pois."
+msgstr ""
+"Netto kassa virta tälle siirrolle. Positiivinen summa tarkoittaa että rahaa "
+"lisättiin sijoituksiin, negatiivinen summa tarkoittaa että rahaa otettiin "
+"pois."
 
 #. module: investment_portfolio
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__activity_date_deadline
@@ -1115,6 +1120,7 @@ msgstr "Positio tapahtuma"
 
 #. module: investment_portfolio
 #: model:ir.actions.act_window,name:investment_portfolio.action_positions
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_move__position_ids
 #: model:ir.ui.menu,name:investment_portfolio.menu_positions
 #: model:ir.ui.menu,name:investment_portfolio.menu_timeseries_positions
 msgid "Positions"
@@ -1168,6 +1174,7 @@ msgstr "Hinnat"
 
 #. module: investment_portfolio
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__profit
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_move__profit
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__profit
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_timeseries__profit
 #: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_transaction_kanban

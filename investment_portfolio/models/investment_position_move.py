@@ -34,6 +34,8 @@ class InvestmentPositionMove(models.Model):
         currency_field='company_currency_id'
     )
 
+    profit = fields.Monetary(compute='_compute_profit', currency_field='company_currency_id')
+
     time = fields.Datetime(required=True, default=fields.Datetime.now, tracking=True)
 
     transaction_ids = fields.One2many(
@@ -104,5 +106,9 @@ class InvestmentPositionMove(models.Model):
             move.cash_flow = sum(move.transaction_ids.mapped('cash_flow'))
 
 
+    @api.depends('transaction_ids')
+    def _compute_profit(self):
+        for move in self:
+            move.profit = sum(move.transaction_ids.mapped('profit'))
 
 
