@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import api, models, fields, _
+from odoo.osv import expression
 import logging
 
 _logger = logging.getLogger(__name__)
@@ -57,7 +58,24 @@ class InvestmentPositionMove(models.Model):
             record.position_ids = record.transaction_ids.mapped('position_id')
 
     def _search_position_ids(self, operator, value):
-        return [('transaction_ids.position_id', operator, value)]
+        if isinstance(value, bool):
+            # Positions is set
+            # Positions is not set
+            return [('transaction_ids', operator, value)]
+
+        domain = []
+        if operator in expression.NEGATIVE_TERM_OPERATORS:
+            # Normal negative term operators do not work intuitively through One2many lists.
+            # We need to negate outside of the leaf using '!', to have behaviour which makes sense to a user.
+            # Positions does not contain X
+            # Positions is not equal to X
+            # We need to actually do the
+            operator = expression.TERM_OPERATORS_NEGATION[operator]
+            domain.append('!')
+
+        domain.append(('transaction_ids.position_id', operator, value))
+        _logger.debug(domain)
+        return domain
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -65,6 +83,9 @@ class InvestmentPositionMove(models.Model):
         for vals in vals_list:
             if vals.get('name', '/') == '/':
                 time = vals.get('time') or fields.Datetime.now()
+                if isinstance(time, str):
+                    time = fields.Datetime.from_string(time)
+
                 if not number:
                     prev = self.search([
                         ('name', '=like', f'MOVE/{time.year}/%'),
