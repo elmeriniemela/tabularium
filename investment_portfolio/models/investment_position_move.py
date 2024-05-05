@@ -41,10 +41,23 @@ class InvestmentPositionMove(models.Model):
         domain="[('company_id', '=', company_id)]",
     )
 
+    position_ids = fields.Many2many(
+        comodel_name='investment.position',
+        string="Positions",
+        compute='_compute_position_ids',
+        search='_search_position_ids',
+    )
+
     _sql_constraints = [
         ('unique_name', 'unique(name, company_id)', 'A move with this name already exists!'),
     ]
 
+    def _compute_position_ids(self):
+        for record in self:
+            record.position_ids = record.transaction_ids.mapped('position_id')
+
+    def _search_position_ids(self, operator, value):
+        return [('transaction_ids.position_id', operator, value)]
 
     @api.model_create_multi
     def create(self, vals_list):

@@ -6,6 +6,7 @@
             <tree>
                 <field name="name"/>
                 <field name="time"/>
+                <field name="position_ids" widget="many2many_tags"/>
                 <field name="cash_flow" decoration-danger="cash_flow &lt; 0" decoration-success="cash_flow &gt; 0"/>
             </tree>
         </field>
@@ -53,6 +54,7 @@
         <field name="arch" type="xml">
             <search>
                 <field name="name"/>
+                <field name="position_ids"/>
                 <separator/>
                 <filter name="date_filter" date="time"/>
                 <separator/>
