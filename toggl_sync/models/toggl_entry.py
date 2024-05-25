@@ -160,7 +160,7 @@ class TogglEntry(models.Model):
 
     @property
     def task_id_regex(self):
-        return '\[(\d+)\]'
+        return r'\[(\d+)\]'
 
     _sql_constraints = [
         ('export_id_uniq', 'unique(export_id)', 'The export_id must be unique!'),
