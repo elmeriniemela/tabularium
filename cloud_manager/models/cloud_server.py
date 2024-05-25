@@ -69,6 +69,22 @@ class CloudServer(models.Model):
         compute='_compute_diff_count'
     )
 
+    ssl_renewal_ping_now = fields.Boolean(
+        string="SSL Renewal Ping Now",
+        compute='_compute_ssl_renewal_ping_now',
+    )
+
+    ssl_renewal_pinged = fields.Datetime(
+        string="SSL Renewal Pinged",
+        tracking=True,
+        readonly=True,
+    )
+
+    ssl_renewal_response = fields.Text(
+        string="SSL Renewal Response",
+        readonly=True,
+    )
+
 
     _sql_constraints = [
         ('uniq_name', 'UNIQUE(name)', 'Server name should be unique.'),
@@ -78,6 +94,20 @@ class CloudServer(models.Model):
     def _compute_diff_count(self):
         for record in self:
             record.diff_count = len(record.diff_ids)
+
+
+    def _compute_ssl_renewal_ping_now(self):
+        for record in self:
+            if not record.ssl_renewal_pinged:
+                record.ssl_renewal_ping_now = True
+            else:
+                record.ssl_renewal_ping_now = (fields.Datetime.now() - record.ssl_renewal_pinged).days > 5
+
+
+    def action_ping_ssl_renewal(self):
+        self.ssl_renewal_response = self._rpc(method='ssl_renew')
+        self.ssl_renewal_pinged = fields.Datetime.now()
+
 
     def action_agent_restart(self):
         self.ensure_one()
@@ -99,8 +129,8 @@ class CloudServer(models.Model):
             kwargs['commit_before'] = False
         return self.endpoint_id.produce(kwargs)['obj']
 
-    @api.model
-    def parse_status(self, endpoint, obj):
+    def parse_status(self, obj):
+        self.ensure_one()
 
         def docker_vals(container):
             vals = {}
@@ -121,10 +151,9 @@ class CloudServer(models.Model):
 
 
 
-        server = self.with_context(active_test=False).search([('endpoint_id', '=', endpoint.id)])
-        server.commit = obj['agent']['commit']
+        self.commit = obj['agent']['commit']
 
-        all_insts = server.instance_ids
+        all_insts = self.instance_ids
 
         existing = {i.uid: i for i in all_insts}
         found = self.env['cloud.instance'].browse()
@@ -133,7 +162,7 @@ class CloudServer(models.Model):
             uid = cloud['uid']
             inst = existing.get(uid) or self.env['cloud.instance'].browse()
             vals = {
-                'server_id': server.id,
+                'server_id': self.id,
                 'uid': uid,
             }
             vals.update(docker_vals(cloud['docker']))

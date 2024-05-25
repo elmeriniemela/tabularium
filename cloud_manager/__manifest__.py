@@ -6,7 +6,7 @@
     'website': "https://eniemela.fi",
     'license': 'LGPL-3',
     'category': 'Uncategorized',
-    'version': '1.0.19',
+    'version': '1.1.0',
     'depends': [
         'base',
         'mail',

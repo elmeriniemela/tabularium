@@ -47,7 +47,19 @@
                             <field name="commit"/>
                         </group>
                     </group>
-                    <field name="instance_ids"/>
+                    <notebook>
+                        <page string="Instances">
+                            <field name="instance_ids"/>
+                        </page>
+                        <page string="SSL Renewal">
+                            <button name="action_ping_ssl_renewal" type="object" string="Ping SSL renewal"/>
+                            <group>
+                                <field name="ssl_renewal_ping_now"/>
+                                <field name="ssl_renewal_pinged"/>
+                                <field name="ssl_renewal_response"/>
+                            </group>
+                        </page>
+                    </notebook>
                 </sheet>
                 <div class="o_attachment_preview"/>
                 <div class="oe_chatter">

@@ -14,16 +14,22 @@
         <field name="documentation" eval="False"/>
         <field name="test_example" eval="False"/>
         <field name="xslt" eval="False"/>
-        <field name="initiator">self.produce(variables={'method': 'status', 'args': tuple(), 'commit_before': False})</field>
+        <field name="initiator">
+for server in self.env['cloud.server'].with_context(active_test=False).search([('endpoint_id', '=', self.id)]):
+    self.produce(variables={'method': 'status', 'args': tuple(), 'commit_before': False, 'server': server})
+        </field>
         <field name="producer">
 url = 'https://%s@%s' % (self.authorization, self.location)
 if commit_before:
-  self.env.cr.commit()
+    self.env.cr.commit()
 obj = self.xmlrpc(url, method, args)
 </field>
         <field name="consumer">
 if method == 'status':
-  self.env['cloud.server'].parse_status(self, obj)
+    server.parse_status(obj)
+    if server.ssl_renewal_ping_now:
+        server.action_ping_ssl_renewal()
+
   </field>
     </record>
     <record id="cloud_manager.endpoint_agent_callback" model="api.endpoint">
