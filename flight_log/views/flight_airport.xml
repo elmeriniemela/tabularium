@@ -21,6 +21,9 @@
                             <field name="name"/>
                         </h1>
                     </div>
+                    <group>
+                        <field name="company_id"/>
+                    </group>
                 </sheet>
                 <div class="oe_chatter">
                     <field name="message_follower_ids" widget="mail_followers"/>

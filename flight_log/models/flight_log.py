@@ -25,6 +25,7 @@ class FightPlane(models.Model):
     _inherit = ['mail.thread']
 
     name = fields.Char(required=True, tracking=True)
+    company_id = fields.Many2one(comodel_name='res.company', tracking=True)
 
 
 class FightAirport(models.Model):
@@ -33,6 +34,7 @@ class FightAirport(models.Model):
     _inherit = ['mail.thread']
 
     name = fields.Char(required=True, tracking=True)
+    company_id = fields.Many2one(comodel_name='res.company', tracking=True)
 
 
 class FlightLog(models.Model):
@@ -42,6 +44,7 @@ class FlightLog(models.Model):
     _inherit = ['mail.thread']
     _check_company_auto = True
 
+    company_id = fields.Many2one(comodel_name='res.company', required=True, default=lambda self: self.env.company, tracking=True)
 
     name = fields.Char(
         required=True,
