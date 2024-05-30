@@ -39,7 +39,7 @@
                         <field name="real_position"/>
                         <field name="company_id"/>
                         <field name="company_currency_id" invisible="1"/>
-                        <field name="domain" widget="domain" options="{'model': 'investment.asset'}"/>
+                        <field name="domain" widget="domain" options="{'model': 'investment.position'}"/>
                         <field name="state"/>
                     </group>
                     <field name="timeseries_ids"/>

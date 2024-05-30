@@ -14,11 +14,9 @@ class InvestmentAssetRealized(models.Model):
         index=True,
     )
 
-    asset_id = fields.Many2one(related='position_id.asset_id')
-
     currency_id = fields.Many2one(related='position_id.company_currency_id')
     company_id = fields.Many2one(related='position_id.company_id')
-    category_id = fields.Many2one(related='asset_id.category_id', store=True)
+    category_id = fields.Many2one(related='position_id.asset_id.category_id', store=True)
 
     sell_batch_id = fields.Many2one(
         comodel_name='investment.position.transaction',
@@ -37,10 +35,10 @@ class InvestmentAssetRealized(models.Model):
     quantity = fields.Float(digits='Investment Asset quantity')
     simulated = fields.Boolean(compute='_compute_simulated', store=True)
 
-    sell_price = fields.Monetary(compute='_compute_profit', store=True)
+    sell_price = fields.Monetary(compute='_compute_profit', store=True, group_operator=None)
     sell_date = fields.Date(compute='_compute_profit', store=True)
     sell_fee = fields.Monetary(compute='_compute_profit', store=True)
-    buy_price = fields.Monetary(compute='_compute_profit', store=True)
+    buy_price = fields.Monetary(compute='_compute_profit', store=True, group_operator=None)
     buy_date = fields.Date(compute='_compute_profit', store=True)
     buy_fee = fields.Monetary(compute='_compute_profit', store=True)
     profit = fields.Monetary(string='Profit/Loss', compute='_compute_profit', store=True)

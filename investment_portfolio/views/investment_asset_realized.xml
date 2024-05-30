@@ -4,7 +4,7 @@
         <field name="model">investment.asset.realized</field>
         <field name="arch" type="xml">
             <tree decoration-info="simulated">
-                <field name="asset_id" optional="hide"/>
+                <field name="position_id" optional="hide"/>
                 <field name="currency_id" optional="hide"/>
                 <field name="quantity" sum="Total Volume"/>
                 <field name="profit" sum="Total Profit"/>
@@ -37,7 +37,7 @@
                             <field name="sell_fee"/>
                         </group>
                         <group>
-                            <field name="asset_id"/>
+                            <field name="position_id"/>
                             <field name="currency_id"/>
                             <field name="buy_batch_id"/>
                             <field name="buy_date"/>
@@ -62,7 +62,7 @@
                 <separator/>
                 <group expand="1" string="Group by">
                     <filter string="Sell Date" name="group_sell_date" context="{'group_by': 'sell_date:year'}"/>
-                    <filter string="Asset" name="group_asset_id" context="{'group_by': 'asset_id'}"/>
+                    <filter string="Asset" name="group_position_id" context="{'group_by': 'position_id'}"/>
                     <filter string="Category" name="group_category_id" context="{'group_by': 'category_id'}"/>
                 </group>
             </search>
