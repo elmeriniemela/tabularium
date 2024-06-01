@@ -25,6 +25,16 @@
          </field>
     </record>
 
+    <record id="entry_pivot" model="ir.ui.view">
+        <field name="name">cashflow.entry.pivot</field>
+        <field name="model">cashflow.entry</field>
+        <field name="arch" type="xml">
+            <pivot sample="1">
+                <field name="amount" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
     <record id="entry_form" model="ir.ui.view">
         <field name="name">cashflow.entry.form</field>
         <field name="model">cashflow.entry</field>
@@ -76,6 +86,14 @@
                 <field name="parser_id"/>
                 <field name="date"/>
                 <filter name="date_filter" date="date"/>
+                <separator />
+                <filter string="Positive amount" name="positive" domain="[('amount', '>', 0.0)]" />
+                <filter string="Zero amount" name="zero" domain="[('amount', '=', 0.0)]" />
+                <filter string="Negative amount" name="negative" domain="[('amount', '&lt;', 0.0)]" />
+                <separator />
+                <filter string="Last Month" name="last_month" domain="[('date', '&gt;=', (context_today() + relativedelta(months=-1)).strftime('%Y-%m-01'))]"/>
+                <filter string="This Month" name="this_month" domain="[('date','&gt;=',time.strftime('%Y-%m-01'))]"/>
+                <separator />
                 <group expand="1" string="Group by">
                     <filter string="Account" name="group_account" context="{'group_by': 'account_id'}"/>
                     <filter string="Category" name="group_category" context="{'group_by': 'category_id'}"/>
@@ -90,11 +108,19 @@
     <record id="entry_action_window" model="ir.actions.act_window">
         <field name="name">Entrys</field>
         <field name="res_model">cashflow.entry</field>
-        <field name="view_mode">tree,form,graph</field>
+        <field name="view_mode">tree,form,graph,pivot</field>
+        <field name="context">{'search_default_group_account': 1,'search_default_group_date': 1,}</field>
+    </record>
+
+    <record id="report_action_window" model="ir.actions.act_window">
+        <field name="name">Reports</field>
+        <field name="res_model">cashflow.entry</field>
+        <field name="view_mode">graph,pivot,tree,form</field>
         <field name="context">{'search_default_group_account': 1,'search_default_group_date': 1,}</field>
     </record>
 
     <menuitem name="Cash Flow" id="root_menu" web_icon="cashflow_management,static/description/icon.png" sequence="3"/>
     <menuitem id="entry_menu" action="entry_action_window" parent="root_menu" sequence="10"/>
+    <menuitem id="report_menu" action="report_action_window" parent="root_menu" sequence="11"/>
 
 </odoo>
