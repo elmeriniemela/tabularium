@@ -5,7 +5,7 @@
     'website': "https://eniemela.fi",
     'license': 'LGPL-3',
     'category': 'Cash Flow',
-    'version': '1.0.0',
+    'version': '1.0.1',
     'depends': [
         'mail',
     ],

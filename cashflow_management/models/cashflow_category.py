@@ -5,6 +5,7 @@ from odoo import api, models, fields, _
 class CashflowCategory(models.Model):
     _name = 'cashflow.category'
     _description = 'Cash Flow Category'
+    _order = 'entry_count desc, id desc'
 
     name = fields.Char(required=True)
 
@@ -14,9 +15,19 @@ class CashflowCategory(models.Model):
         readonly=True,
     )
 
+    entry_count = fields.Integer(
+        compute='_compute_entry_count',
+        store=True,
+    )
+
     _sql_constraints = [
         ('unique_name', 'unique(name)', 'This category already exists!'),
     ]
+
+    @api.depends('entry_ids')
+    def _compute_entry_count(self):
+        for record in self:
+            record.entry_count = len(record.entry_ids)
 
     def sanitize(self):
         for record in self:
