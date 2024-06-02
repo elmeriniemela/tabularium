@@ -153,14 +153,31 @@ class FlightLog(models.Model):
         required=True,
     )
 
+    teaching_time = fields.Float(
+        tracking=True,
+        copy=False,
+        states={'confirmed': [('readonly', True)]},
+        default=0.0,
+        required=True,
+    )
+
     duration = fields.Float(
         compute='_compute_duration',
         store=True,
         copy=False,
     )
 
+    signatory_license_number = fields.Char(
+        string="Signatory's license number",
+        states={'confirmed': [('readonly', True)]},
+        tracking=True,
+        copy=False,
+    )
+
     sign = fields.Binary(
         states={'confirmed': [('readonly', True)]},
+        tracking=True,
+        copy=False,
     )
 
     search_date = fields.Char(compute='_compute_search_date', search='_search_date')
