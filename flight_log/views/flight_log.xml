@@ -54,6 +54,7 @@
                         </div>
                         <field name="duration" widget="float_time"/>
                         <field name="instrumental_time" options="{'type': 'time'}" widget="float_time"/>
+                        <field name="sign" widget="signature"/>
                         <field name="company_id"/>
                     </group>
                 </sheet>

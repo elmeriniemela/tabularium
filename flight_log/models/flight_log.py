@@ -44,7 +44,13 @@ class FlightLog(models.Model):
     _inherit = ['mail.thread']
     _check_company_auto = True
 
-    company_id = fields.Many2one(comodel_name='res.company', required=True, default=lambda self: self.env.company, tracking=True)
+    company_id = fields.Many2one(
+        comodel_name='res.company',
+        required=True,
+        default=lambda self: self.env.company,
+        tracking=True,
+        states={'confirmed': [('readonly', True)]},
+    )
 
     name = fields.Char(
         required=True,
@@ -151,6 +157,10 @@ class FlightLog(models.Model):
         compute='_compute_duration',
         store=True,
         copy=False,
+    )
+
+    sign = fields.Binary(
+        states={'confirmed': [('readonly', True)]},
     )
 
     search_date = fields.Char(compute='_compute_search_date', search='_search_date')
