@@ -145,7 +145,7 @@
     <record id="log_search" model="ir.ui.view">
         <field name="model">flight.log</field>
         <field name="arch" type="xml">
-            <search string="Toggl Entry">
+            <search>
                 <field name="name"/>
                 <field name="search_date" string="Partial date (i.e. 2015-05-)"/>
                 <field name="search_start_time" string="Start Time"/>

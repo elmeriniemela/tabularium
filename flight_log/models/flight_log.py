@@ -113,6 +113,8 @@ class FlightLog(models.Model):
         group_operator=None,
     )
 
+    import_start_time = fields.Char(compute='_compute_import_start_time', inverse='_inverse_import_start_time')
+
     date = fields.Date(
         tracking=True,
         required=True,
