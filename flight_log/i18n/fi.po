@@ -318,7 +318,7 @@ msgstr "Nimi"
 #: model:ir.model.fields,field_description:flight_log.field_flight_airport__message_needaction_counter
 #: model:ir.model.fields,field_description:flight_log.field_flight_log__message_needaction_counter
 #: model:ir.model.fields,field_description:flight_log.field_flight_plane__message_needaction_counter
-msgidNumber of Actions"
+msgid "Number of Actions"
 msgstr ""
 
 #. module: flight_log
