@@ -7,18 +7,6 @@ from odoo.exceptions import ValidationError
 
 _logger = logging.getLogger(__name__)
 
-def ftime(time):
-    return '{0:02.0f}:{1:02.0f}'.format(*divmod(time * 60, 60))
-
-def ptime(time):
-    try:
-        h, m = time.split(':')
-        h, m = float(h), float(m)
-    except ValueError:
-        raise ValidationError(_("Invalid time '%s', expected format '23:59'.") % time)
-    m /= 60.0
-    return h + m
-
 class FightPlane(models.Model):
     _name = 'flight.plane'
     _description = 'Flight Plane'
@@ -26,6 +14,14 @@ class FightPlane(models.Model):
 
     name = fields.Char(required=True, tracking=True)
     company_id = fields.Many2one(comodel_name='res.company', tracking=True)
+
+    @api.model
+    def _name_search(self, name='', args=None, operator='ilike', limit=100, name_get_uid=None):
+        resp = super()._name_search(name, args, operator, limit, name_get_uid)
+        if not resp and self.env.context.get('import_file'):
+            resp = super()._name_search(name, args, 'ilike', limit, name_get_uid)
+        return resp
+
 
 
 class FightAirport(models.Model):
@@ -35,6 +31,13 @@ class FightAirport(models.Model):
 
     name = fields.Char(required=True, tracking=True)
     company_id = fields.Many2one(comodel_name='res.company', tracking=True)
+
+    @api.model
+    def _name_search(self, name='', args=None, operator='ilike', limit=100, name_get_uid=None):
+        resp = super()._name_search(name, args, operator, limit, name_get_uid)
+        if not resp and self.env.context.get('import_file'):
+            resp = super()._name_search(name, args, 'ilike', limit, name_get_uid)
+        return resp
 
 
 class FlightLog(models.Model):
@@ -114,6 +117,7 @@ class FlightLog(models.Model):
     )
 
     import_start_time = fields.Char(compute='_compute_import_start_time', inverse='_inverse_import_start_time')
+    import_end_time = fields.Char(compute='_compute_import_end_time', inverse='_inverse_import_end_time')
 
     date = fields.Date(
         tracking=True,
@@ -186,6 +190,20 @@ class FlightLog(models.Model):
     search_start_time = fields.Char(compute='_compute_search_start_time', search='_search_start_time')
     search_end_time = fields.Char(compute='_compute_search_end_time', search='_search_end_time')
 
+    @staticmethod
+    def ftime(time):
+        return '{0:02.0f}:{1:02.0f}'.format(*divmod(time * 60, 60))
+
+    @staticmethod
+    def ptime(time):
+        try:
+            h, m = time.split(':')
+            h, m = float(h), float(m)
+        except ValueError:
+            raise ValidationError(_("Invalid time '%s', expected format '23:59'.") % time)
+        m /= 60.0
+        return h + m
+
     def _search_date(self, operator, value):
         return [('date', 'like', value)]
 
@@ -193,7 +211,7 @@ class FlightLog(models.Model):
         if value.isdigit():
             hour = int(value)
             return [(field, '>=', hour), (field, '<=', hour+1)]
-        return [(field, '=', ptime(value))]
+        return [(field, '=', self.ptime(value))]
 
     def _search_start_time(self, operator, value):
         return self._search_time('start_time', operator, value)
@@ -205,7 +223,7 @@ class FlightLog(models.Model):
     def _constrain_time(self):
         for record in self:
             if record.end_time < record.start_time:
-                raise ValidationError(_("End time can not be before start time"))
+                raise ValidationError(_("End time (%s) can not be before start time (%s)") % (record.ftime(record.end_time), record.ftime(record.start_time)))
 
             if any(t < 0 or t > 24 for t in [record.end_time, record.start_time]):
                 raise ValidationError(_("Time should be between 0h and 24h"))
@@ -218,8 +236,25 @@ class FlightLog(models.Model):
                 ('end_time', '>=', record.start_time),
             ], limit=1)
             if overlap:
-                raise ValidationError(_("There is already a flight on %s from %s to %s.") % (overlap.date, ftime(overlap.start_time), ftime(overlap.end_time)))
+                raise ValidationError(_("There is already a flight on %s from %s to %s.") % (overlap.date, overlap.ftime(overlap.start_time), overlap.ftime(overlap.end_time)))
 
+
+    def _compute_import_start_time(self):
+        for record in self:
+            record.import_start_time = record.ftime(record.start_time)
+
+    def _inverse_import_start_time(self):
+        for record in self:
+            record.start_time = record.ptime(record.import_start_time) if record.import_start_time else False
+
+
+    def _compute_import_end_time(self):
+        for record in self:
+            record.import_end_time = record.ftime(record.end_time)
+
+    def _inverse_import_end_time(self):
+        for record in self:
+            record.end_time = record.ptime(record.import_end_time) if record.import_end_time else False
 
 
     @api.depends('start_time', 'end_time')
