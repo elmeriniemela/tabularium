@@ -466,7 +466,7 @@ msgstr "Allekirjoita"
 #. module: flight_log
 #: model:ir.model.fields,field_description:flight_log.field_flight_log__signatory_license_number
 msgid "Signatory's license number"
-msgstr "Allekkkirjoittaneen lupakirja numero"
+msgstr "Allekirjoittaneen lupakirjan numero"
 
 #. module: flight_log
 #: model:ir.model.fields,field_description:flight_log.field_flight_log__skip_validation
