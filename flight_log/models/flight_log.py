@@ -129,6 +129,7 @@ class FlightLog(models.Model):
     purpose = fields.Selection(
         selection=[
             ('KOU', 'Koulutus'),
+            ('OPE', 'Opetus'),
             ('HAR', 'Harjoitus'),
             ('LEN', 'Lennätys'),
             ('TAR', 'Tarkastuslento'),

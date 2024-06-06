@@ -4,7 +4,7 @@
         <field name="model">flight.log</field>
         <field name="priority">2</field>
         <field name="arch" type="xml">
-            <tree default_order="date desc, start_time desc, id desc">
+            <tree default_order="date desc, start_time desc, id desc" multi_edit="1">
                 <field name="name" optional="show"/>
                 <field name="purpose" optional="show"/>
                 <field name="departure_method" optional="show"/>
@@ -164,6 +164,9 @@
 
                 <group expand="1" string="Group by">
                     <filter string="Name" name="group_name" context="{'group_by': 'name'}"/>
+                    <filter string="Purpose" name="group_purpose" context="{'group_by': 'purpose'}"/>
+                    <filter string="State" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Plane" name="group_plane_id" context="{'group_by': 'plane_id'}"/>
                     <filter string="Date" name="group_date" context="{'group_by': 'date:year'}"/>
                 </group>
             </search>
