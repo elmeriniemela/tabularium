@@ -6,7 +6,7 @@
     'website': "https://eniemela.fi",
     'license': 'LGPL-3',
     'category': 'Flight Log',
-    'version': '1.1.2',
+    'version': '1.1.3',
     'depends': [
         'base', 'mail',
     ],
