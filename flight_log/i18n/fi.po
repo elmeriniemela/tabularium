@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-06-02 06:10+0000\n"
-"PO-Revision-Date: 2024-06-02 06:10+0000\n"
+"POT-Creation-Date: 2024-06-06 07:46+0000\n"
+"PO-Revision-Date: 2024-06-06 07:46+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -18,7 +18,6 @@ msgstr ""
 #. module: flight_log
 #. odoo-python
 #: code:addons/flight_log/models/flight_log.py:0
-#: code:addons/models/flight_log.py:0
 #, python-format
 msgid "%s (copy)"
 msgstr ""
@@ -155,10 +154,9 @@ msgstr "Loppu aika"
 #. module: flight_log
 #. odoo-python
 #: code:addons/flight_log/models/flight_log.py:0
-#: code:addons/models/flight_log.py:0
 #, python-format
-msgid "End time can not be before start time"
-msgstr "Loppu aika ei voi olla ennen alku aikaa"
+msgid "End time (%s) can not be before start time (%s)"
+msgstr "Loppu aika (%s) ei voi olla ennen alku aikaa (%s)"
 
 #. module: flight_log
 #: model:ir.model,name:flight_log.model_flight_airport
@@ -230,6 +228,16 @@ msgid "If checked, some messages have a delivery error."
 msgstr ""
 
 #. module: flight_log
+#: model:ir.model.fields,field_description:flight_log.field_flight_log__import_end_time
+msgid "Import End Time"
+msgstr "Tuo loppu aika"
+
+#. module: flight_log
+#: model:ir.model.fields,field_description:flight_log.field_flight_log__import_start_time
+msgid "Import Start Time"
+msgstr "Tuo alku aika"
+
+#. module: flight_log
 #: model:ir.model.fields,field_description:flight_log.field_flight_log__instrumental_time
 msgid "Instrumental Time"
 msgstr "Instrumentaali aika"
@@ -237,7 +245,6 @@ msgstr "Instrumentaali aika"
 #. module: flight_log
 #. odoo-python
 #: code:addons/flight_log/models/flight_log.py:0
-#: code:addons/models/flight_log.py:0
 #, python-format
 msgid "Invalid time '%s', expected format '23:59'."
 msgstr "Väärä aika '%s', odotettu formaatti '23:59'."
@@ -345,38 +352,38 @@ msgstr ""
 #. module: flight_log
 #: model_terms:ir.ui.view,arch_db:flight_log.log_search
 msgid "Partial date (i.e. 2015-05-)"
-msgstr ""
+msgstr "Osittainen pvm. (esim 2015-05-)"
 
 #. module: flight_log
 #: model:ir.model.fields,field_description:flight_log.field_flight_log__plane_id
 msgid "Plane"
-msgstr ""
+msgstr "Lentokone"
 
 #. module: flight_log
 #: model:ir.actions.act_window,name:flight_log.plane_action
 #: model:ir.ui.menu,name:flight_log.plane_menu
 msgid "Planes"
-msgstr ""
+msgstr "Lentokoneet"
 
 #. module: flight_log
 #: model:ir.model.fields,field_description:flight_log.field_flight_log__purpose
 msgid "Purpose"
-msgstr ""
+msgstr "Tarkoitus"
 
 #. module: flight_log
 #: model:ir.model.fields,field_description:flight_log.field_flight_log__search_date
 msgid "Search Date"
-msgstr ""
+msgstr "Hae pvm."
 
 #. module: flight_log
 #: model:ir.model.fields,field_description:flight_log.field_flight_log__search_end_time
 msgid "Search End Time"
-msgstr ""
+msgstr "Hae loppu aikaa"
 
 #. module: flight_log
 #: model:ir.model.fields,field_description:flight_log.field_flight_log__search_start_time
 msgid "Search Start Time"
-msgstr ""
+msgstr "Hae alku aikaa"
 
 #. module: flight_log
 #: model:ir.model.fields,field_description:flight_log.field_flight_log__sign
@@ -387,6 +394,12 @@ msgstr "Allekirjoita"
 #: model:ir.model.fields,field_description:flight_log.field_flight_log__signatory_license_number
 msgid "Signatory's license number"
 msgstr "Allekkkirjoittaneen lupakirja numero"
+
+#. module: flight_log
+#: model:ir.model.fields,field_description:flight_log.field_flight_log__skip_validation
+#: model_terms:ir.ui.view,arch_db:flight_log.log_search
+msgid "Skip Validation"
+msgstr "Ohita validointi"
 
 #. module: flight_log
 #: model:ir.model.fields,field_description:flight_log.field_flight_log__start_time
@@ -410,14 +423,6 @@ msgid "Teaching Time"
 msgstr "Opetus aika"
 
 #. module: flight_log
-#. odoo-python
-#: code:addons/flight_log/models/flight_log.py:0
-#: code:addons/models/flight_log.py:0
-#, python-format
-msgid "There is already a flight on %s from %s to %s."
-msgstr "Lento on jo olemassa päivämäärällä %s klo %s - %s."
-
-#. module: flight_log
 #: model_terms:ir.ui.view,arch_db:flight_log.log_form
 msgid "Time"
 msgstr "Aika"
@@ -425,7 +430,6 @@ msgstr "Aika"
 #. module: flight_log
 #. odoo-python
 #: code:addons/flight_log/models/flight_log.py:0
-#: code:addons/models/flight_log.py:0
 #, python-format
 msgid "Time should be between 0h and 24h"
 msgstr "Aika pitäisi olla välillä 0h ja 24h"
@@ -449,6 +453,15 @@ msgstr "Opetusaika yhteensä"
 #: model:ir.model.fields.selection,name:flight_log.selection__flight_log__purpose__tyy
 msgid "Tyyppilento"
 msgstr ""
+
+#. module: flight_log
+#. odoo-python
+#: code:addons/flight_log/models/flight_log.py:0
+#, python-format
+msgid ""
+"Unable to add flight on %s from %s to %s as there is already a flight on %s "
+"from %s to %s."
+msgstr "Et voi lisätä lentoa päivämäärälle %s klo %s - %s, sillä lento on jo olemassa päivämäärällä %s klo %s - %s."
 
 #. module: flight_log
 #: model:res.groups,name:flight_log.group_flight_user
