@@ -204,6 +204,12 @@ msgid "Flight Purpose"
 msgstr "Lennon tarkoitus"
 
 #. module: flight_log
+#: model:ir.actions.act_window,name:flight_log.purpose_action
+#: model:ir.ui.menu,name:flight_log.purpose_menu
+msgid "Flight Purposes"
+msgstr "Tarkoitukset"
+
+#. module: flight_log
 #: model:ir.model.fields,field_description:flight_log.field_flight_airport__message_follower_ids
 #: model:ir.model.fields,field_description:flight_log.field_flight_log__message_follower_ids
 #: model:ir.model.fields,field_description:flight_log.field_flight_plane__message_follower_ids
@@ -425,10 +431,10 @@ msgid "Purpose"
 msgstr "Tarkoitus"
 
 #. module: flight_log
-#: model:ir.actions.act_window,name:flight_log.purpose_action
-#: model:ir.ui.menu,name:flight_log.purpose_menu
-msgid "Flight Purposes"
-msgstr "Lennon tarkoitukset"
+#: model:ir.actions.act_window,name:flight_log.report_action
+#: model:ir.ui.menu,name:flight_log.reports_menu
+msgid "Reports"
+msgstr "Raportit"
 
 #. module: flight_log
 #: model:ir.model.fields,field_description:flight_log.field_flight_log__search_date
@@ -446,6 +452,8 @@ msgid "Search Start Time"
 msgstr "Hae alku aikaa"
 
 #. module: flight_log
+#: model:ir.model.fields,field_description:flight_log.field_flight_airport__sequence
+#: model:ir.model.fields,field_description:flight_log.field_flight_plane__sequence
 #: model:ir.model.fields,field_description:flight_log.field_flight_purpose__sequence
 msgid "Sequence"
 msgstr "Sekvenssi"
