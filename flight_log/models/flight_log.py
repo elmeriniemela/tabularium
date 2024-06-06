@@ -116,8 +116,8 @@ class FlightLog(models.Model):
         group_operator=None,
     )
 
-    import_start_time = fields.Char(compute='_compute_import_start_time', inverse='_inverse_import_start_time')
-    import_end_time = fields.Char(compute='_compute_import_end_time', inverse='_inverse_import_end_time')
+    import_start_time = fields.Char(compute='_compute_import_time', inverse='_inverse_import_time', readonly=False)
+    import_end_time = fields.Char(compute='_compute_import_time', inverse='_inverse_import_time', readonly=False)
 
     date = fields.Date(
         tracking=True,
@@ -230,31 +230,29 @@ class FlightLog(models.Model):
 
 
             overlap = record.search([
+                ('company_id', '=', record.company_id.id),
                 ('date', '=', record.date),
                 ('id', '!=', record.id),
                 ('start_time', '<=', record.end_time),
                 ('end_time', '>=', record.start_time),
             ], limit=1)
             if overlap:
-                raise ValidationError(_("There is already a flight on %s from %s to %s.") % (overlap.date, overlap.ftime(overlap.start_time), overlap.ftime(overlap.end_time)))
+                raise ValidationError(_("Unable to add flight on %s from %s to %s as there is already a flight on %s from %s to %s.") % (
+                    record.date, record.ftime(record.start_time), record.ftime(record.end_time),
+                    overlap.date, overlap.ftime(overlap.start_time), overlap.ftime(overlap.end_time)))
 
 
-    def _compute_import_start_time(self):
-        for record in self:
-            record.import_start_time = record.ftime(record.start_time)
-
-    def _inverse_import_start_time(self):
-        for record in self:
-            record.start_time = record.ptime(record.import_start_time) if record.import_start_time else False
-
-
-    def _compute_import_end_time(self):
+    def _compute_import_time(self):
         for record in self:
             record.import_end_time = record.ftime(record.end_time)
+            record.import_start_time = record.ftime(record.start_time)
 
-    def _inverse_import_end_time(self):
+    def _inverse_import_time(self):
         for record in self:
-            record.end_time = record.ptime(record.import_end_time) if record.import_end_time else False
+            record.write({
+                'end_time': record.ptime(record.import_end_time) if record.import_end_time else False,
+                'start_time': record.ptime(record.import_start_time) if record.import_start_time else False,
+            })
 
 
     @api.depends('start_time', 'end_time')
