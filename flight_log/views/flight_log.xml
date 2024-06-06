@@ -17,7 +17,6 @@
                 <field name="duration" widget="float_time" optional="show" sum="Total Duration"/>
                 <field name="state" optional="show"/>
                 <field name="instrumental_time" widget="float_time" optional="hide" sum="Total Instrumental"/>
-                <field name="teaching_time" widget="float_time" optional="hide" sum="Total Teaching"/>
                 <field name="skip_validation" optional="hide" widget="boolean_toggle"/>
             </tree>
         </field>
@@ -56,7 +55,6 @@
                         </div>
                         <field name="duration" widget="float_time"/>
                         <field name="instrumental_time" options="{'type': 'time'}" widget="float_time"/>
-                        <field name="teaching_time" options="{'type': 'time'}" widget="float_time"/>
                         <field name="signatory_license_number"/>
                         <field name="sign" widget="signature"/>
                         <field name="company_id"/>
@@ -128,7 +126,6 @@
             <pivot sample="1">
                 <field name="duration" type="measure"/>
                 <field name="instrumental_time" type="measure"/>
-                <field name="teaching_time" type="measure"/>
             </pivot>
         </field>
     </record>
@@ -180,7 +177,7 @@
         <field name="view_mode">tree,kanban,form,pivot,graph</field>
         <field name="context">{
             'search_default_group_date': 1,
-            'pivot_measures': ['__count__', 'duration', 'instrumental_time', 'teaching_time'],
+            'pivot_measures': ['__count__', 'duration', 'instrumental_time'],
         }</field>
     </record>
 
