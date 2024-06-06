@@ -258,7 +258,7 @@ class FlightLog(models.Model):
     @api.depends('start_time', 'end_time')
     def _compute_duration(self):
         for record in self:
-            if record.start_time and record.end_time:
+            if isinstance(record.start_time, float) and isinstance(record.end_time, float):
                 record.duration = record.end_time - record.start_time
             else:
                 record.duration = False
