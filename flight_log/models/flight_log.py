@@ -93,6 +93,7 @@ class FlightLog(models.Model):
     )
 
     purpose = fields.Selection(
+        string="Purpose (deprecated)",
         selection=[
             ('KOU', 'Koulutus'),
             ('OPE', 'Opetus'),
@@ -105,6 +106,15 @@ class FlightLog(models.Model):
         default='HAR',
         required=True,
         tracking=True,
+    )
+
+    purpose_id = fields.Many2one(
+        comodel_name='flight.purpose',
+        required=True,
+        index=True,
+        tracking=True,
+        states={'confirmed': [('readonly', True)]},
+        ondelete='restrict',
     )
 
     departure_method = fields.Selection(

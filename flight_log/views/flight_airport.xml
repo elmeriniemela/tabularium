@@ -41,6 +41,5 @@
         <field name="view_mode">tree,kanban,form</field>
     </record>
 
-    <menuitem id="airport_menu" parent="log_menu" action="airport_action" sequence="4"/>
 
 </odoo>

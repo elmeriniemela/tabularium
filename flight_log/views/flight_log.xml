@@ -6,7 +6,7 @@
         <field name="arch" type="xml">
             <tree default_order="date desc, start_time desc, id desc" multi_edit="1">
                 <field name="name" optional="show"/>
-                <field name="purpose" optional="show"/>
+                <field name="purpose_id" widget="selection" optional="show"/>
                 <field name="departure_method" optional="show"/>
                 <field name="plane_id" optional="show"/>
                 <field name="airport_takeoff_id" optional="show"/>
@@ -37,7 +37,7 @@
                         </h1>
                     </div>
                     <group>
-                        <field name="purpose"/>
+                        <field name="purpose_id" widget="selection"/>
                         <field name="departure_method"/>
                         <field name="plane_id"/>
                         <field name="date"/>
@@ -81,7 +81,7 @@
                                 <div class="o_kanban_record_top">
                                     <div class="o_kanban_record_headings">
                                         <strong class="o_kanban_record_title">
-                                            <field name="purpose"/>
+                                            <field name="purpose_id"/>
                                             <span>: </span>
                                             <field name="name"/>
                                         </strong>
@@ -151,7 +151,7 @@
                 <field name="search_end_time" string="End Time"/>
                 <field name="plane_id"/>
                 <field name="airport_takeoff_id"/>
-                <field name="purpose"/>
+                <field name="purpose_id"/>
                 <field name="departure_method"/>
                 <filter name="date" string="Date" date="date"/>
 
@@ -161,7 +161,7 @@
 
                 <group expand="1" string="Group by">
                     <filter string="Name" name="group_name" context="{'group_by': 'name'}"/>
-                    <filter string="Purpose" name="group_purpose" context="{'group_by': 'purpose'}"/>
+                    <filter string="Purpose" name="group_purpose" context="{'group_by': 'purpose_id'}"/>
                     <filter string="State" name="group_state" context="{'group_by': 'state'}"/>
                     <filter string="Plane" name="group_plane_id" context="{'group_by': 'plane_id'}"/>
                     <filter string="Date" name="group_date" context="{'group_by': 'date:year'}"/>
@@ -181,6 +181,6 @@
         }</field>
     </record>
 
-    <menuitem id="log_menu" action="log_action" web_icon="flight_log,static/description/icon2.png" sequence="4"/>
+
 
 </odoo>

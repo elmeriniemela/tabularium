@@ -7,3 +7,6 @@ access_flight_plane_user,access_flight_plane_user.flight_plane,model_flight_plan
 
 access_flight_airport_admin,access_flight_airport_admin.flight_airport,model_flight_airport,flight_log.group_flight_admin,1,1,1,1
 access_flight_airport_user,access_flight_airport_user.flight_airport,model_flight_airport,flight_log.group_flight_user,1,0,0,0
+
+access_flight_purpose_admin,access_flight_purpose_admin.flight_purpose,model_flight_purpose,flight_log.group_flight_admin,1,1,1,1
+access_flight_purpose_user,access_flight_purpose_user.flight_purpose,model_flight_purpose,flight_log.group_flight_user,1,0,0,0

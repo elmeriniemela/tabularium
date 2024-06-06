@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <record id="flight_log.flight_purpose_KOU" model="flight.purpose">
+        <field name="name">Koulutus</field>
+        <field name="code">KOU</field>
+        <field name="sequence" eval="False"/>
+    </record>
+    <record id="flight_log.flight_purpose_OPE" model="flight.purpose">
+        <field name="name">Opetus</field>
+        <field name="code">OPE</field>
+        <field name="sequence" eval="1"/>
+    </record>
+    <record id="flight_log.flight_purpose_HAR" model="flight.purpose">
+        <field name="name">Harjoitus</field>
+        <field name="code">HAR</field>
+        <field name="sequence" eval="2"/>
+    </record>
+    <record id="flight_log.flight_purpose_LEN" model="flight.purpose">
+        <field name="name">Lennätys</field>
+        <field name="code">LEN</field>
+        <field name="sequence" eval="3"/>
+    </record>
+    <record id="flight_log.flight_purpose_TAR" model="flight.purpose">
+        <field name="name">Tarkastuslento</field>
+        <field name="code">TAR</field>
+        <field name="sequence" eval="4"/>
+    </record>
+    <record id="flight_log.flight_purpose_TYY" model="flight.purpose">
+        <field name="name">Tyyppilento</field>
+        <field name="code">TYY</field>
+        <field name="sequence" eval="5"/>
+    </record>
+</odoo>

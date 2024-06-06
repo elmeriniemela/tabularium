@@ -1,18 +1,20 @@
 <odoo>
-    <record id="plane_list" model="ir.ui.view">
-        <field name="name">flight.plane.list</field>
-        <field name="model">flight.plane</field>
+    <record id="purpose_list" model="ir.ui.view">
+        <field name="name">flight.purpose.list</field>
+        <field name="model">flight.purpose</field>
         <field name="priority">2</field>
         <field name="arch" type="xml">
             <tree>
+                <field name="sequence" widget="handle"/>
                 <field name="name" optional="show"/>
+                <field name="code" optional="show"/>
             </tree>
         </field>
     </record>
 
-    <record id="plane_form" model="ir.ui.view">
-        <field name="name">flight.plane.form</field>
-        <field name="model">flight.plane</field>
+    <record id="purpose_form" model="ir.ui.view">
+        <field name="name">flight.purpose.form</field>
+        <field name="model">flight.purpose</field>
         <field name="arch" type="xml">
             <form>
                 <sheet>
@@ -22,7 +24,9 @@
                         </h1>
                     </div>
                     <group>
-                        <field name="company_id"/>
+                        <group>
+                            <field name="code"/>
+                        </group>
                     </group>
                 </sheet>
                 <div class="oe_chatter">
@@ -35,9 +39,9 @@
 
 
 
-    <record id="plane_action" model="ir.actions.act_window">
-        <field name="name">Planes</field>
-        <field name="res_model">flight.plane</field>
+    <record id="purpose_action" model="ir.actions.act_window">
+        <field name="name">Purposes</field>
+        <field name="res_model">flight.purpose</field>
         <field name="view_mode">tree,kanban,form</field>
     </record>
 
