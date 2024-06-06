@@ -18,6 +18,7 @@
                 <field name="state" optional="show"/>
                 <field name="instrumental_time" widget="float_time" optional="hide" sum="Total Instrumental"/>
                 <field name="teaching_time" widget="float_time" optional="hide" sum="Total Teaching"/>
+                <field name="skip_validation" optional="hide" widget="boolean_toggle"/>
             </tree>
         </field>
     </record>
@@ -59,6 +60,7 @@
                         <field name="signatory_license_number"/>
                         <field name="sign" widget="signature"/>
                         <field name="company_id"/>
+                        <field name="skip_validation" widget="boolean_toggle"/>
                     </group>
                 </sheet>
                 <div class="oe_chatter">

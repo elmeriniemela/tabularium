@@ -186,6 +186,11 @@ class FlightLog(models.Model):
         copy=False,
     )
 
+    skip_validation = fields.Boolean(
+        tracking=True,
+        copy=False,
+    )
+
     search_date = fields.Char(compute='_compute_search_date', search='_search_date')
     search_start_time = fields.Char(compute='_compute_search_start_time', search='_search_start_time')
     search_end_time = fields.Char(compute='_compute_search_end_time', search='_search_end_time')
@@ -222,6 +227,8 @@ class FlightLog(models.Model):
     @api.constrains('start_time', 'end_time', 'date')
     def _constrain_time(self):
         for record in self:
+            if record.skip_validation:
+                continue
             if record.end_time < record.start_time:
                 raise ValidationError(_("End time (%s) can not be before start time (%s)") % (record.ftime(record.end_time), record.ftime(record.start_time)))
 
