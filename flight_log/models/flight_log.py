@@ -217,7 +217,7 @@ class FlightLog(models.Model):
     def _search_end_time(self, operator, value):
         return self._search_time('end_time', operator, value)
 
-    @api.constrains('start_time', 'end_time', 'date')
+    @api.constrains('start_time', 'end_time', 'date', 'skip_validation')
     def _constrain_time(self):
         for record in self:
             if record.skip_validation:
