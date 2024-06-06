@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-06-06 08:13+0000\n"
-"PO-Revision-Date: 2024-06-06 08:13+0000\n"
+"POT-Creation-Date: 2024-06-06 12:39+0000\n"
+"PO-Revision-Date: 2024-06-06 12:39+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -46,6 +46,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:flight_log.field_flight_airport__message_needaction
 #: model:ir.model.fields,field_description:flight_log.field_flight_log__message_needaction
 #: model:ir.model.fields,field_description:flight_log.field_flight_plane__message_needaction
+#: model:ir.model.fields,field_description:flight_log.field_flight_purpose__message_needaction
 msgid "Action Needed"
 msgstr ""
 
@@ -84,8 +85,14 @@ msgstr "Lentokentät"
 #: model:ir.model.fields,field_description:flight_log.field_flight_airport__message_attachment_count
 #: model:ir.model.fields,field_description:flight_log.field_flight_log__message_attachment_count
 #: model:ir.model.fields,field_description:flight_log.field_flight_plane__message_attachment_count
+#: model:ir.model.fields,field_description:flight_log.field_flight_purpose__message_attachment_count
 msgid "Attachment Count"
 msgstr ""
+
+#. module: flight_log
+#: model:ir.model.fields,field_description:flight_log.field_flight_purpose__code
+msgid "Code"
+msgstr "Koodi"
 
 #. module: flight_log
 #: model:ir.model.fields,field_description:flight_log.field_flight_airport__company_id
@@ -93,6 +100,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:flight_log.field_flight_plane__company_id
 msgid "Company"
 msgstr "Yhdistys"
+
+#. module: flight_log
+#: model:ir.ui.menu,name:flight_log.configuration_menu
+msgid "Configuration"
+msgstr "Konfiguraatio"
 
 #. module: flight_log
 #: model:ir.model.fields.selection,name:flight_log.selection__flight_log__state__confirmed
@@ -103,6 +115,7 @@ msgstr "Vahvistettu"
 #: model:ir.model.fields,field_description:flight_log.field_flight_airport__create_uid
 #: model:ir.model.fields,field_description:flight_log.field_flight_log__create_uid
 #: model:ir.model.fields,field_description:flight_log.field_flight_plane__create_uid
+#: model:ir.model.fields,field_description:flight_log.field_flight_purpose__create_uid
 msgid "Created by"
 msgstr "Luonut"
 
@@ -110,6 +123,7 @@ msgstr "Luonut"
 #: model:ir.model.fields,field_description:flight_log.field_flight_airport__create_date
 #: model:ir.model.fields,field_description:flight_log.field_flight_log__create_date
 #: model:ir.model.fields,field_description:flight_log.field_flight_plane__create_date
+#: model:ir.model.fields,field_description:flight_log.field_flight_purpose__create_date
 msgid "Created on"
 msgstr "Luotu"
 
@@ -128,6 +142,7 @@ msgstr "Lähtötapa"
 #: model:ir.model.fields,field_description:flight_log.field_flight_airport__display_name
 #: model:ir.model.fields,field_description:flight_log.field_flight_log__display_name
 #: model:ir.model.fields,field_description:flight_log.field_flight_plane__display_name
+#: model:ir.model.fields,field_description:flight_log.field_flight_purpose__display_name
 msgid "Display Name"
 msgstr "Näyttönimi"
 
@@ -168,7 +183,8 @@ msgstr "Lentokenttä"
 #. module: flight_log
 #: model:ir.actions.act_window,name:flight_log.log_action
 #: model:ir.model,name:flight_log.model_flight_log
-#: model:ir.ui.menu,name:flight_log.log_menu
+#: model:ir.ui.menu,name:flight_log.logs_menu
+#: model:ir.ui.menu,name:flight_log.main_menu
 msgid "Flight Log"
 msgstr "Lentoloki"
 
@@ -178,9 +194,15 @@ msgid "Flight Plane"
 msgstr "Lentokone"
 
 #. module: flight_log
+#: model:ir.model,name:flight_log.model_flight_purpose
+msgid "Flight Purpose"
+msgstr "Lennon tarkoitus"
+
+#. module: flight_log
 #: model:ir.model.fields,field_description:flight_log.field_flight_airport__message_follower_ids
 #: model:ir.model.fields,field_description:flight_log.field_flight_log__message_follower_ids
 #: model:ir.model.fields,field_description:flight_log.field_flight_plane__message_follower_ids
+#: model:ir.model.fields,field_description:flight_log.field_flight_purpose__message_follower_ids
 msgid "Followers"
 msgstr ""
 
@@ -188,6 +210,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:flight_log.field_flight_airport__message_partner_ids
 #: model:ir.model.fields,field_description:flight_log.field_flight_log__message_partner_ids
 #: model:ir.model.fields,field_description:flight_log.field_flight_plane__message_partner_ids
+#: model:ir.model.fields,field_description:flight_log.field_flight_purpose__message_partner_ids
 msgid "Followers (Partners)"
 msgstr ""
 
@@ -197,7 +220,7 @@ msgid "Group by"
 msgstr "Ryhmittele"
 
 #. module: flight_log
-#: model:ir.model.fields.selection,name:flight_log.selection__flight_log__purpose__har
+#: model:flight.purpose,name:flight_log.flight_purpose_HAR
 msgid "Harjoitus"
 msgstr ""
 
@@ -205,6 +228,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:flight_log.field_flight_airport__has_message
 #: model:ir.model.fields,field_description:flight_log.field_flight_log__has_message
 #: model:ir.model.fields,field_description:flight_log.field_flight_plane__has_message
+#: model:ir.model.fields,field_description:flight_log.field_flight_purpose__has_message
 msgid "Has Message"
 msgstr ""
 
@@ -212,6 +236,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:flight_log.field_flight_airport__id
 #: model:ir.model.fields,field_description:flight_log.field_flight_log__id
 #: model:ir.model.fields,field_description:flight_log.field_flight_plane__id
+#: model:ir.model.fields,field_description:flight_log.field_flight_purpose__id
 msgid "ID"
 msgstr ""
 
@@ -219,6 +244,7 @@ msgstr ""
 #: model:ir.model.fields,help:flight_log.field_flight_airport__message_needaction
 #: model:ir.model.fields,help:flight_log.field_flight_log__message_needaction
 #: model:ir.model.fields,help:flight_log.field_flight_plane__message_needaction
+#: model:ir.model.fields,help:flight_log.field_flight_purpose__message_needaction
 msgid "If checked, new messages require your attention."
 msgstr ""
 
@@ -226,6 +252,7 @@ msgstr ""
 #: model:ir.model.fields,help:flight_log.field_flight_airport__message_has_error
 #: model:ir.model.fields,help:flight_log.field_flight_log__message_has_error
 #: model:ir.model.fields,help:flight_log.field_flight_plane__message_has_error
+#: model:ir.model.fields,help:flight_log.field_flight_purpose__message_has_error
 msgid "If checked, some messages have a delivery error."
 msgstr ""
 
@@ -256,11 +283,12 @@ msgstr "Väärä aika '%s', odotettu formaatti '23:59'."
 #: model:ir.model.fields,field_description:flight_log.field_flight_airport__message_is_follower
 #: model:ir.model.fields,field_description:flight_log.field_flight_log__message_is_follower
 #: model:ir.model.fields,field_description:flight_log.field_flight_plane__message_is_follower
+#: model:ir.model.fields,field_description:flight_log.field_flight_purpose__message_is_follower
 msgid "Is Follower"
 msgstr ""
 
 #. module: flight_log
-#: model:ir.model.fields.selection,name:flight_log.selection__flight_log__purpose__kou
+#: model:flight.purpose,name:flight_log.flight_purpose_KOU
 msgid "Koulutus"
 msgstr ""
 
@@ -268,6 +296,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:flight_log.field_flight_airport____last_update
 #: model:ir.model.fields,field_description:flight_log.field_flight_log____last_update
 #: model:ir.model.fields,field_description:flight_log.field_flight_plane____last_update
+#: model:ir.model.fields,field_description:flight_log.field_flight_purpose____last_update
 msgid "Last Modified on"
 msgstr ""
 
@@ -275,6 +304,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:flight_log.field_flight_airport__write_uid
 #: model:ir.model.fields,field_description:flight_log.field_flight_log__write_uid
 #: model:ir.model.fields,field_description:flight_log.field_flight_plane__write_uid
+#: model:ir.model.fields,field_description:flight_log.field_flight_purpose__write_uid
 msgid "Last Updated by"
 msgstr ""
 
@@ -282,11 +312,12 @@ msgstr ""
 #: model:ir.model.fields,field_description:flight_log.field_flight_airport__write_date
 #: model:ir.model.fields,field_description:flight_log.field_flight_log__write_date
 #: model:ir.model.fields,field_description:flight_log.field_flight_plane__write_date
+#: model:ir.model.fields,field_description:flight_log.field_flight_purpose__write_date
 msgid "Last Updated on"
 msgstr ""
 
 #. module: flight_log
-#: model:ir.model.fields.selection,name:flight_log.selection__flight_log__purpose__len
+#: model:flight.purpose,name:flight_log.flight_purpose_LEN
 msgid "Lennätys"
 msgstr ""
 
@@ -299,6 +330,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:flight_log.field_flight_airport__message_main_attachment_id
 #: model:ir.model.fields,field_description:flight_log.field_flight_log__message_main_attachment_id
 #: model:ir.model.fields,field_description:flight_log.field_flight_plane__message_main_attachment_id
+#: model:ir.model.fields,field_description:flight_log.field_flight_purpose__message_main_attachment_id
 msgid "Main Attachment"
 msgstr ""
 
@@ -306,6 +338,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:flight_log.field_flight_airport__message_has_error
 #: model:ir.model.fields,field_description:flight_log.field_flight_log__message_has_error
 #: model:ir.model.fields,field_description:flight_log.field_flight_plane__message_has_error
+#: model:ir.model.fields,field_description:flight_log.field_flight_purpose__message_has_error
 msgid "Message Delivery error"
 msgstr ""
 
@@ -313,6 +346,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:flight_log.field_flight_airport__message_ids
 #: model:ir.model.fields,field_description:flight_log.field_flight_log__message_ids
 #: model:ir.model.fields,field_description:flight_log.field_flight_plane__message_ids
+#: model:ir.model.fields,field_description:flight_log.field_flight_purpose__message_ids
 msgid "Messages"
 msgstr ""
 
@@ -320,6 +354,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:flight_log.field_flight_airport__name
 #: model:ir.model.fields,field_description:flight_log.field_flight_log__name
 #: model:ir.model.fields,field_description:flight_log.field_flight_plane__name
+#: model:ir.model.fields,field_description:flight_log.field_flight_purpose__name
 #: model_terms:ir.ui.view,arch_db:flight_log.log_search
 msgid "Name"
 msgstr "Nimi"
@@ -328,6 +363,7 @@ msgstr "Nimi"
 #: model:ir.model.fields,field_description:flight_log.field_flight_airport__message_needaction_counter
 #: model:ir.model.fields,field_description:flight_log.field_flight_log__message_needaction_counter
 #: model:ir.model.fields,field_description:flight_log.field_flight_plane__message_needaction_counter
+#: model:ir.model.fields,field_description:flight_log.field_flight_purpose__message_needaction_counter
 msgid "Number of Actions"
 msgstr ""
 
@@ -335,6 +371,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:flight_log.field_flight_airport__message_has_error_counter
 #: model:ir.model.fields,field_description:flight_log.field_flight_log__message_has_error_counter
 #: model:ir.model.fields,field_description:flight_log.field_flight_plane__message_has_error_counter
+#: model:ir.model.fields,field_description:flight_log.field_flight_purpose__message_has_error_counter
 msgid "Number of errors"
 msgstr ""
 
@@ -342,6 +379,7 @@ msgstr ""
 #: model:ir.model.fields,help:flight_log.field_flight_airport__message_needaction_counter
 #: model:ir.model.fields,help:flight_log.field_flight_log__message_needaction_counter
 #: model:ir.model.fields,help:flight_log.field_flight_plane__message_needaction_counter
+#: model:ir.model.fields,help:flight_log.field_flight_purpose__message_needaction_counter
 msgid "Number of messages requiring action"
 msgstr ""
 
@@ -349,11 +387,12 @@ msgstr ""
 #: model:ir.model.fields,help:flight_log.field_flight_airport__message_has_error_counter
 #: model:ir.model.fields,help:flight_log.field_flight_log__message_has_error_counter
 #: model:ir.model.fields,help:flight_log.field_flight_plane__message_has_error_counter
+#: model:ir.model.fields,help:flight_log.field_flight_purpose__message_has_error_counter
 msgid "Number of messages with delivery error"
 msgstr ""
 
 #. module: flight_log
-#: model:ir.model.fields.selection,name:flight_log.selection__flight_log__purpose__ope
+#: model:flight.purpose,name:flight_log.flight_purpose_OPE
 msgid "Opetus"
 msgstr ""
 
@@ -375,10 +414,16 @@ msgid "Planes"
 msgstr "Lentokoneet"
 
 #. module: flight_log
-#: model:ir.model.fields,field_description:flight_log.field_flight_log__purpose
+#: model:ir.model.fields,field_description:flight_log.field_flight_log__purpose_id
 #: model_terms:ir.ui.view,arch_db:flight_log.log_search
 msgid "Purpose"
 msgstr "Tarkoitus"
+
+#. module: flight_log
+#: model:ir.actions.act_window,name:flight_log.purpose_action
+#: model:ir.ui.menu,name:flight_log.purpose_menu
+msgid "Purposes"
+msgstr "Tarkoitukset"
 
 #. module: flight_log
 #: model:ir.model.fields,field_description:flight_log.field_flight_log__search_date
@@ -394,6 +439,11 @@ msgstr "Hae loppu aikaa"
 #: model:ir.model.fields,field_description:flight_log.field_flight_log__search_start_time
 msgid "Search Start Time"
 msgstr "Hae alku aikaa"
+
+#. module: flight_log
+#: model:ir.model.fields,field_description:flight_log.field_flight_purpose__sequence
+msgid "Sequence"
+msgstr "Sekvenssi"
 
 #. module: flight_log
 #: model:ir.model.fields,field_description:flight_log.field_flight_log__sign
@@ -424,14 +474,9 @@ msgid "State"
 msgstr "Tila"
 
 #. module: flight_log
-#: model:ir.model.fields.selection,name:flight_log.selection__flight_log__purpose__tar
+#: model:flight.purpose,name:flight_log.flight_purpose_TAR
 msgid "Tarkastuslento"
 msgstr ""
-
-#. module: flight_log
-#: model:ir.model.fields,field_description:flight_log.field_flight_log__teaching_time
-msgid "Teaching Time"
-msgstr "Opetus aika"
 
 #. module: flight_log
 #: model_terms:ir.ui.view,arch_db:flight_log.log_form
@@ -457,12 +502,7 @@ msgid "Total Instrumental"
 msgstr "Instrumentaali yhteensä"
 
 #. module: flight_log
-#: model_terms:ir.ui.view,arch_db:flight_log.log_list
-msgid "Total Teaching"
-msgstr "Opetusaika yhteensä"
-
-#. module: flight_log
-#: model:ir.model.fields.selection,name:flight_log.selection__flight_log__purpose__tyy
+#: model:flight.purpose,name:flight_log.flight_purpose_TYY
 msgid "Tyyppilento"
 msgstr ""
 
