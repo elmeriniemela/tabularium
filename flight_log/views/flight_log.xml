@@ -157,6 +157,11 @@
                 <field name="purpose"/>
                 <field name="departure_method"/>
                 <filter name="date" string="Date" date="date"/>
+
+                <separator/>
+                <filter string="Skip Validation" name="skip_validation" domain="[('skip_validation', '=', True)]"/>
+                <separator/>
+
                 <group expand="1" string="Group by">
                     <filter string="Name" name="group_name" context="{'group_by': 'name'}"/>
                     <filter string="Date" name="group_date" context="{'group_by': 'date:year'}"/>
