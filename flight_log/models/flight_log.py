@@ -90,6 +90,7 @@ class FlightLog(models.Model):
         required=True,
         states={'confirmed': [('readonly', True)]},
         index=True,
+        default=fields.Datetime.today
     )
 
     purpose_id = fields.Many2one(

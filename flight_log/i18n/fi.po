@@ -139,6 +139,11 @@ msgid "Departure Method"
 msgstr "Lähtötapa"
 
 #. module: flight_log
+#: model_terms:ir.ui.view,arch_db:flight_log.log_form
+msgid "Description of flight..."
+msgstr "Lennon kuvaus..."
+
+#. module: flight_log
 #: model:ir.model.fields,field_description:flight_log.field_flight_airport__display_name
 #: model:ir.model.fields,field_description:flight_log.field_flight_log__display_name
 #: model:ir.model.fields,field_description:flight_log.field_flight_plane__display_name
