@@ -2,11 +2,9 @@
 
     <menuitem id="main_menu" action="log_action" web_icon="flight_log,static/description/icon2.png" sequence="4">
         <menuitem id="logs_menu" action="log_action" sequence="10"/>
-        <menuitem id="airport_menu" action="airport_action" sequence="30"/>
         <menuitem id="plane_menu" action="plane_action" sequence="20"/>
-        <menuitem name="Configuration" id="configuration_menu" sequence="40">
-            <menuitem id="purpose_menu" action="purpose_action" sequence="10"/>
-        </menuitem>
+        <menuitem id="airport_menu" action="airport_action" sequence="30"/>
+        <menuitem id="purpose_menu" action="purpose_action" sequence="40"/>
     </menuitem>
 
 </odoo>

@@ -10,9 +10,11 @@ class FightPlane(models.Model):
     _name = 'flight.plane'
     _description = 'Flight Plane'
     _inherit = ['mail.thread']
+    _order = 'sequence, id'
 
     name = fields.Char(required=True, tracking=True)
     company_id = fields.Many2one(comodel_name='res.company', tracking=True)
+    sequence = fields.Integer()
 
     @api.model
     def _name_search(self, name='', args=None, operator='ilike', limit=100, name_get_uid=None):

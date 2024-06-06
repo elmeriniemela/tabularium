@@ -40,7 +40,7 @@
 
 
     <record id="purpose_action" model="ir.actions.act_window">
-        <field name="name">Purposes</field>
+        <field name="name">Flight Purposes</field>
         <field name="res_model">flight.purpose</field>
         <field name="view_mode">tree,kanban,form</field>
     </record>

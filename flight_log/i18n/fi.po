@@ -427,8 +427,8 @@ msgstr "Tarkoitus"
 #. module: flight_log
 #: model:ir.actions.act_window,name:flight_log.purpose_action
 #: model:ir.ui.menu,name:flight_log.purpose_menu
-msgid "Purposes"
-msgstr "Tarkoitukset"
+msgid "Flight Purposes"
+msgstr "Lennon tarkoitukset"
 
 #. module: flight_log
 #: model:ir.model.fields,field_description:flight_log.field_flight_log__search_date
