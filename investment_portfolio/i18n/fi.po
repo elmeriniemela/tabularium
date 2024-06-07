@@ -194,6 +194,11 @@ msgid "Allocations per portfolio"
 msgstr "Allokaatiot per salkku"
 
 #. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_period__annualized_irr
+msgid "Annualized IRR"
+msgstr "Efektiivinen vuosikorko (IRR)"
+
+#. module: investment_portfolio
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_price__asset_id
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_timeseries__position_id
 #: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_price_search
@@ -1015,6 +1020,17 @@ msgid "Payment"
 msgstr "Maksu"
 
 #. module: investment_portfolio
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.period_form
+msgid "Performance"
+msgstr "Suorituskyky"
+
+#. module: investment_portfolio
+#: model:ir.actions.act_window,name:investment_portfolio.action_periods
+#: model:ir.ui.menu,name:investment_portfolio.menu_periods
+msgid "Periods"
+msgstr "Ajanjaksot"
+
+#. module: investment_portfolio
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__plan_allow_past
 msgid "Plan Allow Past"
 msgstr ""
@@ -1303,6 +1319,11 @@ msgstr "Myyntihinta"
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__sequence
 msgid "Sequence"
 msgstr "Sekvenssi"
+
+#. module: investment_portfolio
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.period_form
+msgid "Settings"
+msgstr "Asetukset"
 
 #. module: investment_portfolio
 #: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_transaction_search
