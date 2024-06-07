@@ -36,7 +36,14 @@ class InvestmentPeriod(models.Model):
     end_position = fields.Monetary(compute='_compute_period', currency_field='company_currency_id')
     profit = fields.Monetary(compute='_compute_period', currency_field='company_currency_id')
     annualized_irr = fields.Float(
+        string="Annualized IRR",
         compute='_compute_period',
+        help=(
+            "The money-weighted rate of return (MWRR) is a measure of the performance of an investment. "
+            "The MWRR is calculated by finding the rate of return that will set the present values (PV) of all cash flows equal to the value of the initial investment. "
+            "The MWRR is equivalent to the internal rate of return (IRR). "
+            "MWRR can be compared with the time-weighted return (TWR), which removes the effects of cash in- and outflows. "
+        )
     )
 
     def copy(self, default=None):
