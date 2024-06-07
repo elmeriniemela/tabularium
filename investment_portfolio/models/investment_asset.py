@@ -140,6 +140,17 @@ class InvestmentAsset(models.Model):
                     'prediction': True,
                     'price': predicted_price,
                 })
+            # DO we want to "predict" old prices?
+            # elif after_price_id:
+            #     days = (date - after_price_id.time.date()).days
+            #     predicted_price = after_price_id.price * (1+self.expected_yearly_appreciation)**(days/365)
+            #     at_price_id = self.env['investment.asset.price'].create({
+            #         'time': time_cutoff,
+            #         'asset_id': self.id,
+            #         'prediction': True,
+            #         'price': predicted_price,
+            #     })
+
             else:
                 raise RuntimeError(err_msg)
 

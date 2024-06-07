@@ -149,6 +149,16 @@ class InvestmentPosition(models.Model):
     def generate_timeseries(self):
         # Re-generate plans first, as this removes price ids and cascades existing timeseries.
 
+        def serie_price(position, date, prediction):
+            if (not prediction) and (date >= position.asset_id.last_update.date()):
+                price_id = self.env['investment.asset.price'].search([
+                    ('prediction', '=', False),
+                    ('asset_id', '=', position.asset_id.id),
+                ], limit=1, order='time desc') # just use latest instead of making predictions for assets without recent price updates.
+            else:
+                price_id = position.asset_id.price_at_date(date)
+            return price_id
+
         for position_id in self:
             predicted = self.env['investment.asset.price'].search([
                 ('asset_id', '=', position_id.asset_id.id),
@@ -194,18 +204,10 @@ class InvestmentPosition(models.Model):
 
                 serie = existing.get((position_id.id, date), None)
                 if not serie:
-                    if (not prediction) and (date >= position_id.asset_id.last_update.date()):
-                        price_id = self.env['investment.asset.price'].search([
-                            ('prediction', '=', False),
-                            ('asset_id', '=', position_id.asset_id.id),
-                        ], limit=1, order='time desc') # just use latest instead of making predictions for assets without recent price updates.
-                    else:
-                        price_id = position_id.asset_id.price_at_date(date)
-
                     serie = Timeseries.create({
                         'position_id': position_id.id,
                         'date': date,
-                        'price_id': price_id.id,
+                        'price_id': serie_price(position_id, date, prediction).id,
                     })
                     existing[(position_id.id, date)] = serie
                     recompute += serie
@@ -236,6 +238,7 @@ class InvestmentPosition(models.Model):
                 serie = Timeseries.create({
                     'position_id': position_id.id,
                     'date': today,
+                    'price_id': serie_price(position_id, today, False).id,
                 })
                 existing[todaykey] = serie
                 recompute += serie

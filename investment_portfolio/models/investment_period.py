@@ -58,6 +58,8 @@ class InvestmentPeriod(models.Model):
         from pyxirr import xirr
         today = fields.Date.today()
         for record in self:
+            start_date = record.start_date - relativedelta(days=1)
+            end_date = record.end_date if today > record.end_date else today
             record.start_position = 0.0
             record.end_position = 0.0
             record.profit = 0.0
@@ -70,14 +72,12 @@ class InvestmentPeriod(models.Model):
             for position in positions:
                 start_series = record.env['investment.timeseries'].search([
                     ('position_id', '=', position.id),
-                    ('date', '=', record.start_date),
+                    ('date', '=', start_date),
                 ])
                 end_series = record.env['investment.timeseries'].search([
                     ('position_id', '=', position.id),
-                    ('date', '=', record.end_date if today > record.end_date else today),
+                    ('date', '=', end_date),
                 ])
-                if not (start_series and end_series):
-                    continue
 
                 record.start_position += start_series.position
                 record.end_position += end_series.position
@@ -85,7 +85,7 @@ class InvestmentPeriod(models.Model):
 
 
                 values.append(-start_series.position)
-                dates.append(start_series.date)
+                dates.append(start_series.date or start_date)
 
                 transactions = (end_series.transaction_ids - start_series.transaction_ids)
 
@@ -105,13 +105,14 @@ class InvestmentPeriod(models.Model):
                     dates.append(trans.time.date())
 
                 values.append(end_series.position)
-                dates.append(end_series.date)
+                dates.append(end_series.date or end_date)
 
             annualized_irr = 0
-            try:
-                annualized_irr = xirr(dates, values)
-            except Exception as error:
-                _logger.exception(error)
+            if values:
+                try:
+                    annualized_irr = xirr(dates, values)
+                except Exception as error:
+                    _logger.exception(error)
 
             record.annualized_irr = annualized_irr
 
