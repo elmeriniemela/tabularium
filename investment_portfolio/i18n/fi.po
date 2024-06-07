@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-05 14:26+0000\n"
-"PO-Revision-Date: 2024-05-05 14:26+0000\n"
+"POT-Creation-Date: 2024-06-07 13:04+0000\n"
+"PO-Revision-Date: 2024-06-07 13:04+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -136,6 +136,7 @@ msgstr "Hankinta"
 #. module: investment_portfolio
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__message_needaction
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__message_needaction
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_period__message_needaction
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__message_needaction
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_move__message_needaction
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__message_needaction
@@ -237,6 +238,7 @@ msgstr "Omaisuuden toteutumat"
 #. module: investment_portfolio
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__message_attachment_count
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__message_attachment_count
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_period__message_attachment_count
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__message_attachment_count
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_move__message_attachment_count
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__message_attachment_count
@@ -334,6 +336,7 @@ msgstr "Yritykset"
 #. module: investment_portfolio
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_realized__company_id
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__company_id
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_period__company_id
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__company_id
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_move__company_id
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__company_id
@@ -344,6 +347,7 @@ msgstr "Yritys"
 #. module: investment_portfolio
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_realized__currency_id
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__company_currency_id
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_period__company_currency_id
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__company_currency_id
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__company_currency_id
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_timeseries__company_currency_id
@@ -395,6 +399,7 @@ msgstr "Luo hinnat vaihtokurssien perusteella"
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_realized__create_uid
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_category__create_uid
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__create_uid
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_period__create_uid
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_portfolio__create_uid
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__create_uid
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_move__create_uid
@@ -409,6 +414,7 @@ msgstr "Lounut"
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_realized__create_date
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_category__create_date
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__create_date
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_period__create_date
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_portfolio__create_date
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__create_date
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_move__create_date
@@ -482,6 +488,7 @@ msgstr "Ero"
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_realized__display_name
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_category__display_name
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__display_name
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_period__display_name
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_portfolio__display_name
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__display_name
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_move__display_name
@@ -492,8 +499,19 @@ msgstr "Näyttönimi"
 
 #. module: investment_portfolio
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__domain
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_period__domain
 msgid "Domain"
 msgstr "Toimialue"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_period__end_date
+msgid "End Date"
+msgstr "Loppu pvm."
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_period__end_position
+msgid "End Position"
+msgstr "Positio jakson lopussa"
 
 #. module: investment_portfolio
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__exchange_rate
@@ -525,6 +543,7 @@ msgstr "Seuraa"
 #. module: investment_portfolio
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__message_follower_ids
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__message_follower_ids
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_period__message_follower_ids
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__message_follower_ids
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_move__message_follower_ids
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__message_follower_ids
@@ -534,6 +553,7 @@ msgstr "Seuraajat"
 #. module: investment_portfolio
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__message_partner_ids
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__message_partner_ids
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_period__message_partner_ids
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__message_partner_ids
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_move__message_partner_ids
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__message_partner_ids
@@ -581,6 +601,7 @@ msgstr "Ryhmittele"
 #. module: investment_portfolio
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__has_message
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__has_message
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_period__has_message
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__has_message
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_move__has_message
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__has_message
@@ -593,6 +614,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_realized__id
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_category__id
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__id
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_period__id
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_portfolio__id
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__id
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_move__id
@@ -616,6 +638,7 @@ msgstr ""
 #. module: investment_portfolio
 #: model:ir.model.fields,help:investment_portfolio.field_investment_asset__message_needaction
 #: model:ir.model.fields,help:investment_portfolio.field_investment_milestone__message_needaction
+#: model:ir.model.fields,help:investment_portfolio.field_investment_period__message_needaction
 #: model:ir.model.fields,help:investment_portfolio.field_investment_position__message_needaction
 #: model:ir.model.fields,help:investment_portfolio.field_investment_position_move__message_needaction
 #: model:ir.model.fields,help:investment_portfolio.field_investment_position_transaction__message_needaction
@@ -625,6 +648,7 @@ msgstr ""
 #. module: investment_portfolio
 #: model:ir.model.fields,help:investment_portfolio.field_investment_asset__message_has_error
 #: model:ir.model.fields,help:investment_portfolio.field_investment_milestone__message_has_error
+#: model:ir.model.fields,help:investment_portfolio.field_investment_period__message_has_error
 #: model:ir.model.fields,help:investment_portfolio.field_investment_position__message_has_error
 #: model:ir.model.fields,help:investment_portfolio.field_investment_position_move__message_has_error
 #: model:ir.model.fields,help:investment_portfolio.field_investment_position_transaction__message_has_error
@@ -689,6 +713,11 @@ msgid "Investment Milestone"
 msgstr "Sijoitus virstanpylväs"
 
 #. module: investment_portfolio
+#: model:ir.model,name:investment_portfolio.model_investment_period
+msgid "Investment Period"
+msgstr "Sijoitus ajanjakso"
+
+#. module: investment_portfolio
 #: model:ir.model,name:investment_portfolio.model_investment_portfolio
 msgid "Investment Portfolio"
 msgstr "Sijoitus salkku"
@@ -722,6 +751,7 @@ msgstr "On yrityksen valuutta"
 #. module: investment_portfolio
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__message_is_follower
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__message_is_follower
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_period__message_is_follower
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__message_is_follower
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_move__message_is_follower
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__message_is_follower
@@ -739,6 +769,7 @@ msgstr "On sunnuntai"
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_realized____last_update
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_category____last_update
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone____last_update
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_period____last_update
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_portfolio____last_update
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position____last_update
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_move____last_update
@@ -775,6 +806,7 @@ msgstr "Viimeisin hinta tietue"
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_realized__write_uid
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_category__write_uid
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__write_uid
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_period__write_uid
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_portfolio__write_uid
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__write_uid
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_move__write_uid
@@ -789,6 +821,7 @@ msgstr "Viimeksi muokannut"
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_realized__write_date
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_category__write_date
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__write_date
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_period__write_date
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_portfolio__write_date
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__write_date
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_move__write_date
@@ -829,6 +862,7 @@ msgstr "Pitkä"
 #. module: investment_portfolio
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__message_main_attachment_id
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__message_main_attachment_id
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_period__message_main_attachment_id
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__message_main_attachment_id
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_move__message_main_attachment_id
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__message_main_attachment_id
@@ -848,6 +882,7 @@ msgstr "Maksimi sijoitus"
 #. module: investment_portfolio
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__message_has_error
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__message_has_error
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_period__message_has_error
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__message_has_error
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_move__message_has_error
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__message_has_error
@@ -857,6 +892,7 @@ msgstr ""
 #. module: investment_portfolio
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__message_ids
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__message_ids
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_period__message_ids
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__message_ids
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_move__message_ids
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__message_ids
@@ -909,6 +945,7 @@ msgstr ""
 #. module: investment_portfolio
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_category__name
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__name
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_period__name
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_portfolio__name
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__name
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_move__name
@@ -957,7 +994,6 @@ msgstr "Ei tapahtumia"
 #. module: investment_portfolio
 #. odoo-python
 #: code:addons/investment_portfolio/models/investment_position_transaction.py:0
-#: code:addons/models/investment_position_transaction.py:0
 #, python-format
 msgid "No transactions selected!"
 msgstr "Tapahtumia ei ole valittu!"
@@ -975,6 +1011,7 @@ msgstr "Muistiinpanot"
 #. module: investment_portfolio
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__message_needaction_counter
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__message_needaction_counter
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_period__message_needaction_counter
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__message_needaction_counter
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_move__message_needaction_counter
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__message_needaction_counter
@@ -984,6 +1021,7 @@ msgstr ""
 #. module: investment_portfolio
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__message_has_error_counter
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__message_has_error_counter
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_period__message_has_error_counter
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__message_has_error_counter
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_move__message_has_error_counter
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__message_has_error_counter
@@ -993,6 +1031,7 @@ msgstr ""
 #. module: investment_portfolio
 #: model:ir.model.fields,help:investment_portfolio.field_investment_asset__message_needaction_counter
 #: model:ir.model.fields,help:investment_portfolio.field_investment_milestone__message_needaction_counter
+#: model:ir.model.fields,help:investment_portfolio.field_investment_period__message_needaction_counter
 #: model:ir.model.fields,help:investment_portfolio.field_investment_position__message_needaction_counter
 #: model:ir.model.fields,help:investment_portfolio.field_investment_position_move__message_needaction_counter
 #: model:ir.model.fields,help:investment_portfolio.field_investment_position_transaction__message_needaction_counter
@@ -1002,6 +1041,7 @@ msgstr ""
 #. module: investment_portfolio
 #: model:ir.model.fields,help:investment_portfolio.field_investment_asset__message_has_error_counter
 #: model:ir.model.fields,help:investment_portfolio.field_investment_milestone__message_has_error_counter
+#: model:ir.model.fields,help:investment_portfolio.field_investment_period__message_has_error_counter
 #: model:ir.model.fields,help:investment_portfolio.field_investment_position__message_has_error_counter
 #: model:ir.model.fields,help:investment_portfolio.field_investment_position_move__message_has_error_counter
 #: model:ir.model.fields,help:investment_portfolio.field_investment_position_transaction__message_has_error_counter
@@ -1189,6 +1229,7 @@ msgid "Prices"
 msgstr "Hinnat"
 
 #. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_period__profit
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__profit
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_move__profit
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__profit
@@ -1339,6 +1380,16 @@ msgid "Simulated"
 msgstr "Simuloitu"
 
 #. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_period__start_date
+msgid "Start Date"
+msgstr "Alku pvm."
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_period__start_position
+msgid "Start Position"
+msgstr "Positio jakson alussa"
+
+#. module: investment_portfolio
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__state
 msgid "State"
 msgstr "Tila"
@@ -1359,6 +1410,17 @@ msgid "Target Position"
 msgstr "Tavoite positio"
 
 #. module: investment_portfolio
+#: model:ir.model.fields,help:investment_portfolio.field_investment_period__annualized_irr
+msgid ""
+"The money-weighted rate of return (MWRR) is a measure of the performance of "
+"an investment. The MWRR is calculated by finding the rate of return that "
+"will set the present values (PV) of all cash flows equal to the value of the"
+" initial investment. The MWRR is equivalent to the internal rate of return "
+"(IRR). MWRR can be compared with the time-weighted return (TWR), which "
+"removes the effects of cash in- and outflows. "
+msgstr ""
+
+#. module: investment_portfolio
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__thesis
 #: model_terms:ir.ui.view,arch_db:investment_portfolio.position_form
 msgid "Thesis"
@@ -1370,7 +1432,6 @@ msgid "This timeseries already exists!"
 msgstr "Tämä aikasarja on jo olemassa!"
 
 #. module: investment_portfolio
-#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_realized__asset_id
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__asset_id
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__asset_id
 #: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_search
@@ -1460,7 +1521,6 @@ msgstr "Tapahtumat per kuukausi"
 #. module: investment_portfolio
 #. odoo-python
 #: code:addons/investment_portfolio/models/investment_position_transaction.py:0
-#: code:addons/models/investment_position_transaction.py:0
 #, python-format
 msgid "Trasaction '%s' already belongs to a different company!"
 msgstr "Tapahtuma '%s' kuuluu toiselle yritykselle!"
@@ -1468,7 +1528,6 @@ msgstr "Tapahtuma '%s' kuuluu toiselle yritykselle!"
 #. module: investment_portfolio
 #. odoo-python
 #: code:addons/investment_portfolio/models/investment_position_transaction.py:0
-#: code:addons/models/investment_position_transaction.py:0
 #, python-format
 msgid "Trasaction '%s' already has a move!"
 msgstr "Tapahtumalla '%s' on jo siirto!"
