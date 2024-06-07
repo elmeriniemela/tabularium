@@ -9,5 +9,6 @@ from . import investment_position
 from . import investment_category
 from . import investment_portfolio
 from . import investment_milestone
+from . import investment_period
 from . import investment_timeseries
 from . import res_company

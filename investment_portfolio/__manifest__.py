@@ -25,6 +25,7 @@
         'views/investment_portfolio.xml',
         'views/investment_category.xml',
         'views/investment_milestone.xml',
+        'views/investment_period.xml',
         'views/investment_asset_price.xml',
         'views/investment_asset_realized.xml',
         'views/investment_position_move.xml',

@@ -30,6 +30,7 @@
             <menuitem id="menu_portfolios" action="action_portfolios" sequence="20"/>
             <menuitem id="menu_prices" action="action_prices" sequence="30"/>
             <menuitem id="menu_milestones" action="action_milestones" sequence="50"/>
+            <menuitem id="menu_periods" action="action_periods" sequence="50"/>
             <menuitem id="menu_currencies" action="base.action_currency_form" sequence="60"/>
         </menuitem>
 
