@@ -2,14 +2,28 @@
 <odoo>
     <record id="investment_portfolio.investment_asset_8" model="investment.asset">
         <field name="category_id" ref="investment_portfolio.category_crypto"/>
-        <field name="portfolio_id" ref="investment_portfolio.liquid_portfolio"/>
         <field name="currency_id" ref="base.EUR"/>
         <field name="ticker">BTC-EUR</field>
     </record>
     <record id="investment_portfolio.investment_asset_16" model="investment.asset">
         <field name="category_id" ref="investment_portfolio.category_stocks"/>
-        <field name="portfolio_id" ref="investment_portfolio.liquid_portfolio"/>
         <field name="currency_id" ref="base.EUR"/>
         <field name="ticker">SXR8.DE</field>
+    </record>
+
+
+    <record id="investment_portfolio.investment_position_8" model="investment.position">
+        <field name="asset_id" ref="investment_portfolio.investment_asset_8"/>
+        <field name="portfolio_id" ref="investment_portfolio.liquid_portfolio"/>
+        <field name="name">Bitcoin</field>
+        <field name="sequence" eval="False"/>
+        <field name="follow" eval="True"/>
+    </record>
+    <record id="investment_portfolio.investment_position_16" model="investment.position">
+        <field name="asset_id" ref="investment_portfolio.investment_asset_16"/>
+        <field name="portfolio_id" ref="investment_portfolio.liquid_portfolio"/>
+        <field name="name">iShares S&amp;P 500 UCITS ETF USD (Acc)</field>
+        <field name="sequence" eval="1"/>
+        <field name="follow" eval="True"/>
     </record>
 </odoo>

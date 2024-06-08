@@ -1,4 +1,4 @@
-"id","asset_id","time","payment","quantity","exchange_rate","fee"
+"id","position_id","time","payment","quantity","exchange_rate","fee"
 "investment_position_transaction_633_6fda3424","Bitcoin","2024-02-05 02:59:03","2000.0","0.05037537","39503.43193509","10.0"
 "investment_position_transaction_117_24e56ff8","iShares S&P 500 UCITS ETF USD (Acc)","2024-02-04 03:00:00","1000.0","2.05581859","481.5599999","10.0"
 "investment_position_transaction_634_3be61aed","Bitcoin","2024-01-29 02:58:03","2000.0","0.05133902","38761.93974875","10.0"
