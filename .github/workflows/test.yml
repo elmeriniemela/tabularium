@@ -35,11 +35,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - container: ghcr.io/oca/oca-ci/py3.10-odoo16.0:latest
+          - container: ghcr.io/elmeriniemela/odoo-ci:16.0
             name: test with Odoo
-          - container: ghcr.io/oca/oca-ci/py3.10-ocb16.0:latest
-            name: test with OCB
-            makepot: "true"
     services:
       postgres:
         image: postgres:12.0
