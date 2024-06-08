@@ -109,8 +109,8 @@ def find(patterns, text):
 
 amount_str = find(
     patterns=[
-        {'pattern': 'Maksettu([\d\.,]+)', 'index':0},
-        {'pattern': 'Maksettu EUR ([\d\ ]+,\d\d)', 'index': 1},
+        {'pattern': r'Maksettu([\d\.,]+)', 'index':0},
+        {'pattern': r'Maksettu EUR ([\d\ ]+,\d\d)', 'index': 1},
     ],
     text=text,
 ).replace(',', '.').replace(' ', '')
@@ -118,8 +118,8 @@ amount_str = find(
 
 date_str = find(
     patterns=[
-        {'pattern': 'MAKSUPÄIVÄ([\d\.,]+)', 'index': 0},
-        {'pattern': 'Palkkakausi([\d\.]+)', 'index': 0},
+        {'pattern': r'MAKSUPÄIVÄ([\d\.,]+)', 'index': 0},
+        {'pattern': r'Palkkakausi([\d\.]+)', 'index': 0},
     ],
     text=text,
 )
@@ -153,7 +153,7 @@ Category = self.env['cashflow.category']
 for i, line in enumerate(lines):
     if not year and len(line) == 1:
         [token] = line
-        year_list = re.findall('Ajalta \d\d\.\d\d\.(\d\d\d\d)', token)
+        year_list = re.findall(r'Ajalta \d\d\.\d\d\.(\d\d\d\d)', token)
         if year_list:
             [year] = year_list
         else:
