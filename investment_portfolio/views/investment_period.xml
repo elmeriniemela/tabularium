@@ -53,6 +53,7 @@
                                 <field name="company_id"/>
                                 <field name="company_currency_id" invisible="1"/>
                                 <field name="domain" widget="domain" options="{'model': 'investment.position'}"/>
+                                <field name="debug_xirr"/>
                             </group>
                         </page>
                     </notebook>

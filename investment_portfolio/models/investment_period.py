@@ -47,6 +47,7 @@ class InvestmentPeriod(models.Model):
             "MWRR can be compared with the time-weighted return (TWR), which removes the effects of cash in- and outflows. "
         )
     )
+    debug_xirr = fields.Text(compute='_compute_period')
 
     def action_view_timeseries(self):
         return {
@@ -102,9 +103,9 @@ class InvestmentPeriod(models.Model):
 
 
                 values.append(-start_series.position)
-                dates.append(start_series.date or start_date)
+                dates.append(start_date)
 
-                transactions = (end_series.transaction_ids - start_series.transaction_ids)
+                transactions = (end_series.transaction_ids - start_series.transaction_ids).filtered(lambda t: t.usage == 'record')
 
                 for trans in transactions:
                     sign = 1
@@ -118,11 +119,11 @@ class InvestmentPeriod(models.Model):
                         sign = -1
 
 
-                    values.append(sign* abs(trans.payment))
+                    values.append(sign * abs(trans.payment))
                     dates.append(trans.time.date())
 
                 values.append(end_series.position)
-                dates.append(end_series.date or end_date)
+                dates.append(end_date)
 
             annualized_irr = 0
             if values:
@@ -133,6 +134,7 @@ class InvestmentPeriod(models.Model):
 
             record.annualized_irr = annualized_irr
             record.count_timeseries = len(record.timeseries_ids)
+            record.debug_xirr = f'{dates=}\n{values=}'
 
 
 
