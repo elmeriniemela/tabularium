@@ -28,6 +28,7 @@
         'views/investment_period.xml',
         'views/investment_asset_price.xml',
         'views/investment_asset_realized.xml',
+        'views/investment_asset_split.xml',
         'views/investment_position_move.xml',
         'views/investment_position_transaction.xml',
         'views/investment_asset.xml',

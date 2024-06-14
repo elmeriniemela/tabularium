@@ -6,6 +6,7 @@
             <tree editable="top" default_order="time desc" expand="1">
                 <field name="time"/>
                 <field name="price"/>
+                <field name="price_adjusted" optional="hide"/>
                 <field name="prediction" optional="hide"/>
                 <field name="currency_id" optional="show"/>
                 <field name="asset_id" optional="hide"/>

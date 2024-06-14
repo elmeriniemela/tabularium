@@ -73,6 +73,19 @@
                             <field name="ten_year_price" widget="percentage" decoration-danger="ten_year_price &lt; 0" decoration-success="ten_year_price &gt; 0"/>
                         </group>
                     </group>
+                    <notebook>
+                        <page string="Splits">
+                            <field name="split_ids">
+                                <tree editable="top">
+                                    <field name="asset_id" optional="hide"/>
+                                    <field name="price_id" optional="show" domain="[('asset_id', '=', parent.id)]"/>
+                                    <field name="time" optional="show"/>
+                                    <field name="factor" optional="show"/>
+                                </tree>
+                            </field>
+
+                        </page>
+                    </notebook>
                 </sheet>
                 <div class="o_attachment_preview"/>
                 <div class="oe_chatter">

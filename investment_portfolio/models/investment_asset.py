@@ -48,6 +48,11 @@ class InvestmentAsset(models.Model):
         domain=[('prediction', '=', False)],
     )
 
+    split_ids = fields.One2many(
+        comodel_name='investment.asset.split',
+        inverse_name='asset_id',
+    )
+
     owner_ids = fields.Many2many(
         comodel_name='res.users',
         default=lambda self: self.env.user,
@@ -176,7 +181,7 @@ class InvestmentAsset(models.Model):
                     ('prediction', '=', False),
                 ], limit=1, order='time asc') # oldest possible.
 
-            closing_price = closing_price_id.price or 0.0
+            closing_price = closing_price_id.price_adjusted or 0.0
             return (market_price-closing_price)/closing_price if closing_price else 0.0
 
 

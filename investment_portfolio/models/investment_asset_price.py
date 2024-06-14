@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoo import models, fields, _
+from odoo import api, models, fields, _
 from dateutil.relativedelta import relativedelta
 
 
@@ -20,6 +20,8 @@ class InvestmentAssetPrice(models.Model):
     currency_id = fields.Many2one(related='asset_id.currency_id')
 
     price = fields.Monetary(required=True, group_operator='avg')
+    price_adjusted = fields.Monetary(group_operator='avg', compute='_compute_price_adjusted')
+
 
     time = fields.Datetime(required=True, default=fields.Datetime.now)
 
@@ -35,6 +37,15 @@ class InvestmentAssetPrice(models.Model):
     _sql_constraints = [
         ('unique_price', 'unique(asset_id, time)', 'Price for this time is already configured!'),
     ]
+
+    @api.depends('asset_id.split_ids', 'asset_id.split_ids.factor')
+    def _compute_price_adjusted(self):
+        for rec in self:
+            splits = rec.asset_id.split_ids
+            adjusted = rec.price
+            for s in splits.filtered(lambda s: rec.time < s.time):
+                adjusted = rec.price / s.factor
+            rec.price_adjusted = adjusted
 
 
     def interpolate_cagr(self):

@@ -1,0 +1,53 @@
+<odoo>
+    <record id="asset_split_tree" model="ir.ui.view">
+        <field name="name">investment.asset.split.tree</field>
+        <field name="model">investment.asset.split</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="asset_id" optional="hide"/>
+                <field name="price_id" optional="show"/>
+                <field name="time" optional="show"/>
+                <field name="factor" optional="show"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="asset_split_form" model="ir.ui.view">
+        <field name="name">investment.asset.split.form</field>
+        <field name="model">investment.asset.split</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="asset_id"/>
+                            <field name="price_id"/>
+                        </group>
+                        <group>
+                            <field name="time"/>
+                            <field name="factor"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="asset_split_search" model="ir.ui.view">
+        <field name="name">investment.asset.split.search</field>
+        <field name="model">investment.asset.split</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="asset_id"/>
+            </search>
+        </field>
+    </record>
+
+
+    <record id="action_asset_splits" model="ir.actions.act_window">
+        <field name="name">Splits</field>
+        <field name="res_model">investment.asset.split</field>
+        <field name="view_mode">tree,form,graph</field>
+    </record>
+
+</odoo>

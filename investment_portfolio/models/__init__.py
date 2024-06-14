@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from . import investment_asset_price
+from . import investment_asset_split
 from . import investment_asset_realized
 from . import investment_position_move
 from . import investment_position_transaction
