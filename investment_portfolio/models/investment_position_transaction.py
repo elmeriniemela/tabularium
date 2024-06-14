@@ -2,6 +2,7 @@
 
 from odoo import api, models, fields, Command, _
 from odoo.exceptions import ValidationError
+from odoo.tools import float_is_zero, float_compare
 import logging
 
 
@@ -90,6 +91,7 @@ class InvestmentPositionTransaction(models.Model):
             ('sell', 'Sell'),
             ('yield', 'Yield'),
             ('cost', 'Cost'),
+            ('split', 'Split'),
         ],
         string='Type',
         compute='_compute_report',
@@ -193,6 +195,9 @@ class InvestmentPositionTransaction(models.Model):
                 if record.payment > 0:
                     record.ttype = 'buy'
                     record.cash_flow = record.payment
+                elif float_is_zero(record.payment, precision_digits=record.company_currency_id.decimal_places):
+                    record.ttype = 'split'
+                    record.cash_flow = 0.0
                 else:
                     record.ttype = False
                     record.cash_flow = False
