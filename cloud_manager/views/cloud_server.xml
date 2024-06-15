@@ -51,6 +51,9 @@
                         <page string="Instances">
                             <field name="instance_ids"/>
                         </page>
+                        <page string="Modules">
+                            <field name="module_ids"/>
+                        </page>
                         <page string="SSL Renewal">
                             <button name="action_ping_ssl_renewal" type="object" string="Ping SSL renewal"/>
                             <group>

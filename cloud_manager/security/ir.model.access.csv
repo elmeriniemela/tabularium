@@ -6,3 +6,4 @@ access_cloud_restore,access_cloud_restore.cloud_restore,model_cloud_restore,base
 access_dns_zone,access_dns_zone.dns_zone,model_dns_zone,base.group_system,1,1,1,1
 access_dns_zone_record,access_dns_zone_record.dns_zone_record,model_dns_zone_record,base.group_system,1,1,1,1
 access_cloud_server_diff,access_cloud_server_diff.cloud_server_diff,model_cloud_server_diff,base.group_system,1,1,1,1
+access_cloud_server_module,access_cloud_server_module.cloud_server_module,model_cloud_server_module,base.group_system,1,1,1,1

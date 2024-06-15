@@ -60,6 +60,11 @@ class CloudServer(models.Model):
         inverse_name='server_id',
     )
 
+    module_ids = fields.One2many(
+        comodel_name='cloud.server.module',
+        inverse_name='server_id',
+    )
+
     diff_ids = fields.One2many(
         comodel_name='cloud.server.diff',
         inverse_name='server_id',
