@@ -136,7 +136,11 @@ class CloudServer(models.Model):
 
     def parse_status(self, obj):
         self.ensure_one()
+        self.commit = obj['agent']['commit']
+        self.parse_instances(obj)
+        self.parse_modules(obj)
 
+    def parse_instances(self, obj):
         def docker_vals(container):
             vals = {}
             ports = {p['PublicPort'] for p in container["Ports"]}
@@ -154,9 +158,6 @@ class CloudServer(models.Model):
             vals['restarted'] = dateutil.parser.isoparse(container['inspect']['State']['StartedAt']).replace(tzinfo=None)
             return vals
 
-
-
-        self.commit = obj['agent']['commit']
 
         all_insts = self.instance_ids
 
@@ -181,4 +182,32 @@ class CloudServer(models.Model):
             found += inst
 
         (all_insts - found).write({'state': 'removed'})
+
+    def parse_modules(self, obj):
+
+        all_modules = self.with_context(active_test=False).module_ids
+        existing_mods = {m.name: m for m in all_modules}
+
+        found_mods = all_modules.browse()
+        for mod in obj['modules']:
+            vals = {
+                'server_id': self.id,
+                'name': mod['name'],
+                'directory': mod['directory'],
+                'commit': mod['commit'],
+                'url': mod['url'],
+                'branch': mod['branch'],
+                'active': True,
+            }
+
+            module = existing_mods.get(vals['name']) or all_modules.browse()
+            if module:
+                module.write(vals)
+            else:
+                module = module.create(vals)
+            found_mods += module
+
+        (all_modules - found_mods).active = False
+
+
 

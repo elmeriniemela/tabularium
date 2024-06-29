@@ -13,12 +13,17 @@ class CloudServerModule(models.Model):
     _inherit = ['mail.thread']
     _order = 'id desc'
 
+    active = fields.Boolean(
+        tracking=True,
+    )
+
     server_id = fields.Many2one(
         string="Server",
         comodel_name='cloud.server',
         required=True,
         index=True,
         ondelete='cascade',
+        tracking=True,
     )
 
 
