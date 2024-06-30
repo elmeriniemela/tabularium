@@ -3,7 +3,7 @@
         <field name="name">cashflow.entry.tree</field>
         <field name="model">cashflow.entry</field>
         <field name="arch" type="xml">
-            <tree default_order="date desc">
+            <tree default_order="date desc" multi_edit="1">
                 <field name="name" optional="show"/>
                 <field name="date"  optional="show"/>
                 <field name="amount"  optional="show" sum="Total"/>
