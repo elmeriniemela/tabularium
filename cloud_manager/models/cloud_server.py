@@ -190,16 +190,17 @@ class CloudServer(models.Model):
 
         found_mods = all_modules.browse()
         for mod in obj['modules']:
+            name = mod['name']
             vals = {
                 'server_id': self.id,
-                'module_id': (Module.search([('name', '=', mod['name'])]) or Module.create({'name': mod['name']})).id,
+                'module_id': (Module.search([('name', '=', name)]) or Module.create({'name': name})).id,
                 'commit': mod['commit'],
                 'url': mod['url'],
                 'branch': mod['branch'],
                 'active': True,
             }
 
-            module = existing_mods.get(vals['name']) or all_modules.browse()
+            module = existing_mods.get(name) or all_modules.browse()
             if module:
                 module.write(vals)
             else:
