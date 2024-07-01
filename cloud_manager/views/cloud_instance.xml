@@ -6,6 +6,7 @@
             <tree decoration-warning="restart_requested != False" decoration-muted="state == 'removed'" decoration-info="state in ('draft', 'created')" decoration-danger="state in ('exited', 'dead')">
                 <field name="name" optional="show"/>
                 <field name="server_id" optional="show"/>
+                <field name="module_ids" widget="many2many_tags" optional="show"/>
                 <field name="uid" optional="show"/>
                 <field name="http_port" optional="show"/>
                 <field name="gevent_port" optional="show"/>
@@ -44,6 +45,7 @@
                             <field name="server_id"/>
                             <field name="http_port" required="0" attrs="{'invisible': [('http_port', '=', 0)]}"/>
                             <field name="protected" widget="boolean_toggle"/>
+                            <field name="module_ids" widget="many2many_tags"/>
                         </group>
                         <group>
                             <field name="uid" required="0" attrs="{'invisible': [('uid', '=', False)]}"/>

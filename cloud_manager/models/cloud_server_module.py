@@ -15,6 +15,7 @@ class CloudServerModule(models.Model):
 
     active = fields.Boolean(
         tracking=True,
+        default=True,
     )
 
     server_id = fields.Many2one(
@@ -26,14 +27,14 @@ class CloudServerModule(models.Model):
         tracking=True,
     )
 
+    name = fields.Char(related='module_id.name')
 
-    name = fields.Char(
+    module_id = fields.Many2one(
+        string="Module",
+        comodel_name='cloud.module',
         required=True,
-        tracking=True,
-    )
-
-    directory = fields.Char(
-        required=True,
+        index=True,
+        ondelete='restrict',
         tracking=True,
     )
 
@@ -51,6 +52,10 @@ class CloudServerModule(models.Model):
         required=True,
         tracking=True,
     )
+
+    _sql_constraints = [
+        ('uniq_mod', 'UNIQUE(server_id, module_id)', 'The server already has this module!'),
+    ]
 
     def action_update_server(self):
         pass

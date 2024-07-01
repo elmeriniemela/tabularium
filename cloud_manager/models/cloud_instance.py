@@ -95,6 +95,14 @@ class CloudInstance(models.Model):
         readonly=True,
     )
 
+    module_ids = fields.Many2many(
+        comodel_name='cloud.server.module',
+        domain="[('server_id', '=', server_id)]",
+        compute='_compute_module_ids',
+        store=True,
+        readonly=False,
+    )
+
     _sql_constraints = [
         ('uniq_uid', 'UNIQUE(uid)', 'The instance uid must be unique!'),
         ('even_http_port', 'CHECK(http_port % 2 = 0)', 'The HTTP port must be even!'),
@@ -102,6 +110,11 @@ class CloudInstance(models.Model):
         ('uniq_http_port', 'UNIQUE(server_id, http_port)', 'The HTTP port must be unique within the same server!'),
         ('uniq_gevent_port', 'UNIQUE(server_id, gevent_port)', 'The Gevent port must be unique within the same server!'),
     ]
+
+    @api.depends('server_id', 'config')
+    def _compute_module_ids(self):
+        for record in self:
+            record.module_ids = record.server_id.module_ids
 
     @api.depends('restarted')
     def _compute_restart_requested(self):
@@ -168,7 +181,7 @@ class CloudInstance(models.Model):
 
     def action_deploy(self):
         self.ensure_one()
-        self.config = self._irpc(method='create', args=(self.uid, self.name, self.http_port, self.gevent_port))
+        self.config = self._irpc(method='create', args=(self.uid, self.name, self.http_port, self.gevent_port, self.module_ids.mapped('name')))
         self.state = 'running'
 
     def action_rebuild(self):

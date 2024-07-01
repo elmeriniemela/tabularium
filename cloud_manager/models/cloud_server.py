@@ -184,7 +184,7 @@ class CloudServer(models.Model):
         (all_insts - found).write({'state': 'removed'})
 
     def parse_modules(self, obj):
-
+        Module = self.env['cloud.module']
         all_modules = self.with_context(active_test=False).module_ids
         existing_mods = {m.name: m for m in all_modules}
 
@@ -192,8 +192,7 @@ class CloudServer(models.Model):
         for mod in obj['modules']:
             vals = {
                 'server_id': self.id,
-                'name': mod['name'],
-                'directory': mod['directory'],
+                'module_id': (Module.search([('name', '=', mod['name'])]) or Module.create({'name': mod['name']})).id,
                 'commit': mod['commit'],
                 'url': mod['url'],
                 'branch': mod['branch'],
