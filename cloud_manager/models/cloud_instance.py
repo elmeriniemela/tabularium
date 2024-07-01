@@ -118,7 +118,7 @@ class CloudInstance(models.Model):
             if record.config:
                 parser = ConfigParser.RawConfigParser()
                 try:
-                    parser.read_string(self.config)
+                    parser.read_string(record.config)
                 except Exception as error:
                     _logger.exception(error)
                     continue
