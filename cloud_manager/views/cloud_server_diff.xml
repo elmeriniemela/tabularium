@@ -19,6 +19,7 @@
                     <button name="action_update_server" string="Update Server" type="object" attrs="{'invisible': [('allow_update', '=', False)]}"/>
                 </header>
                 <field name="server_id" invisible="1"/>
+                <field name="module_id" invisible="1"/>
                 <field name="allow_update" invisible="1"/>
                 <group>
                     <field name="name"/>
@@ -41,6 +42,7 @@
             <search>
                 <field name="name"/>
                 <field name="server_id"/>
+                <field name="module_id" optional="hide"/>
                 <field name="diff"/>
                 <group expand="1" string="Group by">
                     <filter string="Server" name="group_server_id" context="{'group_by': 'server_id'}"/>

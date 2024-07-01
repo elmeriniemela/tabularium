@@ -53,6 +53,12 @@ class CloudServerModule(models.Model):
         tracking=True,
     )
 
+    diff_ids = fields.One2many(
+        comodel_name='cloud.server.diff',
+        inverse_name='module_id',
+    )
+
+
     _sql_constraints = [
         ('uniq_mod', 'UNIQUE(server_id, module_id)', 'The server already has this module!'),
     ]

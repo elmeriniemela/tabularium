@@ -29,6 +29,13 @@ class CloudServerDiff(models.Model):
         ondelete='cascade',
     )
 
+    module_id = fields.Many2one(
+        string="Module",
+        comodel_name='cloud.server.module',
+        index=True,
+        ondelete='cascade',
+    )
+
     allow_update = fields.Boolean(
         compute='_compute_allow_update'
     )
@@ -38,24 +45,29 @@ class CloudServerDiff(models.Model):
     @api.depends('diff', 'update_done')
     def _compute_allow_update(self):
         for record in self:
-            s = record.server_id
+            r = record.module_id or record.server_id
             conditions = [
                 not record.update_done, # Allowed only once.
                 bool(record.diff), # Diff required.
-                record == s.diff_ids[:1], # The latest diff for the server.
-                record.name.endswith(s.branch.strip()), # should compare to selected checkout/branch.
+                record == r.diff_ids[:1], # The latest diff for the server/module.
+                record.name.endswith(r.branch.strip()), # should compare to selected checkout/branch.
             ]
             record.allow_update = all(conditions)
 
     @api.depends('server_id')
     def _compute_name(self):
         for record in self:
-            s = record.server_id
-            record.name = record.name or f'{s.commit.strip()}...origin/{s.branch.strip()}'
+            r = record.module_id or record.server_id
+            record.name = record.name or f'{r.commit.strip()}...origin/{r.branch.strip()}'
 
     def action_fetch_diff(self):
         s = self.server_id
-        self.diff = s._rpc(method='agent_diff', args=(self.name.strip(),))
+        if self.module_id:
+            kwargs = dict(method='module_diff', args=(self.module_id.name, self.name.strip()))
+        else:
+            kwargs = dict(method='agent_diff', args=(self.name.strip(),))
+
+        self.diff = s._rpc(**kwargs)
         if not self.diff:
             raise ValidationError(_("No changes."))
 
