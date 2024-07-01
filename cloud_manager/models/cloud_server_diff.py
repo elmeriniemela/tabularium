@@ -85,7 +85,13 @@ class CloudServerDiff(models.Model):
         if not self.allow_update:
             raise ValidationError(_("Not allowed to update from this diff."))
         s = self.server_id
-        s.instance_ids.filtered(lambda i: i.state in ['running', 'paused']).restart_requested = fields.Datetime.now()
-        s.commit = s._rpc(method='agent_pull', args=(s.branch,))
-        s.action_agent_restart()
+        m = self.module_id
+        if m:
+            f = lambda i: i.state in ['running', 'paused'] and m in i.module_ids
+            s.instance_ids.filtered(f).restart_requested = fields.Datetime.now()
+            m.commit = s._rpc(method='module_pull', args=(m.name, m.branch,))
+        else:
+            s.commit = s._rpc(method='agent_pull', args=(s.branch,))
+            s.action_agent_restart()
+
         self.update_done = True

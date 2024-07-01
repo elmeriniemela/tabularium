@@ -63,6 +63,3 @@ class CloudServerModule(models.Model):
         ('uniq_mod', 'UNIQUE(server_id, module_id)', 'The server already has this module!'),
     ]
 
-    def action_update_server(self):
-        pass
-
