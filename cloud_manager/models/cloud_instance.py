@@ -2,9 +2,10 @@
 
 import logging
 import secrets
-import threading
-from odoo import models, api, fields, exceptions, registry, _
+import os
+from odoo import models, api, fields, exceptions, _
 from odoo.exceptions import ValidationError
+import configparser as ConfigParser
 
 _logger = logging.getLogger(__name__)
 
@@ -114,7 +115,17 @@ class CloudInstance(models.Model):
     @api.depends('server_id', 'config')
     def _compute_module_ids(self):
         for record in self:
-            record.module_ids = record.server_id.module_ids
+            if record.config:
+                parser = ConfigParser.RawConfigParser()
+                try:
+                    parser.read_string(self.config)
+                except Exception as error:
+                    _logger.exception(error)
+                    continue
+                module_names = [os.path.basename(p.strip()) for p in parser.get('options', 'addons_path', fallback='').split(',')]
+                record.module_ids = record.server_id.module_ids.filtered(lambda m: m.name in module_names)
+            else:
+                record.module_ids = record.module_ids or record.server_id.module_ids
 
     @api.depends('restarted')
     def _compute_restart_requested(self):
