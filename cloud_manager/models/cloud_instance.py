@@ -123,6 +123,7 @@ class CloudInstance(models.Model):
                     _logger.exception(error)
                     continue
                 module_names = [os.path.basename(p.strip()) for p in parser.get('options', 'addons_path', fallback='').split(',')]
+                module_names.append('odoo')
                 record.module_ids = record.server_id.module_ids.filtered(lambda m: m.name in module_names)
             else:
                 record.module_ids = record.module_ids or record.server_id.module_ids
