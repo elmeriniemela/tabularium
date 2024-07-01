@@ -97,11 +97,20 @@ class CloudInstance(models.Model):
     )
 
     module_ids = fields.Many2many(
+        string="Modules",
         comodel_name='cloud.server.module',
         domain="[('server_id', '=', server_id)]",
         compute='_compute_module_ids',
         store=True,
         readonly=False,
+        required=True,
+    )
+
+    dns_record_ids = fields.One2many(
+        string="DNS Records",
+        comodel_name='dns.zone.record',
+        inverse_name='instance_id',
+        required=True,
     )
 
     _sql_constraints = [

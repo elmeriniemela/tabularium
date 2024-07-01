@@ -91,6 +91,12 @@ class DnsZoneRecord(models.Model):
         tracking=True,
     )
 
+    instance_id = fields.Many2one(
+        comodel_name='cloud.instance',
+        tracking=True,
+        ondelete='set null',
+    )
+
     content = fields.Char(
         required=True,
         tracking=True,
