@@ -164,7 +164,8 @@ class DnsZoneRecord(models.Model):
         return records
 
     def unlink(self):
-        self.cloudflare_delete()
+        if not self.env.context.get('fetching'):
+            self.cloudflare_delete()
         return super().unlink()
 
     def cloudflare_update(self):
