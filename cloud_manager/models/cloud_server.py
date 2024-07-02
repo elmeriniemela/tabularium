@@ -35,6 +35,12 @@ class CloudServer(models.Model):
         default='127.0.0.1',
     )
 
+    cname = fields.Char(
+        required=True,
+        tracking=True,
+        default='localhost',
+    )
+
     ipv6_address = fields.Char(
         required=True,
         tracking=True,

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="dns_zonerecord_list" model="ir.ui.view">
+        <field name="model">dns.zone.record</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="zone_id" optional="hide"/>
+                <field name="rtype" optional="show"/>
+                <field name="name"/>
+                <field name="content" optional="show"/>
+                <field name="proxied" widget="boolean_toggle" optional="show"/>
+                <field name="readonly" widget="boolean_toggle" optional="show"/>
+                <field name="ttl" optional="show"/>
+                <field name="identifier" optional="hide"/>
+                <field name="sequence" optional="hide"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="dns_zone_record_form" model="ir.ui.view">
+        <field name="model">dns.zone.record</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="zone_id" required="0"/>
+                            <field name="rtype"/>
+                            <field name="content"/>
+                            <field name="identifier"/>
+                        </group>
+                        <group>
+                            <field name="ttl"/>
+                            <field name="proxied"/>
+                            <field name="readonly"/>
+                            <field name="sequence"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="o_attachment_preview"/>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="dns_zone_record_search" model="ir.ui.view">
+        <field name="model">dns.zone.record</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="identifier"/>
+                <group expand="1" string="Group by">
+                    <filter string="Create Date" name="group_create_date" context="{'group_by': 'create_date:year'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+
+    <record id="dns_zone_record_action" model="ir.actions.act_window">
+        <field name="name">DNS Zone Records</field>
+        <field name="res_model">dns.zone.record</field>
+        <field name="view_mode">tree,kanban,form</field>
+    </record>
+
+</odoo>

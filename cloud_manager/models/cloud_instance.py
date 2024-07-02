@@ -90,6 +90,8 @@ class CloudInstance(models.Model):
         ondelete='restrict',
     )
 
+    cname = fields.Char(related="server_id.cname")
+
     backup_ids = fields.One2many(
         comodel_name='cloud.backup',
         inverse_name='instance_id',
@@ -167,6 +169,7 @@ class CloudInstance(models.Model):
             'upgrade',
             'fshealth',
             'self_upgrade',
+            'sync_urls',
         ]
         if self.is_self and method not in is_self_allowed:
             raise exceptions.ValidationError(_("This action can't be performed on self."))
@@ -202,7 +205,7 @@ class CloudInstance(models.Model):
 
     def action_deploy(self):
         self.ensure_one()
-        self.config = self._irpc(method='create', args=(self.uid, self.name, self.http_port, self.gevent_port, self.module_ids.mapped('name')))
+        self.config = self._irpc(method='create', args=(self.uid, self.dns_record_ids[:1].name, self.http_port, self.gevent_port, self.module_ids.mapped('name')))
         self.state = 'running'
 
     def action_rebuild(self):
@@ -213,7 +216,7 @@ class CloudInstance(models.Model):
 
     def action_remove(self):
         self.ensure_one()
-        self._irpc(method='remove', args=(self.uid, self.name))
+        self._irpc(method='remove', args=(self.uid, self.dns_record_ids[:1].name))
         self.state = 'removed'
 
     def action_stop(self):
@@ -273,6 +276,19 @@ class CloudInstance(models.Model):
         self.ensure_one()
         self._irpc(method='config', args=(self.uid, self.config))
         self.message_post(body="Config updated.")
+
+    def action_sync_urls(self):
+        self.ensure_one()
+
+        for rec in self.dns_record_ids:
+            if rec.rtype != 'CNAME' or rec.content != self.server_id.cname:
+                rec.write({
+                    'rtype': 'CNAME',
+                    'content': self.server_id.cname,
+                })
+
+        self._irpc(method='sync_urls', args=(self.uid, self.dns_record_ids.mapped('name'), self.http_port, self.gevent_port))
+
 
     def parse_callback(self, vals):
         self.ensure_one()

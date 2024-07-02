@@ -38,6 +38,7 @@
                     <group>
                         <group>
                             <field name="endpoint_id"/>
+                            <field name="cname"/>
                             <field name="ipv4_address"/>
                             <field name="ipv6_address"/>
                         </group>
