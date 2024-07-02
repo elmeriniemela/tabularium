@@ -42,6 +42,7 @@
                                     <field name="readonly" widget="boolean_toggle" optional="show"/>
                                     <field name="ttl" optional="show"/>
                                     <field name="identifier" optional="hide"/>
+                                    <field name="sequence" optional="hide"/>
                                 </tree>
                             </field>
                         </page>

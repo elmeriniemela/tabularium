@@ -25,15 +25,15 @@
                     <field name="state" widget="statusbar" statusbar_visible="created,running,exited,removed" options="{'clickable': '1'}"/>
                     <button name="action_deploy" type="object" string="Deploy" states="draft,removed"/>
                     <button name="action_start" type="object" string="Start"  states="exited"/>
-                    <button name="action_restart" type="object" string="Restart" states="running"/>
-                    <button name="action_upgrade" type="object" string="Upgrade" states="running"/>
-                    <button name="action_rebuild" type="object" string="Rebuild" states="exited"/>
-                    <button name="action_restore" type="object" string="Restore" states="exited"/>
-                    <button name="action_config" type="object" string="Config" states="running,exited,paused" confirm="Are you sure you want to overwrite the config on this instance?"/>
+                    <button name="action_restart" type="object" string="Restart" states="running" help="Restart the Odoo process."/>
+                    <button name="action_upgrade" type="object" string="Upgrade" states="running" help="This will upgrade all the modules where the manifest version number has increased compared to the database."/>
+                    <button name="action_rebuild" type="object" string="Rebuild" states="exited" help="The runtime environment will be dropped and recreated, but the database will stay intact."/>
+                    <button name="action_restore" type="object" string="Restore" states="exited" help="Restore from backup file"/>
+                    <button name="action_config" type="object" string="Config" states="running,exited,paused" confirm="Are you sure you want to overwrite the config on this instance?" help="This will overwrite the Odoo config on the server"/>
                     <button name="action_stop" type="object" string="Stop" states="running,restarting,paused"/>
                     <button name="action_backup" type="object" string="Backup" states="running,restarting,paused"/>
-                    <button name="action_reset" type="object" string="Reset" states="exited" confirm="Are you sure you want to RESET this instance?"/>
-                    <button name="action_remove" type="object" string="Remove" states="exited,dead" confirm="Are you sure you want to REMOVE this instance?"/>
+                    <button name="action_reset" type="object" string="Reset" states="exited" confirm="Are you sure you want to RESET this instance? The database will be dropped and an empty one will created." help="The database will be dropped and an empty one will created."/>
+                    <button name="action_remove" type="object" string="Remove" states="exited,dead" confirm="Are you sure you want to REMOVE this instance? This will delete everything related to the instance from the server including the database and all the configurations." help="his will delete everything related to the instance from the server including the database and all the configurations."/>
                 </header>
                 <sheet>
                     <div class="oe_title">
