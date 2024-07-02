@@ -287,7 +287,7 @@ class CloudInstance(models.Model):
                     'content': self.server_id.cname,
                 })
 
-        self._irpc(method='sync_urls', args=(self.uid, self.dns_record_ids.mapped('name'), self.http_port, self.gevent_port))
+        self._irpc(method='sync_urls', args=(self.dns_record_ids.mapped('name'), self.http_port, self.gevent_port))
 
 
     def parse_callback(self, vals):
