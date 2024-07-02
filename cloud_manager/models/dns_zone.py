@@ -69,7 +69,7 @@ class DnsZone(models.Model):
             }})
             res_list = globals_dict['obj']['result']
             existing = ZoneRecord.browse()
-            for res in res_list:
+            for i, res in enumerate(res_list, start=1):
                 _logger.info(res)
                 existing += ZoneRecord.upsert({
                     'name': res['name'],
@@ -79,6 +79,7 @@ class DnsZone(models.Model):
                     'content': res['content'],
                     'proxied': res['proxied'],
                     'zone_id': zone.id,
+                    'sequence': i,
                 })
             (zone.record_ids - existing).unlink()
 
@@ -88,6 +89,12 @@ class DnsZoneRecord(models.Model):
     _name = 'dns.zone.record'
     _description = 'DNS Zone Record'
     _inherit = ['mail.thread']
+    _order = "sequence, id"
+
+    sequence = fields.Integer(
+        tracking=True,
+        copy=False,
+    )
 
     name = fields.Char(
         required=True,
