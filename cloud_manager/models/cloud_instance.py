@@ -205,7 +205,7 @@ class CloudInstance(models.Model):
 
     def action_deploy(self):
         self.ensure_one()
-        self.config = self._irpc(method='create', args=(self.uid, self.dns_record_ids[:1].name, self.http_port, self.gevent_port, self.module_ids.mapped('name')))
+        self.config = self._irpc(method='create', args=(self.uid, self.dns_record_ids.mapped('name'), self.http_port, self.gevent_port, self.module_ids.mapped('name')))
         self.state = 'running'
 
     def action_rebuild(self):
@@ -216,7 +216,7 @@ class CloudInstance(models.Model):
 
     def action_remove(self):
         self.ensure_one()
-        self._irpc(method='remove', args=(self.uid, self.dns_record_ids[:1].name))
+        self._irpc(method='remove', args=(self.uid, self.http_port, self.gevent_port))
         self.state = 'removed'
 
     def action_stop(self):
