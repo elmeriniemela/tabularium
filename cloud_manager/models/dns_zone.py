@@ -55,15 +55,18 @@ class DnsZone(models.Model):
         rec = self.search([('identifier', '=', vals['identifier'])])
         if not rec:
             rec = self.create(vals)
+        else:
+            rec.write(vals)
         return rec
 
 
     def fetch(self):
-        ZoneRecord = self.env['dns.zone.record']
-        for zone in self:
-            globals_dict = zone.ns_endpoint_id.produce({
+        ZoneRecord = self.env['dns.zone.record'].with_context(fetching=True)
+        for zone in self.with_context(fetching=True):
+            globals_dict = zone.ns_endpoint_id.produce({'kwargs': {
                 'url': f'/zones/{zone.identifier}/dns_records',
-            })
+                'method': 'GET',
+            }})
             res_list = globals_dict['obj']['result']
             existing = ZoneRecord.browse()
             for res in res_list:
@@ -138,5 +141,35 @@ class DnsZoneRecord(models.Model):
         rec = self.search([('identifier', '=', vals['identifier'])])
         if not rec:
             rec = self.create(vals)
+        else:
+            rec.write(vals)
         return rec
+
+
+    def write(self, vals):
+        res = super().write(vals)
+        if not self.env.context.get('fetching') and any(f in vals for f in ['content', 'name', 'proxied', 'type', 'ttl']):
+            self.cloudflare_update()
+        return res
+
+    def cloudflare_update(self):
+        for rec in self:
+            globals_dict = rec.zone_id.ns_endpoint_id.produce({'kwargs': {
+                'url': f'/zones/{rec.zone_id.identifier}/dns_records/{rec.identifier}',
+                'method': 'PUT',
+                'json': {
+                    "content": rec.content,
+                    "name": rec.name,
+                    "proxied": rec.proxied,
+                    "type": rec.rtype,
+                    # "comment": "Domain verification record",
+                    "id": rec.identifier,
+                    # "tags": [
+                    #     "owner:dns-team"
+                    # ],
+                    "ttl": rec.ttl,
+                }
+            }})
+            assert globals_dict['obj']['success'], f"Fail: {globals_dict['obj']}"
+
 

@@ -87,10 +87,17 @@ class Base(models.AbstractModel):
                 try:
                     xmlval = etree.XML(val)
                 except etree.XMLSyntaxError:
-                    field.text = val
+                    try:
+                        xmlval = etree.HTML(val)
+                    except etree.XMLSyntaxError:
+                        field.text = val
+                    else:
+                        field.set('type', 'html')
+                        field.append(xmlval)
                 else:
                     field.set('type', 'xml')
                     field.append(xmlval)
+
             else:
                 field.text = val
 

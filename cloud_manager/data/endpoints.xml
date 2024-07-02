@@ -71,4 +71,49 @@ if server: # Before checking uid, ensure the call comes from an authorized IP.
 response = {'status': status}
 </field>
     </record>
+
+    <record id="cloud_manager.endpoint_cloudflare_dns" model="api.endpoint">
+        <field name="id" eval="4"/>
+        <field name="name">Cloudflare</field>
+        <field name="location">https://api.cloudflare.com/client/v4</field>
+        <field name="usage_field_id" ref="cloud_manager.field_dns_zone__ns_endpoint_id"/>
+        <field name="direction">inbound</field>
+        <field name="role">active</field>
+        <field name="comm_method">http</field>
+        <field name="http_method" eval="False"/>
+        <field name="file_format">json</field>
+        <field name="response_format" eval="False"/>
+        <field name="auto_code" eval="False"/>
+        <field name="documentation" type="html"><html>
+                <body>
+                    <p>By default, this integration will fetch the DNS Zones from Cloudflare (by pressing the "Run" button).</p>
+                    <p>Different API calls can be made using the following 'variables'</p>
+                    <ol>
+                        <li>url (default '/zones')<br/>
+                        </li>
+                    </ol>
+                </body>
+            </html>
+        </field>
+        <field name="test_example" eval="False"/>
+        <field name="xslt" eval="False"/>
+        <field name="initiator">self.produce(variables={'kwargs': {'url': '/zones', method='GET'}})</field>
+        <field name="producer">
+if not 'headers' in kwargs:
+  kwargs['headers'] = {}
+
+kwargs['url'] = self.location + kwargs['url']
+kwargs['headers']['Authorization'] = 'Bearer %s' % self.authorization
+kwargs['headers']['Content-Type'] = 'application/json'
+_logger.info(kwargs)
+obj = requests.request(**kwargs).json()
+</field>
+        <field name="consumer">
+if kwargs['url'] == '/zones':
+  for vals in obj['result']:
+    self.env['dns.zone'].upsert({
+      'name': vals['name'],
+      'identifier': vals['id'],
+    })</field>
+    </record>
 </odoo>
