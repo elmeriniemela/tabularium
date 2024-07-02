@@ -39,6 +39,7 @@
                                     <field name="name"/>
                                     <field name="content" optional="show"/>
                                     <field name="proxied" widget="boolean_toggle" optional="show"/>
+                                    <field name="readonly" widget="boolean_toggle" optional="show"/>
                                     <field name="ttl" optional="show"/>
                                     <field name="identifier" optional="hide"/>
                                 </tree>

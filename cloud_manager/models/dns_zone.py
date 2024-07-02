@@ -113,6 +113,10 @@ class DnsZoneRecord(models.Model):
         tracking=True,
     )
 
+    readonly = fields.Boolean(
+        tracking=True,
+    )
+
     ttl = fields.Integer(
         string="TTL",
         required=True,
@@ -152,8 +156,20 @@ class DnsZoneRecord(models.Model):
             self.cloudflare_update()
         return res
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        if not self.env.context.get('fetching'):
+            records.cloudflare_create()
+        return records
+
+    def unlink(self):
+        self.cloudflare_delete()
+        return super().unlink()
+
     def cloudflare_update(self):
         for rec in self:
+            if rec.readonly: continue
             globals_dict = rec.zone_id.ns_endpoint_id.produce({'kwargs': {
                 'url': f'/zones/{rec.zone_id.identifier}/dns_records/{rec.identifier}',
                 'method': 'PUT',
@@ -170,6 +186,31 @@ class DnsZoneRecord(models.Model):
                     "ttl": rec.ttl,
                 }
             }})
-            assert globals_dict['obj']['success'], f"Fail: {globals_dict['obj']}"
+            assert globals_dict['obj'].get('success'), f"Fail: {globals_dict['obj']}"
 
 
+    def cloudflare_create(self):
+        for rec in self:
+            if rec.readonly: continue
+            globals_dict = rec.zone_id.ns_endpoint_id.produce({'kwargs': {
+                'url': f'/zones/{rec.zone_id.identifier}/dns_records',
+                'method': 'POST',
+                'json': {
+                    "content": rec.content,
+                    "name": rec.name,
+                    "proxied": rec.proxied,
+                    "type": rec.rtype,
+                    "ttl": rec.ttl,
+                }
+            }})
+            assert globals_dict['obj'].get('success'), f"Fail: {globals_dict['obj']}"
+            rec.identifier = globals_dict['obj']['result']['id']
+
+    def cloudflare_delete(self):
+        for rec in self:
+            if rec.readonly: continue
+            globals_dict = rec.zone_id.ns_endpoint_id.produce({'kwargs': {
+                'url': f'/zones/{rec.zone_id.identifier}/dns_records/{rec.identifier}',
+                'method': 'DELETE',
+            }})
+            assert globals_dict['obj'].get('result', {}).get('id') == rec.identifier, f"Fail: {globals_dict['obj']}"
