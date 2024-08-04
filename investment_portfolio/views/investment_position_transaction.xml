@@ -5,16 +5,16 @@
         <field name="arch" type="xml">
             <tree editable="top" limit="1000">
                 <field name="position_id" optional="hide"/>
-                <field name="time"/>
-                <field name="quantity" sum="Total"/>
-                <field name="payment" sum="Total"/>
+                <field name="time"  optional="show"/>
+                <field name="quantity" sum="Total"  optional="show"/>
+                <field name="payment" sum="Total" optional="show"/>
                 <field name="ttype" optional="show"/>
                 <field name="cash_flow" optional="hide" sum="Total"/>
-                <field name="description"/>
-                <field name="exchange_rate"/>
+                <field name="description" optional="show"/>
+                <field name="exchange_rate" optional="show"/>
                 <field name="currency_id" optional="show"/>
                 <field name="currency_rate_id" optional="hide"/>
-                <field name="fee" sum="Total Fee" readonly="True"/>
+                <field name="fee" sum="Total Fee" readonly="True" optional="show"/>
                 <field name="profit" decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0" optional="show"/>
                 <field name="liquid" optional="hide"/>
                 <field name="category_id" optional="hide"/>
@@ -111,6 +111,14 @@
                                     <div t-att-class="record.profit.raw_value &lt; 0 ? 'text-danger' : 'text-success'">
                                         <field name="profit"/>
                                     </div>
+                                </div>
+                            </div>
+                            <div t-if="record.description.raw_value" class="row">
+                                <div class="col-4">
+                                    Descrtiption
+                                </div>
+                                <div class="col-8 text-right">
+                                    <span><field name="description"/></span>
                                 </div>
                             </div>
                         </div>
