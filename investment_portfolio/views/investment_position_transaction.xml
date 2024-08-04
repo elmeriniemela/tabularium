@@ -75,6 +75,7 @@
         <field name="arch" type="xml">
             <kanban class="o_kanban_mobile" sample="1">
                 <field name="currency_id"/>
+                <field name="company_currency_id"/>
                 <field name="profit"/>
                 <templates>
                     <t t-name="kanban-box">
@@ -95,7 +96,7 @@
                                     <span><field name="time"/></span>
                                 </div>
                             </div>
-                            <div class="row">
+                            <div t-if="record.ttype.raw_value === 'buy' || record.ttype.raw_value === 'sell'" class="row">
                                 <div class="col-4">
                                     Quantity
                                 </div>
@@ -103,7 +104,7 @@
                                     <field name="quantity"/> @ <field name="exchange_rate"/>
                                 </div>
                             </div>
-                            <div class="row">
+                            <div t-if="record.ttype.raw_value === 'buy' || record.ttype.raw_value === 'sell'" class="row">
                                 <div class="col-4">
                                     Profit
                                 </div>
