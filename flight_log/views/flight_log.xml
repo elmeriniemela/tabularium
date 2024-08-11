@@ -31,6 +31,8 @@
                     <field name="state" widget="statusbar" options="{'clickable': '1'}"/>
                 </header>
                 <sheet>
+                    <div class="oe_button_box" name="button_box">
+                    </div>
                     <div class="oe_title">
                         <h1>
                             <field name="name" placeholder="Description of flight..."/>
