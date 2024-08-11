@@ -1,6 +1,6 @@
 {
     'name': 'Flight Log portal',
-    'version': '1.0',
+    'version': '1.0.1',
     'category': 'Uncategorized',
     'license': 'LGPL-3',
     'author': 'Elmeri Niemelä',

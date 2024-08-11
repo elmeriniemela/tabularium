@@ -1,0 +1,167 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* flight_log_portal
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 16.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-08-11 16:45+0000\n"
+"PO-Revision-Date: 2024-08-11 16:45+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: flight_log_portal
+#: model_terms:ir.ui.view,arch_db:flight_log_portal.flight_log_portal_content
+msgid ""
+"<i class=\"fa fa-long-arrow-right mx-1\" aria-label=\"Arrow icon\" "
+"title=\"Arrow\"/>"
+msgstr ""
+
+#. module: flight_log_portal
+#: model:ir.model.fields,field_description:flight_log_portal.field_flight_log__access_warning
+msgid "Access warning"
+msgstr ""
+
+#. module: flight_log_portal
+#: model_terms:ir.ui.view,arch_db:flight_log_portal.flight_log_portal_content
+msgid "Airport:"
+msgstr "Lentokenttä:"
+
+#. module: flight_log_portal
+#: model_terms:ir.ui.view,arch_db:flight_log_portal.flight_log_portal_template
+msgid "Close"
+msgstr "Sulje"
+
+#. module: flight_log_portal
+#: model:ir.model.fields,help:flight_log_portal.field_flight_log__access_url
+msgid "Customer Portal URL"
+msgstr ""
+
+#. module: flight_log_portal
+#: model_terms:ir.ui.view,arch_db:flight_log_portal.flight_log_portal_content
+msgid "Date:"
+msgstr "Pvm:"
+
+#. module: flight_log_portal
+#: model_terms:ir.ui.view,arch_db:flight_log_portal.flight_log_portal_content
+msgid "Departure Method:"
+msgstr "Lähtötapa:"
+
+#. module: flight_log_portal
+#: model_terms:ir.ui.view,arch_db:flight_log_portal.flight_log_portal_content
+msgid "Duration:"
+msgstr "Kesto:"
+
+#. module: flight_log_portal
+#: model_terms:ir.ui.view,arch_db:flight_log_portal.flight_log_portal_template
+msgid "Feedback"
+msgstr "Palaute"
+
+#. module: flight_log_portal
+#: model:ir.model,name:flight_log_portal.model_flight_log
+msgid "Flight Log"
+msgstr "Lentoloki"
+
+#. module: flight_log_portal
+#: model_terms:ir.ui.view,arch_db:flight_log_portal.flight_log_portal_template
+msgid "Flight log has been signed."
+msgstr "Lentoloki on allekirjoitettu."
+
+#. module: flight_log_portal
+#: model_terms:ir.ui.view,arch_db:flight_log_portal.flight_log_portal_template
+msgid "History"
+msgstr "Historia"
+
+#. module: flight_log_portal
+#: model_terms:ir.ui.view,arch_db:flight_log_portal.flight_log_portal_content
+msgid "Instrumental Time:"
+msgstr "Instrumentaali aika:"
+
+#. module: flight_log_portal
+#. odoo-python
+#: code:addons/controllers/main.py:0
+#: code:addons/flight_log_portal/controllers/main.py:0
+#, python-format
+msgid "Invalid flight log."
+msgstr ""
+
+#. module: flight_log_portal
+#. odoo-python
+#: code:addons/controllers/main.py:0
+#: code:addons/flight_log_portal/controllers/main.py:0
+#, python-format
+msgid "Invalid signature data."
+msgstr ""
+
+#. module: flight_log_portal
+#: model_terms:ir.ui.view,arch_db:flight_log_portal.flight_log_portal_content
+msgid "Plane:"
+msgstr "Lentokone:"
+
+#. module: flight_log_portal
+#: model_terms:ir.ui.view,arch_db:flight_log_portal.log_form
+msgid "Portal"
+msgstr "Portaali"
+
+#. module: flight_log_portal
+#: model:ir.model.fields,field_description:flight_log_portal.field_flight_log__access_url
+msgid "Portal Access URL"
+msgstr ""
+
+#. module: flight_log_portal
+#: model_terms:ir.ui.view,arch_db:flight_log_portal.log_form
+msgid "Preview"
+msgstr "Esikatselu"
+
+#. module: flight_log_portal
+#: model_terms:ir.ui.view,arch_db:flight_log_portal.flight_log_portal_content
+msgid "Purpose:"
+msgstr "Tarkoitus:"
+
+#. module: flight_log_portal
+#: model:ir.model.fields,field_description:flight_log_portal.field_flight_log__access_token
+msgid "Security Token"
+msgstr ""
+
+#. module: flight_log_portal
+#: model_terms:ir.ui.view,arch_db:flight_log_portal.flight_log_portal_template
+msgid "Sign"
+msgstr "Allekirjoita"
+
+#. module: flight_log_portal
+#: model_terms:ir.ui.view,arch_db:flight_log_portal.flight_log_portal_template
+msgid "Sign Flight Log"
+msgstr "Allekirjoita lentoloki"
+
+#. module: flight_log_portal
+#: model_terms:ir.ui.view,arch_db:flight_log_portal.flight_log_portal_content
+msgid "Signatory Name / License number:"
+msgstr "Allekirjoittajan nimi / lupakirjanumero"
+
+#. module: flight_log_portal
+#. odoo-python
+#: code:addons/controllers/main.py:0
+#: code:addons/flight_log_portal/controllers/main.py:0
+#, python-format
+msgid "Signature is missing."
+msgstr "Allekirjoitus puuttuu."
+
+#. module: flight_log_portal
+#: model_terms:ir.ui.view,arch_db:flight_log_portal.flight_log_portal_content
+msgid "Signature:"
+msgstr "Allekirjoitus:"
+
+#. module: flight_log_portal
+#: model_terms:ir.ui.view,arch_db:flight_log_portal.flight_log_portal_template
+msgid "Thank You!"
+msgstr "Kiitos!"
+
+#. module: flight_log_portal
+#: model_terms:ir.ui.view,arch_db:flight_log_portal.flight_log_portal_content
+msgid "Time:"
+msgstr "Aika:"

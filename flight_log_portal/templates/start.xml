@@ -33,9 +33,9 @@
                     <!-- status messages -->
                     <div t-if="message == 'sign_ok'" class="alert alert-success alert-dismissible d-print-none" role="status">
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        <strong>Thank You!</strong>
+                        <strong t-if="True">Thank You!</strong>
                         <br/>
-                        <span>Flight log has been signed.</span>
+                        <span t-if="True">Flight log has been signed.</span>
                     </div>
 
                     <!-- main content -->
@@ -53,7 +53,7 @@
                             </a>
                         </div>
                         <div class="col-sm-auto mt8">
-                            <a role="button" class="btn btn-secondary" href="#discussion"><i class="fa fa-comment"/> Feedback</a>
+                            <a role="button" class="btn btn-secondary" href="#discussion"><i class="fa fa-comment"/> <span t-if="True">Feedback</span></a>
                         </div>
                     </div>
 
@@ -81,47 +81,47 @@
             <div id="informations">
                 <div class="row" id="so_date">
                     <div class="mb-3 col-6">
-                        <strong>Purpose:</strong>
+                        <strong t-if="True">Purpose:</strong>
                         <span t-field="flight_log.purpose_id"/>
                     </div>
                     <div class="mb-3 col-6">
-                        <strong>Departure Method:</strong>
+                        <strong t-if="True">Departure Method:</strong>
                         <span t-field="flight_log.departure_method"/>
                     </div>
                     <div class="mb-3 col-6">
-                        <strong>Plane:</strong>
+                        <strong t-if="True">Plane:</strong>
                         <span t-field="flight_log.plane_id"/>
                     </div>
                     <div class="mb-3 col-6">
-                        <strong>Date:</strong>
+                        <strong t-if="True">Date:</strong>
                         <span t-field="flight_log.date" t-options='{"widget": "date"}'/>
                     </div>
                     <div class="mb-3 col-6">
-                        <strong>Airport:</strong>
+                        <strong t-if="True">Airport:</strong>
                         <span t-field="flight_log.airport_takeoff_id"/>
                         <i class="fa fa-long-arrow-right mx-1" aria-label="Arrow icon" title="Arrow"/>
                         <span t-field="flight_log.airport_landing_id"/>
                     </div>
                     <div class="mb-3 col-6">
-                        <strong>Time:</strong>
+                        <strong t-if="True">Time:</strong>
                         <span t-field="flight_log.start_time" t-options='{"widget": "float_time"}'/>
                         <i class="fa fa-long-arrow-right mx-1" aria-label="Arrow icon" title="Arrow"/>
                         <span t-field="flight_log.end_time" t-options='{"widget": "float_time"}'/>
                     </div>
                     <div class="mb-3 col-6">
-                        <strong>Duration:</strong>
+                        <strong t-if="True">Duration:</strong>
                         <span t-field="flight_log.duration" t-options='{"widget": "float_time"}'/>
                     </div>
                     <div class="mb-3 col-6">
-                        <strong>Instrumental Time:</strong>
+                        <strong t-if="True">Instrumental Time:</strong>
                         <span t-field="flight_log.instrumental_time" t-options='{"widget": "float_time"}'/>
                     </div>
                     <div class="mb-3 col-6" t-if="flight_log.sign">
-                        <strong>Signature:</strong>
+                        <strong t-if="True">Signature:</strong>
                         <img t-att-src="image_data_uri(flight_log.sign)" style="max-height: 6rem; max-width: 100%;"/>
                     </div>
-                    <div class="mb-3 col-6">
-                        <strong>Signatory Name / License number:</strong>
+                    <div class="mb-3 col-6" t-if="flight_log.signatory_license_number">
+                        <strong t-if="True">Signatory Name / License number:</strong>
                         <span t-field="flight_log.signatory_license_number"/>
                     </div>
                 </div>

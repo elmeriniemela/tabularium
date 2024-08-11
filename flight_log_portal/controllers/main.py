@@ -67,7 +67,7 @@ class FlightLog(portal.CustomerPortal):
         try:
             log_sudo = self._document_check_access('flight.log', log_id, access_token=access_token)
         except (AccessError, MissingError):
-            return {'error': _('Invalid order.')}
+            return {'error': _('Invalid flight log.')}
 
         if not signature:
             return {'error': _('Signature is missing.')}
