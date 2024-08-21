@@ -1,0 +1,701 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="start">
+        <t t-call="website.layout">
+            <div class="container">
+                <form enctype="multipart/form-data" action="/start" method="POST">
+                    <div class="row choose-app-step o_trial_step_1">
+                        <div class="choose-app-list col-12 col-lg-10 offset-lg-1 mt24 o_animate_in_children o_visible">
+                            <h6 class="app-category text-body text-uppercase mb24 fw_semibold mt48" style="transition-delay: 0ms;">Website</h6>
+                            <div class="row" style="transition-delay: 100ms;">
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="website" for="app_website">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/website/static/description/icon.png" title="Odoo Website icon" alt="Odoo Website icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">Website</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_website" id="app_website" data-app="website" data-app-name="website" data-app-depends="mail,website" data-appcateg="website" data-title="Website" data-icon="//download.odoocdn.com/icons/website/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="website_sale" for="app_website_sale">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/website_sale/static/description/icon.png" title="Odoo eCommerce icon" alt="Odoo eCommerce icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">eCommerce</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_website_sale" id="app_website_sale" data-app="website_sale" data-app-name="website_sale" data-app-depends="mail,website_sale,website,account" data-appcateg="website" data-title="eCommerce" data-icon="//download.odoocdn.com/icons/website_sale/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="website_slides" for="app_website_slides">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/website_slides/static/description/icon.png" title="Odoo eLearning icon" alt="Odoo eLearning icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">eLearning</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_website_slides" id="app_website_slides" data-app="website_slides" data-app-name="website_slides" data-app-depends="mail,website,website_slides" data-appcateg="website" data-title="eLearning" data-icon="//download.odoocdn.com/icons/website_slides/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="website_livechat" for="app_website_livechat">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/website_livechat/static/description/icon.png" title="Odoo Live Chat icon" alt="Odoo Live Chat icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">Live Chat</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_website_livechat" id="app_website_livechat" data-app="website_livechat" data-app-name="website_livechat" data-app-depends="website_livechat,mail,website,im_livechat" data-appcateg="website" data-title="Live Chat" data-icon="//download.odoocdn.com/icons/website_livechat/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                            <h6 class="app-category text-body text-uppercase mb24 fw_semibold mt48" style="transition-delay: 200ms;">Sales</h6>
+                            <div class="row" style="transition-delay: 300ms;">
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="crm" for="app_crm">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/crm/static/description/icon.png" title="Odoo CRM icon" alt="Odoo CRM icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">CRM</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_crm" id="app_crm" data-app="crm" data-app-name="crm" data-app-depends="mail,calendar,crm,contacts" data-appcateg="sales" data-title="CRM" data-icon="//download.odoocdn.com/icons/crm/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="sale_management" for="app_sale_management">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/sale_management/static/description/icon.png" title="Odoo Sales icon" alt="Odoo Sales icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">Sales</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_sale_management" id="app_sale_management" data-app="sale_management" data-app-name="sale_management" data-app-depends="mail,account,sale_management" data-appcateg="sales" data-title="Sales" data-icon="//download.odoocdn.com/icons/sale_management/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="account" for="app_account">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/account/static/description/icon.png" title="Odoo Invoicing icon" alt="Odoo Invoicing icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">Invoicing</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_account" id="app_account" data-app="account" data-app-name="account" data-app-depends="mail,account" data-appcateg="sales" data-title="Invoicing" data-icon="//download.odoocdn.com/icons/account/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="sign" for="app_sign">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/sign/static/description/icon.png" title="Odoo Sign icon" alt="Odoo Sign icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">Sign</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_sign" id="app_sign" data-app="sign" data-app-name="sign" data-app-depends="mail,sign" data-appcateg="sales" data-title="Sign" data-icon="//download.odoocdn.com/icons/sign/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="point_of_sale" for="app_point_of_sale">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/point_of_sale/static/description/icon.png" title="Odoo Point of Sale icon" alt="Odoo Point of Sale icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">Point of Sale</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_point_of_sale" id="app_point_of_sale" data-app="point_of_sale" data-app-name="point_of_sale" data-app-depends="mail,stock,account,point_of_sale" data-appcateg="sales" data-title="Point of Sale" data-icon="//download.odoocdn.com/icons/point_of_sale/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="pos_restaurant" for="app_pos_restaurant">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/pos_restaurant/static/description/icon.png" title="Odoo Restaurant icon" alt="Odoo Restaurant icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">Restaurant</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_pos_restaurant" id="app_pos_restaurant" data-app="pos_restaurant" data-app-name="pos_restaurant" data-app-depends="pos_restaurant,point_of_sale,mail,stock,account" data-appcateg="sales" data-title="Restaurant" data-icon="//download.odoocdn.com/icons/pos_restaurant/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="sale_subscription" for="app_sale_subscription">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/sale_subscription/static/description/icon.png" title="Odoo Subscriptions icon" alt="Odoo Subscriptions icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">Subscriptions</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_sale_subscription" id="app_sale_subscription" data-app="sale_subscription" data-app-name="sale_subscription" data-app-depends="account_accountant,sale_management,sale_subscription,mail,account" data-appcateg="sales" data-title="Subscriptions" data-icon="//download.odoocdn.com/icons/sale_subscription/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="sale_renting" for="app_sale_renting">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/sale_renting/static/description/icon.png" title="Odoo Rental icon" alt="Odoo Rental icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">Rental</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_sale_renting" id="app_sale_renting" data-app="sale_renting" data-app-name="sale_renting" data-app-depends="mail,account,sale_renting" data-appcateg="sales" data-title="Rental" data-icon="//download.odoocdn.com/icons/sale_renting/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="industry_fsm" for="app_industry_fsm">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/industry_fsm/static/description/icon.png" title="Odoo Field Service icon" alt="Odoo Field Service icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">Field Service</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_industry_fsm" id="app_industry_fsm" data-app="industry_fsm" data-app-name="industry_fsm" data-app-depends="project,industry_fsm,timesheet_grid,mail,hr" data-appcateg="sales" data-title="Field Service" data-icon="//download.odoocdn.com/icons/industry_fsm/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                            <h6 class="app-category text-body text-uppercase mb24 fw_semibold mt48" style="transition-delay: 400ms;">Operations</h6>
+                            <div class="row" style="transition-delay: 500ms;">
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="account_accountant" for="app_account_accountant">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/account_accountant/static/description/icon.png" title="Odoo Accounting icon" alt="Odoo Accounting icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">Accounting</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_account_accountant" id="app_account_accountant" data-app="account_accountant" data-app-name="account_accountant" data-app-depends="account_accountant,mail,account" data-appcateg="operations" data-title="Accounting" data-icon="//download.odoocdn.com/icons/account_accountant/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="knowledge" for="app_knowledge">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/knowledge/static/description/icon.png" title="Odoo Knowledge icon" alt="Odoo Knowledge icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">Knowledge</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_knowledge" id="app_knowledge" data-app="knowledge" data-app-name="knowledge" data-app-depends="mail,knowledge" data-appcateg="operations" data-title="Knowledge" data-icon="//download.odoocdn.com/icons/knowledge/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="project" for="app_project">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/project/static/description/icon.png" title="Odoo Project icon" alt="Odoo Project icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">Project</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_project" id="app_project" data-app="project" data-app-name="project" data-app-depends="project,mail" data-appcateg="operations" data-title="Project" data-icon="//download.odoocdn.com/icons/project/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="timesheet_grid" for="app_timesheet_grid">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/timesheet_grid/static/description/icon.png" title="Odoo Timesheets icon" alt="Odoo Timesheets icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">Timesheets</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_timesheet_grid" id="app_timesheet_grid" data-app="timesheet_grid" data-app-name="timesheet_grid" data-app-depends="project,mail,timesheet_grid,hr" data-appcateg="operations" data-title="Timesheets" data-icon="//download.odoocdn.com/icons/timesheet_grid/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="helpdesk" for="app_helpdesk">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/helpdesk/static/description/icon.png" title="Odoo Helpdesk icon" alt="Odoo Helpdesk icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">Helpdesk</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_helpdesk" id="app_helpdesk" data-app="helpdesk" data-app-name="helpdesk" data-app-depends="mail,helpdesk" data-appcateg="operations" data-title="Helpdesk" data-icon="//download.odoocdn.com/icons/helpdesk/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="stock" for="app_stock">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/stock/static/description/icon.png" title="Odoo Inventory icon" alt="Odoo Inventory icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">Inventory</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_stock" id="app_stock" data-app="stock" data-app-name="stock" data-app-depends="mail,stock" data-appcateg="operations" data-title="Inventory" data-icon="//download.odoocdn.com/icons/stock/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="purchase" for="app_purchase">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/purchase/static/description/icon.png" title="Odoo Purchase icon" alt="Odoo Purchase icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">Purchase</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_purchase" id="app_purchase" data-app="purchase" data-app-name="purchase" data-app-depends="mail,account,purchase" data-appcateg="operations" data-title="Purchase" data-icon="//download.odoocdn.com/icons/purchase/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="documents" for="app_documents">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/documents/static/description/icon.png" title="Odoo Documents icon" alt="Odoo Documents icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">Documents</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_documents" id="app_documents" data-app="documents" data-app-name="documents" data-app-depends="documents,mail" data-appcateg="operations" data-title="Documents" data-icon="//download.odoocdn.com/icons/documents/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                            <h6 class="app-category text-body text-uppercase mb24 fw_semibold mt48" style="transition-delay: 600ms;">Manufacturing</h6>
+                            <div class="row" style="transition-delay: 700ms;">
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="mrp" for="app_mrp">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/mrp/static/description/icon.png" title="Odoo Manufacturing icon" alt="Odoo Manufacturing icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">Manufacturing</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_mrp" id="app_mrp" data-app="mrp" data-app-name="mrp" data-app-depends="mail,stock,mrp" data-appcateg="manufacturing" data-title="Manufacturing" data-icon="//download.odoocdn.com/icons/mrp/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="mrp_plm" for="app_mrp_plm">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/mrp_plm/static/description/icon.png" title="Odoo PLM icon" alt="Odoo PLM icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">PLM</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_mrp_plm" id="app_mrp_plm" data-app="mrp_plm" data-app-name="mrp_plm" data-app-depends="mail,stock,mrp,mrp_plm" data-appcateg="manufacturing" data-title="PLM" data-icon="//download.odoocdn.com/icons/mrp_plm/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="maintenance" for="app_maintenance">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/maintenance/static/description/icon.png" title="Odoo Maintenance icon" alt="Odoo Maintenance icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">Maintenance</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_maintenance" id="app_maintenance" data-app="maintenance" data-app-name="maintenance" data-app-depends="mail,maintenance" data-appcateg="manufacturing" data-title="Maintenance" data-icon="//download.odoocdn.com/icons/maintenance/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="quality_control" for="app_quality_control">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/quality_control/static/description/icon.png" title="Odoo Quality icon" alt="Odoo Quality icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">Quality</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_quality_control" id="app_quality_control" data-app="quality_control" data-app-name="quality_control" data-app-depends="mail,stock,quality_control" data-appcateg="manufacturing" data-title="Quality" data-icon="//download.odoocdn.com/icons/quality_control/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="repair" for="app_repair">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/repair/static/description/icon.png" title="Odoo Repair icon" alt="Odoo Repair icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">Repair</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_repair" id="app_repair" data-app="repair" data-app-name="repair" data-app-depends="repair,sale_management,mail,stock,account" data-appcateg="manufacturing" data-title="Repair" data-icon="//download.odoocdn.com/icons/repair/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                            <h6 class="app-category text-body text-uppercase mb24 fw_semibold mt48" style="transition-delay: 800ms;">Marketing</h6>
+                            <div class="row" style="transition-delay: 900ms;">
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="mass_mailing" for="app_mass_mailing">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/mass_mailing/static/description/icon.png" title="Odoo Email Marketing icon" alt="Odoo Email Marketing icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">Email Marketing</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_mass_mailing" id="app_mass_mailing" data-app="mass_mailing" data-app-name="mass_mailing" data-app-depends="mail,mass_mailing,contacts" data-appcateg="marketing" data-title="Email Marketing" data-icon="//download.odoocdn.com/icons/mass_mailing/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="mass_mailing_sms" for="app_mass_mailing_sms">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/mass_mailing_sms/static/description/icon.png" title="Odoo SMS Marketing icon" alt="Odoo SMS Marketing icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">SMS Marketing</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_mass_mailing_sms" id="app_mass_mailing_sms" data-app="mass_mailing_sms" data-app-name="mass_mailing_sms" data-app-depends="mail,mass_mailing,contacts,mass_mailing_sms" data-appcateg="marketing" data-title="SMS Marketing" data-icon="//download.odoocdn.com/icons/mass_mailing_sms/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="marketing_automation" for="app_marketing_automation">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/marketing_automation/static/description/icon.png" title="Odoo Marketing Automation icon" alt="Odoo Marketing Automation icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">Marketing Automation</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_marketing_automation" id="app_marketing_automation" data-app="marketing_automation" data-app-name="marketing_automation" data-app-depends="mail,mass_mailing,contacts,marketing_automation" data-appcateg="marketing" data-title="Marketing Automation" data-icon="//download.odoocdn.com/icons/marketing_automation/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="website_event" for="app_website_event">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/website_event/static/description/icon.png" title="Odoo Events icon" alt="Odoo Events icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">Events</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_website_event" id="app_website_event" data-app="website_event" data-app-name="website_event" data-app-depends="mail,website,website_event" data-appcateg="marketing" data-title="Events" data-icon="//download.odoocdn.com/icons/website_event/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="survey" for="app_survey">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/survey/static/description/icon.png" title="Odoo Survey icon" alt="Odoo Survey icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">Survey</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_survey" id="app_survey" data-app="survey" data-app-name="survey" data-app-depends="mail,survey" data-appcateg="marketing" data-title="Survey" data-icon="//download.odoocdn.com/icons/survey/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="social" for="app_social">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/social/static/description/icon.png" title="Odoo Social Marketing icon" alt="Odoo Social Marketing icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">Social Marketing</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_social" id="app_social" data-app="social" data-app-name="social" data-app-depends="mail,social" data-appcateg="marketing" data-title="Social Marketing" data-icon="//download.odoocdn.com/icons/social/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="appointment" for="app_appointment">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/appointment/static/description/icon.png" title="Odoo Appointments icon" alt="Odoo Appointments icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">Appointments</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_appointment" id="app_appointment" data-app="appointment" data-app-name="appointment" data-app-depends="mail,calendar,appointment" data-appcateg="marketing" data-title="Appointments" data-icon="//download.odoocdn.com/icons/appointment/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                            <h6 class="app-category text-body text-uppercase mb24 fw_semibold mt48" style="transition-delay: 1000ms;">Human Resources</h6>
+                            <div class="row" style="transition-delay: 1100ms;">
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="hr" for="app_hr">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/hr/static/description/icon.png" title="Odoo Employees icon" alt="Odoo Employees icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">Employees</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_hr" id="app_hr" data-app="hr" data-app-name="hr" data-app-depends="mail,hr" data-appcateg="hr" data-title="Employees" data-icon="//download.odoocdn.com/icons/hr/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="hr_attendance" for="app_hr_attendance">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/hr_attendance/static/description/icon.png" title="Odoo Attendances icon" alt="Odoo Attendances icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">Attendances</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_hr_attendance" id="app_hr_attendance" data-app="hr_attendance" data-app-name="hr_attendance" data-app-depends="mail,hr,hr_attendance" data-appcateg="hr" data-title="Attendances" data-icon="//download.odoocdn.com/icons/hr_attendance/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="hr_recruitment" for="app_hr_recruitment">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/hr_recruitment/static/description/icon.png" title="Odoo Recruitment icon" alt="Odoo Recruitment icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">Recruitment</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_hr_recruitment" id="app_hr_recruitment" data-app="hr_recruitment" data-app-name="hr_recruitment" data-app-depends="mail,calendar,hr_recruitment,hr" data-appcateg="hr" data-title="Recruitment" data-icon="//download.odoocdn.com/icons/hr_recruitment/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="hr_referral" for="app_hr_referral">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/hr_referral/static/description/icon.png" title="Odoo Employee Referral icon" alt="Odoo Employee Referral icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">Employee Referral</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_hr_referral" id="app_hr_referral" data-app="hr_referral" data-app-name="hr_referral" data-app-depends="website_hr_recruitment,website,calendar,hr_referral,hr_recruitment,mail,hr" data-appcateg="hr" data-title="Employee Referral" data-icon="//download.odoocdn.com/icons/hr_referral/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="hr_holidays" for="app_hr_holidays">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/hr_holidays/static/description/icon.png" title="Odoo Time Off icon" alt="Odoo Time Off icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">Time Off</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_hr_holidays" id="app_hr_holidays" data-app="hr_holidays" data-app-name="hr_holidays" data-app-depends="mail,calendar,hr_holidays,hr" data-appcateg="hr" data-title="Time Off" data-icon="//download.odoocdn.com/icons/hr_holidays/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="hr_expense" for="app_hr_expense">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/hr_expense/static/description/icon.png" title="Odoo Expenses icon" alt="Odoo Expenses icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">Expenses</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_hr_expense" id="app_hr_expense" data-app="hr_expense" data-app-name="hr_expense" data-app-depends="mail,hr_expense,account,hr" data-appcateg="hr" data-title="Expenses" data-icon="//download.odoocdn.com/icons/hr_expense/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="planning" for="app_planning">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/planning/static/description/icon.png" title="Odoo Planning icon" alt="Odoo Planning icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">Planning</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_planning" id="app_planning" data-app="planning" data-app-name="planning" data-app-depends="planning,mail,hr" data-appcateg="hr" data-title="Planning" data-icon="//download.odoocdn.com/icons/planning/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="hr_appraisal" for="app_hr_appraisal">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/hr_appraisal/static/description/icon.png" title="Odoo Appraisals icon" alt="Odoo Appraisals icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">Appraisals</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_hr_appraisal" id="app_hr_appraisal" data-app="hr_appraisal" data-app-name="hr_appraisal" data-app-depends="mail,calendar,hr_appraisal,hr" data-appcateg="hr" data-title="Appraisals" data-icon="//download.odoocdn.com/icons/hr_appraisal/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="fleet" for="app_fleet">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/fleet/static/description/icon.png" title="Odoo Fleet icon" alt="Odoo Fleet icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">Fleet</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_fleet" id="app_fleet" data-app="fleet" data-app-name="fleet" data-app-depends="fleet,mail" data-appcateg="hr" data-title="Fleet" data-icon="//download.odoocdn.com/icons/fleet/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="approvals" for="app_approvals">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/approvals/static/description/icon.png" title="Odoo Approvals icon" alt="Odoo Approvals icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">Approvals</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_approvals" id="app_approvals" data-app="approvals" data-app-name="approvals" data-app-depends="mail,hr,approvals" data-appcateg="hr" data-title="Approvals" data-icon="//download.odoocdn.com/icons/approvals/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="lunch" for="app_lunch">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/lunch/static/description/icon.png" title="Odoo Lunch icon" alt="Odoo Lunch icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">Lunch</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_lunch" id="app_lunch" data-app="lunch" data-app-name="lunch" data-app-depends="mail,lunch" data-appcateg="hr" data-title="Lunch" data-icon="//download.odoocdn.com/icons/lunch/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                            <h6 class="app-category text-body text-uppercase mb24 fw_semibold mt48" style="transition-delay: 1200ms;">Customizations</h6>
+                            <div class="row mb128" style="transition-delay: 1300ms;">
+                                <label class="col-sm-6 col-md-4 col-xl-3 d-flex openerp_enterprise_pricing_app oe-app form-label" data-app="web_studio" for="app_web_studio">
+                                    <div class="card openerp_enterprise_pricing_app_container d-flex w-100 align-items-center flex-row p-2">
+                                        <div class="openerp_enterprise_pricing_app_icon m-2">
+                                            <img width="40px" src="//download.odoocdn.com/icons/web_studio/static/description/icon.png" title="Odoo Studio icon" alt="Odoo Studio icon" loading="lazy" style=""/>
+                                        </div>
+                                        <div class="openerp_enterprise_pricing_app_name text-truncate m-2 flex-grow-1">
+                                            <span class="h6">Studio</span>
+                                        </div>
+                                        <div>
+                                            <input type="checkbox" class="openerp_enterprise_trial_app_checkbox" name="app_web_studio" id="app_web_studio" data-app="web_studio" data-app-name="web_studio" data-app-depends="mail,web_studio" data-appcateg="customizations" data-title="Studio" data-icon="//download.odoocdn.com/icons/web_studio/static/description/icon.png"/>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                            <h6 class="app-category text-body text-uppercase mb24 fw_semibold mt48" style="transition-delay: 1200ms;">Contact information</h6>
+                            <div class="row mb128" style="transition-delay: 1300ms;">
+
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+
+
+                                <div class="mb16 col-md-6">
+                                    <label for="username" class="form-label">First and Last Name</label>
+                                    <input type="text" pattern="[^\x3C\x3E\x22\x5C]+" class="form-control" name="username" id="username" required="required" autofocus="autofocus"/>
+                                </div>
+
+                                <div class="mb16 col-md-6">
+                                    <label for="email" class="form-label">Email</label>
+                                    <input type="email" class="form-control" name="email" id="email" required="required"/>
+                                </div>
+
+                                <div class="mb16 col-md-6">
+                                    <label for="company_name" class="form-label">Company Name</label>
+                                    <input type="text" class="form-control" name="company_name" id="company_name" required="required"/>
+                                </div>
+
+                                <div class="mb16 col-md-6">
+                                    <label for="phone" class="form-label">Phone Number</label>
+                                    <input type="tel" class="form-control" name="phone" id="phone" required="required"/>
+                                </div>
+
+
+                                <div class="mb16 col-md-6">
+                                    <label for="country_id" class="form-label">Country</label>
+                                    <select name="country_id" class="form-select" id="country_id" required="required" tabindex="5">
+                                        <option value="3" data-code="AF">
+                                            Afghanistan
+                                        </option>
+                                        <option value="6" data-code="AL">
+                                            Albania
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div class="mb16 col-md-6">
+                                    <label for="lang" class="form-label">Language</label>
+                                    <select name="lang" class="form-select" required="required" tabindex="6">
+                                        <option value="de_DE">Deutsch</option>
+                                        <option selected="selected" value="en_US">English</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb16 col-md-6">
+                                    <label for="company_size" class="form-label">Company size</label>
+                                    <select name="company_size" class="form-select" id="company_size" required="required" tabindex="6">
+                                        <option selected="selected" disabled="disabled" hidden="hidden" value=""></option>
+                                        <option value="1-5">&lt; 5 employees</option>
+                                        <option value="5-20">5 - 20 employees</option>
+                                        <option value="20-50">20 - 50 employees</option>
+                                        <option value="50-250">50 - 250 employees</option>
+                                        <option value="250-over">&gt; 250 employees</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb16 col-md-6">
+                                    <label for="plan" class="form-label">Primary Interest</label>
+                                    <select name="plan" class="form-select" id="plan" required="required" tabindex="7">
+                                        <option selected="selected" disabled="disabled" hidden="hidden" value=""></option>
+                                        <option value="plan_to_use">Use it in my company</option>
+                                        <option value="plan_to_sell">Offer Odoo services to other companies</option>
+                                        <option value="plan_to_test_student">I am a student</option>
+                                        <option value="plan_to_test_teacher">I am a teacher</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb16 col-12">
+                                    <div style="text-align: center;">By clicking on <b>Start Now</b>, you accept our <a href="/terms" target="_blank">Subscription Agreement</a> and <a href="/privacy" target="_blank">Privacy Policy</a></div>
+                                </div>
+                                <div class="mb16 col-12" style="text-align: center;">
+                                    <button type="submit" value="Start Now"  class="btn btn-primary">Start Now<i class="fa fa-chevron-right ml8"></i></button>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </t>
+    </template>
+</odoo>

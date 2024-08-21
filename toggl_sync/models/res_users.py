@@ -46,7 +46,7 @@ class ResUsers(models.Model):
     def toggl_api_call(self, method, endpoint, **kwargs):
         api_token = self.toggl_api_token
         response = getattr(requests, method)(
-            f'https://api.track.toggl.com/api/v8/{endpoint}',
+            f'https://api.track.toggl.com/api/v9/me/{endpoint}',
             headers={"content-type": "application/json"},
             auth=(api_token, "api_token"),
             timeout=10,
