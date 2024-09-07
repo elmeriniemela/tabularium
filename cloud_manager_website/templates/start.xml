@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <template id="start">
+    <template id="start" name="Start Now!">
         <t t-call="website.layout">
             <div class="container">
                 <form enctype="multipart/form-data" action="/start" method="POST">
@@ -620,7 +620,7 @@
 
                                 <div class="mb16 col-md-6">
                                     <label for="username" class="form-label">First and Last Name</label>
-                                    <input type="text" pattern="[^\x3C\x3E\x22\x5C]+" class="form-control" name="username" id="username" required="required" autofocus="autofocus"/>
+                                    <input type="text" pattern="[^\x3C\x3E\x22\x5C]+" class="form-control" name="username" id="username" required="required"/>
                                 </div>
 
                                 <div class="mb16 col-md-6">

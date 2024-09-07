@@ -14,6 +14,8 @@ class WebsiteBackend(http.Controller):
     def start(self, **params):
         if request.httprequest.method == 'POST':
             print(params)
+            # import pdb; pdb.set_trace()
+            user = request.env['res.users'].sudo().search([('login', '=', params['email'])])
             return request.render("cloud_manager_website.start")
         else:
             return request.render("cloud_manager_website.start")
