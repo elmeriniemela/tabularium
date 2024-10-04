@@ -157,12 +157,11 @@ class InvestmentTimeseries(models.Model):
     @api.depends('position_id', 'date')
     def _compute_timeseries_aggregate(self):
         _logger.info(f"Compute time series aggregate on {self.mapped('position_id.name')} for {len(self)} records.")
-        precision = self.env['decimal.precision'].precision_get('Investment Asset quantity')
         for record in self:
             if not record.position_id:
                 continue
 
-            time_cutoff = datetime.datetime(record.date.year, record.date.month, record.date.day, 0, 0, 0) # This has to be the end of day.
+            time_cutoff = datetime.datetime(record.date.year, record.date.month, record.date.day, 23, 59, 0)
             record.transaction_ids = record.env['investment.position.transaction'].search([
                 ('time', '<=', time_cutoff),
                 ('position_id', '=', record.position_id.id),
