@@ -58,6 +58,7 @@ class InvestmentPositionTransaction(models.Model):
     fee = fields.Monetary(readonly=False,  compute='_compute_fee', inverse='_inverse_fee', currency_field='company_currency_id')
 
     quantity = fields.Float(digits='Investment Asset quantity', tracking=True)
+    quantity_adjusted = fields.Monetary(group_operator='avg', compute='_compute_quantity_adjusted')
 
     time = fields.Datetime(required=True, default=fields.Datetime.now, tracking=True)
 
@@ -240,9 +241,11 @@ class InvestmentPositionTransaction(models.Model):
     @api.depends('payment', 'quantity', 'position_id.last_price_own_currency')
     def _compute_profit(self):
         for tx in self:
-            quantity = tx.quantity
+            quantity = tx.quantity_adjusted
             if not quantity: # if quantity is 0, the cash flow will be profit.
                 tx.profit = tx.payment
+            elif tx.ttype == 'split':
+                tx.profit = 0.0
             else:
                 tx.profit = (tx.position_id.last_price_own_currency - (tx.payment / abs(quantity))) * quantity
 
@@ -277,3 +280,11 @@ class InvestmentPositionTransaction(models.Model):
                 tx.exchange_rate = (cmp_payment/quantity - cmp_fee/quantity)
 
 
+    @api.depends('position_id.asset_id.split_ids', 'position_id.asset_id.split_ids.factor')
+    def _compute_quantity_adjusted(self):
+        for rec in self:
+            splits = rec.asset_id.split_ids
+            adjusted = rec.quantity
+            for s in splits.filtered(lambda s: rec.time < s.time):
+                adjusted *= s.factor
+            rec.quantity_adjusted = adjusted

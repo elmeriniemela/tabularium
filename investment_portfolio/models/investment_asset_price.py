@@ -44,7 +44,7 @@ class InvestmentAssetPrice(models.Model):
             splits = rec.asset_id.split_ids
             adjusted = rec.price
             for s in splits.filtered(lambda s: rec.time < s.time):
-                adjusted = rec.price / s.factor
+                adjusted /=  s.factor
             rec.price_adjusted = adjusted
 
 
