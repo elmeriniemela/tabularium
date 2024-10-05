@@ -53,6 +53,11 @@ class CloudServerModule(models.Model):
         tracking=True,
     )
 
+    commit_date = fields.Datetime(
+        required=True,
+        tracking=True,
+    )
+
     diff_ids = fields.One2many(
         comodel_name='cloud.server.diff',
         inverse_name='module_id',
