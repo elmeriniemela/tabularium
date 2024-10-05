@@ -46,6 +46,7 @@
                             <field name="restarted"/>
                             <field name="branch"/>
                             <field name="commit"/>
+                            <field name="commit_date"/>
                         </group>
                     </group>
                     <notebook>

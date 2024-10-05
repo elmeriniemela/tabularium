@@ -9,6 +9,7 @@
                 <field name="url"/>
                 <field name="branch"/>
                 <field name="commit"/>
+                <field name="commit_date"/>
                 <button string="Diff" type="action" name="%(cloud_server_diff_form_action)d" context="{'default_server_id': server_id, 'default_module_id': id, 'search_default_server_id': server_id}"/>
             </tree>
         </field>
@@ -35,6 +36,7 @@
                         <group>
                             <field name="branch"/>
                             <field name="commit"/>
+                            <field name="commit_date"/>
                         </group>
                     </group>
                 </sheet>
