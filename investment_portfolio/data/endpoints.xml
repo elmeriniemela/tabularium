@@ -20,7 +20,7 @@ if resp.status_code != 200:
         <field name="initiator">self.produce(variables={})</field>
         <field name="producer">prices = self.env['investment.asset.price'].search([('asset_id.ticker', '=', ticker), ('prediction', '=', False)], limit=5, order='time desc')
 obj = prices.xml_export(['time', 'price'])</field>
-        <field name="consumer">response = lxml.etree.tostring(obj, encoding='utf-8', xml_declaration=True)</field>
+        <field name="consumer">response = obj</field>
     </record>
     <record id="investment_portfolio.integration_yahoo" model="api.endpoint">
         <field name="name">Yahoo Finance (stocks)</field>

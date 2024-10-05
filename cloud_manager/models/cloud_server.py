@@ -2,9 +2,14 @@
 
 import logging
 import dateutil.parser
+import pytz
+
 from odoo import models, api, fields, exceptions, _
 
 _logger = logging.getLogger(__name__)
+
+def ptime(iso_str):
+    return dateutil.parser.parse(iso_str).astimezone(pytz.utc).replace(tzinfo=None)
 
 
 class CloudServer(models.Model):
@@ -48,6 +53,11 @@ class CloudServer(models.Model):
     )
 
     commit = fields.Char(
+        tracking=True,
+        readonly=True,
+    )
+
+    commit_date = fields.Datetime(
         tracking=True,
         readonly=True,
     )
@@ -143,6 +153,7 @@ class CloudServer(models.Model):
     def parse_status(self, obj):
         self.ensure_one()
         self.commit = obj['agent']['commit']
+        self.commit_date = ptime(obj['agent']['commit_date'])
         self.parse_instances(obj)
         self.parse_modules(obj)
 
@@ -201,6 +212,7 @@ class CloudServer(models.Model):
                 'server_id': self.id,
                 'module_id': (Module.search([('name', '=', name)]) or Module.create({'name': name})).id,
                 'commit': mod['commit'],
+                'commit_date': ptime(mod['commit_date']),
                 'url': mod['url'],
                 'branch': mod['branch'],
                 'active': True,
