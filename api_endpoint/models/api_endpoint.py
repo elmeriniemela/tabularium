@@ -41,6 +41,7 @@ def json_encoder(o):
         return repr(o)
     raise TypeError(f'Object of type {o.__class__.__name__} is not JSON serializable')
 
+
 def json_decoder(d):
     for key, value in d.items():
         if not isinstance(value, str):
@@ -56,9 +57,11 @@ def json_decoder(d):
             d[key] = datetime.date(*dtargs(value))
     return d
 
+
 def import_xml(cr, root, noupdate=True, mode='init', module='__export__'):
     obj = XMLImport(cr, module=module, idref=None, mode=mode, noupdate=noupdate, xml_filename=None)
     obj.parse(root)
+
 
 class ApiEndpoint(models.Model):
     _name = 'api.endpoint'
@@ -311,10 +314,12 @@ class ApiEndpoint(models.Model):
         compute='_compute_msg_count',
     )
 
+
     @api.depends('state')
     def _compute_active(self):
         for record in self:
             record.active = record.state != 'archived'
+
 
     @api.autovacuum
     def _gc_messages(self):
@@ -348,6 +353,7 @@ class ApiEndpoint(models.Model):
         for rec in self:
             rec.msg_count = len(rec.msg_ids)
 
+
     @api.depends('comm_method', 'role', 'direction', 'file_format')
     def _compute_url(self):
         base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url').rstrip('/')
@@ -358,6 +364,7 @@ class ApiEndpoint(models.Model):
                 if rec.authorization:
                     url += f'?Authorization={rec.authorization}'
             rec.url = url
+
 
     @api.depends('comm_method', 'role', 'direction', 'file_format')
     def _compute_hardcoded(self):
@@ -444,6 +451,7 @@ class ApiEndpoint(models.Model):
             self._consume(globals_dict)
         return globals_dict
 
+
     def _serialize_dict(self, globals_dict, original_dict):
         d = original_dict.copy()
         class EvalModel:
@@ -473,6 +481,7 @@ class ApiEndpoint(models.Model):
             'context': context,
         })
 
+
     def _consume(self, globals_dict, force_commit=False, raise_exc=True):
         commit = force_commit or self.auto_commit
         try:
@@ -499,9 +508,11 @@ class ApiEndpoint(models.Model):
                 if commit:
                     self.env.cr.commit()
 
+
     def ensure_response(self, globals_dict):
         if 'response' not in globals_dict:
             raise RuntimeError("The consumer code did not assign variable 'response'.")
+
 
     def assert_obj_type(self, obj, fmt):
         if fmt == 'json':
@@ -572,8 +583,6 @@ class ApiEndpoint(models.Model):
                 finally:
                     msg.env.cr.commit() # Save all and release msg lock.
                 assert msg.state != 'produced', "Programming error, break infinite while loop."
-
-
 
 
     def next_from_queue(self):
