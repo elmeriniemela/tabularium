@@ -2,6 +2,7 @@
 
 from odoo import api, models, fields, _
 from dateutil.relativedelta import relativedelta
+from odoo.tools import float_is_zero
 
 from odoo.tools.safe_eval import safe_eval
 import logging
@@ -102,8 +103,9 @@ class InvestmentPeriod(models.Model):
                 record.profit += (end_series.profit - start_series.profit)
 
 
-                values.append(-start_series.position)
-                dates.append(start_date)
+                if not float_is_zero(start_series.position, precision_digits=start_series.company_currency_id.decimal_places):
+                    values.append(-start_series.position)
+                    dates.append(start_date)
 
                 transactions = (end_series.transaction_ids - start_series.transaction_ids).filtered(lambda t: t.usage == 'record')
 
@@ -118,12 +120,14 @@ class InvestmentPeriod(models.Model):
                     elif trans.ttype == 'cost':
                         sign = -1
 
+                    if not float_is_zero(trans.payment, precision_digits=trans.company_currency_id.decimal_places):
+                        _logger.info(f"{position.name}, {trans.ttype}: {sign * abs(trans.payment)}")
+                        values.append(sign * abs(trans.payment))
+                        dates.append(trans.time.date())
 
-                    values.append(sign * abs(trans.payment))
-                    dates.append(trans.time.date())
-
-                values.append(end_series.position)
-                dates.append(end_date)
+                if not float_is_zero(end_series.position, precision_digits=end_series.company_currency_id.decimal_places):
+                    values.append(end_series.position)
+                    dates.append(record.end_date)
 
             annualized_irr = 0
             if values:

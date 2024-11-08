@@ -97,7 +97,7 @@ response = {'status': status}
         </field>
         <field name="test_example" eval="False"/>
         <field name="xslt" eval="False"/>
-        <field name="initiator">self.produce(variables={'kwargs': {'url': '/zones', method='GET'}})</field>
+        <field name="initiator">self.produce(variables={'kwargs': {'url': '/zones', 'method': 'GET'}})</field>
         <field name="producer">
 if not 'headers' in kwargs:
   kwargs['headers'] = {}
