@@ -72,13 +72,17 @@ class CloudServer(models.Model):
     )
 
     instance_ids = fields.One2many(
+        string="Instances",
         comodel_name='cloud.instance',
         inverse_name='server_id',
+        readonly=True,
     )
 
     module_ids = fields.One2many(
+        string="Modules",
         comodel_name='cloud.server.module',
         inverse_name='server_id',
+        readonly=True,
     )
 
     diff_ids = fields.One2many(

@@ -6,7 +6,7 @@
     'website': "https://eniemela.fi",
     'license': 'LGPL-3',
     'category': 'Uncategorized',
-    'version': '1.2.2',
+    'version': '1.2.3',
     'depends': [
         'base',
         'mail',
@@ -20,6 +20,7 @@
         'views/cloud_instance.xml',
         'views/cloud_server_diff.xml',
         'views/cloud_server_module.xml',
+        'views/cloud_module.xml',
         'views/cloud_server.xml',
         'views/cloud_backup.xml',
         'views/dns_zone.xml',

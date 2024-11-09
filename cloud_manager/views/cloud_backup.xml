@@ -64,7 +64,7 @@
 
 
     <record id="cloud_backup_action" model="ir.actions.act_window">
-        <field name="name">Backup</field>
+        <field name="name">Backups</field>
         <field name="res_model">cloud.backup</field>
         <field name="view_mode">tree,kanban,form</field>
         <field name="context">{'search_default_group_instance_id': 1}</field>

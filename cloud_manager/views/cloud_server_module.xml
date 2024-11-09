@@ -64,9 +64,10 @@
 
 
     <record id="cloud_server_module_action" model="ir.actions.act_window">
-        <field name="name">Modules</field>
+        <field name="name">Module installations</field>
         <field name="res_model">cloud.server.module</field>
         <field name="view_mode">tree,kanban,form</field>
+        <field name="context">{'search_default_group_server_id': 1}</field>
     </record>
 
 </odoo>
