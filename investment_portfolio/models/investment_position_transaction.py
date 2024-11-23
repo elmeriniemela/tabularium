@@ -54,6 +54,7 @@ class InvestmentPositionTransaction(models.Model):
         store=True,
         readonly=False,
     )
+    inverse_company_rate = fields.Float(related='currency_rate_id.inverse_company_rate', readonly=True)
 
     fee = fields.Monetary(readonly=False,  compute='_compute_fee', inverse='_inverse_fee', currency_field='company_currency_id')
 
