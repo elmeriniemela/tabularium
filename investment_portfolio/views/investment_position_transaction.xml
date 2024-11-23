@@ -52,7 +52,7 @@
                         <group>
                             <field name="exchange_rate"/>
                             <field name="fee" readonly="1"/>
-                            <field name="currency_id" invisible="not context.get('show_all')"/>
+                            <field name="currency_id"/>
                             <label for="currency_rate_id"/>
                             <div>
 
@@ -60,8 +60,6 @@
                                 <span>@</span>
                                 <field name="currency_rate_id" class="oe_inline"/>
                             </div>
-
-                            <field name="position_id" invisible="not context.get('show_all')"/>
                             <field name="description"/>
                             <field name="profit" decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0"/>
                             <field name="usage" groups="base.group_no_one"/>
