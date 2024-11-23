@@ -58,7 +58,7 @@ class InvestmentPositionTransaction(models.Model):
     fee = fields.Monetary(readonly=False,  compute='_compute_fee', inverse='_inverse_fee', currency_field='company_currency_id')
 
     quantity = fields.Float(digits='Investment Asset quantity', tracking=True)
-    quantity_adjusted = fields.Monetary(group_operator='avg', compute='_compute_quantity_adjusted')
+    quantity_adjusted = fields.Float(group_operator='avg', compute='_compute_quantity_adjusted', digits='Investment Asset quantity')
 
     time = fields.Datetime(required=True, default=fields.Datetime.now, tracking=True)
 
