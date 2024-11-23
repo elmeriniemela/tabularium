@@ -49,13 +49,15 @@ class InvestmentAssetRealized(models.Model):
 
     def _compute_profit(self):
         for record in self:
+            sell_portion = (record.quantity / abs(record.sell_batch_id.quantity_adjusted))
             record.sell_date = record.sell_batch_id.time.date()
-            record.sell_fee = record.sell_batch_id.fee * (record.quantity / abs(record.sell_batch_id.quantity))
-            record.sell_price = (record.sell_batch_id.exchange_rate) * record.quantity
+            record.sell_fee = record.sell_batch_id.fee * sell_portion
+            record.sell_price = record.sell_batch_id.payment * sell_portion + record.sell_fee
 
+            buy_portion = (record.quantity / abs(record.buy_batch_id.quantity_adjusted))
             record.buy_date = record.buy_batch_id.time.date()
-            record.buy_fee = record.buy_batch_id.fee * (record.quantity / abs(record.buy_batch_id.quantity))
-            record.buy_price = (record.buy_batch_id.exchange_rate) * record.quantity
+            record.buy_fee = record.buy_batch_id.fee * buy_portion
+            record.buy_price = record.buy_batch_id.payment * buy_portion - record.buy_fee
 
             record.profit = record.sell_price - record.sell_fee - record.buy_price - record.buy_fee
 

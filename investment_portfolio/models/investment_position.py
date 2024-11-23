@@ -388,7 +388,7 @@ class InvestmentPosition(models.Model):
                     if float_is_zero(s[op]['qty'], precision_digits=self.precision):
                         tx = next(s[op]['iter']) # This will eventually raise StopIteration
                         s[op]['tx'] = tx
-                        s[op]['qty'] = abs(tx.quantity)
+                        s[op]['qty'] = abs(tx.quantity_adjusted)
                 return s['sell']['tx'], s['buy']['tx'], min(s['buy']['qty'], s['sell']['qty'])
 
         qty_precision = self.env['decimal.precision'].precision_get('Investment Asset quantity')
