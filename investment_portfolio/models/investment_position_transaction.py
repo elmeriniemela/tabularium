@@ -261,7 +261,7 @@ class InvestmentPositionTransaction(models.Model):
                 if tx.currency_rate_id:
                     cmp_exchange_rate *= tx.currency_rate_id.inverse_company_rate
 
-                tx.fee = (tx.payment/quantity - cmp_exchange_rate) * quantity
+                tx.fee = abs(tx.payment/quantity - cmp_exchange_rate) * quantity
 
     def _inverse_fee(self):
         for tx in self:
