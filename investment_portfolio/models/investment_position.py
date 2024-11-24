@@ -82,6 +82,7 @@ class InvestmentPosition(models.Model):
     max_investment = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id')
     cost_basis = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', help="Average price across every purchase.")
     last_price_own_currency = fields.Monetary(string="Last Price (own currency)", compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', group_operator=None)
+    drawdown_price_own_currency = fields.Monetary(string="Drawdown Price (own currency)", compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', group_operator=None)
 
     profit = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', group_operator='sum')
     profit_percent = fields.Float(compute='_compute_position_aggregate', store=True, group_operator='avg')
@@ -456,14 +457,14 @@ class InvestmentPosition(models.Model):
         profit = position-investment
 
 
-        ath_price_cmp_currency = self.asset_id.currency_id._convert(
-            from_amount=self.asset_id.ath_price or 0.0,
+        drawdown_price_own_currency = self.asset_id.currency_id._convert(
+            from_amount=self.asset_id.drawdown_price or 0.0,
             to_currency=self.company_currency_id,
             company=self.company_id,
             date=self.last_price_id.time or fields.Datetime.now(),
         )
 
-        plausible_drawdown_position = ath_price_cmp_currency * (1-self.asset_id.plausible_ath_drawdown) * quantity
+        plausible_drawdown_position = drawdown_price_own_currency * quantity
 
         return {
             'position': position,
@@ -474,4 +475,5 @@ class InvestmentPosition(models.Model):
             'profit_percent': profit/max_investment if max_investment else 0,
             'max_investment': max_investment,
             'plausible_drawdown_position': plausible_drawdown_position,
+            'drawdown_price_own_currency': drawdown_price_own_currency,
         }

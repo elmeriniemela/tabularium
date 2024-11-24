@@ -61,6 +61,7 @@
                                 <span> (<field name="last_update" widget="timeago" class="oe_inline"/>) </span>
                             </div>
                             <field name="ath_price"/>
+                            <field name="drawdown_price"/>
                         </group>
                         <group>
                             <field name="daily_price" widget="percentage" decoration-danger="daily_price &lt; 0" decoration-success="daily_price &gt; 0"/>

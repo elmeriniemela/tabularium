@@ -67,6 +67,7 @@ class InvestmentAsset(models.Model):
     expected_yearly_appreciation = fields.Float(group_operator='avg', default=0.0, digits='Investment Asset Interest', tracking=True)
     plausible_ath_drawdown = fields.Float(string="Plausible ATH drawdown", group_operator='avg', default=0.0, digits='Investment Asset Interest', tracking=True)
     ath_price = fields.Monetary(string='ATH Price', currency_field='currency_id', compute='_compute_ath_price', store=True)
+    drawdown_price = fields.Monetary(string='Drawdown Price', currency_field='currency_id', compute='_compute_ath_price', store=True)
 
 
     daily_price = fields.Float(compute='_compute_last_price', store=True, group_operator='avg', string="1 Day")
@@ -165,7 +166,7 @@ class InvestmentAsset(models.Model):
         return at_price_id
 
 
-    @api.depends('split_ids', 'price_ids')
+    @api.depends('split_ids', 'price_ids', 'plausible_ath_drawdown')
     def _compute_ath_price(self):
         P = self.env['investment.asset.price']
         for asset in self:
@@ -185,6 +186,7 @@ class InvestmentAsset(models.Model):
                 ], order='price desc', limit=1))
 
             asset.ath_price = max(prices, key=lambda p: p.price_adjusted).price_adjusted
+            asset.drawdown_price = (1-asset.plausible_ath_drawdown) * asset.ath_price
 
 
     @api.depends(
