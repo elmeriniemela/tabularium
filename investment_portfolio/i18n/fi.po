@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-06-07 13:04+0000\n"
-"PO-Revision-Date: 2024-06-07 13:04+0000\n"
+"POT-Creation-Date: 2024-11-24 10:37+0000\n"
+"PO-Revision-Date: 2024-11-24 10:37+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -114,6 +114,11 @@ msgid "9 Years"
 msgstr "9 vuotta"
 
 #. module: investment_portfolio
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_transaction_form
+msgid "<span>@</span>"
+msgstr ""
+
+#. module: investment_portfolio
 #: model:ir.model.constraint,message:investment_portfolio.constraint_investment_position_transaction_check_exchange_rate
 msgid "A buy/sell transaction can not be encoded without an exchange rate."
 msgstr "Myyntiä/ostoa ei voida tallentaa ilman vaihtokurssia."
@@ -127,6 +132,12 @@ msgstr "Siirto tällä nimellä on jo olemassa!"
 #: model:ir.model.constraint,message:investment_portfolio.constraint_investment_asset_realized_unique_realized
 msgid "A realization for this aquisition/sell link already exists!"
 msgstr "Toteutumistapahtuma tälle hankinta/myynnille on jo olemassa!"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__ath_price
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__ath_price
+msgid "ATH Price"
+msgstr "ATH Hinta"
 
 #. module: investment_portfolio
 #: model:ir.model.fields.selection,name:investment_portfolio.selection__investment_position__plan_type__acquire
@@ -201,6 +212,7 @@ msgstr "Efektiivinen vuosikorko (IRR)"
 
 #. module: investment_portfolio
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_price__asset_id
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_split__asset_id
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_timeseries__position_id
 #: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_price_search
 #: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_realized_search
@@ -382,6 +394,11 @@ msgid "Cost Basis"
 msgstr "Keskihinta"
 
 #. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_period__count_timeseries
+msgid "Count Timeseries"
+msgstr "Aikasarjojen lukumäärä"
+
+#. module: investment_portfolio
 #: model:ir.actions.server,name:investment_portfolio.cron_create_time_series_ir_actions_server
 #: model:ir.cron,cron_name:investment_portfolio.cron_create_time_series
 msgid "Create Investment Time Series"
@@ -397,6 +414,7 @@ msgstr "Luo hinnat vaihtokurssien perusteella"
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__create_uid
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_price__create_uid
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_realized__create_uid
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_split__create_uid
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_category__create_uid
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__create_uid
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_period__create_uid
@@ -412,6 +430,7 @@ msgstr "Lounut"
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__create_date
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_price__create_date
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_realized__create_date
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_split__create_date
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_category__create_date
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__create_date
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_period__create_date
@@ -468,8 +487,18 @@ msgid "Date"
 msgstr "Päivämäärä"
 
 #. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_period__debug_xirr
+msgid "Debug Xirr"
+msgstr ""
+
+#. module: investment_portfolio
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__description
 msgid "Description"
+msgstr "Kuvaus"
+
+#. module: investment_portfolio
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_transaction_kanban
+msgid "Descrtiption"
 msgstr "Kuvaus"
 
 #. module: investment_portfolio
@@ -486,6 +515,7 @@ msgstr "Ero"
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__display_name
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_price__display_name
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_realized__display_name
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_split__display_name
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_category__display_name
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__display_name
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_period__display_name
@@ -530,9 +560,19 @@ msgid "Expected Yearly Appreciation"
 msgstr "Odotettu vuosittainen arvonnousu"
 
 #. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_split__factor
+msgid "Factor"
+msgstr "Kerroin"
+
+#. module: investment_portfolio
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__fee
 msgid "Fee"
 msgstr "Kulu"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_split__price_id
+msgid "First price post split"
+msgstr "Ensimmäinen hinta splittauksen jälkeen"
 
 #. module: investment_portfolio
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__follow
@@ -612,6 +652,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__id
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_price__id
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_realized__id
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_split__id
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_category__id
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__id
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_period__id
@@ -693,6 +734,11 @@ msgid "Interpolated Price"
 msgstr "Interpoloitu hinta"
 
 #. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__inverse_company_rate
+msgid "Inverse Company Rate"
+msgstr "Käänteinen yrityskurssi"
+
+#. module: investment_portfolio
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__investment
 msgid "Investment"
 msgstr "Sijoitus"
@@ -701,6 +747,11 @@ msgstr "Sijoitus"
 #: model:ir.model,name:investment_portfolio.model_investment_asset
 msgid "Investment Asset"
 msgstr "Sijoitus omaisuus"
+
+#. module: investment_portfolio
+#: model:ir.model,name:investment_portfolio.model_investment_asset_split
+msgid "Investment Asset Split"
+msgstr "Sijoitus omaisuus splittaus"
 
 #. module: investment_portfolio
 #: model:ir.model,name:investment_portfolio.model_investment_category
@@ -730,6 +781,14 @@ msgstr "Sijoitus positio"
 #. module: investment_portfolio
 #: model:ir.model,name:investment_portfolio.model_investment_timeseries
 msgid "Investment Time Series"
+msgstr "Sijoitus aikasarjat"
+
+#. module: investment_portfolio
+#. odoo-python
+#: code:addons/investment_portfolio/models/investment_period.py:0
+#: code:addons/models/investment_period.py:0
+#, python-format
+msgid "Investment Timeseries"
 msgstr "Sijoitus aikasarjat"
 
 #. module: investment_portfolio
@@ -767,6 +826,7 @@ msgstr "On sunnuntai"
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset____last_update
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_price____last_update
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_realized____last_update
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_split____last_update
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_category____last_update
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone____last_update
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_period____last_update
@@ -804,6 +864,7 @@ msgstr "Viimeisin hinta tietue"
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__write_uid
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_price__write_uid
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_realized__write_uid
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_split__write_uid
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_category__write_uid
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__write_uid
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_period__write_uid
@@ -819,6 +880,7 @@ msgstr "Viimeksi muokannut"
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__write_date
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_price__write_date
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_realized__write_date
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_split__write_date
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_category__write_date
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__write_date
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_period__write_date
@@ -994,6 +1056,7 @@ msgstr "Ei tapahtumia"
 #. module: investment_portfolio
 #. odoo-python
 #: code:addons/investment_portfolio/models/investment_position_transaction.py:0
+#: code:addons/models/investment_position_transaction.py:0
 #, python-format
 msgid "No transactions selected!"
 msgstr "Tapahtumia ei ole valittu!"
@@ -1141,6 +1204,17 @@ msgid "Plans"
 msgstr "Suunnitelmat"
 
 #. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__plausible_ath_drawdown
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__plausible_ath_drawdown
+msgid "Plausible ATH drawdown"
+msgstr "Mahdollinen ATH romahdus"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__plausible_drawdown_position
+msgid "Plausible Drawdown Position"
+msgstr "Mahdollinen romahtanut positio"
+
+#. module: investment_portfolio
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__portfolio_id
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__portfolio_id
 #: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_transaction_search
@@ -1218,6 +1292,11 @@ msgid "Price"
 msgstr "Hinta"
 
 #. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_price__price_adjusted
+msgid "Price Adjusted"
+msgstr "Hinta oikaistu"
+
+#. module: investment_portfolio
 #: model:ir.model.constraint,message:investment_portfolio.constraint_investment_asset_price_unique_price
 msgid "Price for this time is already configured!"
 msgstr "Hinta tälle ajankohdalle on jo olemassa!"
@@ -1269,6 +1348,11 @@ msgstr "Tuotot per omaisuus"
 #: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_transaction_kanban
 msgid "Quantity"
 msgstr "Määrä"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__quantity_adjusted
+msgid "Quantity Adjusted"
+msgstr "Määrä oikaistu"
 
 #. module: investment_portfolio
 #: model:ir.model.fields.selection,name:investment_portfolio.selection__investment_timeseries__granularity__2_quaterly
@@ -1380,6 +1464,20 @@ msgid "Simulated"
 msgstr "Simuloitu"
 
 #. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__split_ids
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__split_ids
+#: model:ir.model.fields.selection,name:investment_portfolio.selection__investment_position_transaction__ttype__split
+msgid "Split"
+msgstr "Splittaus"
+
+#. module: investment_portfolio
+#: model:ir.actions.act_window,name:investment_portfolio.action_asset_splits
+#: model:ir.ui.menu,name:investment_portfolio.menu_asset_splits
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_form
+msgid "Splits"
+msgstr "Splittaukset"
+
+#. module: investment_portfolio
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_period__start_date
 msgid "Start Date"
 msgstr "Alku pvm."
@@ -1421,6 +1519,11 @@ msgid ""
 msgstr ""
 
 #. module: investment_portfolio
+#: model:ir.model.fields,help:investment_portfolio.field_investment_position_transaction__inverse_company_rate
+msgid "The rate of the currency to the currency of rate 1 "
+msgstr "Valuutan kurssi suhteessa valuuttakurssiin 1 "
+
+#. module: investment_portfolio
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__thesis
 #: model_terms:ir.ui.view,arch_db:investment_portfolio.position_form
 msgid "Thesis"
@@ -1447,6 +1550,7 @@ msgstr "Tunniste"
 #. module: investment_portfolio
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__last_update
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_price__time
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset_split__time
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__last_update
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_move__time
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position_transaction__time
@@ -1457,7 +1561,9 @@ msgstr "Aika"
 
 #. module: investment_portfolio
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_milestone__timeseries_ids
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_period__timeseries_ids
 #: model:ir.ui.menu,name:investment_portfolio.menu_timeseries
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.period_form
 msgid "Timeseries"
 msgstr "Aikasarja"
 
@@ -1521,6 +1627,7 @@ msgstr "Tapahtumat per kuukausi"
 #. module: investment_portfolio
 #. odoo-python
 #: code:addons/investment_portfolio/models/investment_position_transaction.py:0
+#: code:addons/models/investment_position_transaction.py:0
 #, python-format
 msgid "Trasaction '%s' already belongs to a different company!"
 msgstr "Tapahtuma '%s' kuuluu toiselle yritykselle!"
@@ -1528,6 +1635,7 @@ msgstr "Tapahtuma '%s' kuuluu toiselle yritykselle!"
 #. module: investment_portfolio
 #. odoo-python
 #: code:addons/investment_portfolio/models/investment_position_transaction.py:0
+#: code:addons/models/investment_position_transaction.py:0
 #, python-format
 msgid "Trasaction '%s' already has a move!"
 msgstr "Tapahtumalla '%s' on jo siirto!"
@@ -1556,6 +1664,7 @@ msgstr "Päivitä toteutuneet voitot/tappiot"
 
 #. module: investment_portfolio
 #: model_terms:ir.ui.view,arch_db:investment_portfolio.position_form
+#: model_terms:ir.ui.view,arch_db:investment_portfolio.position_tree
 msgid "Update price"
 msgstr "Päivitä hinta"
 
@@ -1573,6 +1682,11 @@ msgstr "Käyttäjä"
 #: model:res.groups,comment:investment_portfolio.group_investment_user
 msgid "User."
 msgstr "Käyttäjä."
+
+#. module: investment_portfolio
+#: model:ir.model.fields,help:investment_portfolio.field_investment_position__plausible_drawdown_position
+msgid "Value of this position after a plausible drawdown."
+msgstr "Position arvo mahdollisen romahduksen jälkeen."
 
 #. module: investment_portfolio
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__ytd_price
