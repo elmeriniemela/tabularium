@@ -54,16 +54,18 @@
                             <field name="endpoint_id"/>
                             <field name="owner_ids" widget="many2many_tags"/>
                             <field name="expected_yearly_appreciation" widget="percentage"/>
-                            <field name="daily_price" widget="percentage" decoration-danger="daily_price &lt; 0" decoration-success="daily_price &gt; 0"/>
-                            <field name="weekly_price" widget="percentage" decoration-danger="weekly_price &lt; 0" decoration-success="weekly_price &gt; 0"/>
-                            <field name="monthly_price" widget="percentage" decoration-danger="monthly_price &lt; 0" decoration-success="monthly_price &gt; 0"/>
-                        </group>
-                        <group>
+                            <field name="plausible_ath_drawdown" widget="percentage"/>
                             <label for="last_price"/>
                             <div>
                                 <field name="last_price" class="oe_inline" attrs="{'readonly': [('endpoint_id', '!=', False)]}"/>
                                 <span> (<field name="last_update" widget="timeago" class="oe_inline"/>) </span>
                             </div>
+                            <field name="ath_price"/>
+                        </group>
+                        <group>
+                            <field name="daily_price" widget="percentage" decoration-danger="daily_price &lt; 0" decoration-success="daily_price &gt; 0"/>
+                            <field name="weekly_price" widget="percentage" decoration-danger="weekly_price &lt; 0" decoration-success="weekly_price &gt; 0"/>
+                            <field name="monthly_price" widget="percentage" decoration-danger="monthly_price &lt; 0" decoration-success="monthly_price &gt; 0"/>
                             <field name="three_month_price" widget="percentage" decoration-danger="three_month_price &lt; 0" decoration-success="three_month_price &gt; 0"/>
                             <field name="six_month_price" widget="percentage" decoration-danger="six_month_price &lt; 0" decoration-success="six_month_price &gt; 0"/>
                             <field name="ytd_price" widget="percentage" decoration-danger="ytd_price &lt; 0" decoration-success="ytd_price &gt; 0"/>
@@ -78,7 +80,7 @@
                             <field name="split_ids">
                                 <tree editable="top">
                                     <field name="asset_id" optional="hide"/>
-                                    <field name="price_id" optional="show" domain="[('asset_id', '=', parent.id)]"/>
+                                    <field name="price_id" optional="show"/>
                                     <field name="time" optional="show"/>
                                     <field name="factor" optional="show"/>
                                 </tree>

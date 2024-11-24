@@ -9,9 +9,11 @@ class InvestmentAssetSplit(models.Model):
     _order = 'time, id'
 
     price_id = fields.Many2one(
+        string="First price post split",
         comodel_name='investment.asset.price',
         index=True,
         required=True,
+        domain="[('asset_id', '=', asset_id), ('prediction', '=', False)]",
     )
 
     asset_id = fields.Many2one(related='price_id.asset_id', store=True)

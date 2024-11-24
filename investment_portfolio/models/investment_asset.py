@@ -65,6 +65,8 @@ class InvestmentAsset(models.Model):
     last_update = fields.Datetime(related='last_price_id.time', store=True)
     last_price = fields.Monetary(string="Last Price", related='last_price_id.price', store=True, currency_field='currency_id', group_operator=None, inverse='_inverse_last_price')
     expected_yearly_appreciation = fields.Float(group_operator='avg', default=0.0, digits='Investment Asset Interest', tracking=True)
+    plausible_ath_drawdown = fields.Float(string="Plausible ATH drawdown", group_operator='avg', default=0.0, digits='Investment Asset Interest', tracking=True)
+    ath_price = fields.Monetary(string='ATH Price', currency_field='currency_id', compute='_compute_ath_price', store=True)
 
 
     daily_price = fields.Float(compute='_compute_last_price', store=True, group_operator='avg', string="1 Day")
@@ -163,6 +165,28 @@ class InvestmentAsset(models.Model):
         return at_price_id
 
 
+    @api.depends('split_ids', 'price_ids')
+    def _compute_ath_price(self):
+        P = self.env['investment.asset.price']
+        for asset in self:
+            prices = [P.search([
+                ('asset_id', '=', asset.id),
+                ('prediction', '=', False),
+                ('time', '<', asset.split_ids[:1].time or fields.Datetime.now()),
+            ], order='price desc', limit=1)]
+
+            for n, split in enumerate(asset.split_ids, start=1):
+                nextsplit = asset.split_ids[n:n+1]
+                prices.append(P.search([
+                    ('asset_id', '=', asset.id),
+                    ('prediction', '=', False),
+                    ('time', '<', nextsplit.time or fields.Datetime.now()),
+                    ('time', '>=', split.time),
+                ], order='price desc', limit=1))
+
+            asset.ath_price = max(prices, key=lambda p: p.price_adjusted).price_adjusted
+
+
     @api.depends(
         'price_ids',
         'price_ids.price',
@@ -216,6 +240,7 @@ class InvestmentAsset(models.Model):
         for asset in self.sudo():
             asset.endpoint_id.produce({'asset': asset})
             asset._compute_last_price() # For some reason, the depends on price_ids does not work...
+            asset._compute_ath_price() # For some reason, the depends on price_ids does not work...
 
 
     def price_upsert(self, time, price):

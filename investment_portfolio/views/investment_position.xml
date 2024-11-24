@@ -22,6 +22,7 @@
 
                 <field name="quantity" optional="show"/>
                 <field name="position" optional="show" sum="Total Position"/>
+                <field name="plausible_drawdown_position" optional="hide" sum="Total Position"/>
                 <field name="investment" optional="hide"/>
                 <field name="max_investment" optional="hide"/>
                 <field name="cost_basis" optional="hide"/>

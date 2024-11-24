@@ -77,6 +77,7 @@ class InvestmentPosition(models.Model):
 
     quantity = fields.Float(compute='_compute_position_aggregate', store=True, digits='Investment Asset quantity', group_operator=None)
     position = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', help="Current value of this position.")
+    plausible_drawdown_position = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', help="Value of this position after a plausible drawdown.")
     investment = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id')
     max_investment = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id')
     cost_basis = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', help="Average price across every purchase.")
@@ -454,6 +455,16 @@ class InvestmentPosition(models.Model):
         position = quantity * market_price
         profit = position-investment
 
+
+        ath_price_cmp_currency = self.asset_id.currency_id._convert(
+            from_amount=self.asset_id.ath_price or 0.0,
+            to_currency=self.company_currency_id,
+            company=self.company_id,
+            date=self.last_price_id.time or fields.Datetime.now(),
+        )
+
+        plausible_drawdown_position = ath_price_cmp_currency * (1-self.asset_id.plausible_ath_drawdown) * quantity
+
         return {
             'position': position,
             'quantity': quantity,
@@ -462,4 +473,5 @@ class InvestmentPosition(models.Model):
             'cost_basis': investment/quantity if quantity else 0,
             'profit_percent': profit/max_investment if max_investment else 0,
             'max_investment': max_investment,
+            'plausible_drawdown_position': plausible_drawdown_position,
         }
