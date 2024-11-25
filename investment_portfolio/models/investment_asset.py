@@ -66,8 +66,8 @@ class InvestmentAsset(models.Model):
     last_price = fields.Monetary(string="Last Price", related='last_price_id.price', store=True, currency_field='currency_id', group_operator=None, inverse='_inverse_last_price')
     expected_yearly_appreciation = fields.Float(group_operator='avg', default=0.0, digits='Investment Asset Interest', tracking=True)
     plausible_ath_drawdown = fields.Float(string="Plausible ATH drawdown", group_operator='avg', default=0.0, digits='Investment Asset Interest', tracking=True)
-    ath_price = fields.Monetary(string='ATH Price', currency_field='currency_id', compute='_compute_ath_price', store=True)
-    drawdown_price = fields.Monetary(string='Drawdown Price', currency_field='currency_id', compute='_compute_ath_price', store=True)
+    ath_price = fields.Monetary(string='ATH Price', currency_field='currency_id', compute='_compute_ath_price', group_operator=None, store=True)
+    drawdown_price = fields.Monetary(string='Drawdown Price', currency_field='currency_id', compute='_compute_ath_price', group_operator=None, store=True)
 
 
     daily_price = fields.Float(compute='_compute_last_price', store=True, group_operator='avg', string="1 Day")
