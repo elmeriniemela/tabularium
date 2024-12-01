@@ -166,15 +166,14 @@ class BitcoinBlock(models.Model):
             record.env.cr.commit()
 
     @api.model
-    def _search(self, domains, offset=0, limit=None, order=None, count=False, access_rights_uid=None):
-        res = super()._search(domains, offset, limit, order, count=count, access_rights_uid=access_rights_uid)
-        found = res if count else len(res)
-        if not self.env.context.get('disable_auto_populate') and not found and len(domains) == 1:
-            field, operator, value = domains[0]
+    def _search(self, domain, offset=0, limit=None, order=None, access_rights_uid=None):
+        res = super()._search(domain, offset, limit, order, access_rights_uid=access_rights_uid)
+        if not self.env.context.get('disable_auto_populate') and not res and len(domain) == 1:
+            field, operator, value = domain[0]
             if field == 'hash' and operator == '=':
                 auto = self.create({'hash': value})
                 auto.with_context(force_tx=True).refresh()
-                res = 1 if count else auto.ids
+                res = auto.ids
         return res
 
     @api.model_create_multi
