@@ -59,7 +59,7 @@ class DnsZone(models.Model):
         return rec
 
 
-    def fetch(self):
+    def fetch_records(self):
         ZoneRecord = self.env['dns.zone.record'].with_context(fetching=True)
         for zone in self.with_context(fetching=True):
             globals_dict = zone.ns_endpoint_id.produce({'kwargs': {

@@ -15,7 +15,7 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <button name="fetch" type="object" string="Fetch" icon="fa-cogs"/>
+                    <button name="fetch_records" type="object" string="Fetch" icon="fa-cogs"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
