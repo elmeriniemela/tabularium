@@ -39,7 +39,7 @@ class TogglTask(models.Model):
         ('task_id_uniq', 'unique(task_id, company_id)', 'The task_id must be unique within a company!'),
     ]
 
-    def fetch(self):
+    def fetch_tasks(self):
         server_models, dbname, uid, pwd = self.env.user._get_toggl_export_proxy()
         task_res = server_models.execute_kw(dbname, uid, pwd,
             'project.task', 'search_read',
@@ -68,7 +68,7 @@ class TogglTask(models.Model):
         records = super().create(vals_list)
         try:
             with records.env.cr.savepoint():
-                records.fetch()
+                records.fetch_tasks()
         except Exception as error:
             _logger.exception(error)
         return records
@@ -238,7 +238,7 @@ class TogglEntry(models.Model):
         if no_amount:
             raise UserError(_("Unable to export %s. Duration is below rounding limit.") %  no_amount.mapped('name'))
 
-        self.mapped('task_id').fetch()
+        self.mapped('task_id').fetch_tasks()
 
         server_models, dbname, uid, pwd = self.env.user._get_toggl_export_proxy()
 

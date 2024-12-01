@@ -16,7 +16,7 @@
         <field name="arch" type="xml">
             <form string="odoo Data ">
                 <header>
-                    <button name="fetch" string="Fetch" type="object"/>
+                    <button name="fetch_tasks" string="Fetch" type="object"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
@@ -61,7 +61,7 @@
         <field name="binding_model_id" ref="model_toggl_task"/>
         <field name="binding_view_types">list</field>
         <field name="state">code</field>
-        <field name="code">records.fetch()</field>
+        <field name="code">records.fetch_tasks()</field>
     </record>
 
     <menuitem name="Tasks" parent="menu_root" id="menu_tasks" action="task_action" sequence="3"/>
