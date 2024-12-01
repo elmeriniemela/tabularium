@@ -1,26 +1,28 @@
 /** @odoo-module **/
 
-import { _lt } from "@web/core/l10n/translation";
+import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { Component, onWillStart } from "@odoo/owl";
+import { Component } from "@odoo/owl";
 export class TimeagoField extends Component {
+    static template = "timeago_widget.TimeagoField";
 
-    setup() {
-        // onWillStart(async () => {
-        //     await loadJS("/timeago_widget/static/src/lib/jquery.timeago.js");
-        // });
-    }
     get isoValue() {
-        var date = new Date(this.props.value);
+        var date = new Date(this.props.record.data[this.props.name]);
         return date.toISOString()
     }
 
     get formattedValue() {
         jQuery.timeago.settings.allowFuture = true;
-        var date = new Date(this.props.value);
+        var date = new Date(this.props.record.data[this.props.name]);
         return jQuery.timeago(date)
     }
 }
-TimeagoField.template = "timeago_widget.TimeagoField";
-TimeagoField.displayName = _lt("Timeago");
-registry.category("fields").add("timeago", TimeagoField);
+
+export const timeagoField = {
+    component: TimeagoField,
+    displayName: _t("Timeago"),
+    supportedTypes: ["datetime"],
+    isEmpty: () => false,
+};
+
+registry.category("fields").add("timeago", timeagoField);

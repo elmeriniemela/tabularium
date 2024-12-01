@@ -41,14 +41,14 @@
                 <field name="plan_type" optional="hide"/>
                 <field name="plan_start_date" optional="hide"/>
                 <field name="plan_months" optional="hide"/>
-                <field name="plan_payment" attrs="{'readonly': [('plan_type', '!=', 'acquire')]}" optional="hide"/>
+                <field name="plan_payment" readonly="plan_type != 'acquire'" optional="hide"/>
                 <field name="plan_yield" optional="hide"/>
                 <field name="plan_cost" optional="hide"/>
                 <field name="plan_fee" optional="hide"/>
                 <field name="plan_yearly_interest" widget="percentage" optional="hide"/>
                 <field name="plan_total_cash_flow" optional="hide"/>
 
-                <button title="Update price" icon="fa-download" name="run_integration" type="object" attrs="{'invisible': [('endpoint_id', '=', False)]}"/>
+                <button title="Update price" icon="fa-download" name="run_integration" type="object" invisible="not endpoint_id"/>
             </tree>
         </field>
     </record>
@@ -81,13 +81,8 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <button name="run_integration" type="object" string="Update price" icon="fa-download" attrs="{'invisible': [('endpoint_id', '=', False)]}"/>
-                    <button name="%(action_prices)d"
-                        string="Prices"
-                        type="action"
-                        context="{'search_default_asset_id': asset_id, 'search_default_realized': 1, 'search_default_group_time': 1}"
-                        class="oe_stat_button"
-                        icon="fa-usd">
+                    <button name="run_integration" type="object" string="Update price" icon="fa-download" invisible="not endpoint_id"/>
+                    <button name="%(action_prices)d" string="Prices" type="action" context="{'search_default_asset_id': asset_id, 'search_default_realized': 1, 'search_default_group_time': 1}" class="oe_stat_button" icon="fa-usd">
                     </button>
                 </header>
                 <sheet>
@@ -108,8 +103,8 @@
                             <field name="is_company_currency" invisible="1"/>
                             <label for="last_price"/>
                             <div>
-                                <field name="last_price" class="oe_inline" attrs="{'readonly': [('endpoint_id', '!=', False)]}"/>
-                                <span attrs="{'invisible': [('is_company_currency', '=', True)]}"> / <field name="last_price_own_currency" class="oe_inline"/> </span>
+                                <field name="last_price" class="oe_inline" readonly="endpoint_id"/>
+                                <span invisible="is_company_currency"> / <field name="last_price_own_currency" class="oe_inline"/> </span>
                                 <span> (<field name="last_update" widget="timeago" class="oe_inline"/>) </span>
                             </div>
                             <field name="cost_basis"/>
@@ -149,7 +144,7 @@
                                     <field name="plan_type"/>
                                     <field name="plan_start_date"/>
                                     <field name="plan_months"/>
-                                    <field name="plan_payment" attrs="{'readonly': [('plan_type', '!=', 'acquire')]}"/>
+                                    <field name="plan_payment" readonly="plan_type != 'acquire'"/>
                                     <field name="plan_yield"/>
                                     <field name="plan_cost"/>
                                     <field name="plan_fee"/>
@@ -158,7 +153,7 @@
                                     <field name="plan_yearly_interest" widget="percentage"/>
                                     <field name="plan_total_cash_flow"/>
                                     <field name="plan_auto_realize" widget="boolean_toggle"/>
-                                    <field name="plan_allow_past" attrs="{'invisible': [('plan_auto_realize', '=', True)]}" widget="boolean_toggle"/>
+                                    <field name="plan_allow_past" invisible="plan_auto_realize" widget="boolean_toggle"/>
                                     <button name="generate_plan" type="object" string="Generate Plan" icon="fa-cogs"/>
                                 </group>
                             </group>
@@ -188,7 +183,7 @@
                 <field name="category_id"/>
                 <field name="portfolio_id"/>
                 <separator/>
-                <filter string="Long" name="long" domain="[('quantity', '>', 0.0)]"/>
+                <filter string="Long" name="long" domain="[('quantity', '&gt;', 0.0)]"/>
                 <filter string="Short" name="short" domain="[('quantity', '&lt;', 0.0)]"/>
                 <filter string="Closed" name="closed" domain="[('quantity', '=', 0.0)]"/>
                 <separator/>

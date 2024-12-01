@@ -10,7 +10,7 @@
                 </page>
             </xpath>
             <xpath expr="//button[@name='run_integration']" position="after">
-                <button name="fetch_bitcoin_transactions" type="object" string="Fetch Bitcoin Transactions" icon="fa-btc"  attrs="{'invisible': [('wallet_count', '=', 0)]}"/>
+                <button name="fetch_bitcoin_transactions" type="object" string="Fetch Bitcoin Transactions" icon="fa-btc" invisible="wallet_count == 0"/>
             </xpath>
         </field>
     </record>

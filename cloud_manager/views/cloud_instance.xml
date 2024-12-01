@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <odoo>
     <record id="cloud_instance_list" model="ir.ui.view">
         <field name="model">cloud.instance</field>
@@ -23,17 +23,17 @@
             <form>
                 <header>
                     <field name="state" widget="statusbar" statusbar_visible="created,running,exited,removed" options="{'clickable': '1'}"/>
-                    <button name="action_deploy" type="object" string="Deploy" states="draft,removed"/>
-                    <button name="action_start" type="object" string="Start"  states="exited"/>
-                    <button name="action_restart" type="object" string="Restart" states="running" help="Restart the Odoo process."/>
-                    <button name="action_upgrade" type="object" string="Upgrade" states="running" help="This will upgrade all the modules where the manifest version number has increased compared to the database."/>
-                    <button name="action_rebuild" type="object" string="Rebuild" states="exited" help="The runtime environment will be dropped and recreated, but the database will stay intact."/>
-                    <button name="action_restore" type="object" string="Restore" states="exited" help="Restore from backup file"/>
-                    <button name="action_config" type="object" string="Config" states="running,exited,paused" confirm="Are you sure you want to overwrite the config on this instance?" help="This will overwrite the Odoo config on the server"/>
-                    <button name="action_stop" type="object" string="Stop" states="running,restarting,paused"/>
-                    <button name="action_backup" type="object" string="Backup" states="running,restarting,paused"/>
-                    <button name="action_reset" type="object" string="Reset" states="exited" confirm="Are you sure you want to RESET this instance? The database will be dropped and an empty one will created." help="The database will be dropped and an empty one will created."/>
-                    <button name="action_remove" type="object" string="Remove" states="exited,dead" confirm="Are you sure you want to REMOVE this instance? This will delete everything related to the instance from the server including the database and all the configurations." help="his will delete everything related to the instance from the server including the database and all the configurations."/>
+                    <button name="action_deploy" type="object" string="Deploy" invisible="state not in ['draft', 'removed']"/>
+                    <button name="action_start" type="object" string="Start" invisible="state not in ['exited']"/>
+                    <button name="action_restart" type="object" string="Restart" invisible="state not in ['running']" help="Restart the Odoo process."/>
+                    <button name="action_upgrade" type="object" string="Upgrade" invisible="state not in ['running']" help="This will upgrade all the modules where the manifest version number has increased compared to the database."/>
+                    <button name="action_rebuild" type="object" string="Rebuild" invisible="state not in ['exited']" help="The runtime environment will be dropped and recreated, but the database will stay intact."/>
+                    <button name="action_restore" type="object" string="Restore" invisible="state not in ['exited']" help="Restore from backup file"/>
+                    <button name="action_config" type="object" string="Config" invisible="state not in ['running', 'exited', 'paused']" confirm="Are you sure you want to overwrite the config on this instance?" help="This will overwrite the Odoo config on the server"/>
+                    <button name="action_stop" type="object" string="Stop" invisible="state not in ['running', 'restarting', 'paused']"/>
+                    <button name="action_backup" type="object" string="Backup" invisible="state not in ['running', 'restarting', 'paused']"/>
+                    <button name="action_reset" type="object" string="Reset" invisible="state not in ['exited']" confirm="Are you sure you want to RESET this instance? The database will be dropped and an empty one will created." help="The database will be dropped and an empty one will created."/>
+                    <button name="action_remove" type="object" string="Remove" invisible="state not in ['exited', 'dead']" confirm="Are you sure you want to REMOVE this instance? This will delete everything related to the instance from the server including the database and all the configurations." help="his will delete everything related to the instance from the server including the database and all the configurations."/>
                     <button name="action_sync_urls" type="object" string="Sync URLs" help="Sync server and DNS config with the selected URL's"/>
                 </header>
                 <sheet>
@@ -51,9 +51,9 @@
                             <field name="protected" widget="boolean_toggle"/>
                         </group>
                         <group>
-                            <field name="uid" required="0" attrs="{'invisible': [('uid', '=', False)]}"/>
-                            <field name="http_port" required="0" attrs="{'invisible': [('http_port', '=', 0)]}"/>
-                            <field name="gevent_port" required="0" attrs="{'invisible': [('gevent_port', '=', 0)]}"/>
+                            <field name="uid" required="0" invisible="not uid"/>
+                            <field name="http_port" required="0" invisible="http_port == 0"/>
+                            <field name="gevent_port" required="0" invisible="gevent_port == 0"/>
                             <field name="is_self" widget="boolean_toggle"/>
                         </group>
                     </group>
@@ -65,7 +65,7 @@
                             <field name="upgrade"/>
                         </page>
                         <page string="Backups">
-                            <button name="action_fshealth" type="object" string="Fetch Filestore Health" states="running,restarting,paused,exited"/>
+                            <button name="action_fshealth" type="object" string="Fetch Filestore Health" invisible="state not in ['running', 'restarting', 'paused', 'exited']"/>
                             <field name="fshealth"/>
                             <field name="backup_ids"/>
                         </page>
@@ -98,7 +98,7 @@
         <field name="name">Instances</field>
         <field name="res_model">cloud.instance</field>
         <field name="view_mode">tree,kanban,form</field>
-        <field name="context"></field>
+        <field name="context"/>
     </record>
 
 

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <odoo>
     <record id="api_endpoint_list" model="ir.ui.view">
         <field name="model">api.endpoint</field>
@@ -32,8 +32,8 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <field name="state" widget="statusbar" statusbar_visible="active,error,archived" options="{'clickable': '1'}" />
-                    <button name="action_execute" type="object" string="Execute" icon="fa-cogs" attrs="{'invisible': [('role', '!=', 'active')]}"/>
+                    <field name="state" widget="statusbar" statusbar_visible="active,error,archived" options="{'clickable': '1'}"/>
+                    <button name="action_execute" type="object" string="Execute" icon="fa-cogs" invisible="role != 'active'"/>
                     <button name="action_test" type="object" string="Test" icon="fa-cogs"/>
                 </header>
                 <sheet>
@@ -50,12 +50,12 @@
                     <group>
                         <group>
                             <field name="location"/>
-                            <field name="url" widget="url" attrs="{'invisible': [('url', '=', False)]}"/>
+                            <field name="url" widget="url" invisible="not url"/>
                             <field name="authorization"/>
-                            <field name="sequence_id" attrs="{'invisible': [('sequence_id', '=', False)]}" required="False"/>
+                            <field name="sequence_id" invisible="not sequence_id" required="False"/>
                             <field name="user_id" widget="many2one_avatar_user"/>
                             <field name="company_id" groups="base.group_multi_company"/>
-                            <field name="cron_frequency" attrs="{'invisible': [('role', '!=', 'active')]}"/>
+                            <field name="cron_frequency" invisible="role != 'active'"/>
                             <field name="auto_consume" widget="boolean_toggle"/>
                             <field name="auto_commit" widget="boolean_toggle"/>
                         </group>
@@ -64,7 +64,7 @@
                             <field name="direction"/>
                             <field name="role"/>
                             <field name="comm_method"/>
-                            <field name="http_method" attrs="{'invisible': [('comm_method', '!=', 'http')]}"/>
+                            <field name="http_method" invisible="comm_method != 'http'"/>
                             <field name="file_format"/>
                             <field name="response_format"/>
                             <field name="ttl"/>
@@ -75,15 +75,15 @@
                     <field name="documentation"/>
                     <label for="test_example"/>
                     <field name="test_example" widget="ace" options="{'mode': 'python'}"/>
-                    <label for="xslt" attrs="{'invisible': [('file_format', '!=', 'xml')]}"/>
-                    <field name="xslt" widget="ace" options="{'mode': 'xml'}" attrs="{'invisible': [('file_format', '!=', 'xml')]}"/>
-                    <label for="initiator" attrs="{'invisible': [('role', '!=', 'active')]}"/>
-                    <field name="initiator" widget="ace" options="{'mode': 'python'}" attrs="{'invisible': [('role', '!=', 'active')]}"/>
+                    <label for="xslt" invisible="file_format != 'xml'"/>
+                    <field name="xslt" widget="ace" options="{'mode': 'xml'}" invisible="file_format != 'xml'"/>
+                    <label for="initiator" invisible="role != 'active'"/>
+                    <field name="initiator" widget="ace" options="{'mode': 'python'}" invisible="role != 'active'"/>
                     <label for="producer"/>
-                    <field name="hardcoded_producer" widget="ace" options="{'mode': 'python'}" attrs="{'invisible': [('hardcoded_producer', '=', '')]}"/>
+                    <field name="hardcoded_producer" widget="ace" options="{'mode': 'python'}" invisible="hardcoded_producer == ''"/>
                     <field name="producer" widget="ace" options="{'mode': 'python'}"/>
                     <label for="consumer"/>
-                    <field name="hardcoded_consumer" widget="ace" options="{'mode': 'python'}" attrs="{'invisible': [('hardcoded_consumer', '=', '')]}"/>
+                    <field name="hardcoded_consumer" widget="ace" options="{'mode': 'python'}" invisible="hardcoded_consumer == ''"/>
                     <field name="consumer" widget="ace" options="{'mode': 'python'}"/>
                 </sheet>
                 <div class="o_attachment_preview"/>

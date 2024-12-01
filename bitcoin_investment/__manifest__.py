@@ -8,7 +8,7 @@
     'version': '0.1.3',
     'depends': [
         'investment_portfolio',
-        'bitcoin_browser',
+        'bitcoin_treasury',
     ],
     'installable': True,
     'auto_install': True,

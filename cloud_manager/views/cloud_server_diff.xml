@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <odoo>
     <record id="cloud_server_diff_list" model="ir.ui.view">
         <field name="model">cloud.server.diff</field>
@@ -16,20 +16,20 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <button name="action_update_server" string="Update Server" type="object" attrs="{'invisible': [('allow_update', '=', False)]}"/>
+                    <button name="action_update_server" string="Update Server" type="object" invisible="not allow_update"/>
                 </header>
                 <field name="server_id" invisible="1"/>
                 <field name="module_id" invisible="1"/>
                 <field name="allow_update" invisible="1"/>
                 <group>
                     <field name="name"/>
-                    <field name="create_date" attrs="{'invisible': [('create_date', '=', False)]}"/>
+                    <field name="create_date" invisible="not create_date"/>
                 </group>
                 <div>
-                    <field name="diff" widget="diff" options="{'maxLength': 2000000}" attrs="{'invisible': [('diff', '=', False)]}"/>
+                    <field name="diff" widget="diff" options="{'maxLength': 2000000}" invisible="not diff"/>
                 </div>
                 <footer>
-                    <button name="action_fetch_diff" string="Fetch" type="object" class="oe_highlight" attrs="{'invisible': [('diff', '!=', False)]}"/>
+                    <button name="action_fetch_diff" string="Fetch" type="object" class="oe_highlight" invisible="diff"/>
                     <button special="cancel" string="Cancel" type="object"/>
                 </footer>
             </form>

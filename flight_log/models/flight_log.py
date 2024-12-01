@@ -18,20 +18,17 @@ class FlightLog(models.Model):
         required=True,
         default=lambda self: self.env.company,
         tracking=True,
-        states={'confirmed': [('readonly', True)]},
     )
 
     name = fields.Char(
         required=True,
         tracking=True,
-        states={'confirmed': [('readonly', True)]},
     )
 
     airport_takeoff_id = fields.Many2one(
         comodel_name='flight.airport',
         required=True,
         index=True,
-        states={'confirmed': [('readonly', True)]},
         ondelete='restrict',
         tracking=True,
     )
@@ -39,7 +36,6 @@ class FlightLog(models.Model):
         comodel_name='flight.airport',
         required=True,
         index=True,
-        states={'confirmed': [('readonly', True)]},
         ondelete='restrict',
         tracking=True,
     )
@@ -60,7 +56,6 @@ class FlightLog(models.Model):
         required=True,
         index=True,
         tracking=True,
-        states={'confirmed': [('readonly', True)]},
         ondelete='restrict',
     )
 
@@ -69,7 +64,6 @@ class FlightLog(models.Model):
         required=True,
         copy=False,
         default=0.0,
-        states={'confirmed': [('readonly', True)]},
         group_operator=None,
     )
 
@@ -78,7 +72,6 @@ class FlightLog(models.Model):
         required=True,
         copy=False,
         default=0.0,
-        states={'confirmed': [('readonly', True)]},
         group_operator=None,
     )
 
@@ -88,7 +81,6 @@ class FlightLog(models.Model):
     date = fields.Date(
         tracking=True,
         required=True,
-        states={'confirmed': [('readonly', True)]},
         index=True,
         default=fields.Datetime.today
     )
@@ -98,7 +90,6 @@ class FlightLog(models.Model):
         required=True,
         index=True,
         tracking=True,
-        states={'confirmed': [('readonly', True)]},
         ondelete='restrict',
     )
 
@@ -107,7 +98,6 @@ class FlightLog(models.Model):
             ('V', 'Vintturi'),
             ('L', 'Lentokone hinaus'),
         ],
-        states={'confirmed': [('readonly', True)]},
         required=True,
         tracking=True,
         default='V',
@@ -116,7 +106,6 @@ class FlightLog(models.Model):
     instrumental_time = fields.Float(
         tracking=True,
         copy=False,
-        states={'confirmed': [('readonly', True)]},
         default=0.0,
         required=True,
     )
@@ -129,13 +118,11 @@ class FlightLog(models.Model):
 
     signatory_license_number = fields.Char(
         string="Signatory's license number",
-        states={'confirmed': [('readonly', True)]},
         tracking=True,
         copy=False,
     )
 
     sign = fields.Binary(
-        states={'confirmed': [('readonly', True)]},
         tracking=True,
         copy=False,
     )

@@ -113,11 +113,9 @@ class InvestmentTimeseries(models.Model):
 
 
     @api.model
-    def web_read_group(self, domain, fields, groupby, limit=None, offset=0, orderby=False,
-                       lazy=True, expand=False, expand_limit=None, expand_orderby=False):
+    def web_read_group(self, domain, fields, groupby, limit=None, offset=0, orderby=False, lazy=True):
         """
-        Returns the result of a read_group (and optionally search for and read records inside each
-        group), and the total number of groups matching the search domain.
+        Returns the result of a read_group and the total number of groups matching the search domain.
 
         :param domain: search domain
         :param fields: list of fields to read (see ``fields``` param of ``read_group``)
@@ -126,9 +124,6 @@ class InvestmentTimeseries(models.Model):
         :param offset: see ``offset`` param of ``read_group``
         :param orderby: see ``orderby`` param of ``read_group``
         :param lazy: see ``lazy`` param of ``read_group``
-        :param expand: if true, and groupby only contains one field, read records inside each group
-        :param expand_limit: maximum number of records to read in each group
-        :param expand_orderby: order to apply when reading records in each group
         :return: {
             'groups': array of read groups
             'length': total number of groups
@@ -150,8 +145,7 @@ class InvestmentTimeseries(models.Model):
                     _logger.info("Additional domain: %s", add_domain)
                     break
 
-        return super().web_read_group(domain, fields, groupby, limit=limit, offset=offset, orderby=orderby,
-                       lazy=lazy, expand=expand, expand_limit=expand_limit, expand_orderby=expand_orderby)
+        return super().web_read_group(domain, fields, groupby, limit=limit, offset=offset, orderby=orderby, lazy=lazy)
 
 
     @api.depends('position_id', 'date')

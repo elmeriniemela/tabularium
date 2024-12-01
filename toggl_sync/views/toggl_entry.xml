@@ -22,10 +22,10 @@
                 <field name="export_id" optional="hide"/>
                 <field name="parent_id" optional="hide"/>
                 <field name="locked" optional="hide"/>
-                <button title="Round Up" icon="fa-arrow-up" name="action_round_up" type="object" attrs="{'invisible': [('parent_id', '!=', False)]}"/>
-                <button title="Reset Rounding" icon="fa-bullseye" name="action_reset_rounding" type="object" attrs="{'invisible': [('parent_id', '!=', False)]}"/>
-                <button title="Round Down" icon="fa-arrow-down" name="action_round_down" type="object" attrs="{'invisible': [('parent_id', '!=', False)]}"/>
-                <button string="External Task" name="action_view_task" type="object" attrs="{'invisible': [('parent_id', '!=', False)]}"/>
+                <button title="Round Up" icon="fa-arrow-up" name="action_round_up" type="object" invisible="parent_id"/>
+                <button title="Reset Rounding" icon="fa-bullseye" name="action_reset_rounding" type="object" invisible="parent_id"/>
+                <button title="Round Down" icon="fa-arrow-down" name="action_round_down" type="object" invisible="parent_id"/>
+                <button string="External Task" name="action_view_task" type="object" invisible="parent_id"/>
                 <button string="Toggl Entry" name="action_open_form" type="object"/>
             </tree>
         </field>
@@ -58,8 +58,8 @@
                                 <field name="date" class="oe_inline pr-1"/>
                                 (<field class="oe_inline" name="time_period"/>)
                             </div>
-                            <field name="locked" attrs="{'invisible': [('locked', '=', False)]}"/>
-                            <field name="parent_id" attrs="{'invisible': [('parent_id', '=', False)]}"/>
+                            <field name="locked" invisible="not locked"/>
+                            <field name="parent_id" invisible="not parent_id"/>
                         </group>
                         <group>
                             <field name="rounded_duration" widget="float_time"/>
@@ -68,10 +68,10 @@
                         <div>
                         </div>
                         <div>
-                            <button title="Round Up" icon="fa-arrow-up" name="action_round_up" type="object" attrs="{'invisible': [('parent_id', '!=', False)]}"/>
-                            <button title="Reset Rounding" icon="fa-bullseye" name="action_reset_rounding" type="object" attrs="{'invisible': [('parent_id', '!=', False)]}"/>
-                            <button title="Round Down" icon="fa-arrow-down" name="action_round_down" type="object" attrs="{'invisible': [('parent_id', '!=', False)]}"/>
-                            <button string="External Task" name="action_view_task" type="object" attrs="{'invisible': [('parent_id', '!=', False)]}"/>
+                            <button title="Round Up" icon="fa-arrow-up" name="action_round_up" type="object" invisible="parent_id"/>
+                            <button title="Reset Rounding" icon="fa-bullseye" name="action_reset_rounding" type="object" invisible="parent_id"/>
+                            <button title="Round Down" icon="fa-arrow-down" name="action_round_down" type="object" invisible="parent_id"/>
+                            <button string="External Task" name="action_view_task" type="object" invisible="parent_id"/>
                         </div>
                     </group>
                     <notebook>
@@ -153,9 +153,8 @@
                 date_start="date_start"
                 date_stop="date_stop"
                 mode="week"
-                quick_add="False"
                 color="color"
-                event_limit="5">
+                >
             </calendar>
         </field>
     </record>

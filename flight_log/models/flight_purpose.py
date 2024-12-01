@@ -21,9 +21,9 @@ class FightPurpose(models.Model):
 
 
     @api.model
-    def _name_search(self, name='', args=None, operator='ilike', limit=100, name_get_uid=None):
-        resp = super()._name_search(name, args, operator, limit, name_get_uid)
+    def _name_search(self, name, domain=None, operator='ilike', limit=None, order=None):
+        resp = super()._name_search(name, domain=domain, operator=operator, limit=limit, order=order)
         if not resp and self.env.context.get('import_file'):
-            resp = super()._name_search(name, args, 'ilike', limit, name_get_uid)
+            resp = super()._name_search(name, domain=domain, operator='ilike', limit=limit, order=order)
         return resp
 
