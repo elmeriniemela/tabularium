@@ -56,8 +56,9 @@ class BitcoinTx(models.Model):
     ]
 
     @api.model
-    def _search(self, domain, offset=0, limit=None, order=None, access_rights_uid=None):
-        res = super()._search(domain, offset=offset, limit=limit, order=order, access_rights_uid=access_rights_uid)
+    @api.returns('self')
+    def search_fetch(self, domain, field_names, offset=0, limit=None, order=None):
+        res = super().search_fetch(domain, field_names, offset=offset, limit=limit, order=order)
         if not self.env.context.get('disable_auto_populate') and len(domain) == 1:
             field, operator, value = domain[0]
             if field == 'txid' and operator == '=':
