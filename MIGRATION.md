@@ -28,3 +28,14 @@
 * activate odoo16 own.conf
 * pip install git+https://github.com/OCA/openupgradelib.git@master#egg=openupgradelib
 * odoo --update all --stop-after-init --load=base,web,openupgrade_framework
+
+#### Migration from 16.0 to 17.0
+
+* https://oca.github.io/OpenUpgrade/040_run_migration.html
+* git clone -b 17.0 git@github.com:OCA/OpenUpgrade.git
+* cd OpenUpgrade # this adds openupgrade_framework and openupgrade_scripts available in addons path
+* Comment out renamed module note -> project_todo in openupgrade_scripts/apriori.py
+* export OPENUPGRADE_TARGET_VERSION=17.0
+* activate odoo17 own.conf
+* pip install git+https://github.com/OCA/openupgradelib.git@master#egg=openupgradelib
+* odoo --update all --stop-after-init --load=base,web,openupgrade_framework
