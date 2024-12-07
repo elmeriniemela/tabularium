@@ -63,10 +63,9 @@ class BitcoinTx(models.Model):
             field, operator, value = domain[0]
             if field == 'txid' and operator == '=':
                 if not res:
-                    auto = self.create({'txid': value})
-                    res = auto.ids
+                    res = self.create({'txid': value})
 
-                self.browse(res).filtered(lambda tx: not tx.block_id).refresh()
+                res.filtered(lambda tx: not tx.block_id).refresh()
 
         return res
 

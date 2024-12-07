@@ -172,9 +172,8 @@ class BitcoinBlock(models.Model):
         if not self.env.context.get('disable_auto_populate') and not res and len(domain) == 1:
             field, operator, value = domain[0]
             if field == 'hash' and operator == '=':
-                auto = self.create({'hash': value})
-                auto.with_context(force_tx=True).refresh()
-                res = auto.ids
+                res = self.create({'hash': value})
+                res.with_context(force_tx=True).refresh()
         return res
 
     @api.model_create_multi
