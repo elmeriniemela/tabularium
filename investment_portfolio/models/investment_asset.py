@@ -58,16 +58,24 @@ class InvestmentAsset(models.Model):
         default=lambda self: self.env.user,
     )
 
-    last_price_id = fields.Many2one(
-        string='Last Price Record',
-        comodel_name='investment.asset.price',
-        compute='_compute_last_price', store=True)
+    last_price_id = fields.Many2one(string='Last Price Record', comodel_name='investment.asset.price')
     last_update = fields.Datetime(related='last_price_id.time', store=True)
     last_price = fields.Monetary(string="Last Price", related='last_price_id.price', store=True, currency_field='currency_id', group_operator=None, inverse='_inverse_last_price')
     expected_yearly_appreciation = fields.Float(group_operator='avg', default=0.0, digits='Investment Asset Interest', tracking=True)
     plausible_ath_drawdown = fields.Float(string="Plausible ATH drawdown", group_operator='avg', default=0.0, digits='Investment Asset Interest', tracking=True)
     ath_price = fields.Monetary(string='ATH Price', currency_field='currency_id', compute='_compute_ath_price', group_operator=None, store=True)
     drawdown_price = fields.Monetary(string='Drawdown Price', currency_field='currency_id', compute='_compute_ath_price', group_operator=None, store=True)
+
+    daily_price_id = fields.Many2one(comodel_name='investment.asset.price')
+    weekly_price_id = fields.Many2one(comodel_name='investment.asset.price')
+    monthly_price_id = fields.Many2one(comodel_name='investment.asset.price')
+    three_month_price_id = fields.Many2one(comodel_name='investment.asset.price')
+    six_month_price_id = fields.Many2one(comodel_name='investment.asset.price')
+    ytd_price_id = fields.Many2one(comodel_name='investment.asset.price')
+    one_year_price_id = fields.Many2one(comodel_name='investment.asset.price')
+    three_year_price_id = fields.Many2one(comodel_name='investment.asset.price')
+    five_year_price_id = fields.Many2one(comodel_name='investment.asset.price')
+    ten_year_price_id = fields.Many2one(comodel_name='investment.asset.price')
 
 
     daily_price = fields.Float(compute='_compute_last_price', store=True, group_operator='avg', string="1 Day")
@@ -166,36 +174,56 @@ class InvestmentAsset(models.Model):
         return at_price_id
 
 
-    @api.depends('split_ids', 'price_ids', 'plausible_ath_drawdown')
+    @api.depends('split_ids', 'last_price_id', 'plausible_ath_drawdown')
     def _compute_ath_price(self):
         P = self.env['investment.asset.price']
         for asset in self:
-            prices = [P.search([
-                ('asset_id', '=', asset.id),
-                ('prediction', '=', False),
-                ('time', '<', asset.split_ids[:1].time or fields.Datetime.now()),
-            ], order='price desc', limit=1)]
-
-            for n, split in enumerate(asset.split_ids, start=1):
-                nextsplit = asset.split_ids[n:n+1]
-                prices.append(P.search([
+            if not asset.ath_price or asset.ath_price < asset.last_price_id.price_adjusted:
+                prices = [P.search([
                     ('asset_id', '=', asset.id),
                     ('prediction', '=', False),
-                    ('time', '<', nextsplit.time or fields.Datetime.now()),
-                    ('time', '>=', split.time),
-                ], order='price desc', limit=1))
+                    ('time', '<', asset.split_ids[:1].time or fields.Datetime.now()),
+                ], order='price desc', limit=1)]
 
-            asset.ath_price = max(prices, key=lambda p: p.price_adjusted).price_adjusted
-            asset.drawdown_price = (1-asset.plausible_ath_drawdown) * asset.ath_price
+                for n, split in enumerate(asset.split_ids, start=1):
+                    nextsplit = asset.split_ids[n:n+1]
+                    prices.append(P.search([
+                        ('asset_id', '=', asset.id),
+                        ('prediction', '=', False),
+                        ('time', '<', nextsplit.time or fields.Datetime.now()),
+                        ('time', '>=', split.time),
+                    ], order='price desc', limit=1))
+
+                asset.ath_price = max(prices, key=lambda p: p.price_adjusted).price_adjusted
+                asset.drawdown_price = (1-asset.plausible_ath_drawdown) * asset.ath_price
 
 
-    @api.depends(
-        'price_ids',
-        'price_ids.price',
-    )
+    @api.depends('last_price_id', 'last_price_id.price')
     def _compute_last_price(self):
 
-        def percent_change(record, time, market_price):
+        def percent_change(closing_price_id, market_price_id):
+            closing_price = closing_price_id.price_adjusted or 0.0
+            return (market_price_id.price-closing_price)/closing_price if closing_price else 0.0
+
+        for record in self:
+            record.daily_price = percent_change(record.daily_price_id, record.last_price_id)
+            record.weekly_price = percent_change(record.weekly_price_id, record.last_price_id)
+            record.monthly_price = percent_change(record.monthly_price_id, record.last_price_id)
+            record.three_month_price = percent_change(record.three_month_price_id, record.last_price_id)
+            record.six_month_price = percent_change(record.six_month_price_id, record.last_price_id)
+            record.ytd_price = percent_change(record.ytd_price_id, record.last_price_id)
+            record.one_year_price = percent_change(record.one_year_price_id, record.last_price_id)
+            record.three_year_price = percent_change(record.three_year_price_id, record.last_price_id)
+            record.five_year_price = percent_change(record.five_year_price_id, record.last_price_id)
+            record.ten_year_price = percent_change(record.ten_year_price_id, record.last_price_id)
+
+
+    def cron_daily_prices(self):
+        self.search([])._compute_daily_prices()
+
+    def _compute_daily_prices(self):
+        "for performance reasons, this is ran only once a day via cron"
+        def closing_price(record, time):
             closing_price_id = record.env['investment.asset.price'].search([
                 ('asset_id', '=', record.id),
                 ('time', '<', time),
@@ -206,25 +234,20 @@ class InvestmentAsset(models.Model):
                     ('asset_id', '=', record.id),
                     ('prediction', '=', False),
                 ], limit=1, order='time asc') # oldest possible.
-
-            closing_price = closing_price_id.price_adjusted or 0.0
-            return (market_price-closing_price)/closing_price if closing_price else 0.0
-
-
+            return closing_price_id
 
         for record in self:
             record.last_price_id = record.price_ids[:1]
-            record.daily_price = percent_change(record, fields.Datetime.now().replace(hour=0, minute=0, second=0), record.last_price_id.price)
-            record.weekly_price = percent_change(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(weeks=1), record.last_price_id.price)
-            record.monthly_price = percent_change(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(months=1), record.last_price_id.price)
-            record.three_month_price = percent_change(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(months=3), record.last_price_id.price)
-            record.six_month_price = percent_change(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(months=6), record.last_price_id.price)
-            record.ytd_price = percent_change(record, fields.Datetime.now().replace(day=1, month=1, hour=0, minute=0, second=0), record.last_price_id.price)
-            record.one_year_price = percent_change(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(years=1), record.last_price_id.price)
-            record.three_year_price = percent_change(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(years=3), record.last_price_id.price)
-            record.five_year_price = percent_change(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(years=5), record.last_price_id.price)
-            record.ten_year_price = percent_change(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(years=10), record.last_price_id.price)
-
+            record.daily_price_id = closing_price(record, fields.Datetime.now().replace(hour=0, minute=0, second=0))
+            record.weekly_price_id = closing_price(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(weeks=1))
+            record.monthly_price_id = closing_price(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(months=1))
+            record.three_month_price_id = closing_price(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(months=3))
+            record.six_month_price_id = closing_price(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(months=6))
+            record.ytd_price_id = closing_price(record, fields.Datetime.now().replace(day=1, month=1, hour=0, minute=0, second=0))
+            record.one_year_price_id = closing_price(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(years=1))
+            record.three_year_price_id = closing_price(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(years=3))
+            record.five_year_price_id = closing_price(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(years=5))
+            record.ten_year_price_id = closing_price(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(years=10))
 
     def _inverse_last_price(self):
         Price = self.env['investment.asset.price']
@@ -241,8 +264,6 @@ class InvestmentAsset(models.Model):
     def run_integration(self):
         for asset in self.sudo():
             asset.endpoint_id.produce({'asset': asset})
-            asset._compute_last_price() # For some reason, the depends on price_ids does not work...
-            asset._compute_ath_price() # For some reason, the depends on price_ids does not work...
 
 
     def price_upsert(self, time, price):
@@ -262,6 +283,7 @@ class InvestmentAsset(models.Model):
                 'time': time,
                 'price': price,
             })
-        return price_id
+
+        self.last_price_id = price_id
 
 

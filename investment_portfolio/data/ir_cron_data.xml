@@ -10,4 +10,16 @@
         <field name="interval_type">hours</field>
         <field name="numbercall">-1</field>
     </record>
+
+     <record id="cron_daily_prices" model="ir.cron">
+        <field name="name">Update daily price links</field>
+        <field name="model_id" ref="model_investment_asset"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_daily_prices()</field>
+        <field name="user_id" ref="base.user_root"/>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="nextcall" eval="(DateTime.now().replace(hour=0, minute=1, second=0) + timedelta(days=1)).strftime('%Y-%m-%d %H:%M:%S')"/>
+        <field name="numbercall">-1</field>
+    </record>
 </odoo>

@@ -19,15 +19,15 @@ class InvestmentAssetPrice(models.Model):
     )
     currency_id = fields.Many2one(related='asset_id.currency_id')
 
-    price = fields.Monetary(required=True, group_operator='avg')
+    price = fields.Monetary(required=True, group_operator='avg', index=True)
     price_adjusted = fields.Monetary(group_operator='avg', compute='_compute_price_adjusted')
 
 
-    time = fields.Datetime(required=True, default=fields.Datetime.now)
+    time = fields.Datetime(required=True, default=fields.Datetime.now, index=True)
 
-    prediction = fields.Boolean()
+    prediction = fields.Boolean(index=True)
 
-    interpolated = fields.Boolean()
+    interpolated = fields.Boolean(index=True)
 
     transaction_id = fields.Many2one(
         comodel_name='investment.position.transaction',
