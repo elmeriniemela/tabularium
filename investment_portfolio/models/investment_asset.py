@@ -284,6 +284,6 @@ class InvestmentAsset(models.Model):
                 'price': price,
             })
 
-        self.last_price_id = price_id
+        self.sudo().last_price_id = price_id
 
 
