@@ -87,11 +87,10 @@
                     <t t-name="kanban-box">
                         <div t-attf-class="oe_kanban_global_click">
                             <div class="row">
-                                <div class="col-4" style="font-weight: bold;">
-                                    <field name="ttype"/>
-                                </div>
-                                <div class="col-8 text-right">
-                                    <field name="payment"/>
+                                <div class="col-12" style="font-weight: bold;">
+                                    <field name="ttype"/>,
+                                    <field name="payment"/>,
+                                    <field name="position_id"/>
                                 </div>
                             </div>
                             <div class="row">
@@ -107,7 +106,7 @@
                                     Quantity
                                 </div>
                                 <div class="col-8 text-right">
-                                    <field name="quantity"/> @ <field name="exchange_rate"/>
+                                    <field name="kanban_quantity"/>
                                 </div>
                             </div>
                             <div t-if="record.ttype.raw_value === 'buy' || record.ttype.raw_value === 'sell'" class="row">

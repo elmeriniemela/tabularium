@@ -2,7 +2,7 @@
 
 from odoo import api, models, fields, _
 from odoo.exceptions import ValidationError
-from odoo.tools import float_is_zero, float_compare
+from odoo.tools import float_is_zero
 import traceback
 from dateutil.relativedelta import relativedelta
 from dateutil import rrule

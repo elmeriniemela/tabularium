@@ -2,7 +2,7 @@
 
 from odoo import api, models, fields, Command, _
 from odoo.exceptions import ValidationError
-from odoo.tools import float_is_zero, float_compare
+from odoo.tools import float_is_zero, float_utils
 import logging
 
 
@@ -65,6 +65,11 @@ class InvestmentPositionTransaction(models.Model):
 
     profit = fields.Monetary(compute='_compute_profit', currency_field='company_currency_id')
 
+    kanban_quantity = fields.Char(
+        compute='_compute_kanban_quantity'
+    )
+
+
     prediction = fields.Boolean(
         compute='_compute_prediction',
         inverse='_inverse_prediction',
@@ -116,6 +121,27 @@ class InvestmentPositionTransaction(models.Model):
     def _compute_display_name(self):
         for record in self:
             record.display_name = f'{record.position_id.display_name} @ {record.time}'
+
+
+    def _compute_kanban_quantity(self):
+
+        def qty_to_str(qty):
+            return self.env['ir.qweb.field.float'].value_to_html(qty, {'decimal_precision': 'Investment Asset quantity'}).rstrip('0').rstrip('.').rstrip(',')
+
+        def money_to_str(m, currency):
+            qty = qty_to_str(m)
+            if currency.position == 'before':
+                fmt = '{symbol} {qty}'
+            else:
+                fmt = '{qty} {symbol}'
+
+            return fmt.format(qty=qty, symbol=currency.symbol)
+
+        units = _("Units")
+        for record in self:
+            record.kanban_quantity = f'{qty_to_str(record.quantity)} {units} @ {money_to_str(record.exchange_rate, record.currency_id)}'
+
+
 
     def make_move(self):
         if not self:
