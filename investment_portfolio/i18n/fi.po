@@ -1726,3 +1726,11 @@ msgstr "Tuotto"
 #: model:ir.model.fields.selection,name:investment_portfolio.selection__investment_position__plan_type__cashflow
 msgid "Yield/Cost"
 msgstr "Tuotto/kustannus"
+
+#. module: investment_portfolio
+#. odoo-python
+#: code:addons/investment_portfolio/models/investment_position_transaction.py:0
+#: code:addons/models/investment_position_transaction.py:0
+#, python-format
+msgid "units"
+msgstr "kpl"

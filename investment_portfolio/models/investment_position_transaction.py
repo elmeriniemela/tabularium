@@ -137,7 +137,7 @@ class InvestmentPositionTransaction(models.Model):
 
             return fmt.format(qty=qty, symbol=currency.symbol)
 
-        units = _("Units")
+        units = _("units")
         for record in self:
             record.kanban_quantity = f'{qty_to_str(record.quantity)} {units} @ {money_to_str(record.exchange_rate, record.currency_id)}'
 
