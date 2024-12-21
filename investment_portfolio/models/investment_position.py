@@ -170,6 +170,7 @@ class InvestmentPosition(models.Model):
             ])
             predicted.unlink()
             position_id.generate_plan()
+            position_id.env.cr.commit()
 
         today = datetime.date.today()
 
@@ -246,6 +247,9 @@ class InvestmentPosition(models.Model):
                 })
                 existing[todaykey] = serie
                 recompute += serie
+
+            position_id.env.cr.commit()
+
 
         recompute.exists()._compute_timeseries_aggregate()
 
