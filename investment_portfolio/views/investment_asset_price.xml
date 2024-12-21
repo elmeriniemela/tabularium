@@ -42,6 +42,8 @@
         <field name="arch" type="xml">
             <search>
                 <field name="asset_id"/>
+                <field name="time"/>
+                <field name="price"/>
                 <filter name="time" date="time"/>
                 <separator/>
                 <filter string="Realized" name="realized" domain="[('prediction', '=', False)]"/>

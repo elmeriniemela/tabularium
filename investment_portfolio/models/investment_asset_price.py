@@ -8,7 +8,7 @@ class InvestmentAssetPrice(models.Model):
     _name = 'investment.asset.price'
     _description = 'Asset Price'
     _order = 'time desc'
-    _rec_name = 'price'
+    _rec_name = 'display_name'
 
 
     asset_id = fields.Many2one(
@@ -34,9 +34,16 @@ class InvestmentAssetPrice(models.Model):
         index=True,
     )
 
+    display_name = fields.Char(compute='_compute_display_name', store=True)
+
     _sql_constraints = [
         ('unique_price', 'unique(asset_id, time)', 'Price for this time is already configured!'),
     ]
+
+    @api.depends('price', 'time')
+    def _compute_display_name(self):
+        for record in self:
+            record.display_name = f'{record.price} @ {record.time}'
 
     @api.depends('asset_id.split_ids', 'asset_id.split_ids.factor')
     def _compute_price_adjusted(self):

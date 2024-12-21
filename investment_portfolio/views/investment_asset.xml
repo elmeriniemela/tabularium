@@ -83,6 +83,24 @@
                             </field>
 
                         </page>
+                        <page string="Other Info">
+                            <group>
+                                <group>
+                                    <field name="daily_price_id" domain="[('asset_id', '=', id), ('prediction', '=', False)]"/>
+                                    <field name="weekly_price_id" domain="[('asset_id', '=', id), ('prediction', '=', False)]"/>
+                                    <field name="monthly_price_id" domain="[('asset_id', '=', id), ('prediction', '=', False)]"/>
+                                    <field name="three_month_price_id" domain="[('asset_id', '=', id), ('prediction', '=', False)]"/>
+                                    <field name="six_month_price_id" domain="[('asset_id', '=', id), ('prediction', '=', False)]"/>
+                                </group>
+                                <group>
+                                    <field name="ytd_price_id" domain="[('asset_id', '=', id), ('prediction', '=', False)]"/>
+                                    <field name="one_year_price_id" domain="[('asset_id', '=', id), ('prediction', '=', False)]"/>
+                                    <field name="three_year_price_id" domain="[('asset_id', '=', id), ('prediction', '=', False)]"/>
+                                    <field name="five_year_price_id" domain="[('asset_id', '=', id), ('prediction', '=', False)]"/>
+                                    <field name="ten_year_price_id" domain="[('asset_id', '=', id), ('prediction', '=', False)]"/>
+                                </group>
+                            </group>
+                        </page>
                     </notebook>
                 </sheet>
                 <div class="o_attachment_preview"/>
