@@ -19,7 +19,7 @@
                 <field name="liquid" optional="hide"/>
                 <field name="category_id" optional="hide"/>
                 <field name="prediction" optional="hide" widget="boolean_toggle"/>
-                <field name="company_currency_id" invisible="1"/>
+                <field name="company_currency_id" optional="hide"/>
                 <button string="Details" name="open_form" type="object"/>
             </tree>
         </field>
