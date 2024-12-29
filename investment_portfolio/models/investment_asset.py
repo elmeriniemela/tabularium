@@ -195,7 +195,7 @@ class InvestmentAsset(models.Model):
                     ], order='price desc', limit=1))
 
                 asset.ath_price = max(prices, key=lambda p: p.price_adjusted).price_adjusted
-                asset.drawdown_price = (1-asset.plausible_ath_drawdown) * asset.ath_price
+            asset.drawdown_price = (1-asset.plausible_ath_drawdown) * asset.ath_price
 
 
     @api.depends('last_price_id', 'last_price_id.price')
