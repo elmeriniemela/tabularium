@@ -53,9 +53,10 @@ class InvestmentAsset(models.Model):
         inverse_name='asset_id',
     )
 
-    owner_ids = fields.Many2many(
-        comodel_name='res.users',
-        default=lambda self: self.env.user,
+    company_ids = fields.Many2many(
+        string="Companies",
+        comodel_name='res.company',
+        default=lambda self: self.env.user.company,
     )
 
     last_price_id = fields.Many2one(string='Last Price Record', comodel_name='investment.asset.price')

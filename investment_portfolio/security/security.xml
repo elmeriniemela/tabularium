@@ -64,7 +64,7 @@
         <field name="perm_create" eval="True"/>
         <field name="perm_write" eval="True"/>
         <field name="perm_unlink" eval="True"/>
-        <field name="domain_force">[('owner_ids', '=', user.id)]</field>
+        <field name="domain_force">[('company_ids', 'in', company_ids)]</field>
     </record>
 
 
@@ -76,7 +76,7 @@
         <field name="perm_create" eval="True"/>
         <field name="perm_write" eval="True"/>
         <field name="perm_unlink" eval="True"/>
-        <field name="domain_force">[('asset_id.owner_ids', '=', user.id)]</field>
+        <field name="domain_force">[('asset_id.company_ids', 'in', company_ids)]</field>
     </record>
 
 </odoo>
