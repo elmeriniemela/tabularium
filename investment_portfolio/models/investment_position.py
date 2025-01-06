@@ -144,7 +144,7 @@ class InvestmentPosition(models.Model):
         self._compute_position_aggregate()
 
     def run_integration(self):
-        self.mapped('asset_id').run_integration()
+        self.mapped('asset_id').filtered(lambda a: a.sudo().endpoint_id).run_integration()
 
     @api.model
     def cron_create_time_series(self):
