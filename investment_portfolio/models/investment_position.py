@@ -22,8 +22,32 @@ class InvestmentPosition(models.Model):
     _name = 'investment.position'
     _description = 'Investment Position'
     _order = 'portfolio_id, sequence, id'
-    _inherits = {'investment.asset': 'asset_id'}
     _inherit = ['mail.thread', 'mail.activity.mixin']
+
+    ticker = fields.Char(related='asset_id.ticker', readonly=True)
+    category_id = fields.Many2one(related='asset_id.category_id', readonly=True)
+    liquid = fields.Boolean(related='asset_id.liquid', readonly=True)
+    currency_id = fields.Many2one(related='asset_id.currency_id', readonly=True)
+    last_price_id = fields.Many2one(related='asset_id.last_price_id', readonly=True)
+    last_update = fields.Datetime(related='asset_id.last_update', readonly=True)
+    last_price = fields.Monetary(related='asset_id.last_price', readonly=True)
+    expected_yearly_appreciation = fields.Float(related='asset_id.expected_yearly_appreciation', readonly=True)
+    plausible_ath_drawdown = fields.Float(related='asset_id.plausible_ath_drawdown', readonly=True)
+    ath_price = fields.Monetary(related='asset_id.ath_price', readonly=True)
+    drawdown_price = fields.Monetary(related='asset_id.drawdown_price', readonly=True)
+
+
+    daily_price = fields.Float(related='asset_id.daily_price', readonly=True)
+    weekly_price = fields.Float(related='asset_id.weekly_price', readonly=True)
+    monthly_price = fields.Float(related='asset_id.monthly_price', readonly=True)
+    three_month_price = fields.Float(related='asset_id.three_month_price', readonly=True)
+    six_month_price = fields.Float(related='asset_id.six_month_price', readonly=True)
+    ytd_price = fields.Float(related='asset_id.ytd_price', readonly=True)
+    one_year_price = fields.Float(related='asset_id.one_year_price', readonly=True)
+    three_year_price = fields.Float(related='asset_id.three_year_price', readonly=True)
+    five_year_price = fields.Float(related='asset_id.five_year_price', readonly=True)
+    ten_year_price = fields.Float(related='asset_id.ten_year_price', readonly=True)
+
 
     active = fields.Boolean(default=True)
 

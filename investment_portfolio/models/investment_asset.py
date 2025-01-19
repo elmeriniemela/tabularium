@@ -56,7 +56,7 @@ class InvestmentAsset(models.Model):
     company_ids = fields.Many2many(
         string="Companies",
         comodel_name='res.company',
-        default=lambda self: self.env.user.company,
+        default=lambda self: self.env.company,
     )
 
     last_price_id = fields.Many2one(string='Last Price Record', comodel_name='investment.asset.price')
