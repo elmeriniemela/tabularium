@@ -30,7 +30,7 @@ class InvestmentPosition(models.Model):
     currency_id = fields.Many2one(related='asset_id.currency_id', readonly=True)
     last_price_id = fields.Many2one(related='asset_id.last_price_id', readonly=True)
     last_update = fields.Datetime(related='asset_id.last_update', readonly=True)
-    last_price = fields.Monetary(related='asset_id.last_price', readonly=True)
+    last_price = fields.Monetary(related='asset_id.last_price', readonly=True, inverse='_inverse_last_price')
     expected_yearly_appreciation = fields.Float(related='asset_id.expected_yearly_appreciation', readonly=True)
     plausible_ath_drawdown = fields.Float(related='asset_id.plausible_ath_drawdown', readonly=True)
     ath_price = fields.Monetary(related='asset_id.ath_price', readonly=True)
@@ -395,6 +395,9 @@ class InvestmentPosition(models.Model):
         for record in self:
             record.follow = bool(record.transaction_ids)
 
+    def _inverse_last_price(self):
+        for record in self:
+            record.asset_id.last_price = record.last_price
 
     def update_realized_fifo(self):
         class TxJoin:
