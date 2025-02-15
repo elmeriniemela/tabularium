@@ -23,12 +23,23 @@ json = wrap_module(__import__('json'), ['loads','dumps'])
 xmltodict = wrap_module(__import__('xmltodict'), ['parse'])
 dicttoxml = wrap_module(__import__('dicttoxml'), ['dicttoxml'])
 zipfile = wrap_module(__import__('zipfile'), ['ZipFile','ZIP_DEFLATED','BadZipfile'])
+hashlib = wrap_module(__import__('hashlib'), ['sha256','sha512'])
+hmac = wrap_module(__import__('hmac'), ['new',])
+base64 = wrap_module(__import__('base64'), ['b64decode', 'b64encode'])
+time = wrap_module(__import__('time'), ['time',])
 
 import lxml
 lxml_mods = ['etree']
 for mod in lxml_mods:
     __import__('lxml.%s' % mod)
 lxml = wrap_module(__import__('lxml'), {mod: getattr(lxml, mod).__all__ for mod in lxml_mods})
+
+
+import urllib
+urllib_mods = ['parse']
+for mod in urllib_mods:
+    __import__('urllib.%s' % mod)
+urllib = wrap_module(__import__('urllib'), {mod: getattr(urllib, mod).__all__ for mod in urllib_mods})
 
 
 
@@ -81,6 +92,11 @@ class ApiEndpoint(models.Model):
             'request': request,
             'datetime': datetime,
             'dateutil': dateutil,
+            'urllib': urllib,
+            'hashlib': hashlib,
+            'hmac': hmac,
+            'base64': base64,
+            'time': time,
             'io': io,
             're': re,
             'lxml': lxml,
