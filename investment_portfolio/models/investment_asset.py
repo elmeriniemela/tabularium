@@ -222,6 +222,9 @@ class InvestmentAsset(models.Model):
     def cron_daily_prices(self):
         self.search([])._compute_daily_prices()
 
+    def action_compute_daily_prices(self):
+        self._compute_daily_prices()
+
     def _compute_daily_prices(self):
         "for performance reasons, this is ran only once a day via cron"
         def latest_before(record, time):
@@ -303,6 +306,7 @@ class InvestmentAsset(models.Model):
                 'price': price,
             })
 
-        self.sudo().last_price_id = price_id
+        if not self.last_price_id or self.last_price_id.time <= time:
+            self.sudo().last_price_id = price_id
 
 
