@@ -17,14 +17,16 @@
         <field name="model">document.directory</field>
         <field name="arch" type="xml">
             <form>
-                <div class="oe_title" style="margin-left: auto; margin-right: auto; width: 600px;">
-                    <h1>
-                        <field name="name"/>
-                    </h1>
-                    <group>
-                        <field name="message_main_attachment_id" options="{'no_create_edit': True}" domain="[('res_model', '=', 'document.directory'), ('res_id', '=', id)]"/>
-                    </group>
-                </div>
+                <sheet>
+                    <div class="oe_title" style="margin-left: auto; margin-right: auto; width: 600px;">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                        <group>
+                            <field name="message_main_attachment_id" options="{'no_create_edit': True}" domain="[('res_model', '=', 'document.directory'), ('res_id', '=', id)]"/>
+                        </group>
+                    </div>
+                </sheet>
                 <div class="o_attachment_preview"/>
                 <div class="oe_chatter">
                     <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
