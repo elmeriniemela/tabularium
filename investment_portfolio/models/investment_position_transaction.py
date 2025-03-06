@@ -118,6 +118,11 @@ class InvestmentPositionTransaction(models.Model):
         ('check_exchange_rate', "CHECK(payment = 0 OR exchange_rate <> 0 OR ttype not in ('buy', 'sell'))", "A buy/sell transaction can not be encoded without an exchange rate."),
     ]
 
+    @api.onchange('quantity')
+    def _onchange_quantity(self):
+        if not self.payment and not self.ids:
+            self.payment = abs(self.quantity) * self.exchange_rate
+
     def _compute_display_name(self):
         for record in self:
             record.display_name = f'{record.position_id.display_name} @ {record.time}'
