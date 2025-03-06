@@ -63,6 +63,7 @@
                 <group expand="1" string="Group by">
                     <filter string="Sell Date" name="group_sell_date" context="{'group_by': 'sell_date:year'}"/>
                     <filter string="Asset" name="group_position_id" context="{'group_by': 'position_id'}"/>
+                    <filter string="Portfolio" name="group_portfolio_id" context="{'group_by': 'portfolio_id'}"/>
                     <filter string="Category" name="group_category_id" context="{'group_by': 'category_id'}"/>
                 </group>
             </search>

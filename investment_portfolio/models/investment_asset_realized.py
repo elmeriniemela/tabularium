@@ -17,6 +17,7 @@ class InvestmentAssetRealized(models.Model):
     currency_id = fields.Many2one(related='position_id.company_currency_id')
     company_id = fields.Many2one(related='position_id.company_id')
     category_id = fields.Many2one(related='position_id.asset_id.category_id', store=True)
+    portfolio_id = fields.Many2one(related='position_id.portfolio_id', store=True)
 
     sell_batch_id = fields.Many2one(
         comodel_name='investment.position.transaction',

@@ -47,7 +47,7 @@ class BitcoinWallet(models.Model):
                 hist.position_transaction_id = hist.env['investment.position.transaction'].create({
                     'position_id': wallet.position_id.id,
                     'time': hist.date,
-                    'payment': hist.amount * price.price,
+                    'payment': abs(hist.amount * price.price),
                     'quantity': hist.amount,
                     'exchange_rate': price.price,
                     'description': 'Automatically generated',

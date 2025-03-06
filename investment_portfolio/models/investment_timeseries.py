@@ -68,6 +68,14 @@ class InvestmentTimeseries(models.Model):
         readonly=True,
         index=True,
     )
+
+    portfolio_id = fields.Many2one(
+        related='position_id.portfolio_id',
+        store=True,
+        readonly=True,
+        index=True,
+    )
+
     liquid = fields.Boolean(
         related='category_id.liquid',
         store=True,

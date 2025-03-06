@@ -111,6 +111,7 @@
                     <filter string="Date" name="group_week" context="{'group_by': 'date:week'}" invisible="not context.get('search_default_group_week')" />
                     <filter string="Date" name="group_year" context="{'group_by': 'date:year'}" invisible="not context.get('search_default_group_year')" />
                     <filter string="Category" name="group_category_id" context="{'group_by': 'category_id'}" />
+                    <filter string="Portfolio" name="group_portfolio_id" context="{'group_by': 'portfolio_id'}" />
                     <filter string="Position" name="group_position_id" context="{'group_by': 'position_id'}" />
                 </group>
             </search>

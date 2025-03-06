@@ -151,10 +151,10 @@ class InvestmentPositionTransaction(models.Model):
 
         for record in self:
             if record.move_id:
-                raise ValidationError(_("Trasaction '%s' already has a move!") % record.display_name)
+                raise ValidationError(_("Transaction '%s' already has a move!") % record.display_name)
 
             if record.company_id != company:
-                raise ValidationError(_("Trasaction '%s' already belongs to a different company!") % record.display_name)
+                raise ValidationError(_("Transaction '%s' already belongs to a different company!") % record.display_name)
 
         time = self[:1].time
 
