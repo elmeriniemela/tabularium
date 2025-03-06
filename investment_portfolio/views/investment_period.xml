@@ -9,11 +9,11 @@
                 <field name="end_position"/>
                 <field name="profit" widget="monetary" decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0"/>
                 <field name="annualized_irr" widget="percentage" decoration-danger="annualized_irr &lt; 0" decoration-success="annualized_irr &gt; 0"/>
-                <field name="is_closed" widget="boolean_toggle" optional="show"/>
                 <field name="start_date" optional="hide"/>
                 <field name="end_date" optional="hide"/>
                 <field name="company_id" optional="hide"/>
                 <field name="company_currency_id" optional="hide"/>
+                <button title="Update" icon="fa-refresh" name="action_compute" type="object"/>
             </tree>
         </field>
     </record>
@@ -42,7 +42,6 @@
                                     <field name="end_position"/>
                                 </group>
                                 <group>
-                                    <field name="is_closed" widget="boolean_toggle"/>
                                     <field name="profit" widget="monetary" decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0"/>
                                     <field name="annualized_irr" widget="percentage" decoration-danger="annualized_irr &lt; 0" decoration-success="annualized_irr &gt; 0"/>
                                 </group>

@@ -20,7 +20,6 @@ class InvestmentPeriod(models.Model):
 
     start_date = fields.Date(required=True, tracking=True)
     end_date = fields.Date(required=True, tracking=True)
-    is_closed = fields.Boolean(default=False, tracking=True)
 
 
     domain = fields.Text(default="[('liquid', '=', True)]", required=True, tracking=True)
@@ -73,30 +72,14 @@ class InvestmentPeriod(models.Model):
         }
         return super().copy(default)
 
-    def search_fetch(self, domain, field_names, offset=0, limit=None, order=None):
-        records = super().search_fetch(domain, field_names, offset, limit, order)
-        if records.aquire_lock():
-            records._compute_period()
-        return records
+    def action_compute(self):
+        self._compute_period()
 
-    def aquire_lock(self):
-        try:
-            with self.env.cr.savepoint():
-                self.env.cr.execute(
-                    f"SELECT * FROM {self._table} WHERE id in %s FOR UPDATE NOWAIT",
-                    (tuple(self.ids),), log_exceptions=False)
-                if self.env.cr.fetchone():
-                    return True
-                else:
-                    return False
-        except OperationalError:
-            return False
-
-    @api.depends('start_date', 'end_date', 'domain', 'is_closed')
+    @api.depends('start_date', 'end_date', 'domain')
     def _compute_period(self):
         from pyxirr import xirr
         today = fields.Date.today()
-        records = self.filtered(lambda r: not r.is_closed)
+        records = self
         _logger.info(f"Compute period for: {records}")
         for record in records:
             start_date = record.start_date - relativedelta(days=1)
