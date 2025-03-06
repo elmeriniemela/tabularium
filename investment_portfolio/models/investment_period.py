@@ -6,6 +6,7 @@ from odoo.tools import float_is_zero
 
 from odoo.tools.safe_eval import safe_eval
 import logging
+from psycopg2 import OperationalError
 
 _logger = logging.getLogger(__name__)
 
@@ -19,6 +20,7 @@ class InvestmentPeriod(models.Model):
 
     start_date = fields.Date(required=True, tracking=True)
     end_date = fields.Date(required=True, tracking=True)
+    is_closed = fields.Boolean(default=False, tracking=True)
 
 
     domain = fields.Text(default="[('liquid', '=', True)]", required=True, tracking=True)
@@ -33,14 +35,15 @@ class InvestmentPeriod(models.Model):
 
     company_currency_id = fields.Many2one(related='company_id.currency_id', string="Company Currency")
 
-    timeseries_ids = fields.Many2many(comodel_name='investment.timeseries', compute='_compute_period')
-    count_timeseries = fields.Integer(compute='_compute_period')
-    start_position = fields.Monetary(compute='_compute_period', currency_field='company_currency_id')
-    end_position = fields.Monetary(compute='_compute_period', currency_field='company_currency_id')
-    profit = fields.Monetary(compute='_compute_period', currency_field='company_currency_id')
+    timeseries_ids = fields.Many2many(comodel_name='investment.timeseries', compute='_compute_period', store=True)
+    count_timeseries = fields.Integer(compute='_compute_period', store=True)
+    start_position = fields.Monetary(compute='_compute_period', currency_field='company_currency_id', store=True)
+    end_position = fields.Monetary(compute='_compute_period', currency_field='company_currency_id', store=True)
+    profit = fields.Monetary(compute='_compute_period', currency_field='company_currency_id', store=True, tracking=True)
     annualized_irr = fields.Float(
         string="Annualized IRR",
         compute='_compute_period',
+        store=True,
         help=(
             "The money-weighted rate of return (MWRR) is a measure of the performance of an investment. "
             "The MWRR is calculated by finding the rate of return that will set the present values (PV) of all cash flows equal to the value of the initial investment. "
@@ -48,7 +51,7 @@ class InvestmentPeriod(models.Model):
             "MWRR can be compared with the time-weighted return (TWR), which removes the effects of cash in- and outflows. "
         )
     )
-    debug_xirr = fields.Text(compute='_compute_period')
+    debug_xirr = fields.Text(compute='_compute_period', store=True)
 
     def action_view_timeseries(self):
         return {
@@ -70,10 +73,32 @@ class InvestmentPeriod(models.Model):
         }
         return super().copy(default)
 
+    def search_fetch(self, domain, field_names, offset=0, limit=None, order=None):
+        records = super().search_fetch(domain, field_names, offset, limit, order)
+        if records.aquire_lock():
+            records._compute_period()
+        return records
+
+    def aquire_lock(self):
+        try:
+            with self.env.cr.savepoint():
+                self.env.cr.execute(
+                    f"SELECT * FROM {self._table} WHERE id in %s FOR UPDATE NOWAIT",
+                    (tuple(self.ids),), log_exceptions=False)
+                if self.env.cr.fetchone():
+                    return True
+                else:
+                    return False
+        except OperationalError:
+            return False
+
+    @api.depends('start_date', 'end_date', 'domain', 'is_closed')
     def _compute_period(self):
         from pyxirr import xirr
         today = fields.Date.today()
-        for record in self:
+        records = self.filtered(lambda r: not r.is_closed)
+        _logger.info(f"Compute period for: {records}")
+        for record in records:
             start_date = record.start_date - relativedelta(days=1)
             end_date = record.end_date if today > record.end_date else today
 
@@ -91,10 +116,12 @@ class InvestmentPeriod(models.Model):
                 start_series = record.env['investment.timeseries'].search([
                     ('position_id', '=', position.id),
                     ('date', '=', start_date),
+                    ('company_id', '=', record.company_id.id),
                 ])
                 end_series = record.env['investment.timeseries'].search([
                     ('position_id', '=', position.id),
                     ('date', '=', end_date),
+                    ('company_id', '=', record.company_id.id),
                 ])
 
                 record.timeseries_ids += start_series + end_series
