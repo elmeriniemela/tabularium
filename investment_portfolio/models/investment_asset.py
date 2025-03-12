@@ -290,28 +290,29 @@ class InvestmentAsset(models.Model):
         for asset in self.sudo():
             per_integration[asset.endpoint_id] = per_integration.get(asset.endpoint_id, Asset) + asset
 
+        max_workers = int(self.env['ir.config_parameter'].sudo().get_param('investment_portfolio.integration.threads', '3'))
         for integration, assets in per_integration.items():
             if integration.multi_record:
                 _logger.info("Run integration on %s", assets.mapped('ticker'))
                 integration.produce({'assets': assets})
             else:
 
-                ctx = self.env.context.copy()
-                uid = self.env.uid
-                max_workers = int(self.env['ir.config_parameter'].sudo().get_param('investment_portfolio.integration.threads', '3'))
+                _logger.info("Start ThreadPoolExecutor(max_workers=%d)", max_workers)
                 with ThreadPoolExecutor(max_workers=max_workers) as executor:
                     # Map tasks to thread pool
-                    executor.map(functools.partial(Asset.thread_run_integration, ctx=ctx, uid=uid), assets.ids)
+                    executor.map(Asset.thread_run_integration, assets.ids)
 
         _logger.info("Done")
 
     @api.model
-    def thread_run_integration(self, asset_id, ctx, uid):
-         with self.pool.cursor() as new_cr:
-            env = api.Environment(new_cr, uid, ctx)
-            asset = env['investment.asset'].browse(asset_id)
+    def thread_run_integration(self, asset_id):
+         with self.pool.cursor() as cr:
+            self.env.flush_all()
+            Asset = self.with_env(self.env(cr=cr))
+            asset = Asset.browse(asset_id)
             _logger.info("Run integration on %s", asset.ticker)
             asset.endpoint_id.produce({'asset': asset})
+            Asset.env.cache.invalidate()
 
 
     def price_upsert(self, time, price):
