@@ -298,7 +298,8 @@ class InvestmentAsset(models.Model):
 
                 ctx = self.env.context.copy()
                 uid = self.env.uid
-                with ThreadPoolExecutor(max_workers=4) as executor:
+                max_workers = int(self.env['ir.config_parameter'].sudo().get_param('investment_portfolio.integration.threads', '3'))
+                with ThreadPoolExecutor(max_workers=max_workers) as executor:
                     # Map tasks to thread pool
                     executor.map(functools.partial(Asset.thread_run_integration, ctx=ctx, uid=uid), assets.ids)
 
