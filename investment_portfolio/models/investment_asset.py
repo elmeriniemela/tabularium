@@ -284,6 +284,13 @@ class InvestmentAsset(models.Model):
             else:
                 record.last_price_id.price = record.last_price
 
+
+    def _exec_integration(self):
+        _logger.info("Run integration on %s", self.mapped('ticker'))
+        integration = self.mapped('endpoint_id')
+        integration.ensure_one()
+        integration.produce({'assets' if integration.multi_record else 'asset': self})
+
     def run_integration(self):
         Asset = self.browse()
         per_integration = {}
@@ -293,14 +300,16 @@ class InvestmentAsset(models.Model):
         max_workers = int(self.env['ir.config_parameter'].sudo().get_param('investment_portfolio.integration.threads', '3'))
         for integration, assets in per_integration.items():
             if integration.multi_record:
-                _logger.info("Run integration on %s", assets.mapped('ticker'))
-                integration.produce({'assets': assets})
+                assets._exec_integration()
             else:
+                if len(assets) >= max_workers:
+                    _logger.info("Start ThreadPoolExecutor(max_workers=%d)", max_workers)
+                    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                        # Map tasks to thread pool
+                        executor.map(Asset.thread_run_integration, assets.ids)
+                else:
+                    for asset in assets: asset._exec_integration()
 
-                _logger.info("Start ThreadPoolExecutor(max_workers=%d)", max_workers)
-                with ThreadPoolExecutor(max_workers=max_workers) as executor:
-                    # Map tasks to thread pool
-                    executor.map(Asset.thread_run_integration, assets.ids)
 
         _logger.info("Done")
 
@@ -310,8 +319,7 @@ class InvestmentAsset(models.Model):
             self.env.flush_all()
             Asset = self.with_env(self.env(cr=cr))
             asset = Asset.browse(asset_id)
-            _logger.info("Run integration on %s", asset.ticker)
-            asset.endpoint_id.produce({'asset': asset})
+            asset._exec_integration()
             Asset.env.cache.invalidate()
 
 
