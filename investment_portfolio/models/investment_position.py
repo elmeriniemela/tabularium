@@ -174,6 +174,15 @@ class InvestmentPosition(models.Model):
     def cron_create_time_series(self):
         self.env['investment.position'].search([]).generate_timeseries()
 
+    @api.model
+    def web_refresh_prices(self, domain):
+        _logger.info("Refreshing prices for %s", domain)
+        records = self.env['investment.position'].search(domain)
+        assets = records.mapped('asset_id').filtered(lambda a: a.sudo().endpoint_id)
+        assets.run_integration()
+        _logger.info("Price refresed for %s assets", len(assets))
+
+
     def generate_timeseries(self):
         # Re-generate plans first, as this removes price ids and cascades existing timeseries.
 

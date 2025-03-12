@@ -43,4 +43,9 @@
         'demo/investment.asset.price.csv',
         'demo/investment.position.transaction.csv',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'investment_portfolio/static/src/js/*.js',
+        ],
+    }
 }

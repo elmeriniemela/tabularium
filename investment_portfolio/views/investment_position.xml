@@ -3,7 +3,7 @@
         <field name="name">investment.position.tree</field>
         <field name="model">investment.position</field>
         <field name="arch" type="xml">
-            <tree expand="1" default_order="portfolio_id, sequence, id">
+            <tree expand="1" default_order="portfolio_id, sequence, id" js_class="positions_list">
                 <field name="sequence" widget="handle"/>
                 <field name="name" optional="show"/>
                 <field name="ticker" optional="hide"/>
