@@ -264,6 +264,12 @@ class ApiEndpoint(models.Model):
         tracking=True,
     )
 
+    multi_record = fields.Boolean(
+        default=False,
+        tracking=True,
+        help="The integration has multiple records per one file."
+    )
+
     auto_consume = fields.Boolean(
         default=True,
         tracking=True,

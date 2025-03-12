@@ -9,7 +9,8 @@ from dateutil import rrule
 import pytz
 import datetime
 import logging
-
+from concurrent.futures import ThreadPoolExecutor
+import functools
 _logger = logging.getLogger(__name__)
 
 
@@ -284,7 +285,31 @@ class InvestmentAsset(models.Model):
                 record.last_price_id.price = record.last_price
 
     def run_integration(self):
+        Asset = self.browse()
+        per_integration = {}
         for asset in self.sudo():
+            per_integration[asset.endpoint_id] = per_integration.get(asset.endpoint_id, Asset) + asset
+
+        for integration, assets in per_integration.items():
+            if integration.multi_record:
+                _logger.info("Run integration on %s", assets.mapped('ticker'))
+                integration.produce({'assets': assets})
+            else:
+
+                ctx = self.env.context.copy()
+                uid = self.env.uid
+                with ThreadPoolExecutor(max_workers=4) as executor:
+                    # Map tasks to thread pool
+                    executor.map(functools.partial(Asset.thread_run_integration, ctx=ctx, uid=uid), assets.ids)
+
+        _logger.info("Done")
+
+    @api.model
+    def thread_run_integration(self, asset_id, ctx, uid):
+         with self.pool.cursor() as new_cr:
+            env = api.Environment(new_cr, uid, ctx)
+            asset = env['investment.asset'].browse(asset_id)
+            _logger.info("Run integration on %s", asset.ticker)
             asset.endpoint_id.produce({'asset': asset})
 
 

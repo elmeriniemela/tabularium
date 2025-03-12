@@ -15,6 +15,7 @@
                 <field name="file_format" optional="show"/>
                 <field name="location" optional="show"/>
                 <field name="cron_frequency" optional="show"/>
+                <field name="multi_record" widget="boolean_toggle" optional="show"/>
                 <field name="auto_consume" widget="boolean_toggle" optional="show"/>
                 <field name="auto_commit" widget="boolean_toggle" optional="show"/>
                 <field name="ttl" optional="show"/>
@@ -56,6 +57,7 @@
                             <field name="user_id" widget="many2one_avatar_user"/>
                             <field name="company_id" groups="base.group_multi_company"/>
                             <field name="cron_frequency" invisible="role != 'active'"/>
+                            <field name="multi_record" widget="boolean_toggle"/>
                             <field name="auto_consume" widget="boolean_toggle"/>
                             <field name="auto_commit" widget="boolean_toggle"/>
                         </group>
