@@ -48,14 +48,14 @@
                             <field name="time"/>
                             <field name="quantity"/>
                             <field name="payment"/>
+                            <field name="currency_payment" invisible="not currency_rate_id"/>
                         </group>
                         <group>
                             <field name="exchange_rate"/>
                             <field name="fee" readonly="1"/>
                             <field name="currency_id"/>
-                            <label for="currency_rate_id"/>
-                            <div>
-
+                            <label for="currency_rate_id" invisible="not currency_rate_id"/>
+                            <div invisible="not currency_rate_id">
                                 <field name="inverse_company_rate" digits="[6,6]" class="oe_inline"/>
                                 <span>@</span>
                                 <field name="currency_rate_id" class="oe_inline"/>

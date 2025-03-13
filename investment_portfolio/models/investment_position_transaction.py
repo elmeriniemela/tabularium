@@ -43,6 +43,11 @@ class InvestmentPositionTransaction(models.Model):
     company_id = fields.Many2one(related='position_id.company_id')
 
     payment = fields.Monetary(required=True, currency_field='company_currency_id', tracking=True)
+    currency_payment = fields.Monetary(
+        compute='_compute_currency_payment',
+        inverse='_inverse_currency_payment',
+        currency_field='currency_id',
+    )
 
     description = fields.Char()
 
@@ -220,6 +225,21 @@ class InvestmentPositionTransaction(models.Model):
                 _logger.info("%s (%s): %s", transaction.asset_id.ticker, transaction.time, price)
 
 
+    @api.depends('payment')
+    def _compute_currency_payment(self):
+        for tx in self:
+            if tx.currency_id != tx.company_currency_id:
+                tx.currency_payment = tx.payment * tx.currency_rate_id.company_rate
+            else:
+                tx.currency_payment = tx.payment
+
+    def _inverse_currency_payment(self):
+        for tx in self:
+            if tx.currency_id != tx.company_currency_id:
+                tx.payment = tx.currency_payment * tx.currency_rate_id.inverse_company_rate
+            else:
+                tx.payment = tx.currency_payment
+
 
     @api.depends('payment', 'quantity')
     def _compute_report(self):
@@ -258,16 +278,24 @@ class InvestmentPositionTransaction(models.Model):
     def _compute_currency_rate_id(self):
         for tx in self:
             if tx.currency_id != tx.company_currency_id:
-                tx.currency_rate_id = tx.env['res.currency.rate'].search([
+                rate = tx.env['res.currency.rate'].search([
                     ('currency_id', '=', tx.currency_id.id),
                     ('company_id', '=', tx.company_id.id),
                     ('name', '=', tx.time.date()),
-                ]) or tx.env['res.currency.rate'].create({
-                    'currency_id': tx.currency_id.id,
-                    'name': tx.time.date(),
-                    'rate': 1.0,
-                    'company_id': tx.company_id.id,
-                })
+                ])
+                if not rate:
+                    previous = tx.env['res.currency.rate'].search([
+                        ('currency_id', '=', tx.currency_id.id),
+                        ('company_id', '=', tx.company_id.id),
+                    ], order='name desc', limit=1)
+                    rate = tx.env['res.currency.rate'].create({
+                        'currency_id': tx.currency_id.id,
+                        'name': tx.time.date(),
+                        'rate': previous.rate or 0.0,
+                        'company_id': tx.company_id.id,
+                    })
+
+                tx.currency_rate_id = rate
 
 
     @api.depends('payment', 'quantity', 'position_id.last_price_own_currency')
