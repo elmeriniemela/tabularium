@@ -257,7 +257,7 @@
         <field name="name">Current positions</field>
         <field name="res_model">investment.position</field>
         <field name="view_mode">tree,form,graph</field>
-        <field name="context">{'search_default_group_portfolio_id': 1, 'search_default_follow': 1}</field>
+        <field name="context">{'search_default_group_portfolio_id': 1, 'search_default_follow': 1, 'search_default_liquid': 1,}</field>
     </record>
 
     <record id="action_liquid_allocations" model="ir.actions.act_window">
