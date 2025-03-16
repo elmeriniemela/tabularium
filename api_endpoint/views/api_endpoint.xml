@@ -42,6 +42,9 @@
                         <button class="oe_stat_button" type="action" icon="fa-tasks" name="%(api_message_action)d" context="{'default_endpoint_id': id, 'search_default_endpoint_id': id}">
                             <field name="msg_count" widget="statinfo"/>
                         </button>
+                        <button class="oe_stat_button" type="action" icon="fa-tasks" name="%(version_control.version_control_action)d" context="{'search_default_model': 'api.endpoint', 'search_default_res_id': id}">
+                            <field name="version_control_count" widget="statinfo"/>
+                        </button>
                     </div>
                     <div class="oe_title">
                         <h1>

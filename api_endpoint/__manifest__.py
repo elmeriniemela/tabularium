@@ -9,6 +9,7 @@
     'version': '1.0.2',
     'depends': [
         'base', 'mail',
+        'version_control',
     ],
     'installable': True,
     'application': True,
