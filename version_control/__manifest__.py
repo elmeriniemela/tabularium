@@ -9,6 +9,7 @@
     'version': '1.0.2',
     'depends': [
         'base', 'mail',
+        'diff_widget',
     ],
     'installable': True,
     'application': True,

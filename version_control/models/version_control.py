@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import difflib
+import hashlib
+
 from odoo import models, tools, fields, api, _
 
 _logger = logging.getLogger(__name__)
@@ -12,19 +15,44 @@ class VersionControl(models.Model):
     _order = 'id desc'
     _auto = False
 
+    create_date = fields.Datetime(string='Created on')
+    create_uid = fields.Many2one(comodel_name='res.users', string='Created by')
+
+    model = fields.Char('Related Document Model')
+    res_id = fields.Many2oneReference('Related Document ID', model_field='model')
+    field_id = fields.Many2one('ir.model.fields')
+    old_value_text = fields.Text('Old Value Text', readonly=True)
+    new_value_text = fields.Text('New Value Text', readonly=True)
+
+    diff = fields.Text(compute='_compute_diff')
+
+
+    version_hash_before = fields.Char(compute='_compute_hash')
+    version_hash_after = fields.Char(compute='_compute_hash')
+    name = fields.Char(compute='_compute_hash')
+
     def _select(self):
         return f"""
-            mtv.id
+            mtv.id as id,
+            mtv.create_date as create_date,
+            mtv.create_uid as create_uid,
+            mm.model as model,
+            mm.res_id as res_id,
+            mtv.field_id as field_id,
+            mtv.old_value_text as old_value_text,
+            mtv.new_value_text as new_value_text
         """
 
     def _from(self):
         return f"""
             mail_tracking_value mtv
+            LEFT JOIN ir_model_fields imf ON imf.id=mtv.field_id
+            LEFT JOIN mail_message mm ON mm.id=mail_message_id
         """
 
     def _where(self):
         return f"""
-            mtv.id is not null
+            imf.version_control=True
         """
 
 
@@ -35,3 +63,16 @@ class VersionControl(models.Model):
             FROM %s
             WHERE %s
             )""" % (self._table, self._select(), self._from(), self._where()))
+
+
+    def _compute_diff(self):
+        for rec in self:
+            lines = difflib.unified_diff((rec.old_value_text or '').splitlines(True), (rec.new_value_text or '').splitlines(True), fromfile=rec.field_id.name, tofile=rec.field_id.name)
+            rec.diff = ''.join(lines)
+
+
+    def _compute_hash(self):
+        for rec in self:
+            rec.version_hash_before = hashlib.sha1((rec.old_value_text or '').encode('utf-8')).hexdigest()
+            rec.version_hash_after = hashlib.sha1((rec.new_value_text or '').encode('utf-8')).hexdigest()
+            rec.name = f'{rec.version_hash_before}...{rec.version_hash_after}'
