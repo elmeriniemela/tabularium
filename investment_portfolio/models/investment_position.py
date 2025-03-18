@@ -149,7 +149,9 @@ class InvestmentPosition(models.Model):
         'transaction_ids.payment',
         'transaction_ids.currency_rate_id',
         'transaction_ids.currency_rate_id.rate',
+        'last_price',
         'last_price_id',
+        'last_price_id.price',
         'currency_id',
         'company_currency_id',
     )
