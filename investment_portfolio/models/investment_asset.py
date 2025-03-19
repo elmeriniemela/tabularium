@@ -278,11 +278,20 @@ class InvestmentAsset(models.Model):
             if not record.last_price_id:
                 record.last_price_id = Price.create({
                     'asset_id': self.id,
-                    'time': datetime.datetime.fromtimestamp(0),
+                    'time': datetime.datetime.fromtimestamp(0), # first price should be far in history
+                    'price': record.last_price,
+                })
+            elif record.last_price_id.time.date() != fields.Date.today():
+                record.last_price_id = Price.create({
+                    'asset_id': self.id,
+                    'time': fields.Datetime.now(),
                     'price': record.last_price,
                 })
             else:
-                record.last_price_id.price = record.last_price
+                record.last_price_id.write({
+                    'price': record.last_price,
+                    'time': fields.Datetime.now(),
+                })
 
 
     def _exec_integration(self):
