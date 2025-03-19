@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
-
 {
     'name': 'Notes',
     'version': '1.0',
+    'author': "Elmeri Niemelä",
     'category': 'Productivity/Notes',
     'summary': 'Organize your work with memos',
     'sequence': 260,
