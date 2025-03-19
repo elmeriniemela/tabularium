@@ -311,7 +311,7 @@ class InvestmentAsset(models.Model):
             if integration.multi_record:
                 assets._exec_integration()
             else:
-                if len(assets) >= max_workers:
+                if max_workers and len(assets) >= max_workers:
                     _logger.info("Start ThreadPoolExecutor(max_workers=%d)", max_workers)
                     with ThreadPoolExecutor(max_workers=max_workers) as executor:
                         # Map tasks to thread pool
