@@ -99,7 +99,7 @@ class InvestmentPosition(models.Model):
 
     follow = fields.Boolean(compute='_compute_follow', store=True, readonly=False)
 
-    quantity = fields.Float(compute='_compute_position_aggregate', store=True, digits='Investment Asset quantity', group_operator=None)
+    quantity = fields.Float(compute='_compute_position_aggregate', inverse='_inverse_quantity', readonly=False, store=True, digits='Investment Asset quantity', group_operator=None)
     position = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', help="Current value of this position.")
     plausible_drawdown_position = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', help="Value of this position after a plausible drawdown.")
     investment = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id')
@@ -411,6 +411,21 @@ class InvestmentPosition(models.Model):
     def _inverse_last_price(self):
         for record in self:
             record.asset_id.last_price = record.last_price
+
+    def _inverse_quantity(self):
+        qty_precision = self.env['decimal.precision'].precision_get('Investment Asset quantity')
+        for record in self:
+            current_quantity = sum(record.transaction_ids.mapped('quantity'))
+            diff = record.quantity - current_quantity
+            if not float_is_zero(diff, precision_digits=qty_precision):
+                record.transaction_ids.create({
+                    'quantity': diff,
+                    'exchange_rate': record.last_price,
+                    'payment': abs(record.last_price_own_currency*diff),
+                    'time': fields.Datetime.now(),
+                    'position_id': record.id,
+                })
+
 
     def update_realized_fifo(self):
         class TxJoin:

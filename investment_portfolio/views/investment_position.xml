@@ -107,10 +107,10 @@
                                 <span invisible="is_company_currency"> / <field name="last_price_own_currency" class="oe_inline"/> </span>
                                 <span> (<field name="last_update" widget="timeago" class="oe_inline"/>) </span>
                             </div>
-                            <field name="cost_basis"/>
                             <field name="quantity"/>
                             <field name="position"/>
                             <field name="investment"/>
+                            <field name="cost_basis"/>
                             <field name="profit" decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0"/>
                             <field name="profit_percent" widget="percentage" decoration-danger="profit_percent &lt; 0" decoration-success="profit_percent &gt; 0"/>
 
