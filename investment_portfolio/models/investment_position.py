@@ -34,6 +34,7 @@ class InvestmentPosition(models.Model):
     expected_yearly_appreciation = fields.Float(related='asset_id.expected_yearly_appreciation', readonly=True)
     plausible_ath_drawdown = fields.Float(related='asset_id.plausible_ath_drawdown', readonly=True)
     ath_price = fields.Monetary(related='asset_id.ath_price', readonly=True)
+    current_ath_drawdown = fields.Float(related='asset_id.current_ath_drawdown', readonly=True)
     drawdown_price = fields.Monetary(related='asset_id.drawdown_price', readonly=True)
 
 

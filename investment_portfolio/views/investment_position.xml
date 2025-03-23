@@ -10,6 +10,7 @@
                 <field name="activity_ids" optional="hide" widget="list_activity"/>
                 <field name="last_price" optional="show"  digits="[2,2]"/>
                 <field name="ath_price" optional="hide"  digits="[2,2]"/>
+                <field name="current_ath_drawdown" widget="percentage" optional="hide"/>
                 <field name="drawdown_price" optional="hide"  digits="[2,2]"/>
                 <field name="last_update" optional="show" widget="timeago"/>
                 <field name="daily_price" widget="percentage" decoration-danger="daily_price &lt; 0" decoration-success="daily_price &gt; 0" optional="show"/>

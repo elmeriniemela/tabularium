@@ -66,7 +66,8 @@ class InvestmentAsset(models.Model):
     expected_yearly_appreciation = fields.Float(group_operator='avg', default=0.0, digits='Investment Asset Interest', tracking=True)
     plausible_ath_drawdown = fields.Float(string="Plausible ATH drawdown", group_operator='avg', default=0.0, digits='Investment Asset Interest', tracking=True)
     ath_price = fields.Monetary(string='ATH Price', currency_field='currency_id', compute='_compute_ath_price', group_operator=None, store=True)
-    drawdown_price = fields.Monetary(string='Drawdown Price', currency_field='currency_id', compute='_compute_ath_price', group_operator=None, store=True)
+    current_ath_drawdown = fields.Float(string="Current ATH drawdown", compute='_compute_ath_price', group_operator=None, store=True)
+    drawdown_price = fields.Monetary(string='Plausible Drawdown Price', currency_field='currency_id', compute='_compute_ath_price', group_operator=None, store=True)
 
     daily_price_id = fields.Many2one(comodel_name='investment.asset.price')
     weekly_price_id = fields.Many2one(comodel_name='investment.asset.price')
@@ -198,6 +199,7 @@ class InvestmentAsset(models.Model):
 
                 asset.ath_price = max(prices, key=lambda p: p.price_adjusted).price_adjusted
             asset.drawdown_price = (1-asset.plausible_ath_drawdown) * asset.ath_price
+            asset.current_ath_drawdown = (asset.ath_price - asset.last_price_id.price_adjusted) / asset.ath_price if asset.ath_price else 0.0
 
 
     @api.depends('last_price_id', 'last_price_id.price')
