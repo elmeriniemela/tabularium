@@ -36,7 +36,9 @@
                 <field name="endpoint_id" optional="hide"/>
                 <field name="company_currency_id" optional="hide"/>
 
-
+                <field name="category_id" optional="hide"/>
+                <field name="portfolio_id" optional="hide"/>
+                <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}" optional="hide"/>
                 <field name="follow" widget="boolean_toggle" optional="hide"/>
                 <field name="plan_type" optional="hide"/>
                 <field name="plan_start_date" optional="hide"/>
@@ -113,7 +115,7 @@
                             <field name="cost_basis"/>
                             <field name="profit" decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0"/>
                             <field name="profit_percent" widget="percentage" decoration-danger="profit_percent &lt; 0" decoration-success="profit_percent &gt; 0"/>
-
+                            <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
                         </group>
                         <group>
 
@@ -179,7 +181,7 @@
         <field name="model">investment.position</field>
         <field name="arch" type="xml">
             <search>
-                <field name="name"/>
+                <field name="name" string="Name/Tags" filter_domain="['|', ('name', 'ilike', self), ('tag_ids', 'ilike', self)]"/>
                 <field name="category_id"/>
                 <field name="portfolio_id"/>
                 <separator/>

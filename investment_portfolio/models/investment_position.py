@@ -65,6 +65,11 @@ class InvestmentPosition(models.Model):
         index=True,
     )
 
+    tag_ids = fields.Many2many(
+        string="Tags",
+        comodel_name='investment.position.tag',
+    )
+
     notes = fields.Html(sanitize=False, translate=False)
 
     company_id = fields.Many2one(
