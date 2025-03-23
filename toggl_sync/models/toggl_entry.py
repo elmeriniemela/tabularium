@@ -14,7 +14,7 @@ def roundto(x, base):
 class TogglTask(models.Model):
     _name = 'toggl.task'
     _description = 'Toggl Task'
-    _order = 'task_id desc'
+    _order = 'last_entry desc'
     _inherit = ['mail.thread']
 
     name = fields.Char(required=True, readonly=True, tracking=True)
@@ -30,14 +30,27 @@ class TogglTask(models.Model):
     company_id = fields.Many2one(comodel_name='res.company', required=True, default=lambda self: self.env.company, tracking=True)
 
     entry_ids = fields.One2many(
+        string="Entries",
         comodel_name='toggl.entry',
         inverse_name='task_id',
         readonly=True,
+        context={'active_test': False},
+    )
+
+    last_entry = fields.Datetime(
+        string="Latest entry",
+        compute='_compute_last_entry',
+        store=True,
     )
 
     _sql_constraints = [
         ('task_id_uniq', 'unique(task_id, company_id)', 'The task_id must be unique within a company!'),
     ]
+
+    @api.depends('entry_ids', 'entry_ids.date_start')
+    def _compute_last_entry(self):
+        for record in self:
+            record.last_entry = max(record.with_context(active_test=False).entry_ids.mapped('date_start'), default=False)
 
     def fetch_tasks(self):
         server_models, dbname, uid, pwd = self.env.user._get_toggl_export_proxy()
