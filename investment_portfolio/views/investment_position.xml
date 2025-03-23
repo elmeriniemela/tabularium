@@ -7,9 +7,9 @@
                 <field name="sequence" widget="handle"/>
                 <field name="name" optional="show"/>
                 <field name="ticker" optional="hide"/>
-                <field name="last_price" optional="show"/>
-                <field name="ath_price" optional="hide"/>
-                <field name="drawdown_price" optional="hide"/>
+                <field name="last_price" optional="show"  digits="[2,2]"/>
+                <field name="ath_price" optional="hide"  digits="[2,2]"/>
+                <field name="drawdown_price" optional="hide"  digits="[2,2]"/>
                 <field name="last_update" optional="show" widget="timeago"/>
                 <field name="daily_price" widget="percentage" decoration-danger="daily_price &lt; 0" decoration-success="daily_price &gt; 0" optional="show"/>
                 <field name="weekly_price" widget="percentage" decoration-danger="weekly_price &lt; 0" decoration-success="weekly_price &gt; 0" optional="show"/>
@@ -23,13 +23,13 @@
                 <field name="ten_year_price" widget="percentage" decoration-danger="ten_year_price &lt; 0" decoration-success="ten_year_price &gt; 0" optional="hide"/>
 
                 <field name="quantity" digits="[2,2]" optional="show"/>
-                <field name="position" optional="show" sum="Total Position"/>
+                <field name="position" optional="show" sum="Total Position" digits="[2,2]"/>
                 <field name="plausible_drawdown_position" optional="hide" sum="Total Position"/>
                 <field name="investment" optional="hide"/>
                 <field name="max_investment" optional="hide"/>
                 <field name="cost_basis" optional="hide"/>
 
-                <field name="profit" widget="monetary" decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0" optional="show" sum="Total Profit"/>
+                <field name="profit" decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0" optional="show" sum="Total Profit" digits="[2,2]"/>
                 <field name="profit_percent" widget="percentage" decoration-danger="profit_percent &lt; 0" decoration-success="profit_percent &gt; 0" optional="show"/>
 
                 <field name="currency_id" optional="hide"/>
