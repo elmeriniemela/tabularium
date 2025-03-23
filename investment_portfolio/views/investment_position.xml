@@ -7,6 +7,7 @@
                 <field name="sequence" widget="handle"/>
                 <field name="name" optional="show"/>
                 <field name="ticker" optional="hide"/>
+                <field name="activity_ids" optional="hide" widget="list_activity"/>
                 <field name="last_price" optional="show"  digits="[2,2]"/>
                 <field name="ath_price" optional="hide"  digits="[2,2]"/>
                 <field name="drawdown_price" optional="hide"  digits="[2,2]"/>
