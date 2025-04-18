@@ -3,7 +3,7 @@
     <record id="dns_zonerecord_list" model="ir.ui.view">
         <field name="model">dns.zone.record</field>
         <field name="arch" type="xml">
-            <tree editable="bottom">
+            <list editable="bottom">
                 <field name="zone_id" optional="hide"/>
                 <field name="rtype" optional="show"/>
                 <field name="name"/>
@@ -13,7 +13,7 @@
                 <field name="ttl" optional="show"/>
                 <field name="identifier" optional="hide"/>
                 <field name="sequence" optional="hide"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -68,7 +68,7 @@
     <record id="dns_zone_record_action" model="ir.actions.act_window">
         <field name="name">DNS Zone Records</field>
         <field name="res_model">dns.zone.record</field>
-        <field name="view_mode">tree,kanban,form</field>
+        <field name="view_mode">list,kanban,form</field>
     </record>
 
 </odoo>

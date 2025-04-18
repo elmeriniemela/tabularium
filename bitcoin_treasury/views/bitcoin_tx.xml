@@ -7,12 +7,12 @@
             <xpath expr="//notebook" position='inside'>
                 <page string="Wallet Addresses">
                     <field name="wallet_address_ids">
-                        <tree>
+                        <list>
                             <field name="wallet_id"/>
                             <field name="index"/>
                             <field name="atype"/>
                             <field name="address"/>
-                        </tree>
+                        </list>
                     </field>
                 </page>
             </xpath>

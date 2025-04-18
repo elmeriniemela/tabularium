@@ -36,10 +36,10 @@ class InvestmentAssetRealized(models.Model):
     quantity = fields.Float(digits='Investment Asset quantity')
     simulated = fields.Boolean(compute='_compute_simulated', store=True)
 
-    sell_price = fields.Monetary(compute='_compute_profit', store=True, group_operator=None)
+    sell_price = fields.Monetary(compute='_compute_profit', store=True, aggregator=None)
     sell_date = fields.Date(compute='_compute_profit', store=True)
     sell_fee = fields.Monetary(compute='_compute_profit', store=True)
-    buy_price = fields.Monetary(compute='_compute_profit', store=True, group_operator=None)
+    buy_price = fields.Monetary(compute='_compute_profit', store=True, aggregator=None)
     buy_date = fields.Date(compute='_compute_profit', store=True)
     buy_fee = fields.Monetary(compute='_compute_profit', store=True)
     profit = fields.Monetary(string='Profit/Loss', compute='_compute_profit', store=True)

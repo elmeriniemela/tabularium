@@ -4,7 +4,7 @@
         <field name="model">file.scanner</field>
         <field name="priority">2</field>
         <field name="arch" type="xml">
-            <tree>
+            <list>
                 <field name="path" optional="show"/>
                 <field name="fname" optional="show"/>
                 <field name="date" optional="show"/>
@@ -14,7 +14,7 @@
                 <field name="parent" optional="show"/>
                 <field name="suffix" optional="show"/>
                 <field name="size" optional="show"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -64,7 +64,7 @@
     <record id="file_action" model="ir.actions.act_window">
         <field name="name">file scanner</field>
         <field name="res_model">file.scanner</field>
-        <field name="view_mode">tree,kanban,form</field>
+        <field name="view_mode">list,kanban,form</field>
         <field name="context">
             {
             'search_default_group_date': 1,

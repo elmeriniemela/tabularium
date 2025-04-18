@@ -14,16 +14,16 @@
       </field>
     </record>
 
-    <!-- note Stage Tree View -->
+    <!-- note Stage list View -->
     <record id="view_note_stage_tree" model="ir.ui.view">
-      <field name="name">note.stage.tree</field>
+      <field name="name">note.stage.list</field>
       <field name="model">note.stage</field>
       <field name="arch" type="xml">
-        <tree string="Stages of Notes" editable="bottom">
+        <list string="Stages of Notes" editable="bottom">
             <field name="sequence" widget="handle"/>
             <field name="name"/>
             <field name="fold"/>
-        </tree>
+        </list>
       </field>
     </record>
 
@@ -31,7 +31,7 @@
     <record id="action_note_stage" model="ir.actions.act_window">
         <field name="name">Stages</field>
         <field name="res_model">note.stage</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="domain">[('user_id','=',uid)]</field>
     </record>
 
@@ -48,14 +48,14 @@
       </field>
     </record>
 
-    <!-- note Tag Tree View -->
+    <!-- note Tag list View -->
     <record id="note_tag_view_tree" model="ir.ui.view">
-      <field name="name">note.tag.tree</field>
+      <field name="name">note.tag.list</field>
       <field name="model">note.tag</field>
       <field name="arch" type="xml">
-        <tree string="Tags" editable="bottom">
+        <list string="Tags" editable="bottom">
             <field name="name"/>
-        </tree>
+        </list>
       </field>
     </record>
 
@@ -63,7 +63,7 @@
     <record id="note_tag_action" model="ir.actions.act_window">
       <field name="name">Tags</field>
       <field name="res_model">note.tag</field>
-      <field name="view_mode">tree,form</field>
+      <field name="view_mode">list,form</field>
       <field name="help" type="html">
         <p class="o_view_nocontent_smiling_face">
           Add a new tag
@@ -146,18 +146,18 @@
       </field>
     </record>
 
-    <!-- New note Tree View -->
+    <!-- New note list View -->
     <record id="view_note_note_tree" model="ir.ui.view">
-      <field name="name">note.note.tree</field>
+      <field name="name">note.note.list</field>
       <field name="model">note.note</field>
       <field name="arch" type="xml">
-        <tree string="Stages">
+        <list string="Stages">
           <field name="name"/>
           <field name="open"/>
           <field name="stage_id"/>
           <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
           <field name="activity_ids" widget="list_activity" optional="show"/>
-        </tree>
+        </list>
       </field>
     </record>
 
@@ -216,7 +216,7 @@
     <record id="action_note_note" model="ir.actions.act_window">
       <field name="name">Notes</field>
       <field name="res_model">note.note</field>
-      <field name="view_mode">kanban,tree,form,activity</field>
+      <field name="view_mode">kanban,list,form,activity</field>
       <field name="search_view_id" ref="view_note_note_filter"/>
       <field name="context">{}</field>
       <field name="help" type="html">

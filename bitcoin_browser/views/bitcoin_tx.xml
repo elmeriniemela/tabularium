@@ -1,15 +1,15 @@
 <odoo>
     <record id="tree_tx" model="ir.ui.view">
-        <field name="name">bitcoin.tx.tree</field>
+        <field name="name">bitcoin.tx.list</field>
         <field name="model">bitcoin.tx</field>
         <field name="arch" type="xml">
-            <tree create="false">
+            <list create="false">
                 <field name="txid" optional="show"/>
                 <field name="locktime"/>
                 <field name="size"/>
                 <field name="vsize"/>
                 <field name="fee"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -68,7 +68,7 @@
     <record id="action_tx" model="ir.actions.act_window">
         <field name="name">Transactions</field>
         <field name="res_model">bitcoin.tx</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
 
 </odoo>

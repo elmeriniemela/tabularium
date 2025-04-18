@@ -1,12 +1,12 @@
 <odoo>
     <record id="portfolio_tree" model="ir.ui.view">
-        <field name="name">investment.portfolio.tree</field>
+        <field name="name">investment.portfolio.list</field>
         <field name="model">investment.portfolio</field>
         <field name="arch" type="xml">
-            <tree>
+            <list>
                 <field name="sequence" widget="handle"/>
                 <field name="name" optional="show"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -40,7 +40,7 @@
     <record id="action_portfolios" model="ir.actions.act_window">
         <field name="name">Portfolios</field>
         <field name="res_model">investment.portfolio</field>
-        <field name="view_mode">tree,form,graph</field>
+        <field name="view_mode">list,form,graph</field>
         <field name="context">{'search_default_group_portfolio_id': 1}</field>
     </record>
 

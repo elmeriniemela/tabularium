@@ -3,9 +3,9 @@
     <record id="cloud_module_list" model="ir.ui.view">
         <field name="model">cloud.module</field>
         <field name="arch" type="xml">
-            <tree>
+            <list>
                 <field name="name" optional="show"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -45,7 +45,7 @@
     <record id="cloud_module_action" model="ir.actions.act_window">
         <field name="name">Modules</field>
         <field name="res_model">cloud.module</field>
-        <field name="view_mode">tree,kanban,form</field>
+        <field name="view_mode">list,kanban,form</field>
         <field name="context"></field>
     </record>
 

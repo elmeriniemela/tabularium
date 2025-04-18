@@ -1,9 +1,9 @@
 <odoo>
     <record id="entry_tree" model="ir.ui.view">
-        <field name="name">cashflow.entry.tree</field>
+        <field name="name">cashflow.entry.list</field>
         <field name="model">cashflow.entry</field>
         <field name="arch" type="xml">
-            <tree default_order="date desc" multi_edit="1">
+            <list default_order="date desc" multi_edit="1">
                 <field name="name" optional="show"/>
                 <field name="date"  optional="show"/>
                 <field name="amount"  optional="show" sum="Total"/>
@@ -11,7 +11,7 @@
                 <field name="company_currency_id"  optional="show"/>
                 <field name="category_id" optional="show"/>
                 <field name="parser_id"  optional="show"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -107,14 +107,14 @@
     <record id="entry_action_window" model="ir.actions.act_window">
         <field name="name">Entrys</field>
         <field name="res_model">cashflow.entry</field>
-        <field name="view_mode">tree,form,graph,pivot</field>
+        <field name="view_mode">list,form,graph,pivot</field>
         <field name="context">{'search_default_group_account': 1,'search_default_group_date': 1,}</field>
     </record>
 
     <record id="report_action_window" model="ir.actions.act_window">
         <field name="name">Reports</field>
         <field name="res_model">cashflow.entry</field>
-        <field name="view_mode">graph,pivot,tree,form</field>
+        <field name="view_mode">graph,pivot,list,form</field>
         <field name="context">{'search_default_group_account': 1,'search_default_group_date': 1,}</field>
     </record>
 

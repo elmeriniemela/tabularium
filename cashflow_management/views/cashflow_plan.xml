@@ -1,14 +1,14 @@
 <odoo>
     <record id="plan_tree" model="ir.ui.view">
-        <field name="name">cashflow.plan.tree</field>
+        <field name="name">cashflow.plan.list</field>
         <field name="model">cashflow.plan</field>
         <field name="arch" type="xml">
-            <tree>
+            <list>
                 <field name="name"/>
                 <field name="create_date"  optional="show"/>
                 <field name="company_id" optional="hide"/>
                 <field name="company_currency_id"  optional="hide"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -35,7 +35,7 @@
                         </group>
                     </group>
                     <field name="line_ids">
-                        <tree editable="bottom">
+                        <list editable="bottom">
                             <field name="sequence" widget="handle"/>
                             <field name="date" optional="hide"/>
                             <field name="name"/>
@@ -43,7 +43,7 @@
                             <field name="balance"/>
                             <field name="company_id" optional="hide"/>
                             <field name="company_currency_id"  optional="hide"/>
-                        </tree>
+                        </list>
                     </field>
                 </sheet>
             </form>
@@ -69,7 +69,7 @@
     <record id="plan_action_window" model="ir.actions.act_window">
         <field name="name">Plans</field>
         <field name="res_model">cashflow.plan</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
 
     <menuitem id="plan_menu" action="plan_action_window" parent="root_menu" sequence="15"/>

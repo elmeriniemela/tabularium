@@ -1,16 +1,16 @@
 <odoo>
     <record id="asset_price_tree" model="ir.ui.view">
-        <field name="name">investment.asset.price.tree</field>
+        <field name="name">investment.asset.price.list</field>
         <field name="model">investment.asset.price</field>
         <field name="arch" type="xml">
-            <tree editable="top" default_order="time desc" expand="1">
+            <list editable="top" default_order="time desc" expand="1">
                 <field name="time"/>
                 <field name="price"/>
                 <field name="price_adjusted" optional="hide"/>
                 <field name="prediction" optional="hide"/>
                 <field name="currency_id" optional="show"/>
                 <field name="asset_id" optional="hide"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -79,7 +79,7 @@
     <record id="action_prices" model="ir.actions.act_window">
         <field name="name">Asset Prices</field>
         <field name="res_model">investment.asset.price</field>
-        <field name="view_mode">tree,graph,form</field>
+        <field name="view_mode">list,graph,form</field>
     </record>
 
 </odoo>

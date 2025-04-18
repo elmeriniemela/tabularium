@@ -1,9 +1,9 @@
 <odoo>
     <record id="tree_key" model="ir.ui.view">
-        <field name="name">bitcoin.key.tree</field>
+        <field name="name">bitcoin.key.list</field>
         <field name="model">bitcoin.key</field>
         <field name="arch" type="xml">
-            <tree>
+            <list>
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
                 <field name="secret"/>
@@ -15,7 +15,7 @@
                 <field name="witness_type"/>
                 <field name="script_type"/>
                 <field name="encoding"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -54,9 +54,9 @@
                     <notebook>
                         <page string="Wallets">
                             <field name="wallet_ids">
-                                <tree>
+                                <list>
                                     <field name="wallet_id"/>
-                                </tree>
+                                </list>
                             </field>
                         </page>
                     </notebook>
@@ -84,7 +84,7 @@
     <record id="action_key" model="ir.actions.act_window">
         <field name="name">Keys</field>
         <field name="res_model">bitcoin.key</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
 
 </odoo>

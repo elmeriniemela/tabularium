@@ -4,7 +4,7 @@
         <field name="model">flight.log</field>
         <field name="priority">2</field>
         <field name="arch" type="xml">
-            <tree default_order="date desc, start_time desc, id desc" multi_edit="1">
+            <list default_order="date desc, start_time desc, id desc" multi_edit="1">
                 <field name="name" optional="show"/>
                 <field name="purpose_id" widget="selection" optional="show"/>
                 <field name="departure_method" optional="show"/>
@@ -18,7 +18,7 @@
                 <field name="state" optional="show"/>
                 <field name="instrumental_time" widget="float_time" optional="hide" sum="Total Instrumental"/>
                 <field name="skip_validation" optional="hide" widget="boolean_toggle"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -176,7 +176,7 @@
     <record id="log_action" model="ir.actions.act_window">
         <field name="name">Flight Log</field>
         <field name="res_model">flight.log</field>
-        <field name="view_mode">tree,kanban,form,pivot,graph</field>
+        <field name="view_mode">list,kanban,form,pivot,graph</field>
         <field name="context">{
             'search_default_group_date': 1,
             'pivot_measures': ['__count__', 'duration', 'instrumental_time'],
@@ -186,7 +186,7 @@
     <record id="report_action" model="ir.actions.act_window">
         <field name="name">Reports</field>
         <field name="res_model">flight.log</field>
-        <field name="view_mode">graph,pivot,tree,form</field>
+        <field name="view_mode">graph,pivot,list,form</field>
         <field name="context">{
             'search_default_group_date': 1,
             'pivot_measures': ['__count__', 'duration', 'instrumental_time'],

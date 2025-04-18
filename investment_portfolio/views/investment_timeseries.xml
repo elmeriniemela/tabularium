@@ -1,9 +1,9 @@
 <odoo>
     <record id="timeseries_tree" model="ir.ui.view">
-        <field name="name">investment.timeseries.tree</field>
+        <field name="name">investment.timeseries.list</field>
         <field name="model">investment.timeseries</field>
         <field name="arch" type="xml">
-            <tree>
+            <list>
                 <field name="position_id" optional="show" />
                 <field name="prediction" optional="show"/>
                 <field name="interpolated" optional="show"/>
@@ -14,7 +14,7 @@
                 <field name="company_currency_id" invisible="1" />
 
                 <field name="last_price_own_currency" optional="hide" />
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -129,7 +129,7 @@
     <record id="action_profits" model="ir.actions.act_window">
         <field name="name">Profits</field>
         <field name="res_model">investment.timeseries</field>
-        <field name="view_mode">graph,tree,form,pivot</field>
+        <field name="view_mode">graph,list,form,pivot</field>
         <field name="domain" eval="False"/>
         <field name="context">{'search_default_group_day': 1, 'search_default_liquid': 1, 'search_default_1_year': 1, 'search_default_until_today': 1}</field>
         <field
@@ -143,7 +143,7 @@
     <record id="action_positions" model="ir.actions.act_window">
         <field name="name">Positions</field>
         <field name="res_model">investment.timeseries</field>
-        <field name="view_mode">graph,tree,form,pivot</field>
+        <field name="view_mode">graph,list,form,pivot</field>
         <field name="domain" eval="False"/>
         <field name="context">{'search_default_group_day': 1, 'search_default_liquid': 1, 'search_default_1_year': 1, 'search_default_until_today': 1}</field>
         <field
@@ -159,7 +159,7 @@
     <record id="action_profits_per_asset" model="ir.actions.act_window">
         <field name="name">Profits per asset</field>
         <field name="res_model">investment.timeseries</field>
-        <field name="view_mode">graph,tree,form,pivot</field>
+        <field name="view_mode">graph,list,form,pivot</field>
         <field name="domain" eval="False"/>
         <field name="context">{'search_default_group_week': 1, 'search_default_group_position_id': 1, 'search_default_liquid': 1, 'search_default_4_years': 1, 'search_default_until_today': 1}</field>
         <field
@@ -173,7 +173,7 @@
     <record id="action_positions_per_asset" model="ir.actions.act_window">
         <field name="name">Positions per asset</field>
         <field name="res_model">investment.timeseries</field>
-        <field name="view_mode">graph,tree,form,pivot</field>
+        <field name="view_mode">graph,list,form,pivot</field>
         <field name="domain" eval="False"/>
         <field name="context">{'search_default_group_week': 1, 'search_default_group_position_id': 1, 'search_default_liquid': 1, 'search_default_4_years': 1, 'search_default_until_today': 1}</field>
         <field
@@ -188,7 +188,7 @@
     <record id="action_prediction_growth" model="ir.actions.act_window">
         <field name="name">Predicted growth</field>
         <field name="res_model">investment.timeseries</field>
-        <field name="view_mode">graph,tree,form,pivot</field>
+        <field name="view_mode">graph,list,form,pivot</field>
         <field name="context">{'search_default_group_year': 1, 'search_default_group_position_id': 1, 'search_default_liquid': 1}</field>
         <field
             name="view_ids"

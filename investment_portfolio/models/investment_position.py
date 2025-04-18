@@ -105,17 +105,17 @@ class InvestmentPosition(models.Model):
 
     follow = fields.Boolean(compute='_compute_follow', store=True, readonly=False)
 
-    quantity = fields.Float(compute='_compute_position_aggregate', inverse='_inverse_quantity', readonly=False, store=True, digits='Investment Asset quantity', group_operator=None)
+    quantity = fields.Float(compute='_compute_position_aggregate', inverse='_inverse_quantity', readonly=False, store=True, digits='Investment Asset quantity', aggregator=None)
     position = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', help="Current value of this position.")
     plausible_drawdown_position = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', help="Value of this position after a plausible drawdown.")
     investment = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id')
     max_investment = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id')
     cost_basis = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', help="Average price across every purchase.")
-    last_price_own_currency = fields.Monetary(string="Last Price (own currency)", compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', group_operator=None)
-    drawdown_price_own_currency = fields.Monetary(string="Drawdown Price (own currency)", compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', group_operator=None)
+    last_price_own_currency = fields.Monetary(string="Last Price (own currency)", compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', aggregator=None)
+    drawdown_price_own_currency = fields.Monetary(string="Drawdown Price (own currency)", compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', aggregator=None)
 
-    profit = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', group_operator='sum')
-    profit_percent = fields.Float(compute='_compute_position_aggregate', store=True, group_operator='avg')
+    profit = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', aggregator='sum')
+    profit_percent = fields.Float(compute='_compute_position_aggregate', store=True, aggregator='avg')
 
 
     is_cash = fields.Boolean(
@@ -143,8 +143,8 @@ class InvestmentPosition(models.Model):
     plan_yield = fields.Monetary(default=0.0)
     plan_cost = fields.Monetary(default=0.0)
     plan_fee = fields.Monetary(default=0.0)
-    plan_yearly_appreciation = fields.Float(group_operator='avg', default=0.0, digits='Investment Asset Interest')
-    plan_yearly_interest = fields.Float(group_operator='avg', default=0.0, digits='Investment Asset Interest')
+    plan_yearly_appreciation = fields.Float(aggregator='avg', default=0.0, digits='Investment Asset Interest')
+    plan_yearly_interest = fields.Float(aggregator='avg', default=0.0, digits='Investment Asset Interest')
     plan_total_cash_flow = fields.Monetary(readonly=True)
     plan_auto_realize = fields.Boolean()
     plan_allow_past = fields.Boolean()

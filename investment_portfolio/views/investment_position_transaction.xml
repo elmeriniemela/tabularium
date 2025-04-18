@@ -1,9 +1,9 @@
 <odoo>
     <record id="asset_transaction_tree" model="ir.ui.view">
-        <field name="name">investment.position.transaction.tree</field>
+        <field name="name">investment.position.transaction.list</field>
         <field name="model">investment.position.transaction</field>
         <field name="arch" type="xml">
-            <tree editable="top" limit="1000">
+            <list editable="top" limit="1000">
                 <field name="position_id" optional="hide"/>
                 <field name="time"  optional="show"/>
                 <field name="quantity" sum="Total"  optional="show"/>
@@ -21,7 +21,7 @@
                 <field name="prediction" optional="hide" widget="boolean_toggle"/>
                 <field name="company_currency_id" optional="hide"/>
                 <button string="Details" name="open_form" type="object"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -204,21 +204,21 @@
     <record id="action_transactions_per_month" model="ir.actions.act_window">
         <field name="name">Transactions per month</field>
         <field name="res_model">investment.position.transaction</field>
-        <field name="view_mode">graph,tree,kanban,form</field>
+        <field name="view_mode">graph,list,kanban,form</field>
         <field name="context">{'search_default_group_month': 1, 'search_default_group_position_id': 1, 'search_default_liquid': 1, 'search_default_1_year': 1, 'search_default_record': 1}</field>
     </record>
 
     <record id="action_yearly_savings" model="ir.actions.act_window">
         <field name="name">Yearly savings</field>
         <field name="res_model">investment.position.transaction</field>
-        <field name="view_mode">graph,tree,kanban,form</field>
+        <field name="view_mode">graph,list,kanban,form</field>
         <field name="context">{'search_default_liquid': 1, 'search_default_group_year': 1, 'search_default_record': 1}</field>
     </record>
 
     <record id="action_transaction_list" model="ir.actions.act_window">
         <field name="name">Transaction list</field>
         <field name="res_model">investment.position.transaction</field>
-        <field name="view_mode">tree,kanban,form</field>
+        <field name="view_mode">list,kanban,form</field>
         <field name="context">{'search_default_record': 1}</field>
     </record>
 

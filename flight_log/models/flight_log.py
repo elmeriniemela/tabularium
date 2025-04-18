@@ -64,7 +64,7 @@ class FlightLog(models.Model):
         required=True,
         copy=False,
         default=0.0,
-        group_operator=None,
+        aggregator=None,
     )
 
     end_time = fields.Float(
@@ -72,7 +72,7 @@ class FlightLog(models.Model):
         required=True,
         copy=False,
         default=0.0,
-        group_operator=None,
+        aggregator=None,
     )
 
     import_start_time = fields.Char(compute='_compute_import_time', inverse='_inverse_import_time', readonly=False)

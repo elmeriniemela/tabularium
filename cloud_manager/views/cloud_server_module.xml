@@ -3,7 +3,7 @@
     <record id="cloud_server_module_list" model="ir.ui.view">
         <field name="model">cloud.server.module</field>
         <field name="arch" type="xml">
-            <tree>
+            <list>
                 <field name="server_id" optional="hide"/>
                 <field name="module_id"/>
                 <field name="url"/>
@@ -11,7 +11,7 @@
                 <field name="commit"/>
                 <field name="commit_date"/>
                 <button string="Diff" type="action" name="%(cloud_server_diff_form_action)d" context="{'default_server_id': server_id, 'default_module_id': id, 'search_default_server_id': server_id}"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -66,7 +66,7 @@
     <record id="cloud_server_module_action" model="ir.actions.act_window">
         <field name="name">Module installations</field>
         <field name="res_model">cloud.server.module</field>
-        <field name="view_mode">tree,kanban,form</field>
+        <field name="view_mode">list,kanban,form</field>
         <field name="context">{'search_default_group_server_id': 1}</field>
     </record>
 

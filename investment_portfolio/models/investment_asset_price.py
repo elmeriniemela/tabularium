@@ -19,8 +19,8 @@ class InvestmentAssetPrice(models.Model):
     )
     currency_id = fields.Many2one(related='asset_id.currency_id')
 
-    price = fields.Monetary(required=True, group_operator='avg', index=True)
-    price_adjusted = fields.Monetary(group_operator='avg', compute='_compute_price_adjusted')
+    price = fields.Monetary(required=True, aggregator='avg', index=True)
+    price_adjusted = fields.Monetary(aggregator='avg', compute='_compute_price_adjusted')
 
 
     time = fields.Datetime(required=True, default=fields.Datetime.now, index=True)

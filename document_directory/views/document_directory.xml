@@ -1,14 +1,14 @@
 <odoo>
     <record id="directory_tree" model="ir.ui.view">
-        <field name="name">document.directory.tree</field>
+        <field name="name">document.directory.list</field>
         <field name="model">document.directory</field>
         <field name="arch" type="xml">
-            <tree default_order="write_date desc">
+            <list default_order="write_date desc">
                 <field name="name" optional="show"/>
                 <field name="attachment_ids" widget="many2many_tags" optional="show"/>
                 <field name="write_date" optional="show"/>
                 <field name="create_date" optional="hide"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -50,7 +50,7 @@
     <record id="action_document_dirs" model="ir.actions.act_window">
         <field name="name">Document Directories</field>
         <field name="res_model">document.directory</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
 
     <menuitem name="Documents" id="root_menu" web_icon="document_directory,static/description/icon.png" sequence="2" action="action_document_dirs"/>

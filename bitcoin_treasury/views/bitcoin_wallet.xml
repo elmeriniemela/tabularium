@@ -1,15 +1,15 @@
 <odoo>
     <record id="tree_wallet" model="ir.ui.view">
-        <field name="name">bitcoin.wallet.tree</field>
+        <field name="name">bitcoin.wallet.list</field>
         <field name="model">bitcoin.wallet</field>
         <field name="arch" type="xml">
-            <tree>
+            <list>
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
                 <field name="multisig"/>
                 <field name="transactions"/>
                 <field name="balance"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -45,12 +45,12 @@
                     <notebook>
                         <page string="History">
                             <field name="history_ids">
-                                <tree editable="top" create="false" limit="1000">
+                                <list editable="top" create="false" limit="1000">
                                     <field name="date"/>
                                     <field name="name"/>
                                     <field name="amount" decoration-danger="amount &lt; 0" decoration-success="amount &gt; 0"/>
                                     <field name="transaction_id"/>
-                                </tree>
+                                </list>
                             </field>
                         </page>
                         <page string="Addresses">
@@ -58,20 +58,20 @@
                                 <field name="address_amount"/>
                             </group>
                             <field name="address_ids">
-                                <tree>
+                                <list>
                                     <field name="index"/>
                                     <field name="atype"/>
                                     <field name="address"/>
                                     <field name="transaction_ids"/>
-                                </tree>
+                                </list>
                             </field>
                         </page>
                         <page string="Keys">
                             <field name="key_ids">
-                                <tree editable="top">
+                                <list editable="top">
                                     <field name="sequence" widget="handle"/>
                                     <field name="key_id"/>
-                                </tree>
+                                </list>
                             </field>
                         </page>
                     </notebook>
@@ -103,7 +103,7 @@
     <record id="action_wallet" model="ir.actions.act_window">
         <field name="name">Wallets</field>
         <field name="res_model">bitcoin.wallet</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="context">{'search_default_has_balance': 1}</field>
     </record>
 

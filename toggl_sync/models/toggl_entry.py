@@ -114,8 +114,8 @@ class TogglEntry(models.Model):
     extra_duration = fields.Float(tracking=True)
     duration = fields.Float(required=True, readonly=True)
 
-    original_price = fields.Monetary(currency_field='company_currency_id', group_operator="avg")
-    timesheet_price = fields.Monetary(currency_field='company_currency_id', group_operator="avg")
+    original_price = fields.Monetary(currency_field='company_currency_id', aggregator="avg")
+    timesheet_price = fields.Monetary(currency_field='company_currency_id', aggregator="avg")
     revenue = fields.Monetary(
         compute='_compute_revenue',
         store=True,

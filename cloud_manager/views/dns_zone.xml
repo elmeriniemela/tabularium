@@ -3,10 +3,10 @@
     <record id="dns_zone_list" model="ir.ui.view">
         <field name="model">dns.zone</field>
         <field name="arch" type="xml">
-            <tree>
+            <list>
                 <field name="name" optional="show"/>
                 <field name="identifier" optional="show"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -34,7 +34,7 @@
                     <notebook>
                         <page string="Records">
                             <field name="record_ids">
-                                <tree editable="bottom">
+                                <list editable="bottom">
                                     <field name="rtype" optional="show"/>
                                     <field name="name"/>
                                     <field name="content" optional="show"/>
@@ -43,7 +43,7 @@
                                     <field name="ttl" optional="show"/>
                                     <field name="identifier" optional="hide"/>
                                     <field name="sequence" optional="hide"/>
-                                </tree>
+                                </list>
                             </field>
                         </page>
                     </notebook>
@@ -74,7 +74,7 @@
     <record id="dns_zone_action" model="ir.actions.act_window">
         <field name="name">DNS Zones</field>
         <field name="res_model">dns.zone</field>
-        <field name="view_mode">tree,kanban,form</field>
+        <field name="view_mode">list,kanban,form</field>
         <field name="context"></field>
     </record>
 

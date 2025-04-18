@@ -62,12 +62,12 @@ class InvestmentAsset(models.Model):
 
     last_price_id = fields.Many2one(string='Last Price Record', comodel_name='investment.asset.price')
     last_update = fields.Datetime(related='last_price_id.time', store=True)
-    last_price = fields.Monetary(string="Last Price", related='last_price_id.price', store=True, currency_field='currency_id', group_operator=None, inverse='_inverse_last_price')
-    expected_yearly_appreciation = fields.Float(group_operator='avg', default=0.0, digits='Investment Asset Interest', tracking=True)
-    plausible_ath_drawdown = fields.Float(string="Plausible ATH drawdown", group_operator='avg', default=0.0, digits='Investment Asset Interest', tracking=True)
-    ath_price = fields.Monetary(string='ATH Price', currency_field='currency_id', compute='_compute_ath_price', group_operator=None, store=True)
-    current_ath_drawdown = fields.Float(string="Current ATH drawdown", compute='_compute_ath_price', group_operator=None, store=True)
-    drawdown_price = fields.Monetary(string='Plausible Drawdown Price', currency_field='currency_id', compute='_compute_ath_price', group_operator=None, store=True)
+    last_price = fields.Monetary(string="Last Price", related='last_price_id.price', store=True, currency_field='currency_id', aggregator=None, inverse='_inverse_last_price')
+    expected_yearly_appreciation = fields.Float(aggregator='avg', default=0.0, digits='Investment Asset Interest', tracking=True)
+    plausible_ath_drawdown = fields.Float(string="Plausible ATH drawdown", aggregator='avg', default=0.0, digits='Investment Asset Interest', tracking=True)
+    ath_price = fields.Monetary(string='ATH Price', currency_field='currency_id', compute='_compute_ath_price', aggregator=None, store=True)
+    current_ath_drawdown = fields.Float(string="Current ATH drawdown", compute='_compute_ath_price', aggregator=None, store=True)
+    drawdown_price = fields.Monetary(string='Plausible Drawdown Price', currency_field='currency_id', compute='_compute_ath_price', aggregator=None, store=True)
 
     daily_price_id = fields.Many2one(comodel_name='investment.asset.price')
     weekly_price_id = fields.Many2one(comodel_name='investment.asset.price')
@@ -81,16 +81,16 @@ class InvestmentAsset(models.Model):
     ten_year_price_id = fields.Many2one(comodel_name='investment.asset.price')
 
 
-    daily_price = fields.Float(compute='_compute_last_price', store=True, group_operator='avg', string="1 Day")
-    weekly_price = fields.Float(compute='_compute_last_price', store=True, group_operator='avg', string="1 Week")
-    monthly_price = fields.Float(compute='_compute_last_price', store=True, group_operator='avg', string="1 Month")
-    three_month_price = fields.Float(compute='_compute_last_price', store=True, group_operator='avg', string="3 Months")
-    six_month_price = fields.Float(compute='_compute_last_price', store=True, group_operator='avg', string="6 Months")
-    ytd_price = fields.Float(compute='_compute_last_price', store=True, group_operator='avg', string="YTD")
-    one_year_price = fields.Float(compute='_compute_last_price', store=True, group_operator='avg', string="1 Year")
-    three_year_price = fields.Float(compute='_compute_last_price', store=True, group_operator='avg', string="3 Years")
-    five_year_price = fields.Float(compute='_compute_last_price', store=True, group_operator='avg', string="5 Years")
-    ten_year_price = fields.Float(compute='_compute_last_price', store=True, group_operator='avg', string="10 Years")
+    daily_price = fields.Float(compute='_compute_last_price', store=True, aggregator='avg', string="1 Day")
+    weekly_price = fields.Float(compute='_compute_last_price', store=True, aggregator='avg', string="1 Week")
+    monthly_price = fields.Float(compute='_compute_last_price', store=True, aggregator='avg', string="1 Month")
+    three_month_price = fields.Float(compute='_compute_last_price', store=True, aggregator='avg', string="3 Months")
+    six_month_price = fields.Float(compute='_compute_last_price', store=True, aggregator='avg', string="6 Months")
+    ytd_price = fields.Float(compute='_compute_last_price', store=True, aggregator='avg', string="YTD")
+    one_year_price = fields.Float(compute='_compute_last_price', store=True, aggregator='avg', string="1 Year")
+    three_year_price = fields.Float(compute='_compute_last_price', store=True, aggregator='avg', string="3 Years")
+    five_year_price = fields.Float(compute='_compute_last_price', store=True, aggregator='avg', string="5 Years")
+    ten_year_price = fields.Float(compute='_compute_last_price', store=True, aggregator='avg', string="10 Years")
 
 
     endpoint_id = fields.Many2one(

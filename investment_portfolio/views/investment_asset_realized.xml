@@ -1,9 +1,9 @@
 <odoo>
     <record id="asset_realized_tree" model="ir.ui.view">
-        <field name="name">investment.asset.realized.tree</field>
+        <field name="name">investment.asset.realized.list</field>
         <field name="model">investment.asset.realized</field>
         <field name="arch" type="xml">
-            <tree decoration-info="simulated">
+            <list decoration-info="simulated">
                 <field name="position_id" optional="hide"/>
                 <field name="currency_id" optional="hide"/>
                 <field name="quantity" sum="Total Volume"/>
@@ -17,7 +17,7 @@
                 <field name="buy_price"/>
                 <field name="buy_fee"/>
                 <field name="simulated" optional="hide"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -84,7 +84,7 @@
     <record id="action_realized" model="ir.actions.act_window">
         <field name="name">Assets Realized</field>
         <field name="res_model">investment.asset.realized</field>
-        <field name="view_mode">tree,graph,form</field>
+        <field name="view_mode">list,graph,form</field>
         <field name="context">{'search_default_group_sell_date': 1, 'search_default_not_simulated': 1}</field>
     </record>
 

@@ -3,13 +3,13 @@
         <field name="name">toggl.task.list</field>
         <field name="model">toggl.task</field>
         <field name="arch" type="xml">
-            <tree>
+            <list>
                 <field name="name"/>
                 <field name="project_name"/>
                 <field name="sale_line_name"/>
                 <field name="last_entry" widget="timeago"/>
                 <field name="entry_ids"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -60,7 +60,7 @@
     <record id="task_action" model="ir.actions.act_window">
         <field name="name">Toggl Tasks</field>
         <field name="res_model">toggl.task</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="context">{'search_default_entries': 1}</field>
     </record>
 

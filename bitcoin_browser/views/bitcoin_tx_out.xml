@@ -1,9 +1,9 @@
 <odoo>
     <record id="tree_tx_out" model="ir.ui.view">
-        <field name="name">bitcoin.tx.out.tree</field>
+        <field name="name">bitcoin.tx.out.list</field>
         <field name="model">bitcoin.tx.out</field>
         <field name="arch" type="xml">
-            <tree create="false">
+            <list create="false">
                 <field name="tx_id" optional="hide"/>
                 <field name="n"/>
                 <field name="type"/>
@@ -11,7 +11,7 @@
                 <field name="asm" optional="show"/>
                 <field name="value"/>
                 <field name="spent_input_id"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -51,7 +51,7 @@
     <record id="action_tx_out" model="ir.actions.act_window">
         <field name="name">Outputs</field>
         <field name="res_model">bitcoin.tx.out</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="context">{'show_all': True}</field>
     </record>
 

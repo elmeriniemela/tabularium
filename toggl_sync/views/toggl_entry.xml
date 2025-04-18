@@ -4,7 +4,7 @@
         <field name="model">toggl.entry</field>
         <field name="priority">2</field>
         <field name="arch" type="xml">
-            <tree expand="1" default_order="date desc, id asc" editable="top" multi_edit="1" decoration-muted="not active">
+            <list expand="1" default_order="date desc, id asc" editable="top" multi_edit="1" decoration-muted="not active">
                 <field name="description" width="450px" optional="show"/>
                 <field name="checked" widget="boolean_toggle"/>
                 <field name="project_name" optional="show"/>
@@ -27,7 +27,7 @@
                 <button title="Round Down" icon="fa-arrow-down" name="action_round_down" type="object" invisible="parent_id"/>
                 <button string="External Task" name="action_view_task" type="object" invisible="parent_id"/>
                 <button string="Toggl Entry" name="action_open_form" type="object"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -267,7 +267,7 @@
     <record id="entry_action" model="ir.actions.act_window">
         <field name="name">Toggl Entries</field>
         <field name="res_model">toggl.entry</field>
-        <field name="view_mode">tree,kanban,form,pivot,calendar</field>
+        <field name="view_mode">list,kanban,form,pivot,calendar</field>
         <field name="context">
             {
                 'search_default_not_exported': 1,
