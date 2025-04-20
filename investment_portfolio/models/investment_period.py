@@ -18,8 +18,8 @@ class InvestmentPeriod(models.Model):
 
     name = fields.Char(required=True)
 
-    start_date = fields.Date(required=True, tracking=True)
-    end_date = fields.Date(required=True, tracking=True)
+    start_date = fields.Date(required=True, tracking=True, default=fields.Date.context_today)
+    end_date = fields.Date(required=True, tracking=True, default=fields.Date.context_today)
 
 
     domain = fields.Text(default="[('liquid', '=', True)]", required=True, tracking=True)
