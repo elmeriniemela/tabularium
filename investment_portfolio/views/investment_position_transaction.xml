@@ -81,7 +81,7 @@
                 <field name="company_currency_id"/>
                 <field name="profit"/>
                 <templates>
-                    <t t-name="kanban-box">
+                    <t t-name="card">
                         <div t-attf-class="oe_kanban_global_click">
                             <div class="row">
                                 <div class="col-12" style="font-weight: bold;">

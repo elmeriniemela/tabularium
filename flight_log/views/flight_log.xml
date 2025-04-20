@@ -74,7 +74,7 @@
         <field name="arch" type="xml">
             <kanban class="o_kanban_mobile" sample="1" default_order="date desc, start_time desc, id desc">
                 <templates>
-                    <t t-name="kanban-box">
+                    <t t-name="card">
                         <div class="oe_kanban_global_click_edit">
                             <div class="oe_kanban_content">
                                 <div class="o_kanban_record_top">

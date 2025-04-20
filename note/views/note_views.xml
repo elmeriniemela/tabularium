@@ -89,7 +89,7 @@
           <field name="activity_state" />
           <progressbar field="activity_state" colors='{"planned": "success", "today": "warning", "overdue": "danger"}'/>
           <templates>
-            <t t-name="kanban-box">
+            <t t-name="card">
               <t t-set="noteHasFollowers" t-value="record.message_partner_ids.raw_value.length &gt; 1"/>
 
               <div t-attf-class="#{!selection_mode ? kanban_color(record.color.raw_value) : ''} oe_kanban_global_click_edit oe_semantic_html_override oe_kanban_card">
