@@ -16,7 +16,7 @@ class TogglImport(models.TransientModel):
 
     start_date = fields.Datetime(
         required=True,
-        default=lambda self: self.env['toggl.entry'].search([('export_id', '!=', False)], limit=1).date_stop - datetime.timedelta(days=1)
+        default=lambda self: (self.env['toggl.entry'].search([('export_id', '!=', False)], limit=1).date_stop or datetime.datetime.now()) - datetime.timedelta(days=1)
     )
 
     end_date = fields.Datetime(
