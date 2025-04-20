@@ -2,8 +2,9 @@
 
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { Component, markup } from "@odoo/owl";
+import { Component, markup, onWillStart } from "@odoo/owl";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
+import { loadBundle } from "@web/core/assets";
 
 export class DiffField extends Component {
     static template = "diff_widget.DiffField";
@@ -11,6 +12,12 @@ export class DiffField extends Component {
         ...standardFieldProps,
         maxLength: { type: Number, optional: true },
     };
+
+    setup() {
+        onWillStart(async () => {
+            await loadBundle("diff_widget.diff2html");
+        });
+    }
 
     get formattedValue() {
         var value = this.props.record.data[this.props.name];
