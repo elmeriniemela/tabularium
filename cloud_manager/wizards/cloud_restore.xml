@@ -6,6 +6,7 @@
             <form>
                 <h2>Restore backup to instance</h2>
                 <group>
+                    <field name="method"/>
                     <field name="backup_id"/>
                     <field name="instance_id"/>
                 </group>
