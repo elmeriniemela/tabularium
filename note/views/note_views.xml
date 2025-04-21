@@ -32,7 +32,6 @@
         <field name="name">Stages</field>
         <field name="res_model">note.stage</field>
         <field name="view_mode">list,form</field>
-        <field name="domain">[('user_id','=',uid)]</field>
     </record>
 
     <!-- note Tag Form View -->
@@ -170,7 +169,7 @@
                 <header>
                     <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}" placeholder="Tags"/>
                     <field name="company_id" groups="base.group_multi_company"/>
-                    <field name="stage_id" domain="[('user_id','=',uid)]" widget="statusbar" options="{'clickable': '1'}"/>
+                    <field name="stage_id" widget="statusbar" options="{'clickable': '1'}"/>
                 </header>
                 <group>
                   <field name="name" widget="char"/>

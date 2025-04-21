@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<odoo noupdate="1">
+<odoo>
     <record id="ir_rule_note_note_multi_company" model="ir.rule">
         <field name="name">Note - Multi-Company</field>
         <field name="model_id" ref="model_note_note"/>
@@ -20,12 +20,6 @@
         <field name="domain_force">[('user_id', '=', user.id)]</field>
         <field name="perm_write" eval="False"/>
         <field name="perm_read" eval="False"/>
-    </record>
-
-    <record id="note_stage_rule_global" model="ir.rule">
-        <field name="name">Each user have his stage name</field>
-        <field name="model_id" ref="model_note_stage"/>
-        <field name="domain_force">['|',('user_id','=',False),('user_id','=',user.id)]</field>
     </record>
 
 </odoo>

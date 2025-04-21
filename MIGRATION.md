@@ -39,3 +39,15 @@
 * activate odoo17 own.conf
 * pip install git+https://github.com/OCA/openupgradelib.git@master#egg=openupgradelib
 * odoo --update all --stop-after-init --load=base,web,openupgrade_framework
+
+
+#### Migration from 17.0 to 18.0
+
+* https://oca.github.io/OpenUpgrade/040_run_migration.html
+* git clone -b 18.0 git@github.com:OCA/OpenUpgrade.git
+* cd OpenUpgrade # this adds openupgrade_framework and openupgrade_scripts available in addons path
+* export OPENUPGRADE_TARGET_VERSION=18.0
+* activate odoo18 own.conf
+* pip install git+https://github.com/OCA/openupgradelib.git@master#egg=openupgradelib
+* odoo --update all --stop-after-init --load=base,web,openupgrade_framework --logfile=../odoo_addons/migrate.log
+* update ir_act_window set view_mode=REPLACE(view_mode, 'tree', 'list')
