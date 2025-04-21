@@ -70,5 +70,6 @@ class CloudBackup(models.Model):
                                            (dst_instance.server_id.branch, self.instance_id.server_id.branch))
         resp = dst_instance._irpc(method=method, args=(self.instance_id.uid, dst_instance.uid, self.trigger, self.name))
         if resp:
-            self.upgrade = resp
+            dst_instance.message_post(body="Migraded from %s to %s." % (self.instance_id.server_id.branch, dst_instance.server_id.branch))
+            dst_instance.upgrade = resp
         self.message_post(body="Restored to %s on server %s using method '%s'." % (dst_instance.display_name, dst_instance.server_id.display_name, method))
