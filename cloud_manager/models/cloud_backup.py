@@ -68,5 +68,7 @@ class CloudBackup(models.Model):
             if not (dst_instance.server_id.branch > self.instance_id.server_id.branch):
                 raise exceptions.UserError(_("Destination server should have higher branch than src: %s is not greater than %s.") %
                                            (dst_instance.server_id.branch, self.instance_id.server_id.branch))
-        dst_instance._irpc(method=method, args=(self.instance_id.uid, dst_instance.uid, self.trigger, self.name))
+        resp = dst_instance._irpc(method=method, args=(self.instance_id.uid, dst_instance.uid, self.trigger, self.name))
+        if resp:
+            self.upgrade = resp
         self.message_post(body="Restored to %s on server %s using method '%s'." % (dst_instance.display_name, dst_instance.server_id.display_name, method))
