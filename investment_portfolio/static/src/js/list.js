@@ -31,7 +31,7 @@ export class PositionsList extends ListController {
     async fetchAndUpdateData() {
         try {
             // Example: Make an RPC call to a custom backend method
-            await this.orm.call("investment.position", "web_refresh_prices", [this.props.domain]);
+            await this.model.root.model.orm.call("investment.position", "web_refresh_prices", [this.props.domain]);
             await this.model.load({ ...this.model.config});
         } catch (error) {
             console.error("Failed to fetch data:", error);
