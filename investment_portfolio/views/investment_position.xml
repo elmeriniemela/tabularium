@@ -257,6 +257,7 @@
         <field name="name">Current positions</field>
         <field name="res_model">investment.position</field>
         <field name="view_mode">list,form,graph</field>
+        <field name="path">positions</field>
         <field name="context">{'search_default_group_portfolio_id': 1, 'search_default_follow': 1, 'search_default_liquid': 1, 'search_default_long': 1, 'search_default_short': 1,}</field>
     </record>
 
