@@ -301,6 +301,7 @@ class InvestmentPosition(models.Model):
 
         for position_id in self:
             if not position_id.quantity and position_id.plan_type != 'cashflow':
+                Transaction.search([('prediction', '=', True), ('position_id', '=', position_id.id)]).unlink()
                 _logger.info("Skip plan for %s as we have no position on it.", position_id.name)
                 continue
 

@@ -106,6 +106,13 @@ class InvestmentPeriod(models.Model):
                     ('date', '=', end_date),
                     ('company_id', '=', record.company_id.id),
                 ])
+                if end_date == today:
+                    for serie in end_series:
+                        serie.price_id = self.env['investment.asset.price'].search([
+                            ('prediction', '=', False),
+                            ('asset_id', '=', position.asset_id.id),
+                        ], limit=1, order='time desc') # update the latest price when not doing predictions.
+                    end_series._compute_timeseries_aggregate()
 
                 record.timeseries_ids += start_series + end_series
                 record.start_position += start_series.position
