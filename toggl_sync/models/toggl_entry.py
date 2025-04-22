@@ -257,7 +257,7 @@ class TogglEntry(models.Model):
 
         for record in self:
             values = {
-                'date': record.date,
+                'date': record.date.strftime('%Y-%m-%d'),
                 'name': record.description,
                 'task_id': record.task_id.task_id,
                 'project_id': record.task_id.project_id,
