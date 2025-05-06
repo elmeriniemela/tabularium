@@ -188,7 +188,7 @@ class InvestmentPosition(models.Model):
     def web_refresh_prices(self, domain):
         _logger.info("Refreshing prices for %s", domain)
         records = self.env['investment.position'].search(domain)
-        assets = records.mapped('asset_id').filtered(lambda a: a.sudo().endpoint_id)
+        assets = records.mapped('asset_id').filtered(lambda a: a.sudo().endpoint_id.state == 'active')
         assets.run_integration()
         _logger.info("Price refresed for %s assets", len(assets))
 
