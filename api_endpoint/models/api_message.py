@@ -94,16 +94,16 @@ class ApiMessage(models.Model):
         # READ-ONLY, should be OK not to ROLLBACK
         literal_globals = msg.endpoint_id._get_globals()
 
-        context = safe_eval(msg.context, literal_globals)
+        context = safe_eval(msg.context, literal_globals, nocopy=True)
         context['bin_size'] = False
         msg = msg.with_context(context)
 
-        variables = safe_eval(msg.variables, literal_globals)
+        variables = safe_eval(msg.variables, literal_globals, nocopy=True)
         globals_dict = msg.endpoint_id._get_globals()
         globals_dict.update(variables)
         obj = msg.endpoint_id.bytes_to_obj(base64.b64decode(msg.content), msg.endpoint_id.file_format)
         globals_dict['obj'] = obj
-        globals_dict['msg'] = msg
+        globals_dict.force_set('msg', msg)
         return globals_dict
 
     def action_consume(self):

@@ -450,11 +450,25 @@ class ApiEndpoint(models.Model):
 
 
     def action_execute(self):
-        if not (self.initiator and self.role == 'active'):
-            raise exceptions.UserError(_("Unable to initiate, check integration parameters."))
-        globals_dict = self._get_globals()
-        safe_eval(self.initiator, globals_dict, mode="exec", nocopy=True)
+        self.ensure_one()
+        commit = self.env.context.get('force_commit') or self.auto_commit
+        raise_exc = self.env.context.get('raise_exc', True)
+        assert raise_exc or commit, "If you want to bypass the error, you need to set force_commit=True."
 
+        try:
+            if not (self.initiator and self.role == 'active'):
+                raise exceptions.UserError(_("Unable to initiate, check integration parameters."))
+            globals_dict = self._get_globals()
+            safe_eval(self.initiator, globals_dict, mode="exec", nocopy=True)
+        except Exception as error:
+            self.env.cr.rollback()
+            if commit:
+                if self.state == 'active':
+                    self.state = 'error'
+                self.message_post(body=html.escape(str(error)))
+                self.env.cr.commit()
+            if raise_exc or not commit: # Commit required, silent bypass is not allowed
+                raise error
 
     def action_test(self):
         globals_dict = self._get_globals()
@@ -464,9 +478,12 @@ class ApiEndpoint(models.Model):
     def produce(self, variables):
         self.ensure_one()
         self = self.sudo() # All the internals of this function should be run as root, but the _get_globals will demote the user.
-        if self.state not in ['active', 'error']:
-            raise exceptions.UserError(_("Unable to produce, invalid state: %s.") % self.state)
+        commit = self.env.context.get('force_commit') or self.auto_commit
+        raise_exc = self.env.context.get('raise_exc', True)
+        assert raise_exc or commit, "If you want to bypass the error, you need to set force_commit=True."
         try:
+            if self.state not in ['active', 'error']:
+                raise exceptions.UserError(_("Unable to produce, invalid state: %s.") % self.state)
             globals_dict = self._get_globals()
             serialized_vars = self._serialize_dict(globals_dict, variables)
             serialized_ctx = self._serialize_dict(globals_dict, self.env.context)
@@ -480,17 +497,18 @@ class ApiEndpoint(models.Model):
             self._store(globals_dict, serialized_vars, serialized_ctx)
         except Exception as error:
             self.env.cr.rollback()
-            if self.auto_commit:
+            if commit:
                 if self.state == 'active':
                     self.state = 'error'
                 self.message_post(body=html.escape(str(error)))
                 self.env.cr.commit()
-            raise error
+            if raise_exc or not commit: # Commit required, silent bypass is not allowed
+                raise error
         else:
             if self.state == 'error':
                 self.state = 'active'
 
-        if self.auto_commit:
+        if commit:
             self.env.cr.commit()
         if self.auto_consume:
             self._consume(globals_dict)
@@ -527,8 +545,10 @@ class ApiEndpoint(models.Model):
         }))
 
 
-    def _consume(self, globals_dict, force_commit=False, raise_exc=True):
-        commit = force_commit or self.auto_commit
+    def _consume(self, globals_dict):
+        commit = self.env.context.get('force_commit') or self.auto_commit
+        raise_exc = self.env.context.get('raise_exc', True)
+        assert raise_exc or commit, "If you want to bypass the error, you need to set force_commit=True."
         try:
             safe_eval((self.hardcoded_consumer or '') + (self.consumer or ''), globals_dict, mode="exec", nocopy=True)
         except Exception as error:
@@ -537,7 +557,7 @@ class ApiEndpoint(models.Model):
                 globals_dict['msg'].write({'state': 'error'})
                 globals_dict['msg'].message_post(body=html.escape(str(error)))
                 self.env.cr.commit()
-            if not commit or raise_exc: # Commit required, silent bypass is not allowed
+            if raise_exc or not commit: # Commit required, silent bypass is not allowed
                 raise error
         else:
             globals_dict['msg'].write({'state': 'consumed'})
@@ -614,7 +634,7 @@ class ApiEndpoint(models.Model):
     def cron_run(self, frequency):
         for rec in self.search([('cron_frequency', '=', frequency),('role', '=', 'active')]).sudo():
             _logger.info("Execute %s", rec.name)
-            rec.action_execute()
+            rec.with_context(force_commit=True, raise_exc=False).action_execute()
             rec.env.cr.commit()
             while msg := rec.next_from_queue():
                 try:
@@ -624,7 +644,7 @@ class ApiEndpoint(models.Model):
                     msg.write({'state': 'error'})
                     msg.message_post(body=html.escape(str(error)))
                 else:
-                    msg.endpoint_id._consume(globals_dict, force_commit=True, raise_exc=False) # method _consume already has error handling.
+                    msg.endpoint_id.with_context(force_commit=True, raise_exc=False)._consume(globals_dict) # method _consume already has error handling.
                 finally:
                     msg.env.cr.commit() # Save all and release msg lock.
                 assert msg.state != 'produced', "Programming error, break infinite while loop."
