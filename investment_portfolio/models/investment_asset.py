@@ -25,12 +25,13 @@ class InvestmentAsset(models.Model):
 
     active = fields.Boolean(default=True)
 
-    ticker = fields.Char(required=True, string="Ticker / ID")
+    ticker = fields.Char(required=True, string="Ticker / ID", tracking=True)
 
     category_id = fields.Many2one(
         comodel_name='investment.category',
         required=True,
         index=True,
+        tracking=True,
         default=lambda self: self.env['investment.category'].search([], limit=1)
     )
 
@@ -40,6 +41,7 @@ class InvestmentAsset(models.Model):
         comodel_name='res.currency',
         required=True,
         index=True,
+        tracking=True,
         default=lambda self: self.env.company.currency_id,
     )
 
@@ -97,6 +99,7 @@ class InvestmentAsset(models.Model):
         string="Integration",
         comodel_name='api.endpoint',
         index=True,
+        tracking=True,
         ondelete='restrict',
         domain=[
             ('usage_field_id.name', '=', 'endpoint_id'),
