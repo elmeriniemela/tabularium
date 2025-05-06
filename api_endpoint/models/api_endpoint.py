@@ -74,6 +74,23 @@ def import_xml(cr, root, noupdate=True, mode='init', module='__export__'):
     obj.parse(root)
 
 
+class GlobalsDict(dict):
+
+    def __init__(self, mapping=None, /, **kwargs):
+        super().__init__(mapping)
+        self.__protected_keys = set(mapping.keys()) | {
+            'msg',
+        }
+
+    def force_set(self, key, value):
+        super().__setitem__(key, value)
+
+    def __setitem__(self, key, value):
+        if key in self.__protected_keys:
+            raise exceptions.UserError(f"Cannot redefine a protected variable {key}={value}. Protected vars: {self.__protected_keys}")
+        super().__setitem__(key, value)
+
+
 class ApiEndpoint(models.Model):
     _name = 'api.endpoint'
     _description = 'API Endpoint'
@@ -81,7 +98,7 @@ class ApiEndpoint(models.Model):
     _order = "sequence, id"
 
     def _get_globals(self):
-        return {
+        return GlobalsDict({
             'self': self.with_user(self.user_id).sudo(flag=False),
             'json': json,
             'xmltodict': xmltodict,
@@ -105,7 +122,7 @@ class ApiEndpoint(models.Model):
             'UserError': exceptions.UserError,
             'AccessError': exceptions.AccessError,
             'import_xml': functools.partial(import_xml, self.env.cr),
-        }
+        })
 
 
     sequence = fields.Integer(
@@ -436,17 +453,19 @@ class ApiEndpoint(models.Model):
         if not (self.initiator and self.role == 'active'):
             raise exceptions.UserError(_("Unable to initiate, check integration parameters."))
         globals_dict = self._get_globals()
-        safe_eval(self.initiator, globals_dict, mode="exec", nocopy=False)
+        safe_eval(self.initiator, globals_dict, mode="exec", nocopy=True)
 
 
     def action_test(self):
         globals_dict = self._get_globals()
-        safe_eval(self.test_example or '', globals_dict, mode="exec", nocopy=False)
+        safe_eval(self.test_example or '', globals_dict, mode="exec", nocopy=True)
 
 
     def produce(self, variables):
         self.ensure_one()
         self = self.sudo() # All the internals of this function should be run as root, but the _get_globals will demote the user.
+        if self.state not in ['active', 'error']:
+            raise exceptions.UserError(_("Unable to produce, invalid state: %s.") % self.state)
         try:
             globals_dict = self._get_globals()
             serialized_vars = self._serialize_dict(globals_dict, variables)
@@ -462,7 +481,7 @@ class ApiEndpoint(models.Model):
         except Exception as error:
             self.env.cr.rollback()
             if self.auto_commit:
-                if self.state != 'error':
+                if self.state == 'active':
                     self.state = 'error'
                 self.message_post(body=html.escape(str(error)))
                 self.env.cr.commit()
@@ -492,7 +511,7 @@ class ApiEndpoint(models.Model):
                 d[key] = EvalModel(val)
 
         serialized_dict = str(d)
-        assert isinstance(safe_eval(serialized_dict, globals_dict), dict), "Ensure that the dict can be evaluated from message queue."
+        assert isinstance(safe_eval(serialized_dict, globals_dict, nocopy=True), dict), "Ensure that the dict can be evaluated from message queue."
         return serialized_dict
 
 
@@ -500,12 +519,12 @@ class ApiEndpoint(models.Model):
         self.ensure_one()
         obj = globals_dict['obj']
         bytesdata = self.obj_to_bytes(obj, self.file_format)
-        globals_dict['msg'] = self.sudo().env['api.message'].create({
+        globals_dict.force_set('msg', self.sudo().env['api.message'].create({
             'endpoint_id': self.id,
             'content': base64.b64encode(bytesdata),
             'variables': variables,
             'context': context,
-        })
+        }))
 
 
     def _consume(self, globals_dict, force_commit=False, raise_exc=True):
