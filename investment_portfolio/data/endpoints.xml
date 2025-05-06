@@ -223,7 +223,7 @@ if key not in obj:
 
 for date_str, price_data in obj[key].items():
     date = dateutil.parser.parse(date_str)
-    timedt = datetime.datetime.combine(date, datetime.datetime.min.timedt()).replace(hour=20)
+    timedt = datetime.datetime.combine(date, datetime.datetime.min.time()).replace(hour=20)
     if timedt in existing:
       continue
     vals_list.append({
@@ -272,7 +272,7 @@ if key not in obj:
 
 for date_str, price_data in obj[key].items():
     date = dateutil.parser.parse(date_str)
-    timedt = datetime.datetime.combine(date, datetime.datetime.min.timedt()).replace(hour=20)
+    timedt = datetime.datetime.combine(date, datetime.datetime.min.time()).replace(hour=20)
     if timedt in existing:
       continue
     vals_list.append({
@@ -320,7 +320,7 @@ if key not in obj:
 
 for date_str, price_data in obj[key].items():
     date = dateutil.parser.parse(date_str)
-    timedt = datetime.datetime.combine(date, datetime.datetime.min.timedt()).replace(hour=20)
+    timedt = datetime.datetime.combine(date, datetime.datetime.min.time()).replace(hour=20)
     if timedt in existing:
       continue
     vals_list.append({
