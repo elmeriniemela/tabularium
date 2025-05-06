@@ -54,8 +54,8 @@ obj = prices.xml_export(['time', 'price'])</field>
 resp.raise_for_status()
 obj = resp.json()</field>
         <field name="consumer">meta = obj['chart']['result'][0]['meta']
-time = datetime.datetime.fromtimestamp(int(meta['regularMarketTime']))
-asset.price_upsert(time=time, price= meta['regularMarketPrice'])</field>
+timedt = datetime.datetime.fromtimestamp(int(meta['regularMarketTime']))
+asset.price_upsert(time=timedt, price= meta['regularMarketPrice'])</field>
     </record>
     <record id="investment_portfolio.integration_cnbc" model="api.endpoint">
         <field name="name">CNBC</field>
@@ -87,10 +87,10 @@ resp.raise_for_status()
 obj = resp.json()</field>
         <field name="consumer">vals = obj['FormattedQuoteResult']['FormattedQuote'][0]
 
-time = dateutil.parser.parse(vals['last_time'])
+timedt = dateutil.parser.parse(vals['last_time'])
 price = vals['last'].strip('%')
 
-asset.price_upsert(time=time, price=price)</field>
+asset.price_upsert(time=timedt, price=price)</field>
     </record>
     <record id="investment_portfolio.integration_ft" model="api.endpoint">
         <field name="name">Financial Times (stocks)</field>
@@ -121,9 +121,9 @@ resp.raise_for_status()
 obj = lxml.etree.parse(io.StringIO(resp.text), lxml.etree.HTMLParser()).getroot()</field>
         <field name="consumer">price_str = obj.xpath('.//ul[@class="mod-tearsheet-overview__quote__bar"]//span[@class="mod-ui-data-list__value"]')[0].text
 
-time = datetime.datetime.now().replace(hour=20, minute=0, second=0, microsecond=0)
+timedt = datetime.datetime.now().replace(hour=20, minute=0, second=0, microsecond=0)
 
-asset.price_upsert(time=time, price=float(price_str))</field>
+asset.price_upsert(time=timedt, price=float(price_str))</field>
     </record>
     <record id="investment_portfolio.integration_bitstamp" model="api.endpoint">
         <field name="name">Bitstamp</field>
@@ -179,9 +179,11 @@ resp.raise_for_status()
 obj = pandas.read_csv(io.StringIO(resp.text), sep=',', decimal='.')
 obj.dropna(inplace=True)
 </field>
-        <field name="consumer">for index, row in obj.iterrows():
-  time = datetime.datetime.strptime(row['Date'], '%Y-%m-%d')
-  asset.price_upsert(time=time, price= row['Close'])</field>
+        <field name="consumer">
+for index, row in obj.iterrows():
+  timedt = datetime.datetime.strptime(row['Date'], '%Y-%m-%d')
+  asset.price_upsert(time=timedt, price= row['Close'])
+</field>
     </record>
     <record id="investment_portfolio.integration_alphavantage_daily" model="api.endpoint">
         <field name="name">AlphaVantage (daily stocks)</field>
@@ -210,7 +212,8 @@ obj.dropna(inplace=True)
   },
 )
 obj = resp.json()</field>
-        <field name="consumer">existing = {
+        <field name="consumer">
+existing = {
     p.time: p for p in asset.price_ids
 }
 vals_list = []
@@ -220,12 +223,12 @@ if key not in obj:
 
 for date_str, price_data in obj[key].items():
     date = dateutil.parser.parse(date_str)
-    time = datetime.datetime.combine(date, datetime.datetime.min.time()).replace(hour=20)
-    if time in existing:
+    timedt = datetime.datetime.combine(date, datetime.datetime.min.timedt()).replace(hour=20)
+    if timedt in existing:
       continue
     vals_list.append({
         'price': float(price_data['4. close']),
-        'time': time,
+        'time': timedt,
     })
 
 asset.write({'price_ids': [(0, 0, values) for values in vals_list]})</field>
@@ -258,7 +261,8 @@ asset.write({'price_ids': [(0, 0, values) for values in vals_list]})</field>
 )
 resp.raise_for_status()
 obj = resp.json()</field>
-        <field name="consumer">existing = {
+        <field name="consumer">
+existing = {
     p.time: p for p in asset.price_ids
 }
 vals_list = []
@@ -268,12 +272,12 @@ if key not in obj:
 
 for date_str, price_data in obj[key].items():
     date = dateutil.parser.parse(date_str)
-    time = datetime.datetime.combine(date, datetime.datetime.min.time()).replace(hour=20)
-    if time in existing:
+    timedt = datetime.datetime.combine(date, datetime.datetime.min.timedt()).replace(hour=20)
+    if timedt in existing:
       continue
     vals_list.append({
         'price': float(price_data['4. close']),
-        'time': time,
+        'time': timedt,
     })
 
 asset.write({'price_ids': [(0, 0, values) for values in vals_list]})</field>
@@ -305,7 +309,8 @@ asset.write({'price_ids': [(0, 0, values) for values in vals_list]})</field>
   },
 )
 obj = resp.json()</field>
-        <field name="consumer">existing = {
+        <field name="consumer">
+existing = {
     p.time: p for p in asset.price_ids
 }
 vals_list = []
@@ -315,12 +320,12 @@ if key not in obj:
 
 for date_str, price_data in obj[key].items():
     date = dateutil.parser.parse(date_str)
-    time = datetime.datetime.combine(date, datetime.datetime.min.time()).replace(hour=20)
-    if time in existing:
+    timedt = datetime.datetime.combine(date, datetime.datetime.min.timedt()).replace(hour=20)
+    if timedt in existing:
       continue
     vals_list.append({
         'price': float(price_data['4. close']),
-        'time': time,
+        'time': timedt,
     })
 
 asset.write({'price_ids': [(0, 0, values) for values in vals_list]})</field>
@@ -454,10 +459,11 @@ resp = requests.get(
 )
 resp.raise_for_status()
 obj = resp.json()</field>
-        <field name="consumer">for (timestamp, price) in obj[0]['Data']:
+        <field name="consumer">
+for (timestamp, price) in obj[0]['Data']:
   _logger.info(timestamp)
-  time = datetime.datetime.fromtimestamp(int(timestamp/1000))
-  asset.price_upsert(time=time, price=price)
+  timedt = datetime.datetime.fromtimestamp(int(timestamp/1000))
+  asset.price_upsert(time=timedt, price=price)
 </field>
     </record>
     <record id="investment_portfolio.import_asset_prices" model="api.endpoint">
