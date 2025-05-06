@@ -143,7 +143,7 @@ asset.price_upsert(time=timedt, price=float(price_str))</field>
         <field name="initiator">for asset in self.env['investment.asset'].search([('endpoint_id', '=', self.id)]):
   _logger.info("Run integration on %s", asset.ticker)
   self.produce(variables={'asset': asset})</field>
-        <field name="producer">resp = requests.get(f'{asset.location}/{asset.ticker}/')
+        <field name="producer">resp = requests.get(f'{self.location}/{asset.ticker}/')
 resp.raise_for_status()
 obj = resp.json()</field>
         <field name="consumer">asset.price_upsert(time=datetime.datetime.fromtimestamp(int(obj['timestamp'])), price=obj['last'])</field>
