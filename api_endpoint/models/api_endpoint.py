@@ -22,10 +22,7 @@ re = wrap_module(__import__('re'), ['findall', 'sub'])
 json = wrap_module(__import__('json'), ['loads','dumps'])
 xmltodict = wrap_module(__import__('xmltodict'), ['parse'])
 dicttoxml = wrap_module(__import__('dicttoxml'), ['dicttoxml'])
-try:
-    yfinance = wrap_module(__import__('yfinance'), ['Ticker'])
-except:
-    yfinance = None
+yfinance = wrap_module(__import__('yfinance'), ['Ticker', 'Tickers', 'download'])
 
 zipfile = wrap_module(__import__('zipfile'), ['ZipFile','ZIP_DEFLATED','BadZipfile'])
 hashlib = wrap_module(__import__('hashlib'), ['sha256','sha512'])
