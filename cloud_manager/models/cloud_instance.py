@@ -298,6 +298,8 @@ class CloudInstance(models.Model):
             if vals.get('logs'):
                 self.upgrade = vals.get('logs')
                 _logger.info("Saved logs on %s", self)
+                self.message_post(body="Saved upgrade logs.")
+
             self.restart_requested = False
 
 

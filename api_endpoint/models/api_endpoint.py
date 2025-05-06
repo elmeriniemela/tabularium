@@ -22,6 +22,11 @@ re = wrap_module(__import__('re'), ['findall', 'sub'])
 json = wrap_module(__import__('json'), ['loads','dumps'])
 xmltodict = wrap_module(__import__('xmltodict'), ['parse'])
 dicttoxml = wrap_module(__import__('dicttoxml'), ['dicttoxml'])
+try:
+    yfinance = wrap_module(__import__('yfinance'), ['Ticker'])
+except:
+    yfinance = None
+
 zipfile = wrap_module(__import__('zipfile'), ['ZipFile','ZIP_DEFLATED','BadZipfile'])
 hashlib = wrap_module(__import__('hashlib'), ['sha256','sha512'])
 hmac = wrap_module(__import__('hmac'), ['new',])
@@ -115,6 +120,7 @@ class ApiEndpoint(models.Model):
             'base64': base64,
             'time': time,
             'io': io,
+            'yfinance': yfinance,
             're': re,
             'lxml': lxml,
             '_logger': _logger,
