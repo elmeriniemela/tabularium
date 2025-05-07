@@ -103,7 +103,7 @@ class InvestmentPosition(models.Model):
 
     thesis = fields.Html(sanitize=False, translate=False)
 
-    follow = fields.Boolean(compute='_compute_follow', store=True, readonly=False)
+    follow = fields.Boolean(default=True)
 
     quantity = fields.Float(compute='_compute_position_aggregate', inverse='_inverse_quantity', readonly=False, store=True, digits='Investment Asset quantity', aggregator=None)
     position = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', help="Current value of this position.")
@@ -409,11 +409,6 @@ class InvestmentPosition(models.Model):
         currency_ticker = self.env.company.currency_id.name
         for record in self:
             record.is_cash = record.ticker == currency_ticker
-
-    @api.depends('transaction_ids')
-    def _compute_follow(self):
-        for record in self:
-            record.follow = bool(record.transaction_ids)
 
     def _inverse_last_price(self):
         for record in self:

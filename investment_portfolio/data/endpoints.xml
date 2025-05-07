@@ -345,28 +345,21 @@ asset.write({'price_ids': [(0, 0, values) for values in vals_list]})</field>
         <field name="documentation">&lt;p&gt;AlphaVantage&amp;nbsp;API rate limit is 25 requests per day. We are trying different modes to see which works.&lt;/p&gt;</field>
         <field name="test_example" eval="False"/>
         <field name="xslt" eval="False"/>
-        <field name="initiator">modes = ['realtime', 'intraday', 'daily']
+        <field name="initiator">
+modes = ['realtime', 'intraday', 'daily']
 from_currency = self.company_id.currency_id.name
 currencies = {c.name: c for c in self.env['res.currency'].search([('name', '!=', from_currency)])}
 
-alert = ''
 for to_currency, currency_id in currencies.items():
-  for mode in modes:
-    try:
-      self.produce(variables={
-        'mode': mode,
-        'from_currency': from_currency,
-        'to_currency': to_currency,
-        'currency_id': currency_id,
-      })
-    except ValidationError as error:
-      _logger.exception(error)
-      alert = error.args[0]
-    else:
-      break
-  else:
-    raise ValidationError("Unable to fetch currencies: %s" % alert)</field>
-        <field name="producer">def call_api(params, key):
+  self.produce(variables={
+    'try_modes': modes,
+    'from_currency': from_currency,
+    'to_currency': to_currency,
+    'currency_id': currency_id,
+  })
+        </field>
+        <field name="producer">
+def call_api(params, key):
   params.update({
     'from_currency': from_currency,
     'to_currency': to_currency,
@@ -383,25 +376,35 @@ for to_currency, currency_id in currencies.items():
       raise ValidationError(str(json_data))
   return json_data[key]
 
-if mode == 'realtime':
-  vals = call_api({'function': 'CURRENCY_EXCHANGE_RATE'}, 'Realtime Currency Exchange Rate')
-  obj = {dateutil.parser.parse(vals['6. Last Refreshed']).date(): float(vals['5. Exchange Rate'])}
-elif mode == 'intraday':
-  vals = call_api({'function': 'FX_INTRADAY', 'interval': '5min'}, 'Time Series FX (5min)')
-  obj = {}
-  for d_str, w in vals.items():
-      date = dateutil.parser.parse(d_str).date()
-      if date not in obj:
-          obj[date] = float(w['4. close'])
-elif mode == 'daily':
-    vals = call_api({'function': 'FX_DAILY'}, 'Time Series FX (Daily)')
-    obj = {dateutil.parser.parse(d_str).date(): float(w['4. close']) for d_str, w in vals.items() }
-elif mode == 'weekly':
-    vals = call_api({'function': 'FX_WEEKLY'}, 'Time Series FX (Weekly)')
-    obj = {dateutil.parser.parse(d_str).date(): float(w['4. close']) for d_str, w in vals.items() }
+for mode in try_modes:
+    try:
+        if mode == 'realtime':
+          vals = call_api({'function': 'CURRENCY_EXCHANGE_RATE'}, 'Realtime Currency Exchange Rate')
+          obj = {dateutil.parser.parse(vals['6. Last Refreshed']).date(): float(vals['5. Exchange Rate'])}
+        elif mode == 'intraday':
+          vals = call_api({'function': 'FX_INTRADAY', 'interval': '5min'}, 'Time Series FX (5min)')
+          obj = {}
+          for d_str, w in vals.items():
+              date = dateutil.parser.parse(d_str).date()
+              if date not in obj:
+                  obj[date] = float(w['4. close'])
+        elif mode == 'daily':
+            vals = call_api({'function': 'FX_DAILY'}, 'Time Series FX (Daily)')
+            obj = {dateutil.parser.parse(d_str).date(): float(w['4. close']) for d_str, w in vals.items() }
+        elif mode == 'weekly':
+            vals = call_api({'function': 'FX_WEEKLY'}, 'Time Series FX (Weekly)')
+            obj = {dateutil.parser.parse(d_str).date(): float(w['4. close']) for d_str, w in vals.items() }
+    except ValidationError as error:
+        _logger.warning(error.args)
+    else:
+        break
+else:
+    raise ValidationError("None of the modes worked: %s" % try_modes)
 
-obj = {k.strftime('%Y-%m-%d'):v for k, v in obj.items()}</field>
-        <field name="consumer"># _logger.info(f"Update {mode} rates on {to_currency}")
+obj = {k.strftime('%Y-%m-%d'):v for k, v in obj.items()}
+</field>
+        <field name="consumer">
+# _logger.info(f"Update {mode} rates on {to_currency}")
 Rate = self.env['res.currency.rate']
 for date, rate in obj.items():
     rate_record = Rate.search([
@@ -416,7 +419,8 @@ for date, rate in obj.items():
             'currency_id': currency_id.id,
             'rate': rate,
         })
-self.env['investment.position'].search([('asset_id.currency_id', '=', currency_id.id)])._compute_position_aggregate()</field>
+self.env['investment.position'].search([('asset_id.currency_id', '=', currency_id.id)])._compute_position_aggregate()
+</field>
     </record>
     <record id="investment_portfolio.integration_euribor_rates" model="api.endpoint">
         <field name="name">Euribor Rates</field>
