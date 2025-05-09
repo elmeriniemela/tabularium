@@ -101,7 +101,17 @@ class InvestmentPosition(models.Model):
         readonly=True,
     )
 
-    thesis = fields.Html(sanitize=False, translate=False)
+    thesis = fields.Html(
+        string="Thesis (deprecated)",
+        sanitize=False, translate=False)
+    thesis_id = fields.Many2one(
+        string="Thesis ID",
+        comodel_name='investment.position.note',
+        ondelete='restrict',
+    )
+    thesis2 = fields.Html(
+        string="Thesis",
+        related='thesis_id.content', readonly=False)
 
     follow = fields.Boolean(default=True)
 

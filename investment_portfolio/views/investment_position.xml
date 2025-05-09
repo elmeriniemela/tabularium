@@ -164,7 +164,8 @@
                             <field name="plan_transaction_ids" context="{'default_position_id': id, 'default_prediction': True}"/>
                         </page>
                         <page string="Thesis">
-                            <field name="thesis"/>
+                            <field name="thesis_id"/>
+                            <field name="thesis2" invisible="not thesis_id"/>
                         </page>
                     </notebook>
                 </sheet>

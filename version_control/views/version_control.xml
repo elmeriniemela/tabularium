@@ -35,6 +35,7 @@
                         <page string="Details">
                             <group>
                                 <group>
+                                    <field name="reference" widget="reference" string="Record"/>
                                     <field name="field_id"/>
                                     <field name="version_hash_before"/>
                                     <field name="version_hash_after"/>

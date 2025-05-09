@@ -23,5 +23,5 @@ class MailThread(models.AbstractModel):
             rec.version_control_count = len(rec.version_control_ids)
 
     def _valid_field_parameter(self, field, name):
-        return name == 'version_control' and field.type == 'text' or super()._valid_field_parameter(field, name)
+        return name == 'version_control' and field.type in {'text', 'html'} or super()._valid_field_parameter(field, name)
 

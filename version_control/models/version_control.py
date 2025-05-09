@@ -3,6 +3,10 @@
 import logging
 import difflib
 import hashlib
+try:
+    from markdownify import markdownify as md
+except Exception:
+    md = lambda x: x
 
 from odoo import models, tools, fields, api, _
 
@@ -30,6 +34,12 @@ class VersionControl(models.Model):
     version_hash_before = fields.Char(compute='_compute_hash')
     version_hash_after = fields.Char(compute='_compute_hash')
     name = fields.Char(compute='_compute_hash')
+    reference = fields.Char(string='Reference', compute='_compute_reference', readonly=True, store=False)
+
+    @api.depends('model', 'res_id')
+    def _compute_reference(self):
+        for res in self:
+            res.reference = "%s,%s" % (res.model, res.res_id)
 
     def _select(self):
         return f"""
@@ -67,7 +77,17 @@ class VersionControl(models.Model):
 
     def _compute_diff(self):
         for rec in self:
-            lines = difflib.unified_diff((rec.old_value_text or '').splitlines(True), (rec.new_value_text or '').splitlines(True), fromfile=rec.field_id.name, tofile=rec.field_id.name)
+            src = rec.old_value_text or ''
+            dst = rec.new_value_text or ''
+            if rec.field_id.ttype == 'html':
+                src = md(src)
+                dst = md(dst)
+            lines = difflib.unified_diff(
+                src.splitlines(True),
+                dst.splitlines(True),
+                fromfile=rec.field_id.name,
+                tofile=rec.field_id.name,
+            )
             rec.diff = ''.join(lines)
 
 

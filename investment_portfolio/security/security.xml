@@ -50,6 +50,18 @@
         <field name="domain_force">['|',('company_id','=',False),('company_id', 'in', company_ids)]</field>
     </record>
 
+    <record id="comp_rule_investment_position_move" model="ir.rule">
+        <field name="name">investment_position_move company rule</field>
+        <field name="model_id" ref="model_investment_position_move"/>
+        <field name="domain_force">['|',('company_id','=',False),('company_id', 'in', company_ids)]</field>
+    </record>
+
+    <record id="comp_rule_investment_position_note" model="ir.rule">
+        <field name="name">investment_position_note company rule</field>
+        <field name="model_id" ref="model_investment_position_note"/>
+        <field name="domain_force">['|',('company_id','=',False),('company_id', 'in', company_ids)]</field>
+    </record>
+
     <record id="comp_rule_investment_asset_realized" model="ir.rule">
         <field name="name">investment_asset_realized company rule</field>
         <field name="model_id" ref="model_investment_asset_realized"/>

@@ -10,3 +10,5 @@ dicttoxml
 tinyrpc
 pyxirr
 numpy-financial
+yfinance
+markdownify

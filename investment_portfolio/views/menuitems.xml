@@ -7,6 +7,7 @@
             <menuitem id="menu_postion_moves" action="action_position_moves" sequence="20"/>
             <menuitem id="menu_liquid_allocations" action="action_liquid_allocations" sequence="30"/>
             <menuitem id="menu_allocations_by_asset_class" action="action_allocations_by_portfolio" sequence="40"/>
+            <menuitem id="menu_notes" action="action_position_notes" sequence="50"/>
         </menuitem>
 
         <menuitem name="Transactions" id="menu_transactions" sequence="20">
