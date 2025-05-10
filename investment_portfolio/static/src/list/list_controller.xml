@@ -5,7 +5,7 @@
         <xpath expr="//button[@t-on-click='onClickCreate']" position="after">
             <t t-if="fetchAndUpdateData">
                 <span if="env.isSmall"> </span> <!-- Add a little space between new and refresh buttons-->
-                <button type="button" class="btn btn-primary o_list_button_add" style="margin-right: 10px;" data-hotkey="r" t-on-click="fetchAndUpdateData" data-bounce-button="">
+                <button type="button" class="btn btn-primary o_list_button_add" data-hotkey="r" t-on-click="fetchAndUpdateData" data-bounce-button="">
                     <i class="fa fa-refresh" aria-label="Refresh prices" title="Refresh prices"/>
                 </button>
             </t>
