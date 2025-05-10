@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="investment_portfolio.ListView" t-inherit="web.ListView" t-inherit-mode="extension">
+        <xpath expr="//button[@t-on-click='onClickCreate']" position="after">
+            <button type="button" class="btn btn-primary o_list_button_add" data-hotkey="r" t-on-click="fetchAndUpdateData" data-bounce-button="">
+                <i class="fa fa-refresh" aria-label="Refresh prices" title="Refresh prices"/>
+            </button>
+        </xpath>
+
+    </t>
+
+
+</templates>

@@ -48,7 +48,7 @@
     ],
     'assets': {
         'web.assets_backend': [
-            'investment_portfolio/static/src/js/*.js',
+            'investment_portfolio/static/src/list/*',
         ],
     }
 }

@@ -52,7 +52,7 @@
                 <field name="plan_yearly_interest" widget="percentage" optional="hide"/>
                 <field name="plan_total_cash_flow" optional="hide"/>
 
-                <button title="Update price" icon="fa-download" name="run_integration" type="object" invisible="not endpoint_id"/>
+                <button title="Update price" icon="fa-refresh" name="run_integration" type="object" invisible="not endpoint_id"/>
             </list>
         </field>
     </record>
