@@ -46,5 +46,15 @@ class InvestmentPositionNote(models.Model):
         readonly=True,
     )
 
+    def action_documents(self):
+        """ Open the documents linked to this note. """
+        self.ensure_one()
+        ctx = dict(self.env.context or {})
+        action_xmlid = ctx.pop('action')
+        action = self.env.ref(action_xmlid).read()[0]
+        action['domain'] = [('id', 'in', ctx.pop('domain_ids'))]
+        action['context'] = ctx
+        return action
+
 
 

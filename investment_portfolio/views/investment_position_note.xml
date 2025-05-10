@@ -23,6 +23,12 @@
                         <button class="oe_stat_button" type="action" icon="fa-tasks" name="%(version_control.version_control_action)d" context="{'search_default_model': 'investment.position.note', 'search_default_res_id': id}">
                             <field name="version_control_count" widget="statinfo"/>
                         </button>
+                        <button invisible="not position_ids" class="oe_stat_button" icon="fa-tasks" type="object" name="action_documents" context="{'action': 'investment_portfolio.action_all_positions', 'domain_ids': position_ids, 'active_test': False}">
+                            <field name="position_ids" widget="statinfo"/>
+                        </button>
+                        <button invisible="not move_ids" class="oe_stat_button" icon="fa-tasks" type="object" name="action_documents" context="{'action': 'investment_portfolio.action_position_moves', 'domain_ids': move_ids, 'active_test': False}">
+                            <field name="move_ids" widget="statinfo"/>
+                        </button>
                     </div>
                     <div class="oe_title">
                         <h1>
