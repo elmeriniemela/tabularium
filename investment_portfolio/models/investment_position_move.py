@@ -51,6 +51,18 @@ class InvestmentPositionMove(models.Model):
         search='_search_position_ids',
     )
 
+    note_id = fields.Many2one(
+        string="Note ID",
+        comodel_name='investment.position.note',
+        ondelete='restrict',
+    )
+    note = fields.Html(
+        string="Note",
+        related='note_id.content',
+        readonly=False,
+        tracking=False,
+    )
+
     _sql_constraints = [
         ('unique_name', 'unique(name, company_id)', 'A move with this name already exists!'),
     ]

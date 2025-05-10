@@ -34,5 +34,17 @@ class InvestmentPositionNote(models.Model):
         tracking=True,
     )
 
+    position_ids = fields.One2many(
+        comodel_name='investment.position',
+        inverse_name='thesis_id',
+        readonly=True,
+    )
+
+    move_ids = fields.One2many(
+        comodel_name='investment.position.move',
+        inverse_name='note_id',
+        readonly=True,
+    )
+
 
 

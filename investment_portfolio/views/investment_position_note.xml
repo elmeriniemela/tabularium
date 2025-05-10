@@ -6,6 +6,8 @@
             <list>
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
+                <field name="position_ids" widget="many2many_tags"/>
+                <field name="move_ids" widget="many2many_tags"/>
                 <field name="company_id" optional="hide"/>
             </list>
         </field>
@@ -42,6 +44,8 @@
         <field name="arch" type="xml">
             <search>
                 <field name="name"/>
+                <field name="position_ids" widget="many2many_tags"/>
+                <field name="move_ids" widget="many2many_tags"/>
             </search>
         </field>
     </record>

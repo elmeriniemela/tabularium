@@ -111,7 +111,10 @@ class InvestmentPosition(models.Model):
     )
     thesis2 = fields.Html(
         string="Thesis",
-        related='thesis_id.content', readonly=False)
+        related='thesis_id.content',
+        readonly=False,
+        tracking=False,
+    )
 
     follow = fields.Boolean(default=True)
 

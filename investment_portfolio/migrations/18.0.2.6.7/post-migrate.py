@@ -4,7 +4,7 @@ from odoo import api, SUPERUSER_ID
 def migrate(cr, version):
     env = api.Environment(cr, SUPERUSER_ID, {})
 
-    positions = env['investment.position'].search([
+    positions = env['investment.position'].with_context(active_test=False).search([
         ('thesis_id', '=', False),
         ('thesis', '!=', False),
     ])

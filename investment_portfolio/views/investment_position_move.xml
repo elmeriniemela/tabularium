@@ -38,6 +38,10 @@
                         <page string="Transactions">
                             <field name="transaction_ids" widget="many2many" context="{'default_move_id': id, 'default_time': time, 'search_default_record': 1, 'search_default_move_not_set': 1}"/>
                         </page>
+                        <page string="Notes">
+                            <field name="note_id"/>
+                            <field name="note" invisible="not note_id"/>
+                        </page>
                     </notebook>
                 </sheet>
                 <div class="o_attachment_preview"/>
