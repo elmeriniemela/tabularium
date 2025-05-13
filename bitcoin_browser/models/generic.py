@@ -14,7 +14,7 @@ class BitcoinJSONRPCProtocol(JSONRPCProtocol):
         """
         rep['jsonrpc'] = self.JSON_RPC_VERSION
         for mutex in ['error', 'result']:
-            if rep[mutex] == None:
+            if rep.get(mutex, True) == None:
                 del rep[mutex]
         return super()._parse_subreply(rep)
 

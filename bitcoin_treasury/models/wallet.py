@@ -144,6 +144,7 @@ class BitcoinWallet(models.Model):
             for wallet in self:
                 for addr in wallet.address_ids:
                     sh = address_to_scripthash(addr.address)
+                    _logger.info("get_history(%s)", sh)
                     tx_json = send({
                         "method": "blockchain.scripthash.get_history",
                         "params": {
@@ -152,7 +153,10 @@ class BitcoinWallet(models.Model):
                         "id": 0
                     })
                     for vals in tx_json['result']:
+                        _logger.info("TX search(%s)", vals['tx_hash'])
                         addr.transaction_ids |= self.env['bitcoin.tx'].search([('txid', '=', vals['tx_hash'])])
+
+                    _logger.info("Addr %s done.", addr.address)
 
     def refresh_history(self):
         for wallet in self:
