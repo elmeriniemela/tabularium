@@ -156,7 +156,7 @@ class BitcoinWallet(models.Model):
                         _logger.info("TX search(%s)", vals['tx_hash'])
                         addr.transaction_ids |= self.env['bitcoin.tx'].search([('txid', '=', vals['tx_hash'])])
 
-                    _logger.info("Addr %s done.", addr.address)
+                _logger.info("Wallet %s done.", wallet.name)
 
     def refresh_history(self):
         for wallet in self:
