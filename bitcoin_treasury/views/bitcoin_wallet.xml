@@ -55,7 +55,12 @@
                         </page>
                         <page string="Addresses">
                             <group>
-                                <field name="address_amount"/>
+                                <group>
+                                    <field name="address_amount"/>
+                                </group>
+                                <group>
+                                    <field name="check_empty"/>
+                                </group>
                             </group>
                             <field name="address_ids">
                                 <list>

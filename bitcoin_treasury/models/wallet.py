@@ -87,6 +87,7 @@ class BitcoinWallet(models.Model):
     )
 
     address_amount = fields.Integer(default=100, tracking=True)
+    check_empty = fields.Integer(default=5, tracking=True)
 
     def _compute_multisig(self):
         for wallet in self:
@@ -142,19 +143,34 @@ class BitcoinWallet(models.Model):
 
         with electumx_jsonrpc(host, port, use_ssl) as send:
             for wallet in self:
+                per_type = {}
                 for addr in wallet.address_ids:
-                    sh = address_to_scripthash(addr.address)
-                    _logger.info("get_history(%s)", sh)
-                    tx_json = send({
-                        "method": "blockchain.scripthash.get_history",
-                        "params": {
-                            "scripthash": sh,
-                        },
-                        "id": 0
-                    })
-                    for vals in tx_json['result']:
-                        _logger.info("TX search(%s)", vals['tx_hash'])
-                        addr.transaction_ids |= self.env['bitcoin.tx'].search([('txid', '=', vals['tx_hash'])])
+                    per_type.setdefault(addr.atype, []).append(addr.address)
+
+                for atype, addr_list in per_type.items():
+                    empty = 0
+                    for address in addr_list:
+                        sh = address_to_scripthash(address)
+                        _logger.info("get_history(%s)", sh)
+                        tx_json = send({
+                            "method": "blockchain.scripthash.get_history",
+                            "params": {
+                                "scripthash": sh,
+                            },
+                            "id": 0
+                        })
+                        if tx_json['result']:
+                            empty = 0
+                            for vals in tx_json['result']:
+                                _logger.info("TX search(%s)", vals['tx_hash'])
+                                addr.transaction_ids |= self.env['bitcoin.tx'].search([('txid', '=', vals['tx_hash'])])
+                        else:
+                            empty +=1
+
+                        if empty >= wallet.check_empty:
+                            _logger.info("Stop checking after %s empty addresses of type %s.", empty, atype)
+                            break
+
 
                 _logger.info("Wallet %s done.", wallet.name)
 

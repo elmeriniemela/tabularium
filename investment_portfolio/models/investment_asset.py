@@ -212,7 +212,7 @@ class InvestmentAsset(models.Model):
             closing_price = closing_price_id.price_adjusted or 0.0
             return (market_price_id.price-closing_price)/closing_price if closing_price else 0.0
 
-        for record in self:
+        for record in self.sudo():
             record.daily_price = percent_change(record.daily_price_id, record.last_price_id)
             record.weekly_price = percent_change(record.weekly_price_id, record.last_price_id)
             record.monthly_price = percent_change(record.monthly_price_id, record.last_price_id)
@@ -264,7 +264,7 @@ class InvestmentAsset(models.Model):
             ], limit=1, order='time desc')
             return earliest_closing_after_id
 
-        for record in self:
+        for record in self.sudo():
             record.last_price_id = record.price_ids[:1]
             record.daily_price_id = latest_before(record, fields.Datetime.now().replace(hour=0, minute=0, second=0))
             record.weekly_price_id = latest_before(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(weeks=1))
