@@ -46,10 +46,11 @@
                         <page string="History">
                             <field name="history_ids">
                                 <list editable="top" create="false" limit="1000">
-                                    <field name="date"/>
-                                    <field name="name"/>
-                                    <field name="amount" decoration-danger="amount &lt; 0" decoration-success="amount &gt; 0"/>
-                                    <field name="transaction_id"/>
+                                    <field name="date" optional="show"/>
+                                    <field name="name" optional="show"/>
+                                    <field name="amount" decoration-danger="amount &lt; 0" decoration-success="amount &gt; 0" optional="show"/>
+                                    <field name="transaction_id" optional="show"/>
+                                    <field name="other_wallet_ids" widget="many2many_tags" optional="show"/>
                                 </list>
                             </field>
                         </page>

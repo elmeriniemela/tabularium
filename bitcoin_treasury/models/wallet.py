@@ -330,6 +330,17 @@ class BitcoinWalletHistory(models.Model):
         readonly=True,
     )
 
+    other_wallet_ids = fields.Many2many(
+        comodel_name='bitcoin.wallet',
+        compute='_compute_other_wallet_ids',
+    )
+
+    def _compute_other_wallet_ids(self):
+        for record in self:
+            record.other_wallet_ids = (record.transaction_id.wallet_history_ids - record).mapped('wallet_id')
+
+
+
     _sql_constraints = [
         ('wallet_transaction_uniq', 'unique(wallet_id, transaction_id)', 'You should net out the balance change of one transaction instead of creating multiple lines per transaction!'),
     ]
