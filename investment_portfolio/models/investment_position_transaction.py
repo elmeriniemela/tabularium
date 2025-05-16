@@ -19,6 +19,8 @@ class InvestmentPositionTransaction(models.Model):
     _inherit = ['mail.thread']
     _order = 'time desc, ttype'
 
+    active = fields.Boolean(default=True, tracking=True)
+
     display_name = fields.Char(compute='_compute_display_name')
 
     position_id = fields.Many2one(

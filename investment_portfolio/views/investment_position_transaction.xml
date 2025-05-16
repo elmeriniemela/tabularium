@@ -63,6 +63,7 @@
                             <field name="description"/>
                             <field name="profit" decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0"/>
                             <field name="usage" groups="base.group_no_one"/>
+                            <field name="active" widget="boolean_toggle"/>
                         </group>
                     </group>
                 </sheet>
