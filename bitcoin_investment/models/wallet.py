@@ -44,14 +44,24 @@ class BitcoinWallet(models.Model):
                 if price.time.date() != hist.date.date():
                     raise exceptions.UserError(_("Unable to find daily price for %s") % (hist.date))
 
-                hist.position_transaction_id = hist.env['investment.position.transaction'].create({
-                    'position_id': wallet.position_id.id,
-                    'time': hist.date,
-                    'payment': abs(hist.amount * price.price),
-                    'quantity': hist.amount,
-                    'exchange_rate': price.price,
-                    'description': 'Automatically generated',
-                })
+                other_wallet_tx = hist.transaction_id.wallet_history_ids.position_transaction_id
+                if other_wallet_tx:
+                    hist.position_transaction_id = other_wallet_tx
+                    qty = sum(hist.transaction_id.wallet_history_ids.mapped('amount'))
+                    hist.position_transaction_id.write({
+                        'quantity': qty,
+                        'payment': 0,
+                        'description': 'Transfer between wallets',
+                    })
+                else:
+                    hist.position_transaction_id = hist.env['investment.position.transaction'].create({
+                        'position_id': wallet.position_id.id,
+                        'time': hist.date,
+                        'payment': abs(hist.amount * price.price),
+                        'quantity': hist.amount,
+                        'exchange_rate': price.price,
+                        'description': 'Automatically generated',
+                    })
 
 
 

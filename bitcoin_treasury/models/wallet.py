@@ -292,6 +292,11 @@ class BitcoinTx(models.Model):
         readonly=True,
     )
 
+    wallet_history_ids = fields.One2many(
+        comodel_name='bitcoin.wallet.history',
+        inverse_name='transaction_id',
+    )
+
 
 class BitcoinWalletHistory(models.Model):
     _name = 'bitcoin.wallet.history'
