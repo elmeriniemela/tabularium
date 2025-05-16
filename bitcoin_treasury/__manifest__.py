@@ -5,7 +5,7 @@
     'website': "https://eniemela.fi",
     'license': 'LGPL-3',
     'category': 'Uncategorized',
-    'version': '0.1.1',
+    'version': '0.1.2',
     'depends': [
         'mail',
         'bitcoin_browser',

@@ -10,6 +10,7 @@ import json
 from contextlib import contextmanager
 from odoo import api, exceptions, fields, models, Command, _
 from ..electrum.bitcoin import address_to_scripthash
+from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -24,7 +25,12 @@ def electumx_jsonrpc(host, port, use_ssl):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     sock.settimeout(10)
-    sock.connect((host, port))
+    try:
+        sock.connect((host, port))
+    except Exception as error:
+        raise UserError(("Unable to connect to host '%s:%s': %s") % (host, port, str(error)))
+
+
     def send(content):
         sock.sendall(json.dumps(content).encode('utf-8')+b'\n')
         responselist = []
@@ -95,7 +101,7 @@ class BitcoinWallet(models.Model):
 
 
     def refresh(self):
-        self.refresh_addresses()
+        self.filtered(lambda w: not w.address_ids).refresh_addresses()
         self.refresh_transactions()
         self.refresh_history()
 
@@ -144,8 +150,10 @@ class BitcoinWallet(models.Model):
         with electumx_jsonrpc(host, port, use_ssl) as send:
             for wallet in self:
                 per_type = {}
-                for addr in wallet.address_ids:
-                    per_type.setdefault(addr.atype, []).append(addr.address)
+                addr_to_rec = {}
+                for addr_record in wallet.address_ids:
+                    per_type.setdefault(addr_record.atype, []).append(addr_record.address)
+                    addr_to_rec[addr_record.address] = addr_record
 
                 for atype, addr_list in per_type.items():
                     empty = 0
@@ -159,11 +167,18 @@ class BitcoinWallet(models.Model):
                             },
                             "id": 0
                         })
+
+                        trans_list = tx_json['result']
+                        _logger.info("%s has %s transactions", address, len(trans_list))
                         if tx_json['result']:
                             empty = 0
                             for vals in tx_json['result']:
-                                _logger.info("TX search(%s)", vals['tx_hash'])
-                                addr.transaction_ids |= self.env['bitcoin.tx'].search([('txid', '=', vals['tx_hash'])])
+                                tx_hash = vals['tx_hash']
+                                _logger.info("TX search(%s)", tx_hash)
+                                tx = self.env['bitcoin.tx'].search([('txid', '=', tx_hash)])
+                                if not tx:
+                                    raise UserError(_("Bitcoin TX '%s' not found") % tx_hash)
+                                addr_to_rec[address].transaction_ids |= tx
                         else:
                             empty +=1
 
