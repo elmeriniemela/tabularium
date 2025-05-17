@@ -35,19 +35,19 @@
                     </group>
                     <group>
                         <group>
-                            <field name="secret"/>
-                            <field name="compressed"/>
+                            <field name="witness_type"/>
                             <field name="multisig"/>
+                            <field name="compressed"/>
                             <field name="depth"/>
                             <field name="parent_fingerprint"/>
                             <field name="real_parent_fingerprint"/>
                         </group>
                         <group>
-                            <field name="key_type"/>
-                            <field name="witness_type"/>
                             <field name="script_type"/>
                             <field name="encoding"/>
+                            <field name="key_type"/>
                             <field name="address"/>
+                            <field name="secret"/>
                             <field name="real_derivation_path"/>
                         </group>
                     </group>

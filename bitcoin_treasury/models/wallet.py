@@ -79,7 +79,7 @@ class BitcoinWallet(models.Model):
         readonly=True,
     )
 
-    sigs_required = fields.Integer()
+    sigs_required = fields.Integer(default=1)
 
     multisig = fields.Boolean(compute='_compute_multisig')
 
@@ -93,7 +93,7 @@ class BitcoinWallet(models.Model):
     )
 
     address_amount = fields.Integer(default=100, tracking=True)
-    check_empty = fields.Integer(default=5, tracking=True)
+    gap_limit = fields.Integer(default=5, tracking=True)
 
     def _compute_multisig(self):
         for wallet in self:
@@ -115,6 +115,7 @@ class BitcoinWallet(models.Model):
                     subkey_path = ('M', str(atype), str(index))
                     subkeys = [k.subkey_for_path(subkey_path) for k in master_keys]
                     subkeys.sort(key=lambda k: k.public_byte)
+                    first_key = wallet.key_ids[:1].key_id
                     if len(subkeys) > 1 and len(subkeys) <= 15:
                         # MULTISIG
                         redeemscript = Script(
@@ -122,11 +123,18 @@ class BitcoinWallet(models.Model):
                             keys=subkeys,
                             sigs_required=wallet.sigs_required,
                         )
-                        addr = Address(redeemscript.serialize(), encoding=wallet.key_ids[:1].key_id.encoding, script_type='p2wsh')
+                        addr = Address(
+                            redeemscript.serialize(),
+                            encoding=first_key.encoding,
+                            script_type=first_key.script_type,
+                        )
                         addr_str = addr.address
                     elif len(subkeys) == 1:
                         # SINGLE-SIG
-                        addr_str = subkeys[0].address()
+                        addr_str = subkeys[0].address(
+                            script_type=first_key.script_type,
+                            encoding=first_key.encoding,
+                        )
                     else:
                         raise exceptions.UserError(_("Wrong amount of keys: %s") % len(subkeys))
 
@@ -182,7 +190,7 @@ class BitcoinWallet(models.Model):
                         else:
                             empty +=1
 
-                        if empty >= wallet.check_empty:
+                        if empty >= wallet.gap_limit:
                             _logger.info("Stop checking after %s empty addresses of type %s.", empty, atype)
                             break
 

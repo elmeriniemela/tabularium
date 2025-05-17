@@ -60,7 +60,7 @@
                                     <field name="address_amount"/>
                                 </group>
                                 <group>
-                                    <field name="check_empty"/>
+                                    <field name="gap_limit"/>
                                 </group>
                             </group>
                             <button name="refresh_addresses" type="object" string="Refresh addresses" icon="fa-cogs"/>

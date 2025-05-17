@@ -3,8 +3,44 @@
 import logging
 
 from odoo import api, exceptions, fields, models, Command, _
+from odoo.exceptions import ValidationError
 
 from bitcoinlib.keys import HDKey
+
+def script_type_default(witness_type=None, multisig=False, locking_script=False):
+    """
+    Determine default script type for provided witness type and key type combination used in this library.
+
+    >>> script_type_default('segwit', locking_script=True)
+    'p2wpkh'
+
+    :param witness_type: Witness type used: standard, p2sh-segwit or segwit
+    :type witness_type: str
+    :param multisig: Multi-signature key or not, default is False
+    :type multisig: bool
+    :param locking_script: Limit search to locking_script. Specify False for locking scripts and True for unlocking scripts
+    :type locking_script: bool
+
+    :return str: Default script type
+    """
+
+    if witness_type == 'legacy' and not multisig:
+        return 'p2pkh' if locking_script else 'sig_pubkey'
+    elif witness_type == 'legacy' and multisig:
+        return 'p2sh' if locking_script else 'p2sh_multisig'
+    elif witness_type == 'segwit' and not multisig:
+        return 'p2wpkh' if locking_script else 'sig_pubkey'
+    elif witness_type == 'segwit' and multisig:
+        return 'p2wsh' if locking_script else 'p2sh_multisig'
+    elif witness_type == 'p2sh-segwit' and not multisig:
+        return 'p2sh' if locking_script else 'p2sh_p2wpkh'
+    elif witness_type == 'p2sh-segwit' and multisig:
+        return 'p2sh' if locking_script else 'p2sh_p2wsh'
+    elif witness_type == 'taproot':
+        return 'p2tr'
+    else:
+        raise ValidationError("Wallet and key type combination not supported: %s / %s" % (witness_type, multisig))
+
 
 _logger = logging.getLogger(__name__)
 
@@ -28,36 +64,110 @@ class BitcoinKey(models.Model):
 
     secret = fields.Boolean(compute='_compute_info', store=True)
     compressed = fields.Boolean(compute='_compute_info', store=True)
-    multisig = fields.Boolean(compute='_compute_info', store=True)
+    multisig = fields.Boolean(
+        help="Specify if key is part of multisig wallet, used when creating key representations such as WIF and addreses",
+        tracking=True,
+    )
     depth = fields.Integer(compute='_compute_info', store=True)
     parent_fingerprint = fields.Char(compute='_compute_info', store=True)
     key_type = fields.Char(compute='_compute_info', store=True)
-    witness_type = fields.Char(compute='_compute_info', store=True)
-    script_type = fields.Char(compute='_compute_info', store=True)
+    witness_type = fields.Selection(
+        selection=[
+            ('taproot', 'Taproot'),
+            ('segwit', 'Segwit'),
+            ('p2sh-segwit', 'P2SH Segwit'),
+            ('legacy', 'Legacy'),
+        ],
+        tracking=True,
+        required=True,
+    )
+    script_type = fields.Selection(
+        string="Script Type",
+        selection=[
+            # Basically deprecated
+            ('p2pk', 'Pay To Public Key'),
+            ('p2ms', 'Pay To Multisig'), # "Bare multisig"
+
+            # LEGACY
+            ('p2pkh', 'Pay to Public Key Hash (m/44)'),
+            ('p2sh', 'Pay to Script Hash (m/45)'),
+            ('p2sh_p2wpkh', 'Pay To Witness Public Key Hash Wrapped In P2SH (m/49)'),
+            ('p2sh_p2wsh', 'Pay To Witness Script Hash Wrapped In P2SH (m/48h/0h/0h/1h)'),
+
+            # Segwit
+            ('p2wpkh', 'Pay To Witness Public Key Hash (m/84)'),
+            ('p2wsh', 'Pay To Witness Script Hash (m/48h/0h/0h/2h)'),
+            ('p2tr', 'Pay To Taproot (m/86)'),
+        ],
+        compute='_compute_script_type',
+        help=(
+            "BIP44 specifies derivation paths m / purpose' / coin_type' / account' / change / address_index."
+        ),
+        tracking=True,
+        readonly=False,
+    )
     address = fields.Char(compute='_compute_info', store=True)
-    encoding = fields.Char(compute='_compute_info', store=True)
+    encoding = fields.Selection(
+        selection=[
+            ('bech32', 'bech32'),
+            ('base58', 'base58'),
+        ],
+        compute='_compute_encoding',
+        tracking=True,
+        required=True,
+        store=True,
+    )
 
     real_parent_fingerprint = fields.Char(tracking=True)
     real_derivation_path = fields.Char(tracking=True)
 
 
+    _script_encoding_map = {
+        'p2pk': 'base58',
+        'p2pkh': 'base58',
+        'p2ms': 'base58',
+        'p2sh': 'base58',
+        'p2sh_p2wpkh': 'base58',
+        'p2sh_p2wsh': 'base58',
+        'p2wpkh': 'bech32',
+        'p2wsh': 'bech32',
+        'p2tr': 'bech32',
+    }
+    _witness_encoding_map = {
+        'segwit': 'bech32',
+        'taproot': 'bech32',
+        'p2sh-segwit': 'base58',
+        'legacy': 'base58',
+    }
+
+
+
+    @api.depends('witness_type', 'multisig')
+    def _compute_script_type(self):
+        for rec in self:
+            rec.script_type = script_type_default(rec.witness_type, rec.multisig, locking_script=True)
+
+
+    @api.depends('witness_type')
+    def _compute_encoding(self):
+        for rec in self:
+            rec.encoding = self._witness_encoding_map[rec.witness_type]
+
+
+
     @property
     def hdkey(self):
         self.ensure_one()
-        return HDKey(import_key=self.wif)
+        return HDKey(import_key=self.wif, encoding=self.encoding, witness_type=self.witness_type, multisig=self.multisig)
 
-    @api.depends('wif')
+    @api.depends('wif', 'encoding', 'witness_type', 'multisig')
     def _compute_info(self):
         for record in self:
             key = record.hdkey
             record.secret = key.secret
             record.compressed = key.compressed
-            record.multisig = key.multisig
             record.depth = key.depth
             record.parent_fingerprint = key.parent_fingerprint.hex()
             record.key_type = key.key_type
-            record.witness_type = key.witness_type
-            record.script_type = key.script_type
             record.address = key.address()
-            record.encoding = key.encoding
 
