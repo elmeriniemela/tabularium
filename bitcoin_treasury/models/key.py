@@ -78,6 +78,7 @@ class BitcoinKey(models.Model):
             ('p2sh-segwit', 'P2SH Segwit'),
             ('legacy', 'Legacy'),
         ],
+        default='segwit',
         tracking=True,
         required=True,
     )
@@ -112,6 +113,7 @@ class BitcoinKey(models.Model):
             ('bech32', 'bech32'),
             ('base58', 'base58'),
         ],
+        default='bech32',
         compute='_compute_encoding',
         tracking=True,
         required=True,
