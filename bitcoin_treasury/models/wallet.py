@@ -193,13 +193,17 @@ class BitcoinWallet(models.Model):
                         _logger.info("get_history(%s)", sh)
                         tx_json = send({
                             "method": "blockchain.scripthash.get_history",
-                            "params": {
-                                "scripthash": sh,
-                            },
+                            "params": [sh],
                             "id": 0
                         })
-
-                        trans_list = tx_json['result']
+                        trans_list = tx_json.get('result')
+                        if trans_list is None:
+                            version = send({
+                                "method": "server.version",
+                                "params": ["", "1.4"],
+                                "id": 0
+                            })
+                            raise UserError(_("%s:%s response has no transactions: %s. Version: %s") % (host, port, tx_json, version))
                         _logger.info("%s has %s transactions", address, len(trans_list))
                         if tx_json['result']:
                             empty = 0
