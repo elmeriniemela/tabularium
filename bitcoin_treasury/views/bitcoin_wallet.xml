@@ -35,9 +35,9 @@
                     <group>
                         <group>
                             <field name="balance"/>
-                            <field name="transactions"/>
                         </group>
                         <group>
+                            <field name="transactions"/>
                             <field name="multisig"/>
                             <field name="sigs_required" invisible="not multisig"/>
                         </group>
@@ -71,6 +71,7 @@
                                     <field name="atype"/>
                                     <field name="address"/>
                                     <field name="transaction_ids"/>
+                                    <field name="write_date" optional="hide"/>
                                 </list>
                             </field>
                         </page>

@@ -3,6 +3,7 @@
     <menuitem name="Treasury" id="menu_root" web_icon="bitcoin_treasury,static/description/icon.png" sequence="2">
         <menuitem id="menu_wallet" action="action_wallet"/>
         <menuitem id="menu_key" action="action_key"/>
+        <menuitem id="menu_wallet_address" action="action_wallet_address"/>
     </menuitem>
 
 </odoo>

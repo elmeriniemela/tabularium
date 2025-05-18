@@ -10,7 +10,6 @@ from ..electrum.bitcoin import address_to_scripthash
 from odoo.exceptions import UserError, ValidationError
 from btclib.script.script_pub_key import ScriptPubKey
 from btclib.bip32 import derive
-from btclib.b32 import p2wpkh
 
 _logger = logging.getLogger(__name__)
 
@@ -184,6 +183,8 @@ class BitcoinWallet(models.Model):
                 for addr_record in wallet.address_ids:
                     per_type.setdefault(addr_record.atype, []).append(addr_record.address)
                     addr_to_rec[addr_record.address] = addr_record
+                    if addr_record.transaction_ids:
+                        addr_record.transaction_ids = False # clean up old links.
 
                 for atype, addr_list in per_type.items():
                     empty = 0
@@ -215,6 +216,9 @@ class BitcoinWallet(models.Model):
                         if empty >= wallet.gap_limit:
                             _logger.info("Stop checking after %s empty addresses of type %s.", empty, atype)
                             break
+                    else:
+                        if not empty:
+                            raise UserError(_("Ran out of addresses! Please icrease address amount."))
 
 
                 _logger.info("Wallet %s done.", wallet.name)
@@ -282,6 +286,7 @@ class BitcoinWalletKey(models.Model):
 class BitcoinWalletAddress(models.Model):
     _name = 'bitcoin.wallet.address'
     _description = 'Bitcoin Wallet Address'
+    _inherit = ['mail.thread']
     _order = 'atype, index, id'
     _rec_name = 'address'
 

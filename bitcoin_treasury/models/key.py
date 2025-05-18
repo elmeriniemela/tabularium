@@ -56,6 +56,7 @@ class BitcoinKey(models.Model):
     wif = fields.Char(required=True, tracking=True)
 
     wallet_ids = fields.One2many(
+        string="Wallets",
         comodel_name='bitcoin.wallet.key',
         inverse_name='key_id',
         readonly=True,

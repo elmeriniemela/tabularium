@@ -1,0 +1,62 @@
+<odoo>
+    <record id="tree_wallet_address" model="ir.ui.view">
+        <field name="name">bitcoin.wallet.address.list</field>
+        <field name="model">bitcoin.wallet.address</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="wallet_id" optional="show"/>
+                <field name="index"/>
+                <field name="atype"/>
+                <field name="address"/>
+                <field name="transaction_ids"/>
+                <field name="write_date" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="form_wallet_address" model="ir.ui.view">
+        <field name="name">bitcoin.wallet.address.form</field>
+        <field name="model">bitcoin.wallet.address</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="index"/>
+                            <field name="address"/>
+                        </group>
+                        <group>
+                            <field name="atype"/>
+                            <field name="write_date" optional="hide"/>
+                        </group>
+                    </group>
+                    <field name="transaction_ids"/>
+                </sheet>
+                <div class="o_attachment_preview"/>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="search_wallet_address" model="ir.ui.view">
+        <field name="name">bitcoin.wallet.address.search</field>
+        <field name="model">bitcoin.wallet.address</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="address"/>
+                <separator/>
+                <filter string="Has transactions" name="has_transactions" domain="[('transaction_ids', '!=', False)]"/>
+                <filter string="No transactions" name="no_transactions" domain="[('transaction_ids', '=', False)]"/>
+                <separator/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_wallet_address" model="ir.actions.act_window">
+        <field name="name">Addresses</field>
+        <field name="res_model">bitcoin.wallet.address</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_has_transactions': 1}</field>
+    </record>
+
+</odoo>
