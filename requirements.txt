@@ -12,3 +12,4 @@ pyxirr
 numpy-financial
 yfinance
 markdownify
+btclib

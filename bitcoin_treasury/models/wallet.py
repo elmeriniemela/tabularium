@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import hashlib
-from bitcoinlib.scripts import Script
-from bitcoinlib.keys import Address, deserialize_address
 import socket
 import ssl
 import json
@@ -11,6 +8,9 @@ from contextlib import contextmanager
 from odoo import api, exceptions, fields, models, Command, _
 from ..electrum.bitcoin import address_to_scripthash
 from odoo.exceptions import UserError
+from btclib.script.script_pub_key import ScriptPubKey
+from btclib.bip32 import derive
+from btclib.b32 import p2wpkh
 
 _logger = logging.getLogger(__name__)
 
@@ -108,35 +108,25 @@ class BitcoinWallet(models.Model):
 
     def refresh_addresses(self):
         for wallet in self:
-            existing = {('M', str(r.atype), str(r.index)): r for r in wallet.address_ids}
-            master_keys = [k.key_id.hdkey for k in wallet.key_ids]
+            existing = {(str(r.atype), str(r.index)): r for r in wallet.address_ids}
             for atype in range(2):
                 for index in range(wallet.address_amount):
-                    subkey_path = ('M', str(atype), str(index))
-                    subkeys = [k.subkey_for_path(subkey_path) for k in master_keys]
-                    subkeys.sort(key=lambda k: k.public_byte)
+                    subkey_path = (str(atype), str(index))
                     first_key = wallet.key_ids[:1].key_id
-                    if len(subkeys) > 1 and len(subkeys) <= 15:
-                        # MULTISIG
-                        redeemscript = Script(
-                            script_types=['multisig'],
-                            keys=subkeys,
-                            sigs_required=wallet.sigs_required,
+                    if len(wallet.key_ids) > 1 and len(wallet.key_ids) <= 15:
+                        keys = [derive(k.key_id.wif, subkey_path) for k in wallet.key_ids]
+                        p2ms = ScriptPubKey.p2ms(
+                            m=wallet.sigs_required,
+                            keys=keys
                         )
-                        addr = Address(
-                            redeemscript.serialize(),
-                            encoding=first_key.encoding,
-                            script_type=first_key.script_type,
-                        )
-                        addr_str = addr.address
-                    elif len(subkeys) == 1:
-                        # SINGLE-SIG
-                        addr_str = subkeys[0].address(
-                            script_type=first_key.script_type,
-                            encoding=first_key.encoding,
-                        )
+                        addr_str = ScriptPubKey.p2wsh(p2ms.script).address
+                    elif len(wallet.key_ids) == 1:
+                        if first_key.script_type == 'p2tr':
+                            addr_str = ScriptPubKey.p2tr(derive(first_key.wif, subkey_path)).address
+                        else:
+                            addr_str = p2wpkh(derive(first_key.wif, subkey_path))
                     else:
-                        raise exceptions.UserError(_("Wrong amount of keys: %s") % len(subkeys))
+                        raise exceptions.UserError(_("Wrong amount of keys: %s") % len(wallet.key_ids))
 
 
                     if subkey_path in existing:
