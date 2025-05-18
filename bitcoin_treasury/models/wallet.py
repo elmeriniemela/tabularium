@@ -409,6 +409,8 @@ class BitcoinWalletHistory(models.Model):
             else:
                 record.other_wallet_ids = record.transaction_id.vout_ids.mapped('wallet_ids')
 
+            if len(record.transaction_id.vout_ids) > 1:
+                record.other_wallet_ids -= record.wallet_id # remove change address wallet
 
 
     _sql_constraints = [
