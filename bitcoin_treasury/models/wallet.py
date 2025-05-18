@@ -95,6 +95,21 @@ class BitcoinWallet(models.Model):
     address_amount = fields.Integer(default=100, tracking=True)
     gap_limit = fields.Integer(default=5, tracking=True)
 
+    first_key_id = fields.Many2one(
+        comodel_name='bitcoin.key',
+        compute='_compute_first_key_id',
+    )
+
+    script_type = fields.Selection(
+        related='first_key_id.script_type',
+        depends=['key_ids'],
+    )
+
+    def _compute_first_key_id(self):
+        for wallet in self:
+            wallet.first_key_id = wallet.key_ids[:1].key_id
+
+
     def _compute_multisig(self):
         for wallet in self:
             wallet.multisig = len(wallet.key_ids) > 1
@@ -125,11 +140,10 @@ class BitcoinWallet(models.Model):
         musig = {'p2sh', 'p2wsh'}
         for wallet in self:
             existing = {(str(r.atype), str(r.index)): r for r in wallet.address_ids}
+            st = wallet.first_key_id.script_type
             for atype in range(2):
                 for index in range(wallet.address_amount):
                     subkey_path = (str(atype), str(index))
-                    first_key = wallet.key_ids[:1].key_id
-                    st = first_key.script_type
                     if len(wallet.key_ids) > 1 and len(wallet.key_ids) <= 15:
                         if st not in musig:
                             raise ValidationError(_("Multisig not supported for script type %s. Supported types %s.") % (st, musig))
@@ -142,7 +156,7 @@ class BitcoinWallet(models.Model):
                     elif len(wallet.key_ids) == 1:
                         if st not in sisig:
                             raise ValidationError(_("Multisig not supported for script type %s. Supported types %s.") % (st, sisig))
-                        addr_str = address_map[st](derive(first_key.wif, subkey_path))
+                        addr_str = address_map[st](derive(wallet.first_key_id.wif, subkey_path))
                     else:
                         raise UserError(_("Wrong amount of keys: %s") % len(wallet.key_ids))
 
@@ -243,15 +257,19 @@ class BitcoinWalletKey(models.Model):
     _name = 'bitcoin.wallet.key'
     _description = 'Bitcoin Wallet Key'
     _order = 'sequence, id'
+    _inherits = {'bitcoin.key': 'key_id'}
+
 
     key_id = fields.Many2one(
         comodel_name='bitcoin.key',
         required=True,
+        ondelete='restrict',
     )
 
     wallet_id = fields.Many2one(
         comodel_name='bitcoin.wallet',
         required=True,
+        ondelete='cascade',
     )
 
     sequence = fields.Integer()
@@ -288,6 +306,7 @@ class BitcoinWalletAddress(models.Model):
         comodel_name='bitcoin.wallet',
         required=True,
         readonly=True,
+        ondelete='cascade',
     )
 
     transaction_ids = fields.Many2many(
@@ -323,6 +342,7 @@ class BitcoinWalletHistory(models.Model):
         comodel_name='bitcoin.wallet',
         required=True,
         readonly=True,
+        ondelete='cascade',
     )
 
     date = fields.Datetime(

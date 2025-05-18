@@ -34,12 +34,12 @@
                     </div>
                     <group>
                         <group>
-                            <field name="multisig"/>
                             <field name="balance"/>
+                            <field name="transactions"/>
                         </group>
                         <group>
-                            <field name="sigs_required"/>
-                            <field name="transactions"/>
+                            <field name="multisig"/>
+                            <field name="sigs_required" invisible="not multisig"/>
                         </group>
                     </group>
                     <notebook>
@@ -57,9 +57,10 @@
                         <page string="Addresses">
                             <group>
                                 <group>
-                                    <field name="address_amount"/>
+                                    <field name="script_type"/>
                                 </group>
                                 <group>
+                                    <field name="address_amount"/>
                                     <field name="gap_limit"/>
                                 </group>
                             </group>
@@ -78,6 +79,10 @@
                                 <list editable="top">
                                     <field name="sequence" widget="handle"/>
                                     <field name="key_id"/>
+                                    <field name="multisig" readonly="True"/>
+                                    <field name="fingerprint" readonly="True"/>
+                                    <field name="witness_type" readonly="True"/>
+                                    <field name="script_type" readonly="True"/>
                                 </list>
                             </field>
                         </page>

@@ -104,6 +104,7 @@ class BitcoinKey(models.Model):
             "BIP44 specifies derivation paths m / purpose' / coin_type' / account' / change / address_index."
         ),
         tracking=True,
+        store=True,
         readonly=False,
     )
     encoding = fields.Selection(
