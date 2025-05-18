@@ -84,7 +84,7 @@ class BitcoinKey(models.Model):
     script_type = fields.Selection(
         string="Script Type",
         selection=[
-            # Basically deprecated
+            # Rare
             ('p2pk', 'Pay To Public Key'),
             ('p2ms', 'Pay To Multisig'), # "Bare multisig"
 

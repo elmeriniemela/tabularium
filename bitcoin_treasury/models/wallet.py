@@ -5,9 +5,9 @@ import socket
 import ssl
 import json
 from contextlib import contextmanager
-from odoo import api, exceptions, fields, models, Command, _
+from odoo import api, fields, models, Command, _
 from ..electrum.bitcoin import address_to_scripthash
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 from btclib.script.script_pub_key import ScriptPubKey
 from btclib.bip32 import derive
 from btclib.b32 import p2wpkh
@@ -107,26 +107,44 @@ class BitcoinWallet(models.Model):
 
 
     def refresh_addresses(self):
+        address_map = {
+            # Rare
+            'p2pk': lambda pubkey: ScriptPubKey.p2pk(pubkey).address,
+
+            # Legacy
+            'p2pkh': lambda pubkey: ScriptPubKey.p2pkh(pubkey).address,
+            'p2sh': lambda redeem_script: ScriptPubKey.p2sh(redeem_script).address,
+
+            # Segwit
+            'p2wpkh': lambda pubkey: ScriptPubKey.p2wpkh(pubkey).address,
+            'p2wsh': lambda redeem_script: ScriptPubKey.p2wsh(redeem_script).address,
+            'p2tr': lambda pubkey: ScriptPubKey.p2tr(pubkey).address,
+        }
+
+        sisig = {'p2wpkh', 'p2tr', 'p2pkh', 'p2pk'}
+        musig = {'p2sh', 'p2wsh'}
         for wallet in self:
             existing = {(str(r.atype), str(r.index)): r for r in wallet.address_ids}
             for atype in range(2):
                 for index in range(wallet.address_amount):
                     subkey_path = (str(atype), str(index))
                     first_key = wallet.key_ids[:1].key_id
+                    st = first_key.script_type
                     if len(wallet.key_ids) > 1 and len(wallet.key_ids) <= 15:
+                        if st not in musig:
+                            raise ValidationError(_("Multisig not supported for script type %s. Supported types %s.") % (st, musig))
                         keys = [derive(k.key_id.wif, subkey_path) for k in wallet.key_ids]
                         p2ms = ScriptPubKey.p2ms(
                             m=wallet.sigs_required,
                             keys=keys
                         )
-                        addr_str = ScriptPubKey.p2wsh(p2ms.script).address
+                        addr_str = address_map[st](p2ms.script)
                     elif len(wallet.key_ids) == 1:
-                        if first_key.script_type == 'p2tr':
-                            addr_str = ScriptPubKey.p2tr(derive(first_key.wif, subkey_path)).address
-                        else:
-                            addr_str = p2wpkh(derive(first_key.wif, subkey_path))
+                        if st not in sisig:
+                            raise ValidationError(_("Multisig not supported for script type %s. Supported types %s.") % (st, sisig))
+                        addr_str = address_map[st](derive(first_key.wif, subkey_path))
                     else:
-                        raise exceptions.UserError(_("Wrong amount of keys: %s") % len(wallet.key_ids))
+                        raise UserError(_("Wrong amount of keys: %s") % len(wallet.key_ids))
 
 
                     if subkey_path in existing:
