@@ -6,6 +6,7 @@
             <list>
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
+                <field name="script_type"/>
                 <field name="multisig"/>
                 <field name="transactions"/>
                 <field name="balance"/>
