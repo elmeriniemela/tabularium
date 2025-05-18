@@ -293,6 +293,7 @@ class BitcoinWalletAddress(models.Model):
     address = fields.Char(
         required=True,
         readonly=True,
+        tracking=True,
     )
     atype = fields.Selection(
         string="Type",
@@ -302,16 +303,19 @@ class BitcoinWalletAddress(models.Model):
         ],
         required=True,
         readonly=True,
+        tracking=True,
     )
     index = fields.Integer(
         readonly=True,
         required=True,
+        tracking=True,
     )
     wallet_id = fields.Many2one(
         comodel_name='bitcoin.wallet',
         required=True,
         readonly=True,
         ondelete='cascade',
+        tracking=True,
     )
 
     transaction_ids = fields.Many2many(

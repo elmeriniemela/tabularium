@@ -22,12 +22,14 @@
                 <sheet>
                     <group>
                         <group>
-                            <field name="index"/>
+                            <field name="wallet_id"/>
                             <field name="address"/>
+                            <field name="index"/>
                         </group>
                         <group>
+                            <field name="write_date"/>
+                            <field name="write_uid"/>
                             <field name="atype"/>
-                            <field name="write_date" optional="hide"/>
                         </group>
                     </group>
                     <field name="transaction_ids"/>
