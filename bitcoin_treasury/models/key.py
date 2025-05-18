@@ -4,8 +4,7 @@ import logging
 
 from odoo import api, exceptions, fields, models, Command, _
 from odoo.exceptions import ValidationError
-
-from bitcoinlib.keys import HDKey
+from btclib.to_pub_key import fingerprint
 
 def script_type_default(witness_type=None, multisig=False, locking_script=False):
     """
@@ -62,15 +61,15 @@ class BitcoinKey(models.Model):
         readonly=True,
     )
 
-    secret = fields.Boolean(compute='_compute_info', store=True)
-    compressed = fields.Boolean(compute='_compute_info', store=True)
     multisig = fields.Boolean(
         help="Specify if key is part of multisig wallet, used when creating key representations such as WIF and addreses",
         tracking=True,
     )
-    depth = fields.Integer(compute='_compute_info', store=True)
-    parent_fingerprint = fields.Char(compute='_compute_info', store=True)
-    key_type = fields.Char(compute='_compute_info', store=True)
+    fingerprint = fields.Char(
+        compute='_compute_fingerprint',
+        store=True,
+        tracking=True,
+    )
     witness_type = fields.Selection(
         selection=[
             ('taproot', 'Taproot'),
@@ -107,7 +106,6 @@ class BitcoinKey(models.Model):
         tracking=True,
         readonly=False,
     )
-    address = fields.Char(compute='_compute_info', store=True)
     encoding = fields.Selection(
         selection=[
             ('bech32', 'bech32'),
@@ -156,20 +154,8 @@ class BitcoinKey(models.Model):
             rec.encoding = self._witness_encoding_map[rec.witness_type]
 
 
-
-    @property
-    def hdkey(self):
-        self.ensure_one()
-        return HDKey(import_key=self.wif, encoding=self.encoding, witness_type=self.witness_type, multisig=self.multisig)
-
-    @api.depends('wif', 'encoding', 'witness_type', 'multisig')
-    def _compute_info(self):
+    @api.depends('wif')
+    def _compute_fingerprint(self):
         for record in self:
-            key = record.hdkey
-            record.secret = key.secret
-            record.compressed = key.compressed
-            record.depth = key.depth
-            record.parent_fingerprint = key.parent_fingerprint.hex()
-            record.key_type = key.key_type
-            record.address = key.address()
+            record.fingerprint = fingerprint(record.wif, "mainnet").hex()
 

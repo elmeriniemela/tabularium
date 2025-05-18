@@ -6,12 +6,8 @@
             <list>
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
-                <field name="secret"/>
-                <field name="compressed"/>
                 <field name="multisig"/>
-                <field name="depth"/>
-                <field name="parent_fingerprint"/>
-                <field name="key_type"/>
+                <field name="fingerprint"/>
                 <field name="witness_type"/>
                 <field name="script_type"/>
                 <field name="encoding"/>
@@ -37,18 +33,13 @@
                         <group>
                             <field name="witness_type"/>
                             <field name="multisig"/>
-                            <field name="compressed"/>
-                            <field name="depth"/>
-                            <field name="parent_fingerprint"/>
-                            <field name="real_parent_fingerprint"/>
+                            <field name="fingerprint"/>
+                            <field name="encoding"/>
                         </group>
                         <group>
                             <field name="script_type"/>
-                            <field name="encoding"/>
-                            <field name="key_type"/>
-                            <field name="address"/>
-                            <field name="secret"/>
                             <field name="real_derivation_path"/>
+                            <field name="real_parent_fingerprint"/>
                         </group>
                     </group>
                     <notebook>

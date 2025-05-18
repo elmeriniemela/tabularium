@@ -4,7 +4,6 @@ openpyxl
 pysftp
 cryptography
 paramiko
-git+https://github.com/elmeriniemela/bitcoinlib
 xmltodict
 dicttoxml
 tinyrpc
