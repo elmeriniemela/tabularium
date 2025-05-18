@@ -159,5 +159,8 @@ class BitcoinKey(models.Model):
     @api.depends('wif')
     def _compute_fingerprint(self):
         for record in self:
-            record.fingerprint = fingerprint(record.wif, "mainnet").hex()
+            if record.wif:
+                record.fingerprint = fingerprint(record.wif, "mainnet").hex()
+            else:
+                record.fingerprint = False
 
