@@ -71,6 +71,7 @@
                                     <field name="index"/>
                                     <field name="atype"/>
                                     <field name="address"/>
+                                    <field name="balance"/>
                                     <field name="transaction_ids"/>
                                     <field name="write_date" optional="hide"/>
                                 </list>

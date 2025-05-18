@@ -190,7 +190,13 @@ class BitcoinWallet(models.Model):
                     empty = 0
                     for address in addr_list:
                         sh = address_to_scripthash(address)
-                        _logger.info("get_history(%s)", sh)
+                        # _logger.info("blockchain.scripthash.subscribe(%s)", sh)
+                        # tx_json = send({
+                        #     "method": "blockchain.scripthash.subscribe",
+                        #     "params": [sh],
+                        #     "id": 0
+                        # })
+                        _logger.info("blockchain.scripthash.get_history(%s)", sh)
                         tx_json = send({
                             "method": "blockchain.scripthash.get_history",
                             "params": [sh],
@@ -230,15 +236,18 @@ class BitcoinWallet(models.Model):
     def refresh_history(self):
         for wallet in self:
             existing = {h.transaction_id: h for h in wallet.history_ids}
+            addr_balance = {}
             for tx in wallet.address_ids.transaction_ids:
                 amount = 0.0
                 for addr in tx.wallet_address_ids.filtered(lambda a: a.wallet_id == wallet):
                     for vin in tx.vin_ids:
                         if addr.address == vin.spent_output_id.address:
                             amount -= vin.spent_output_id.value
+                            addr_balance[addr] = addr_balance.get(addr, 0) - vin.spent_output_id.value
                     for vout in tx.vout_ids:
                         if addr.address == vout.address:
                             amount += vout.value
+                            addr_balance[addr] = addr_balance.get(addr, 0) + vout.value
 
                 vals = {
                     'amount': amount,
@@ -253,6 +262,10 @@ class BitcoinWallet(models.Model):
                     existing[tx].write(vals)
                 else:
                     existing[tx] = History.create(vals)
+
+
+            for addr, balance in addr_balance.items():
+                addr.balance = balance
 
             wallet.balance = sum(wallet.mapped('history_ids.amount'))
             wallet.transactions = len(wallet.history_ids)
@@ -327,6 +340,11 @@ class BitcoinWalletAddress(models.Model):
         readonly=True,
     )
 
+    balance = fields.Float(
+        digits='Bitcoin Decimal',
+        readonly=True,
+    )
+
 
     _sql_constraints = [
         ('wallet_address_uniq', 'unique(wallet_id, address)', 'The wallet already has this address!'),
@@ -386,7 +404,10 @@ class BitcoinWalletHistory(models.Model):
 
     def _compute_other_wallet_ids(self):
         for record in self:
-            record.other_wallet_ids = (record.transaction_id.wallet_history_ids - record).mapped('wallet_id')
+            if record.amount > 0:
+                record.other_wallet_ids = record.transaction_id.vin_ids.mapped('wallet_ids')
+            else:
+                record.other_wallet_ids = record.transaction_id.vout_ids.mapped('wallet_ids')
 
 
 
