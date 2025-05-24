@@ -112,24 +112,24 @@
                 <field name="active"/>
                 <templates>
                     <t t-name="card">
-                        <div class="oe_kanban_global_click_edit">
-                            <div class="oe_kanban_content">
-                                <div class="o_kanban_record_top">
-                                    <div class="o_kanban_record_headings">
-                                        <strong class="o_kanban_record_title">
+                        <div>
+                            <div>
+                                <div>
+                                    <div>
+                                        <strong>
                                             <field name="description"/>
                                         </strong>
                                     </div>
                                 </div>
-                                <div class="o_kanban_record_body">
+                                <div class="mb-1 mt-1">
                                     <field name="task_id"/> / <field name="project_name"/>
                                 </div>
-                                <div class="o_kanban_record_bottom">
-                                    <div class="oe_kanban_bottom_left">
+                                <div class="d-flex">
+                                    <div style="flex: 1 1 auto; align-items: center; display: flex; min-height: 20px; gap: 4px;">
                                         <span class="pr-2">Rounded:</span>
                                         <field name="rounded_duration" widget="float_time"/>
                                     </div>
-                                    <div class="oe_kanban_bottom_right">
+                                    <div style="flex: 0 1 auto; align-items: center; display: flex; min-height: 20px; gap: 4px;">
                                         <span class="pr-2">Total:</span>
                                         <field name="total_duration" widget="float_time"/>
                                     </div>

@@ -123,7 +123,6 @@ class FlightLog(models.Model):
     )
 
     sign = fields.Binary(
-        tracking=True,
         copy=False,
     )
 

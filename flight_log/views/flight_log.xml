@@ -35,14 +35,14 @@
                     </div>
                     <div class="oe_title">
                         <h1>
-                            <field name="name" placeholder="Description of flight..."  readonly="state == 'confirmed'"/>
+                            <field name="name" placeholder="Description of flight..." readonly="state == 'confirmed'"/>
                         </h1>
                     </div>
                     <group>
                         <field name="purpose_id" widget="selection" readonly="state == 'confirmed'"/>
                         <field name="departure_method" readonly="state == 'confirmed'"/>
                         <field name="plane_id" readonly="state == 'confirmed'"/>
-                        <field name="date"  readonly="state == 'confirmed'"/>
+                        <field name="date" readonly="state == 'confirmed'"/>
                         <label for="airport_takeoff_id" string="Airport"/>
                         <div class="o_row">
                             <field name="airport_takeoff_id" readonly="state == 'confirmed'"/>
@@ -56,9 +56,9 @@
                             <field name="end_time" options="{'type': 'time'}" widget="float_time" readonly="state == 'confirmed'"/>
                         </div>
                         <field name="duration" widget="float_time" readonly="state == 'confirmed'"/>
-                        <field name="instrumental_time" options="{'type': 'time'}" widget="float_time"  readonly="state == 'confirmed'"/>
-                        <field name="signatory_license_number"  readonly="state == 'confirmed'"/>
-                        <field name="sign" widget="signature"  readonly="state == 'confirmed'"/>
+                        <field name="instrumental_time" options="{'type': 'time'}" widget="float_time" readonly="state == 'confirmed'"/>
+                        <field name="signatory_license_number" readonly="state == 'confirmed'"/>
+                        <field name="sign" widget="signature" readonly="state == 'confirmed'"/>
                         <field name="company_id" readonly="state == 'confirmed'"/>
                         <field name="skip_validation" widget="boolean_toggle"/>
                     </group>
@@ -75,37 +75,35 @@
             <kanban class="o_kanban_mobile" sample="1" default_order="date desc, start_time desc, id desc">
                 <templates>
                     <t t-name="card">
-                        <div class="oe_kanban_global_click_edit">
-                            <div class="oe_kanban_content">
-                                <div class="o_kanban_record_top">
-                                    <div class="o_kanban_record_headings">
-                                        <strong class="o_kanban_record_title">
+                        <div>
+                            <div>
+                                <div class="d-flex">
+                                    <div>
+                                        <strong>
                                             <field name="purpose_id"/>
                                             <span>: </span>
                                             <field name="name"/>
                                         </strong>
                                         <br/>
                                         <span class="mt-2">
-                                            <field name="plane_id"/>,
-                                            <field name="departure_method"/>,
-                                            <field name="airport_takeoff_id"/>
+                                            <field name="plane_id"/>, <field name="departure_method"/>, <field name="airport_takeoff_id"/>
                                         </span>
                                     </div>
                                 </div>
-                                <div class="o_kanban_record_body">
+                                <div class="d-flex mb-1 mt-1" style="align-items: center;">
                                     <field name="date" widget="date"/>, <field name="start_time" widget="float_time"/>
-                                    <i class="fa fa-long-arrow-right mx-2 oe_read_only" aria-label="Arrow icon" title="Arrow"/>
+                                    <i class="fa fa-long-arrow-right mx-2" title="Arrow" style="height: 14px;"/>
                                     <field name="end_time" class="me-2" widget="float_time"/>
                                 </div>
-                                <div class="o_kanban_record_bottom" t-if="!selection_mode">
-                                    <div class="oe_kanban_bottom_left">
-                                        <div t-attf-class="oe_kanban_align badge" t-att-title="title">
-                                            Duration: <field name="duration" widget="float_time"/>
+                                <div class="d-flex">
+                                    <div style="flex: 1 1 auto; align-items: center; display: flex; min-height: 20px; gap: 4px;">
+                                        <div style="font-size: 0.75rem;" t-att-title="title">
+                                            Duration: <field name="duration" style="display: inline-block;" widget="float_time"/>
                                         </div>
                                     </div>
-                                    <div class="oe_kanban_bottom_right" t-if="!selection_mode">
-                                        <div t-attf-class="oe_kanban_align badge" t-att-title="title">
-                                            <field name="instrumental_time" widget="float_time"/>
+                                    <div style="flex: 0 1 auto; align-items: center; display: flex; min-height: 20px; gap: 4px;">
+                                        <div style="font-size: 0.75rem" t-att-title="title">
+                                            <field name="instrumental_time" style="display: inline-block;" widget="float_time"/>
                                             instrumental time.
                                         </div>
                                     </div>
@@ -132,7 +130,7 @@
     <record id="log_graph" model="ir.ui.view">
         <field name="name">flight.log.graph</field>
         <field name="model">flight.log</field>
-        <field name="priority" eval="2" />
+        <field name="priority" eval="2"/>
         <field name="arch" type="xml">
             <graph type="bar">
                 <field name="duration" type="measure"/>
@@ -177,7 +175,7 @@
         <field name="context">{
             'search_default_group_date': 1,
             'pivot_measures': ['__count__', 'duration', 'instrumental_time'],
-        }</field>
+            }</field>
     </record>
 
     <record id="report_action" model="ir.actions.act_window">
@@ -187,9 +185,8 @@
         <field name="context">{
             'search_default_group_date': 1,
             'pivot_measures': ['__count__', 'duration', 'instrumental_time'],
-        }</field>
+            }</field>
     </record>
-
 
 
 </odoo>
