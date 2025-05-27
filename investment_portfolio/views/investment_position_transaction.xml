@@ -20,6 +20,7 @@
                 <field name="category_id" optional="hide"/>
                 <field name="prediction" optional="hide" widget="boolean_toggle"/>
                 <field name="company_currency_id" optional="hide"/>
+                <button title="Details" icon="fa-info-circle" name="open_form" type="object"/>
             </list>
         </field>
     </record>

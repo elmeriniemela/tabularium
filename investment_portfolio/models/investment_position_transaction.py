@@ -185,6 +185,18 @@ class InvestmentPositionTransaction(models.Model):
         }
 
 
+    def open_form(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': self._name,
+            'res_id': self.id,
+            'target': 'current',
+        }
+
+
     @api.depends('usage')
     def _compute_prediction(self):
         for record in self: record.prediction = record.usage == 'prediction'
