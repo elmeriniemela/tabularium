@@ -57,7 +57,6 @@ class InvestmentPeriod(models.Model):
             'type': 'ir.actions.act_window',
             'name': _('Investment Timeseries'),
             'res_model': 'investment.timeseries',
-            'view_type': 'list',
             'view_mode': 'list',
             'views': [[False, 'list'], [False, 'form']],
             'domain': [('id', 'in', self.mapped('timeseries_ids').ids)],

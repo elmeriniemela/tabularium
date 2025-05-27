@@ -17,7 +17,6 @@ class BitcoinWallet(models.Model):
             'type': 'ir.actions.act_window',
             'name': _('Investment Transactions'),
             'res_model': 'investment.position.transaction',
-            'view_type': 'list',
             'view_mode': 'list',
             'views': [[False, 'list'], [False, 'form']],
             'domain': [('id', 'in', self.mapped('history_ids.position_transaction_id').ids)],

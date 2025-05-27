@@ -177,7 +177,6 @@ class InvestmentPositionTransaction(models.Model):
         })
         return {
             'type': 'ir.actions.act_window',
-            'view_type': 'form',
             'view_mode': 'form',
             'res_model': move._name,
             'res_id': move.id,
@@ -189,7 +188,6 @@ class InvestmentPositionTransaction(models.Model):
         self.ensure_one()
         return {
             'type': 'ir.actions.act_window',
-            'view_type': 'form',
             'view_mode': 'form',
             'res_model': self._name,
             'res_id': self.id,
