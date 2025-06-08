@@ -120,6 +120,7 @@ class InvestmentPosition(models.Model):
 
     quantity = fields.Float(compute='_compute_position_aggregate', inverse='_inverse_quantity', readonly=False, store=True, digits='Investment Asset quantity', aggregator=None)
     position = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', help="Current value of this position.")
+    position_currency = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='currency_id', help="Current value of this position in the underlying currency.")
     plausible_drawdown_position = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', help="Value of this position after a plausible drawdown.")
     investment = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id')
     max_investment = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id')
@@ -168,6 +169,7 @@ class InvestmentPosition(models.Model):
         'transaction_ids.payment',
         'transaction_ids.currency_rate_id',
         'transaction_ids.currency_rate_id.rate',
+        'quantity',
         'last_price',
         'last_price_id',
         'last_price_id.price',
@@ -183,6 +185,8 @@ class InvestmentPosition(models.Model):
                 date=record.last_price_id.time or fields.Datetime.now(),
             )
             record.update(record._get_position(record.last_price_own_currency, record.transaction_ids))
+            record.position_currency = record.last_price * record.quantity
+
 
     def recompute_value(self):
         assets = self.mapped('asset_id')
@@ -440,6 +444,7 @@ class InvestmentPosition(models.Model):
                     'time': fields.Datetime.now(),
                     'position_id': record.id,
                 })
+        self._compute_position_aggregate()
 
 
     def update_realized_fifo(self):

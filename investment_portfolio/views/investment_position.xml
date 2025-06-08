@@ -26,6 +26,7 @@
 
                 <field name="quantity" digits="[2,2]" optional="show"/>
                 <field name="position" optional="show" sum="Total Position" digits="[2,2]"/>
+                <field name="position_currency" optional="hide" sum="Total Position" digits="[2,2]"/>
                 <field name="plausible_drawdown_position" optional="hide" sum="Total Position"/>
                 <field name="investment" optional="hide"/>
                 <field name="max_investment" optional="hide"/>
