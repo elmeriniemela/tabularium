@@ -28,6 +28,9 @@
                         <button class="oe_stat_button" type="object" icon="fa-tasks" name="action_view_timeseries">
                             <field name="count_timeseries" widget="statinfo" string="Timeseries"/>
                         </button>
+                        <button class="oe_stat_button" type="object" icon="fa-tasks" name="action_view_transactions">
+                            <field name="count_transactions" widget="statinfo" string="Transactions"/>
+                        </button>
                     </div>
                     <div class="oe_title">
                         <h1>

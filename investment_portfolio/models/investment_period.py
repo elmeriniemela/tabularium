@@ -35,7 +35,9 @@ class InvestmentPeriod(models.Model):
     company_currency_id = fields.Many2one(related='company_id.currency_id', string="Company Currency")
 
     timeseries_ids = fields.Many2many(comodel_name='investment.timeseries', compute='_compute_period', store=True)
+    transaction_ids = fields.Many2many(comodel_name='investment.position.transaction', compute='_compute_period', store=True)
     count_timeseries = fields.Integer(compute='_compute_period', store=True)
+    count_transactions = fields.Integer(compute='_compute_period', store=True)
     start_position = fields.Monetary(compute='_compute_period', currency_field='company_currency_id', store=True)
     end_position = fields.Monetary(compute='_compute_period', currency_field='company_currency_id', store=True)
     profit = fields.Monetary(compute='_compute_period', currency_field='company_currency_id', store=True, tracking=True)
@@ -62,6 +64,17 @@ class InvestmentPeriod(models.Model):
             'domain': [('id', 'in', self.mapped('timeseries_ids').ids)],
         }
 
+    def action_view_transactions(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Investment Transactions'),
+            'res_model': 'investment.position.transaction',
+            'view_mode': 'list',
+            'views': [[False, 'list'], [False, 'form']],
+            'domain': [('id', 'in', self.mapped('transaction_ids').ids)],
+        }
+
+
 
     def copy(self, default=None):
         default = default or {
@@ -85,6 +98,7 @@ class InvestmentPeriod(models.Model):
             end_date = record.end_date if today > record.end_date else today
 
             record.timeseries_ids = False
+            record.transaction_ids = False
             record.start_position = 0.0
             record.end_position = 0.0
             record.profit = 0.0
@@ -124,6 +138,7 @@ class InvestmentPeriod(models.Model):
                     dates.append(start_date)
 
                 transactions = (end_series.transaction_ids - start_series.transaction_ids).filtered(lambda t: t.usage == 'record')
+                record.transaction_ids += transactions
 
                 for trans in transactions:
                     sign = 1
@@ -154,8 +169,5 @@ class InvestmentPeriod(models.Model):
 
             record.annualized_irr = annualized_irr
             record.count_timeseries = len(record.timeseries_ids)
+            record.count_transactions = len(record.transaction_ids)
             record.debug_xirr = f'{dates=}\n{values=}'
-
-
-
-
