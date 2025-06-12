@@ -6,7 +6,7 @@
     'website': "https://eniemela.fi",
     'license': 'LGPL-3',
     'category': 'Uncategorized',
-    'version': '1.0.2',
+    'version': '1.0.6',
     'depends': [
         'base', 'mail',
         'version_control',
@@ -19,5 +19,6 @@
         'views/api_endpoint.xml',
         'views/menuitems.xml',
         'data/cron.xml',
+        'data/subtypes.xml',
     ],
 }

@@ -468,7 +468,7 @@ class ApiEndpoint(models.Model):
             if commit:
                 if self.state == 'active':
                     self.state = 'error'
-                self.message_post(body=(str(error)))
+                self.message_post(body=(str(error)), subtype_xmlid='api_endpoint.mt_integration_error', message_type='comment')
                 self.env.cr.commit()
             if raise_exc or not commit: # Commit required, silent bypass is not allowed
                 raise error
@@ -503,7 +503,7 @@ class ApiEndpoint(models.Model):
             if commit:
                 if self.state == 'active':
                     self.state = 'error'
-                self.message_post(body=(str(error)))
+                self.message_post(body=(str(error)), subtype_xmlid='api_endpoint.mt_integration_error', message_type='comment')
                 self.env.cr.commit()
             if raise_exc or not commit: # Commit required, silent bypass is not allowed
                 raise error
@@ -557,22 +557,25 @@ class ApiEndpoint(models.Model):
         except Exception as error:
             self.env.cr.rollback()
             if commit:
-                globals_dict['msg'].write({'state': 'error'})
-                globals_dict['msg'].message_post(body=(str(error)))
+                if globals_dict.get('msg'):
+                    globals_dict['msg'].write({'state': 'error'})
+                    globals_dict['msg'].message_post(body=(str(error)), subtype_xmlid='api_endpoint.mt_integration_error', message_type='comment')
                 self.env.cr.commit()
             if raise_exc or not commit: # Commit required, silent bypass is not allowed
                 raise error
         else:
-            globals_dict['msg'].write({'state': 'consumed'})
+            if globals_dict.get('msg'):
+                globals_dict['msg'].write({'state': 'consumed'})
             if commit:
                 self.env.cr.commit()
 
             if self.response_format:
                 self.ensure_response(globals_dict)
                 bytesdata = self.obj_to_bytes(globals_dict['response'], self.response_format)
-                globals_dict['msg'].write({
-                    'response': base64.b64encode(bytesdata)
-                })
+                if globals_dict.get('msg'):
+                    globals_dict['msg'].write({
+                        'response': base64.b64encode(bytesdata)
+                    })
                 if commit:
                     self.env.cr.commit()
 
@@ -645,7 +648,7 @@ class ApiEndpoint(models.Model):
                 except Exception as error:
                     # NO ROLLBACK NEEDED.
                     msg.write({'state': 'error'})
-                    msg.message_post(body=(str(error)))
+                    msg.message_post(body=(str(error)), subtype_xmlid='api_endpoint.mt_integration_error', message_type='comment')
                 else:
                     msg.endpoint_id.with_context(force_commit=True, raise_exc=False)._consume(globals_dict) # method _consume already has error handling.
                 finally:

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="mt_integration_error" model="mail.message.subtype">
+        <field name="name">Integration Error</field>
+        <field name="default" eval="True"/>
+        <field name="description" eval="False"/>
+    </record>
+</odoo>
