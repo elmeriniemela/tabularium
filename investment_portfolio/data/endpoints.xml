@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<odoo>
+<odoo noupdate="1">
     <record id="investment_portfolio.export_asset_prices" model="api.endpoint">
         <field name="name">Export asset prices to another system</field>
         <field name="location">asset/prices</field>

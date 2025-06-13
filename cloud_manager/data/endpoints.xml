@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<odoo>
+<odoo noupdate="1">
     <record id="cloud_manager.endpoint_cloud_v16" model="api.endpoint">
         <field name="name">Odoo V16 Cloud</field>
         <field name="location">agent16.eniemela.fi:9000</field>
