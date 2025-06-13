@@ -168,6 +168,8 @@ class ApiEndpoint(models.Model):
         help="Use this field to limit selection of a spefic field to a specific subset of API endpoints."
     )
 
+    usage_count = fields.Integer(compute='_compute_usage_count')
+
     direction = fields.Selection(
         selection=[
             ('outbound', 'Outbound'),
@@ -360,6 +362,31 @@ class ApiEndpoint(models.Model):
         compute='_compute_msg_count',
     )
 
+
+    @api.depends('usage_field_id')
+    def _compute_usage_count(self):
+        for record in self:
+            record.usage_count = len(record._get_usage_records())
+
+
+    def _get_usage_records(self):
+        self.ensure_one()
+        if not self.usage_field_id:
+            return self.browse()
+
+        return self.env[self.usage_field_id.model_id.model].search([(self.usage_field_id.name, '=', self.id)])
+
+
+    def action_view_usage(self):
+        records = self._get_usage_records()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': records._description,
+            'res_model': records._name,
+            'view_mode': 'list',
+            'views': [[False, 'list'], [False, 'form']],
+            'domain': [('id', 'in', records.ids)],
+        }
 
     @api.depends('state')
     def _compute_active(self):

@@ -39,10 +39,13 @@
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
-                        <button class="oe_stat_button" type="action" icon="fa-tasks" name="%(api_message_action)d" context="{'default_endpoint_id': id, 'search_default_endpoint_id': id}">
+                        <button class="oe_stat_button" invisible="not usage_count" type="object" icon="fa-download" name="action_view_usage">
+                            <field name="usage_count" widget="statinfo" string="Usage"/>
+                        </button>
+                        <button class="oe_stat_button" type="action" icon="fa-envelope" name="%(api_message_action)d" context="{'default_endpoint_id': id, 'search_default_endpoint_id': id}">
                             <field name="msg_count" widget="statinfo"/>
                         </button>
-                        <button class="oe_stat_button" type="action" icon="fa-tasks" name="%(version_control.version_control_action)d" context="{'search_default_model': 'api.endpoint', 'search_default_res_id': id}">
+                        <button class="oe_stat_button" type="action" icon="fa-code-fork" name="%(version_control.version_control_action)d" context="{'search_default_model': 'api.endpoint', 'search_default_res_id': id}">
                             <field name="version_control_count" widget="statinfo"/>
                         </button>
                     </div>

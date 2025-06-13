@@ -34,6 +34,7 @@ class DnsZone(models.Model):
             ('usage_field_id.model_id.model', '=', 'dns.zone'),
         ],
         compute='_compute_ns_endpoint_id',
+        search='_search_ns_endpoint_id',
     )
 
     _sql_constraints = [
@@ -41,13 +42,31 @@ class DnsZone(models.Model):
         ('uniq_identifier', 'UNIQUE(identifier)', 'The zone identifier must be unique!'),
     ]
 
-    def _compute_ns_endpoint_id(self):
-        ns_endpoint = self.env['api.endpoint'].search([
+
+    def _get_ns_endpoint(self):
+        return self.env['api.endpoint'].search([
             ('usage_field_id.name', '=', 'ns_endpoint_id'),
             ('usage_field_id.model_id.model', '=', 'dns.zone'),
         ], limit=1)
+
+    def _compute_ns_endpoint_id(self):
+        ns_endpoint = self._get_ns_endpoint()
         for zone in self:
             zone.ns_endpoint_id = ns_endpoint
+
+    def _search_ns_endpoint_id(self, operator, value):
+        if isinstance(value, int):
+            leaf = ('id', operator, value)
+        elif isinstance(value, str):
+            leaf = ('name', operator, value)
+        else:
+            raise RuntimeError("Invalid type: %s", type(value))
+
+        ns_endpoint = self._get_ns_endpoint().filtered_domain([leaf])
+        if ns_endpoint:
+            return [] # match all DNS zones if trying to search with endpoint.
+        else:
+            return [('id', '=', False)]
 
     @api.model
     def upsert(self, vals):
