@@ -19,6 +19,7 @@
                 <field name="five_year_price" widget="percentage" decoration-danger="five_year_price &lt; 0" decoration-success="five_year_price &gt; 0" optional="show"/>
                 <field name="ten_year_price" widget="percentage" decoration-danger="ten_year_price &lt; 0" decoration-success="ten_year_price &gt; 0" optional="hide"/>
                 <field name="currency_id" optional="hide"/>
+                <field name="exchange_id" optional="hide"/>
                 <field name="endpoint_id" optional="hide"/>
                 <field name="company_ids" widget="many2many_tags" optional="hide"/>
                 <field name="expected_yearly_appreciation" widget="percentage" optional="hide"/>
@@ -47,6 +48,7 @@
                         <group>
                             <field name="currency_id"/>
                             <field name="category_id"/>
+                            <field name="exchange_id"/>
                             <field name="endpoint_id"/>
                             <field name="company_ids" widget="many2many_tags"/>
                             <field name="expected_yearly_appreciation" widget="percentage"/>

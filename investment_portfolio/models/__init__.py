@@ -10,6 +10,8 @@ from . import investment_position_transaction
 from . import investment_asset
 from . import investment_position
 from . import investment_category
+from . import investment_exchange
+from . import investment_exchange_gap
 from . import investment_portfolio
 from . import investment_milestone
 from . import investment_period

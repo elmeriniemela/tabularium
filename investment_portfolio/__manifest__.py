@@ -5,7 +5,7 @@
     'website': "https://eniemela.fi",
     'license': 'LGPL-3',
     'category': 'Investment Portfolio',
-    'version': '2.7.3',
+    'version': '2.7.4',
     'depends': [
         'mail',
         'timeago_widget',
@@ -25,6 +25,8 @@
         'views/investment_timeseries.xml',
         'views/investment_portfolio.xml',
         'views/investment_category.xml',
+        'views/investment_exchange_gap.xml',
+        'views/investment_exchange.xml',
         'views/investment_milestone.xml',
         'views/investment_period.xml',
         'views/investment_asset_price.xml',

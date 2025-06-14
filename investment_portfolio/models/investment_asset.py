@@ -107,6 +107,14 @@ class InvestmentAsset(models.Model):
         ],
     )
 
+
+    exchange_id = fields.Many2one(
+        comodel_name='investment.exchange',
+        index=True,
+        tracking=True,
+        ondelete='restrict',
+    )
+
     @api.onchange('expected_yearly_appreciation')
     def invalidate_predicted_prices(self):
         self.env['investment.asset.price'].search([
@@ -309,7 +317,10 @@ class InvestmentAsset(models.Model):
         Asset = self.browse()
         per_integration = {}
         for asset in self.sudo():
-            per_integration[asset.endpoint_id] = per_integration.get(asset.endpoint_id, Asset) + asset
+            if not asset.exchange_id or asset.exchange_id.is_open:
+                per_integration[asset.endpoint_id] = per_integration.get(asset.endpoint_id, Asset) + asset
+            else:
+                _logger.info("Skip integration on %s as %s is closed.", asset.ticker, asset.exchange_id.name)
 
         max_workers = int(self.env['ir.config_parameter'].sudo().get_param('investment_portfolio.integration.threads', '3'))
         for integration, assets in per_integration.items():
