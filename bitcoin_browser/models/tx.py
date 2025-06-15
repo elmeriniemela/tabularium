@@ -112,7 +112,38 @@ class BitcoinTx(models.Model):
                 if blockhash:
                     record.block_id = Block.create({'hash': rawtx['blockhash']}).id
 
-            record.block_id.with_context(only_txid=record.txid).refresh()
+                record.write(self.rawtx_to_vals(rawtx))
+
+    def rawtx_to_vals(self, rawtx):
+        return  {
+            'in_active_chain': rawtx.get('in_active_chain'),
+            'txid': rawtx['txid'],
+            'hash': rawtx['hash'],
+            'version': rawtx['version'],
+            'size': rawtx['size'],
+            'vsize': rawtx['vsize'],
+            'weight': rawtx['weight'],
+            'locktime': rawtx['locktime'],
+            'fee': rawtx.get('fee', 0.0),
+            'vin_ids': [
+                Command.create({
+                    'sequence': vin['sequence'],
+                    'vout_tx_id': vin.get('txid', False),
+                    'vout': vin.get('vout', False),
+                    'coinbase': vin.get('coinbase', False),
+                }) for vin in rawtx['vin']
+            ],
+            'vout_ids': [
+                Command.create({
+                    'n': vout['n'],
+                    'value': vout['value'],
+                    'address': vout['scriptPubKey'].get('address', False),
+                    'asm': vout['scriptPubKey']['asm'],
+                    'type': vout['scriptPubKey']['type'],
+                }) for vout in rawtx['vout']
+            ]
+        }
+
 
 
 

@@ -119,39 +119,9 @@ class BitcoinBlock(models.Model):
 
         if tx:
             tx_ids = []
-            only_txid = self.env.context.get('only_txid')
             for rawtx in getblock['tx']:
-                if only_txid and rawtx['txid'] != only_txid:
-                    continue
-                txvals = {
-                    'block_id': self.id,
-                    'in_active_chain': rawtx.get('in_active_chain'),
-                    'txid': rawtx['txid'],
-                    'hash': rawtx['hash'],
-                    'version': rawtx['version'],
-                    'size': rawtx['size'],
-                    'vsize': rawtx['vsize'],
-                    'weight': rawtx['weight'],
-                    'locktime': rawtx['locktime'],
-                    'fee': rawtx.get('fee', 0.0),
-                    'vin_ids': [
-                        Command.create({
-                            'sequence': vin['sequence'],
-                            'vout_tx_id': vin.get('txid', False),
-                            'vout': vin.get('vout', False),
-                            'coinbase': vin.get('coinbase', False),
-                        }) for vin in rawtx['vin']
-                    ],
-                    'vout_ids': [
-                        Command.create({
-                            'n': vout['n'],
-                            'value': vout['value'],
-                            'address': vout['scriptPubKey'].get('address', False),
-                            'asm': vout['scriptPubKey']['asm'],
-                            'type': vout['scriptPubKey']['type'],
-                        }) for vout in rawtx['vout']
-                    ]
-                }
+                txvals = self.env['bitcoin.tx'].rawtx_to_vals(rawtx)
+                txvals['block_id'] = self.id
                 tx_ids.append(Command.create(txvals))
 
             vals['tx_ids'] = tx_ids
