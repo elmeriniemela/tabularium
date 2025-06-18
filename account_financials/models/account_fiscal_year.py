@@ -58,6 +58,13 @@ class AccountFiscalYear(models.Model):
 
     place_and_date = fields.Char(compute='_compute_place_and_date')
 
+    def copy(self, default=None):
+        default = default or {
+            'date_from': self.date_from+relativedelta(years=1),
+            'date_to': self.date_to+relativedelta(years=1),
+            'name': self.name + ' (copy)',
+        }
+        return super().copy(default)
 
 
     def _compute_place_and_date(self):
@@ -84,8 +91,6 @@ class AccountFiscalYear(models.Model):
             infile.seek(0)
             t = Template(infile.name, outfile.name)
             t.render(dict(
-                items=self,
-                document=self,
                 objects=self,
                 format_multiline_value=format_multiline_value,
             ))
@@ -120,22 +125,15 @@ class AccountFiscalYear(models.Model):
         options['date']['period_type'] = 'fiscalyear'
         options['comparison'] = {'filter': 'same_last_year', 'number_period': 1}
         options['selected_analytic_account_names'] = []
-        options['selected_analytic_tag_names'] = []
         options['unfold_all'] = False
         options['export_mode'] = 'file'
         options['all_entries'] = False # Do not include unposted entries, 14.0
-        options['multi_company'] = [{
-            'id': self.company_id.id,
-            'name': self.company_id.name,
-            'selected': True,
-        }]
         options = report.get_options(options)
         all_column_groups_expression_totals = report._compute_expression_totals_for_each_column_group(
             report.line_ids.expression_ids,
             options,
         )
         lines = report._get_lines(options, all_column_groups_expression_totals)
-
 
         py3o_lines = []
         for line in lines:
