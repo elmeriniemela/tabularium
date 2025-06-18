@@ -12,7 +12,6 @@ class BaseModuleUninstall(models.TransientModel):
         context = self.env.context.copy()
         active = self.env['ir.module.module'].browse(context.get('active_ids') or []).filtered(lambda m: m.state in ('installed', 'to upgrade')).ids
         if len(active) > 1:
-            active.remove(self.module_id.id)
             context['default_show_all'] = True
             context['default_module_id'] = active[0]
             return {
