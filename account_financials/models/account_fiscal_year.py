@@ -7,7 +7,7 @@ import base64
 import datetime
 import html
 from markupsafe import Markup
-from odoo.tools import misc
+from odoo.tools import misc, float_is_zero
 from dateutil.relativedelta import relativedelta
 
 FILETYPE_BASE64_MAGICWORD = {
@@ -139,7 +139,11 @@ class AccountFiscalYear(models.Model):
                 )
             }
             for i, col_dict in enumerate(line['columns'][:2]):
-                vals[f"col_{i + 1}"] = col_dict['name']
+                value = col_dict['name']
+                if isinstance(value, float) and float_is_zero(value, precision_rounding=self.company_id.currency_id.rounding):
+                    value = 0
+                vals[f"col_{i + 1}"] = value
+
             py3o_lines.append(vals)
         return py3o_lines
 
