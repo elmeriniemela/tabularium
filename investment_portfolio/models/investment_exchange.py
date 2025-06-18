@@ -44,7 +44,7 @@ class InvestmentExchange(models.Model):
     @api.depends('tz', 'opening_time', 'closing_time', 'weekend_trading', 'gap_ids')
     def _compute_open_close(self):
 
-        def localize(tz, date, float_time=None):
+        def localize(tz, date, float_time):
             second = microsecond = 0
             if float_time is not None:
                 hour, minute = (int(t) for t in divmod(float_time * 60, 60))
@@ -61,7 +61,7 @@ class InvestmentExchange(models.Model):
 
         for ex in self:
             tz = pytz.timezone(ex.tz)
-            now = localize(tz, fields.Datetime.now())
+            now = datetime.datetime.now(tz)
             if not ex.weekend_trading:
                 while now.isoweekday() in [6,7]:
                     now += datetime.timedelta(days=1)
@@ -76,7 +76,7 @@ class InvestmentExchange(models.Model):
             next_open = localize(tz, next_close, ex.opening_time)
 
             gaps = ex.gap_ids.filtered(lambda g: g.date == next_open.date())
-            while any(localize(tz, g.closing_datetime) <= next_open for g in gaps):
+            while any(g.closing_datetime.astimezone(tz) <= next_open for g in gaps):
                 next_open += datetime.timedelta(days=1)
                 gaps = ex.gap_ids.filtered(lambda g: g.date == next_open.date())
 
