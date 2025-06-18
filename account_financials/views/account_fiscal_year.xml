@@ -6,6 +6,7 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='company_id']" position="after">
                 <field name="financials_template_id"/>
+                <field name="financials_signature" widget="signature"/>
             </xpath>
 
             <xpath expr="//sheet" position="before">

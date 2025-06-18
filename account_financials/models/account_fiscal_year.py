@@ -45,6 +45,9 @@ class AccountFiscalYear(models.Model):
         comodel_name='ir.attachment',
         copy=True)
 
+    financials_signature = fields.Binary(copy=True)
+    financials_signature2 = fields.Binary(related='financials_signature')
+
     logo_ftype = fields.Char(compute='_compute_logo_ftype')
 
     format_date_from = fields.Char(compute='_compute_format_date')
@@ -52,6 +55,14 @@ class AccountFiscalYear(models.Model):
     format_date_to = fields.Char(compute='_compute_format_date')
     format_date_to_previous = fields.Char(compute='_compute_format_date')
     format_date_expire = fields.Char(compute='_compute_format_date')
+
+    place_and_date = fields.Char(compute='_compute_place_and_date')
+
+
+
+    def _compute_place_and_date(self):
+        for record in self:
+            record.place_and_date = f'{record.company_id.city}, {misc.format_date(record.env, fields.Date.today())}'
 
     def _compute_format_date(self):
         for record in self:
@@ -96,9 +107,6 @@ class AccountFiscalYear(models.Model):
 
     def py3o_bs_lines(self):
         return self._get_report_lines('l10n_fi_reports.account_financial_report_l10n_fi_bs')
-
-    def py3o_cie_lines(self):
-        return []
 
     def _get_report_lines(self, report_xmlid):
         self.ensure_one()
