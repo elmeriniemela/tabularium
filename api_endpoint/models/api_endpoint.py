@@ -246,6 +246,7 @@ class ApiEndpoint(models.Model):
             ('xml', 'XML'),
             ('csv', 'CSV'),
             ('zip', 'ZIP'),
+            ('redirect', 'HTTP Redirect'),
         ],
         tracking=True,
     )
@@ -433,7 +434,7 @@ class ApiEndpoint(models.Model):
         for rec in self:
             url = False
             if rec.comm_method == 'http' and rec.role == 'passive' and rec.location:
-                url = f'{base_url}/api-endpoint/v1/{rec.location}'
+                url = f'{base_url}/api-v1/{rec.location}'
                 if rec.authorization:
                     url += f'?Authorization={rec.authorization}'
             rec.url = url
@@ -613,7 +614,7 @@ class ApiEndpoint(models.Model):
 
 
     def assert_obj_type(self, obj, fmt):
-        if fmt == 'json':
+        if fmt in ['json', 'redirect']:
             assert isinstance(obj, (list, dict)), str(type(obj))
         elif fmt == 'xml':
             assert isinstance(obj, (etree._Element)), str(type(obj)) # the wrapped module does not have attr ._Element
@@ -627,7 +628,7 @@ class ApiEndpoint(models.Model):
 
     def bytes_to_obj(self, bytesdata, fmt):
         self.ensure_one()
-        if fmt == 'json':
+        if fmt in ['json', 'redirect']:
             obj = json.loads(bytesdata, object_hook=json_decoder)
         elif fmt == 'xml':
             obj = lxml.etree.fromstring(bytesdata)
@@ -645,7 +646,7 @@ class ApiEndpoint(models.Model):
 
     def obj_to_bytes(self, obj, fmt):
         self.ensure_one()
-        if fmt == 'json':
+        if fmt in ['json', 'redirect']:
             bytesdata = json.dumps(obj, sort_keys=True, indent=4, default=json_encoder).encode('utf-8')
         elif fmt == 'xml':
             bytesdata = lxml.etree.tostring(obj, pretty_print=True, xml_declaration=True, encoding='utf-8')

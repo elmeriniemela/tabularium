@@ -472,7 +472,7 @@ for (timestamp, price) in obj[0]['Data']:
     </record>
     <record id="investment_portfolio.import_asset_prices" model="api.endpoint">
         <field name="name">Import asset prices from another system</field>
-        <field name="location">https://odoo.eniemela.fi/api-endpoint/v1/asset/prices</field>
+        <field name="location">https://odoo.eniemela.fi/api-v1/asset/prices</field>
         <field name="usage_field_id" ref="investment_portfolio.field_investment_asset__endpoint_id"/>
         <field name="user_id" ref="investment_portfolio.user_asset_integration"/>
         <field name="direction">inbound</field>

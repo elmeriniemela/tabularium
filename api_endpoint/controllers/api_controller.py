@@ -33,7 +33,7 @@ class IrHttp(models.AbstractModel):
 
 class ApiController(http.Controller):
 
-    @http.route('/api-endpoint/v1/<wildcard:location>', type='http', auth="public", csrf=False)
+    @http.route('/api-v1/<wildcard:location>', type='http', auth="public", csrf=False)
     def api_endopoint(self, location, **variables):
         return self._process(location, **variables)
 
@@ -51,8 +51,8 @@ class ApiController(http.Controller):
         try:
             globals_dict = endpoint.produce(variables)
             endpoint.ensure_response(globals_dict)
-            obj = globals_dict['response']
-            bytesdata = endpoint.obj_to_bytes(obj, endpoint.response_format)
+            response = globals_dict['response']
+            bytesdata = endpoint.obj_to_bytes(response, endpoint.response_format)
         except Exception as exc:
             _logger.exception(exc)
             return self._raise_error(exc)
@@ -61,6 +61,8 @@ class ApiController(http.Controller):
 
         if endpoint.response_format == 'xml':
             content_type = 'text/xml'
+        elif endpoint.response_format == 'redirect':
+            return request.redirect(**response)
         else: # TODO zip, csv, bytes
             content_type = 'application/json'
 
