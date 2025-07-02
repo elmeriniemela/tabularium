@@ -102,4 +102,14 @@
         <field name="domain_force">[('asset_id.company_ids', 'in', company_ids)]</field>
     </record>
 
+    <record id="owner_rule_investment_asset_split" model="ir.rule">
+        <field name="name">investment_asset_split owner rule</field>
+        <field name="model_id" ref="model_investment_asset_split"/>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+        <field name="domain_force">[('asset_id.company_ids', 'in', company_ids)]</field>
+    </record>
+
 </odoo>
