@@ -480,6 +480,9 @@ class InvestmentPosition(models.Model):
 
         qty_precision = self.env['decimal.precision'].precision_get('Investment Asset quantity')
         for position in self:
+            if not isinstance(position.id, int):
+                continue
+
             valid = position.env['investment.asset.realized'].browse()
 
             existing = {(r.sell_batch_id, r.buy_batch_id): r for r in position.realized_ids}
@@ -569,7 +572,7 @@ class InvestmentPosition(models.Model):
 
     def _compute_cost_basis(self):
         for record in self:
-            simulated = record.env['investment.position.transaction'].search([('position_id', '=', record.id), ('usage', '=', 'realized')])
+            simulated = record.env['investment.position.transaction'].search([('position_id', 'in', record.ids), ('usage', '=', 'realized')])
             if simulated.quantity > 0: # Short cover
                 search, mapped =  'buy_batch_id', 'sell'
             else:
