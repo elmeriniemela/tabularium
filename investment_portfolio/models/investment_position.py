@@ -188,6 +188,7 @@ class InvestmentPosition(models.Model):
             record.position_currency = record.last_price * record.quantity
 
 
+
     def recompute_value(self):
         assets = self.mapped('asset_id')
         assets._compute_daily_prices()
@@ -477,28 +478,33 @@ class InvestmentPosition(models.Model):
             existing = {(r.sell_batch_id, r.buy_batch_id): r for r in position.realized_ids}
             transactions = position.transaction_ids.sorted(key=lambda s: s.time)
             sells = transactions.filtered(lambda t: t.ttype == 'sell')
-            sell_vals = {
-                'description': 'Simulated Realization',
-                'quantity': position.quantity,
-                'payment': position.quantity * position.last_price_own_currency,
-                'exchange_rate': position.last_price,
-                'usage': 'realized',
-                'position_id': position.id,
-                'time': fields.Datetime.now(),
-            }
-            simulated = sells.search([('position_id', '=', position.id), ('usage', '=', 'realized')])
+            buys = transactions.filtered(lambda t: t.ttype == 'buy')
+            simulated = transactions.search([('position_id', '=', position.id), ('usage', '=', 'realized')])
             assert len(simulated) <= 1
 
             if position.quantity:
+                simulated_vals = {
+                    'description': 'Simulated Realization',
+                    'quantity': position.quantity * -1,
+                    'payment': abs(position.quantity * position.last_price_own_currency),
+                    'exchange_rate': position.last_price,
+                    'usage': 'realized',
+                    'position_id': position.id,
+                    'time': fields.Datetime.now(),
+                }
                 if simulated:
-                    simulated.write(sell_vals)
+                    simulated.write(simulated_vals)
                 else:
-                    simulated = simulated.create(sell_vals)
-                sells += simulated
+                    simulated = simulated.create(simulated_vals)
+
+
+                if position.quantity > 0:
+                    sells += simulated
+                else:
+                    buys += simulated
             else:
                 simulated.unlink()
 
-            buys = transactions.filtered(lambda t: t.ttype == 'buy')
             if buys and sells:
                 for (sell, buy, quantity) in TxJoin(buys, sells, qty_precision):
                     key = (sell, buy)

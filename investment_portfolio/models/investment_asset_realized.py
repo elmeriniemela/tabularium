@@ -46,7 +46,7 @@ class InvestmentAssetRealized(models.Model):
 
     @api.depends('sell_batch_id.usage')
     def _compute_simulated(self):
-        for r in self: r.simulated = r.sell_batch_id.usage == 'realized'
+        for r in self: r.simulated = any(u == 'realized' for u in [r.sell_batch_id.usage, r.buy_batch_id.usage])
 
     def _compute_profit(self):
         for record in self:
