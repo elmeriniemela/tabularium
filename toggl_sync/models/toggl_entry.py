@@ -27,8 +27,6 @@ class TogglTask(models.Model):
     sale_line_name = fields.Char(readonly=True, tracking=True)
     sale_line_id = fields.Integer(readonly=True, tracking=True)
 
-    company_id = fields.Many2one(comodel_name='res.company', required=True, default=lambda self: self.env.company, tracking=True)
-
     entry_ids = fields.One2many(
         string="Entries",
         comodel_name='toggl.entry',
@@ -44,7 +42,7 @@ class TogglTask(models.Model):
     )
 
     _sql_constraints = [
-        ('task_id_uniq', 'unique(task_id, company_id)', 'The task_id must be unique within a company!'),
+        ('task_id_uniq', 'unique(task_id)', 'The task_id must be unique!'),
     ]
 
     @api.depends('entry_ids', 'entry_ids.date_start')
@@ -121,8 +119,7 @@ class TogglEntry(models.Model):
         store=True,
         currency_field='company_currency_id')
     price_initialized = fields.Boolean()
-    company_id = fields.Many2one(comodel_name='res.company', required=True, default=lambda self: self.env.company, tracking=True)
-    company_currency_id = fields.Many2one(related='company_id.currency_id', string="Company Currency")
+    company_currency_id = fields.Many2one(related='create_uid.company_id.currency_id', string="Company Currency")
 
     date_start = fields.Datetime(required=True, readonly=True)
 
@@ -140,7 +137,7 @@ class TogglEntry(models.Model):
         compute='_compute_toggl_fields',
         store=True,
         readonly=True,
-        check_company=True,
+        ondelete='restrict',
     )
 
     project_name = fields.Char(related='task_id.project_name')
@@ -150,7 +147,6 @@ class TogglEntry(models.Model):
         compute='_compute_toggl_fields',
         store=True,
         readonly=True,
-        check_company=True,
         ondelete='cascade',
     )
 
@@ -326,11 +322,10 @@ class TogglEntry(models.Model):
                 raise UserError(_("A timesheet can't be linked to multiple tasks: %s") % record.name)
             if ids:
                 [task_id] = ids
-                record.task_id = Task.search([('task_id', '=', task_id),('company_id', '=', record.company_id.id)], limit=1) \
+                record.task_id = Task.search([('task_id', '=', task_id)], limit=1) \
                     or Task.create({
                         'name': record.name,
                         'task_id': task_id,
-                        'company_id': record.company_id.id,
                     })
             else:
                 record.task_id = False
