@@ -192,6 +192,7 @@
                 <field name="name" string="Name/Tags" filter_domain="['|', ('name', 'ilike', self), ('tag_ids', 'ilike', self)]"/>
                 <field name="category_id"/>
                 <field name="portfolio_id"/>
+                <field name="asset_id"/>
                 <separator/>
                 <filter string="Long" name="long" domain="[('quantity', '&gt;', 0.0)]"/>
                 <filter string="Short" name="short" domain="[('quantity', '&lt;', 0.0)]"/>

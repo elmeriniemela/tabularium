@@ -115,6 +115,20 @@ class InvestmentAsset(models.Model):
         ondelete='restrict',
     )
 
+    position_count = fields.Integer(compute='_compute_position_count')
+
+    def _compute_position_count(self):
+        res = self.env['investment.position'].sudo().read_group(
+            domain=[('asset_id', 'in', self.ids)],
+            fields=['asset_id'],
+            groupby=['asset_id'],
+            lazy=False,
+        )
+        counts = {(r['asset_id'][0]): r['__count'] for r in res}
+        for record in self:
+            record.position_count = counts.get(record.id, 0)
+
+
     @api.onchange('expected_yearly_appreciation')
     def invalidate_predicted_prices(self):
         self.env['investment.asset.price'].search([

@@ -22,6 +22,7 @@
                 <field name="exchange_id" optional="hide"/>
                 <field name="endpoint_id" optional="hide"/>
                 <field name="company_ids" widget="many2many_tags" optional="hide"/>
+                <field name="position_count" optional="show"/>
                 <field name="expected_yearly_appreciation" widget="percentage" optional="hide"/>
             </list>
         </field>
@@ -35,10 +36,14 @@
                 <header>
                     <button name="run_integration" type="object" string="Run Integration" icon="fa-cogs" invisible="not endpoint_id"/>
                     <button name="action_compute_daily_prices" type="object" string="Re-compute prices" icon="fa-cogs"/>
-                    <button name="%(action_prices)d" string="Prices" type="action" context="{'search_default_asset_id': id, 'search_default_realized': 1, 'search_default_group_time': 1}" class="oe_stat_button" icon="fa-usd">
-                    </button>
+                    <button name="%(action_prices)d" string="Prices" type="action" context="{'search_default_asset_id': id, 'search_default_realized': 1, 'search_default_group_time': 1}" class="oe_stat_button" icon="fa-usd"/>
                 </header>
                 <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" type="action" name="%(action_all_positions)d" context="{'default_asset_id': id, 'search_default_asset_id': id}" icon="fa-cogs">
+                            <field string="Positions" name="position_count" widget="statinfo" options="{'label': 'Positions'}"/>
+                        </button>
+                    </div>
                     <div class="oe_title">
                         <h1>
                             <field name="ticker"/>
