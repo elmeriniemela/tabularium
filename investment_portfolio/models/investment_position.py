@@ -125,6 +125,7 @@ class InvestmentPosition(models.Model):
     investment = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id')
     max_investment = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id')
     cost_basis = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', help="Average price across every purchase.")
+    cost_basis_currency = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='currency_id', help="Average price across every purchase.")
     last_price_own_currency = fields.Monetary(string="Last Price (own currency)", compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', aggregator=None)
     drawdown_price_own_currency = fields.Monetary(string="Drawdown Price (own currency)", compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', aggregator=None)
 
@@ -187,7 +188,11 @@ class InvestmentPosition(models.Model):
             record.update(record._get_position(record.last_price_own_currency, record.transaction_ids))
             record.position_currency = record.last_price * record.quantity
 
+        protected = [f for f in self._fields.values() if f.compute == '_compute_position_aggregate']
+        with self.env.protecting(protected, self): # do not allow depends recursion, as these create only simulated transactions.
+            self.update_realized_fifo()
 
+        self._compute_cost_basis()
 
     def recompute_value(self):
         assets = self.mapped('asset_id')
@@ -473,7 +478,7 @@ class InvestmentPosition(models.Model):
 
         qty_precision = self.env['decimal.precision'].precision_get('Investment Asset quantity')
         for position in self:
-            valid = self.env['investment.asset.realized'].browse()
+            valid = position.env['investment.asset.realized'].browse()
 
             existing = {(r.sell_batch_id, r.buy_batch_id): r for r in position.realized_ids}
             transactions = position.transaction_ids.sorted(key=lambda s: s.time)
@@ -554,9 +559,23 @@ class InvestmentPosition(models.Model):
             'quantity': quantity,
             'profit': profit,
             'investment': investment,
-            'cost_basis': investment/quantity if quantity else 0,
             'profit_percent': profit/max_investment if max_investment else 0,
             'max_investment': max_investment,
             'plausible_drawdown_position': plausible_drawdown_position,
             'drawdown_price_own_currency': drawdown_price_own_currency,
         }
+
+    def _compute_cost_basis(self):
+        for record in self:
+            simulated = record.env['investment.position.transaction'].search([('position_id', '=', record.id), ('usage', '=', 'realized')])
+            if simulated.quantity > 0: # Short cover
+                search, mapped =  'buy_batch_id', 'sell'
+            else:
+                search, mapped =  'sell_batch_id', 'buy'
+
+            realized = record.env['investment.asset.realized'].search([
+                (search, '=', simulated.id),
+            ])
+
+            record.cost_basis_currency = sum(realized.mapped(f'{mapped}_payment_currency')) / record.quantity if record.quantity else 0 # buy_payment_currency or sell_payment_currency
+            record.cost_basis = sum(realized.mapped(f'{mapped}_payment')) / record.quantity if record.quantity else 0 # buy_payment or sell_payment

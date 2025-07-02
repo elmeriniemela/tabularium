@@ -390,7 +390,6 @@ msgstr "Kustannus"
 
 #. module: investment_portfolio
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__cost_basis
-#: model:ir.model.fields,field_description:investment_portfolio.field_investment_timeseries__cost_basis
 msgid "Cost Basis"
 msgstr "Keskihinta"
 

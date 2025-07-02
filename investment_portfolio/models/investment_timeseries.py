@@ -18,8 +18,6 @@ class InvestmentTimeseries(models.Model):
 
     position = fields.Monetary(compute='_compute_timeseries_aggregate', store=True, currency_field='company_currency_id')
     quantity = fields.Float(compute='_compute_timeseries_aggregate', store=True, digits='Investment Asset quantity')
-    cost_basis = fields.Monetary(compute='_compute_timeseries_aggregate', store=True, currency_field='company_currency_id')
-
 
     last_price_own_currency = fields.Monetary(compute='_compute_timeseries_aggregate', store=True, currency_field='company_currency_id')
     profit = fields.Monetary(compute='_compute_timeseries_aggregate', store=True, currency_field='company_currency_id', aggregator='sum')

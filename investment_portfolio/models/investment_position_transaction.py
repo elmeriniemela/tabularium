@@ -45,9 +45,9 @@ class InvestmentPositionTransaction(models.Model):
     company_id = fields.Many2one(related='position_id.company_id')
 
     payment = fields.Monetary(required=True, currency_field='company_currency_id', tracking=True)
-    currency_payment = fields.Monetary(
-        compute='_compute_currency_payment',
-        inverse='_inverse_currency_payment',
+    payment_currency = fields.Monetary(
+        compute='_compute_payment_currency',
+        inverse='_inverse_payment_currency',
         currency_field='currency_id',
     )
 
@@ -225,19 +225,19 @@ class InvestmentPositionTransaction(models.Model):
 
 
     @api.depends('payment')
-    def _compute_currency_payment(self):
+    def _compute_payment_currency(self):
         for tx in self:
             if tx.currency_id != tx.company_currency_id:
-                tx.currency_payment = tx.payment * tx.currency_rate_id.company_rate
+                tx.payment_currency = tx.payment * tx.currency_rate_id.company_rate
             else:
-                tx.currency_payment = tx.payment
+                tx.payment_currency = tx.payment
 
-    def _inverse_currency_payment(self):
+    def _inverse_payment_currency(self):
         for tx in self:
             if tx.currency_id != tx.company_currency_id:
-                tx.payment = tx.currency_payment * tx.currency_rate_id.inverse_company_rate
+                tx.payment = tx.payment_currency * tx.currency_rate_id.inverse_company_rate
             else:
-                tx.payment = tx.currency_payment
+                tx.payment = tx.payment_currency
 
 
     @api.depends('payment', 'quantity')

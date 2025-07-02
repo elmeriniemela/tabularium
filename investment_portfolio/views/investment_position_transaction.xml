@@ -48,7 +48,7 @@
                             <field name="time"/>
                             <field name="quantity"/>
                             <field name="payment"/>
-                            <field name="currency_payment" invisible="not currency_rate_id"/>
+                            <field name="payment_currency" invisible="not currency_rate_id"/>
                         </group>
                         <group>
                             <field name="exchange_rate"/>

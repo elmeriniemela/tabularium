@@ -6,6 +6,7 @@
             <list decoration-info="simulated">
                 <field name="position_id" optional="hide"/>
                 <field name="currency_id" optional="hide"/>
+                <field name="company_currency_id" optional="hide"/>
                 <field name="quantity" sum="Total Volume"/>
                 <field name="profit" sum="Total Profit"/>
                 <field name="sell_batch_id" optional="hide"/>
@@ -43,6 +44,7 @@
                             <field name="buy_date"/>
                             <field name="buy_price"/>
                             <field name="buy_fee"/>
+                            <field name="company_currency_id" invisible="1"/>
                         </group>
                     </group>
                 </sheet>
