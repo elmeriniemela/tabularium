@@ -51,7 +51,7 @@ class InvestmentAssetRealized(models.Model):
 
     profit = fields.Monetary(string='Profit/Loss', compute='_compute_profit', store=True, currency_field='company_currency_id')
 
-    @api.depends('sell_batch_id.usage')
+    @api.depends('sell_batch_id.usage', 'buy_batch_id.usage')
     def _compute_simulated(self):
         for r in self: r.simulated = any(u == 'realized' for u in [r.sell_batch_id.usage, r.buy_batch_id.usage])
 

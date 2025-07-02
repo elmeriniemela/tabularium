@@ -79,6 +79,17 @@
         <field name="domain_force">[('company_ids', 'in', company_ids)]</field>
     </record>
 
+    <record id="viewer_rule_investment_asset" model="ir.rule">
+        <field name="name">investment_asset viewer rule</field>
+        <field name="model_id" ref="model_investment_asset"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+        <field name="domain_force">[('liquid', '=', True)]</field>
+        <field name="groups" eval="[Command.link(ref('group_investment_user'))]"/>
+    </record>
+
 
 
     <record id="owner_rule_investment_asset_price" model="ir.rule">

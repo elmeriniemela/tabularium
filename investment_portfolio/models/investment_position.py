@@ -54,7 +54,7 @@ class InvestmentPosition(models.Model):
 
     asset_id = fields.Many2one(
         comodel_name='investment.asset', string='Ticker',
-        auto_join=True, index=True, ondelete='cascade', required=True)
+        auto_join=True, index=True, ondelete='restrict', required=True)
 
     name = fields.Char(required=True)
 
@@ -120,6 +120,7 @@ class InvestmentPosition(models.Model):
 
     quantity = fields.Float(compute='_compute_position_aggregate', inverse='_inverse_quantity', readonly=False, store=True, digits='Investment Asset quantity', aggregator=None)
     position = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', help="Current value of this position.")
+    position_abs = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', help="Current value of this position.")
     position_currency = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='currency_id', help="Current value of this position in the underlying currency.")
     plausible_drawdown_position = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', help="Value of this position after a plausible drawdown.")
     investment = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id')
@@ -187,6 +188,7 @@ class InvestmentPosition(models.Model):
             )
             record.update(record._get_position(record.last_price_own_currency, record.transaction_ids))
             record.position_currency = record.last_price * record.quantity
+            record.position_abs = abs(record.position)
 
         protected = [f for f in self._fields.values() if f.compute == '_compute_position_aggregate']
         with self.env.protecting(protected, self): # do not allow depends recursion, as these create only simulated transactions.

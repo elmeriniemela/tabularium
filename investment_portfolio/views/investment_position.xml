@@ -64,7 +64,7 @@
         <field name="priority" eval="1"/>
         <field name="arch" type="xml">
             <graph type="pie">
-                <field name="position" type="measure"/>
+                <field name="position_abs" type="measure"/>
             </graph>
         </field>
     </record>
@@ -269,7 +269,7 @@
         <field name="name">Liquid Allocations</field>
         <field name="res_model">investment.position</field>
         <field name="view_mode">graph,list,form</field>
-        <field name="context">{'search_default_group_name': 1, 'search_default_long': 1, 'search_default_liquid': 1,}</field>
+        <field name="context">{'search_default_group_name': 1, 'search_default_liquid': 1,}</field>
         <field
             name="view_ids"
             eval="[
