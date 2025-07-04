@@ -2,13 +2,13 @@
 <templates xml:space="preserve">
 
     <t t-name="investment_portfolio.PositionDashboard">
-        <div t-att-class="className" t-ref="root">
-            <Layout display="this.display" className="'o_dashboard h-100'">
+        <div t-ref="root" style="overflow: auto; height: 100%;">
+            <!-- <Layout display="this.display" className="'o_dashboard h-100'">
                 <t t-set-slot="layout-buttons">
                     <button type="button" class="btn btn-primary" t-on-click="this.refresh">
                         <i class="fa fa-refresh" aria-label="Refresh" title="Refresh"/>
                     </button>
-                </t>
+                </t> -->
 
                 <div class="m-2">
                     <div class="row gx-2 gy-2">
@@ -184,7 +184,7 @@
                         </div>
                     </div>
                 </div>
-            </Layout>
+            <!-- </Layout> -->
         </div>
     </t>
 

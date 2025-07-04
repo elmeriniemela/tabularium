@@ -12,7 +12,7 @@ import { formatMonetary } from "@web/views/fields/formatters";
 class PositionDashboard extends Component {
     static template = "investment_portfolio.PositionDashboard";
     static components = { Layout };
-    // static props = ["*"];
+    static props = ["*"];
 
     setup() {
         this.action = useService("action");
