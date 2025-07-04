@@ -33,43 +33,41 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-sm-6 col-md-4 col-lg-3">
-                        <div class="card">
-                            <div class="card-body">
-                                <h5 class="card-title">Top Gainer: <span t-esc="state.gainer.name"/></h5>
-
-                                <div class="card-text m-2">
-                                    <div class="row o_kpi_row">
-                                        <div class="col-4">
-                                            <label>Position</label>
+                    <t t-foreach="state.positions" t-as="position" t-key="position.id">
+                        <div class="col-sm-6 col-md-4 col-lg-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title"><span t-esc="position.name"/></h5>
+                                    <div class="card-text m-2">
+                                        <div class="row o_kpi_row">
+                                            <div class="col-4">
+                                                <label>Position</label>
+                                            </div>
+                                            <div class="col-8 text-end">
+                                                <span t-esc="position.position"/>
+                                            </div>
                                         </div>
-                                        <div class="col-8 text-end">
-                                            <span t-esc="state.gainer.position"/>
+                                        <div class="row o_kpi_row">
+                                            <div class="col-4">
+                                                <label>Profit</label>
+                                            </div>
+                                            <div class="col-8 text-end">
+                                                <span t-esc="position.profit" t-att-class="position.profitClass"/>
+                                            </div>
+                                        </div>
+                                        <div class="row o_kpi_row">
+                                            <div class="col-4">
+                                                <label>1 day</label>
+                                            </div>
+                                            <div class="col-8 text-end">
+                                                <span t-esc="position.daily_price" t-att-class="position.daily_priceClass"/>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div class="row o_kpi_row">
-                                        <div class="col-4">
-                                            <label>Profit</label>
-                                        </div>
-                                        <div class="col-8 text-end">
-                                            <span t-esc="state.gainer.profit" t-att-class="state.gainer.profitClass"/>
-                                        </div>
-                                    </div>
-                                    <div class="row o_kpi_row">
-                                        <div class="col-4">
-                                            <label>1 day</label>
-                                        </div>
-                                        <div class="col-8 text-end">
-                                            <span t-esc="state.gainer.daily_price" t-att-class="state.gainer.daily_priceClass"/>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="o_dashboard_graph">
-
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </t>
                 </div>
             </div>
         </div>

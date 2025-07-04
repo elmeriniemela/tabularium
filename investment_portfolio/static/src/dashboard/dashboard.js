@@ -25,9 +25,7 @@ class PositionDashboard extends Component {
                     data: [],
                 }
             },
-            gainer: {
-
-            }
+            positions: [],
         });
         this.orm = useService("orm");
 
@@ -123,26 +121,34 @@ class PositionDashboard extends Component {
     async refreshPositions() {
         var results = await this.orm.call("investment.position", "web_search_read", [], {
             domain: [["liquid", "=", true], ["position", "!=", 0]],
-            order: "daily_price DESC",
+            order: "daily_price DESC, position DESC",
             specification: {
+                id: {},
                 name: {},
                 position: {},
                 profit: {},
                 daily_price: {},
             }
         });
-        this.state.gainer.position = formatMonetary(results.records[0].position, {
-            currencyId: 1,
-            digits: 2,
-        });
-        this.state.gainer.profit = formatMonetary(results.records[0].profit, {
-            currencyId: 1,
-            digits: 2,
-        });
-        this.state.gainer.profitClass = results.records[0].profit >= 0 ? "text-success" : "text-danger";
-        this.state.gainer.name = results.records[0].name;
-        this.state.gainer.daily_price = formatPercentage(results.records[0].daily_price, 2);
-        this.state.gainer.daily_priceClass = results.records[0].daily_price >= 0 ? "text-success" : "text-danger";
+        let positons = [];
+        for (const record of results.records) {
+            positons.push({
+                id: record.id,
+                name: record.name,
+                position: formatMonetary(record.position, {
+                    currencyId: 1,
+                    digits: 2,
+                }),
+                profit: formatMonetary(record.profit, {
+                    currencyId: 1,
+                    digits: 2,
+                }),
+                daily_price: formatPercentage(record.daily_price, 2),
+                profitClass: record.profit >= 0 ? "text-success" : "text-danger",
+                daily_priceClass: record.daily_price >= 0 ? "text-success" : "text-danger",
+            });
+        }
+        this.state.positions = positons;
 
     }
 }
