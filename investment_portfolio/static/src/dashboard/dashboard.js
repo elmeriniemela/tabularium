@@ -31,7 +31,11 @@ class PositionDashboard extends Component {
 
         this.chart = null;
         this.canvasRef = useRef("canvas");
-        onWillStart(async () => await loadBundle("web.chartjs_lib"));
+        onWillStart(async () => {
+            await loadBundle("web.chartjs_lib");
+            await this.refresh();
+            this.renderChart();
+        });
         useEffect(() => {
             this.renderChart();
             return () => {
@@ -40,8 +44,6 @@ class PositionDashboard extends Component {
                 }
             };
         });
-        this.refresh();
-
     }
 
     renderChart() {
