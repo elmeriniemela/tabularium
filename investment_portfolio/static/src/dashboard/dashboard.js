@@ -16,10 +16,6 @@ class PositionDashboard extends Component {
 
     setup() {
         this.action = useService("action");
-        this.display = {
-            controlPanel: {},
-            searchPanel: false,
-        };
         this.state = useState({
             liquid: {
                 position: 0.0,
