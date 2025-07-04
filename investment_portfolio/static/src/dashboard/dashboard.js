@@ -7,7 +7,7 @@ import { Component, useState, onWillStart, useEffect, useRef } from "@odoo/owl";
 import { Layout } from "@web/search/layout";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
-import { formatMonetary } from "@web/views/fields/formatters";
+import { formatMonetary, formatPercentage } from "@web/views/fields/formatters";
 
 class PositionDashboard extends Component {
     static template = "investment_portfolio.PositionDashboard";
@@ -82,26 +82,23 @@ class PositionDashboard extends Component {
     }
 
     async refresh() {
-        // this.action.doAction("investment_portfolio.action_current_positions");
+        this.refreshPortfolios();
+        this.refreshPositions();
+
+    }
+    async refreshPortfolios() {
         var results = await this.orm.call("investment.position", "web_read_group", [], {
             domain: [["liquid", "=", true], ["position", "!=", 0]],
             fields: ["position:sum", "profit:sum", "portfolio_id",],
             groupby: ["portfolio_id"],
-            lazy: false,
+            lazy: true,
             limit: 10,
             orderby: "position:sum DESC",
         });
-
         let labels = [];
         let data = [];
         let position = 0.0;
         let profit = 0.0;
-        let gainer = {
-            position: 0.0,
-            profit: 0.0,
-            daily_price: 0.0,
-            daily_price: 0.0,
-        };
         for (const group of results.groups) {
             labels.push(group.portfolio_id[1]);
             data.push(group.position);
@@ -119,6 +116,32 @@ class PositionDashboard extends Component {
         this.state.liquid.profitClass = profit >= 0 ? "text-success" : "text-danger";
         this.state.liquid.chart.labels = labels;
         this.state.liquid.chart.data = data;
+    }
+
+    async refreshPositions() {
+        var results = await this.orm.call("investment.position", "web_search_read", [], {
+            domain: [["liquid", "=", true], ["position", "!=", 0]],
+            order: "daily_price DESC",
+            specification: {
+                name: {},
+                position: {},
+                profit: {},
+                daily_price: {},
+            }
+        });
+        this.state.gainer.position = formatMonetary(results.records[0].position, {
+            currencyId: 1,
+            digits: 2,
+        });
+        this.state.gainer.profit = formatMonetary(results.records[0].profit, {
+            currencyId: 1,
+            digits: 2,
+        });
+        this.state.gainer.profitClass = results.records[0].profit >= 0 ? "text-success" : "text-danger";
+        this.state.gainer.name = results.records[0].name;
+        this.state.gainer.daily_price = formatPercentage(results.records[0].daily_price, 2);
+        this.state.gainer.daily_priceClass = results.records[0].daily_price >= 0 ? "text-success" : "text-danger";
+
     }
 }
 
