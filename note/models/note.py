@@ -63,12 +63,6 @@ class Note(models.Model):
             text = html2plaintext(note.memo) if note.memo else ''
             note.name = text.strip().replace('*', '').split("\n")[0]
 
-    def _compute_stage_id(self):
-        first = self.env['note.stage'].search([], limit=1)
-        for note in self:
-            if not note.stage_id:
-                note.stage_id = note.stage_ids.sudo()[:1] or first
-
     def action_close(self):
         return self.write({'open': False, 'date_done': fields.date.today()})
 

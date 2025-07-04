@@ -13,11 +13,7 @@
         'security/note_security.xml',
         'security/ir.model.access.csv',
         'data/mail_activity_type_data.xml',
-        'data/note_data.xml',
         'views/note_views.xml',
-        ],
-    'demo': [
-        'data/note_demo.xml',
     ],
     'installable': True,
     'application': True,
