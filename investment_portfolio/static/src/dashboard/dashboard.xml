@@ -11,18 +11,18 @@
                                 <h5 class="card-title">Liquid Portfolios</h5>
                                 <div class="card-text m-2">
                                     <div class="row o_kpi_row">
-                                        <div class="col-4">
+                                        <div class="col-5">
                                             <label>Total Position</label>
                                         </div>
-                                        <div class="col-8 text-end">
+                                        <div class="col-7 text-end">
                                             <span t-esc="state.liquid.position"/>
                                         </div>
                                     </div>
                                     <div class="row o_kpi_row">
-                                        <div class="col-4">
+                                        <div class="col-5">
                                             <label>Total Profit</label>
                                         </div>
-                                        <div class="col-8 text-end">
+                                        <div class="col-7 text-end">
                                             <span t-esc="state.liquid.profit" t-att-class="state.liquid.profitClass"/>
                                         </div>
                                     </div>
@@ -40,26 +40,26 @@
                                     <h5 class="card-title"><span t-esc="position.name"/></h5>
                                     <div class="card-text m-2">
                                         <div class="row o_kpi_row">
-                                            <div class="col-4">
+                                            <div class="col-5">
                                                 <label>Position</label>
                                             </div>
-                                            <div class="col-8 text-end">
+                                            <div class="col-7 text-end">
                                                 <span t-esc="position.position"/>
                                             </div>
                                         </div>
                                         <div class="row o_kpi_row">
-                                            <div class="col-4">
+                                            <div class="col-5">
                                                 <label>Profit</label>
                                             </div>
-                                            <div class="col-8 text-end">
+                                            <div class="col-7 text-end">
                                                 <span t-esc="position.profit" t-att-class="position.profitClass"/>
                                             </div>
                                         </div>
                                         <div class="row o_kpi_row">
-                                            <div class="col-4">
+                                            <div class="col-5">
                                                 <label>1 day</label>
                                             </div>
-                                            <div class="col-8 text-end">
+                                            <div class="col-7 text-end">
                                                 <span t-esc="position.daily_price" t-att-class="position.daily_priceClass"/>
                                             </div>
                                         </div>
