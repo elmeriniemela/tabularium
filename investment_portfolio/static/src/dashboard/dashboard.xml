@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
+
+    <t t-name="investment_portfolio.PieChart">
+        <div class="o_dashboard_graph">
+            <canvas t-ref="canvas"/>
+        </div>
+    </t>
+
     <t t-name="investment_portfolio.PositionDashboard">
         <div t-ref="root" style="overflow: auto; height: 100%;">
             <div class="m-2">
@@ -27,9 +34,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="o_dashboard_graph">
-                                    <canvas t-ref="canvas"/>
-                                </div>
+                                <PieChart labels="state.liquid.chart.labels" data="state.liquid.chart.data" title="state.liquid.chart.title" />
                             </div>
                         </div>
                     </div>
@@ -37,7 +42,9 @@
                         <div class="col-sm-6 col-md-4 col-lg-3">
                             <div class="card">
                                 <div class="card-body">
-                                    <h5 class="card-title"><span t-esc="position.name"/></h5>
+                                    <h5 class="card-title">
+                                        <span t-esc="position.name"/>
+                                    </h5>
                                     <div class="card-text m-2">
                                         <div class="row o_kpi_row">
                                             <div class="col-5">

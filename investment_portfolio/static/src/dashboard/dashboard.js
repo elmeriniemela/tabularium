@@ -3,15 +3,62 @@
 // https://www.odoo.com/documentation/18.0/developer/tutorials/discover_js_framework/02_build_a_dashboard.html
 
 import { loadBundle } from "@web/core/assets";
-import { Component, useState, onWillStart, useEffect, useRef } from "@odoo/owl";
+import { Component, useState, onWillStart, onWillUnmount, useEffect, onRendered, useRef } from "@odoo/owl";
 import { Layout } from "@web/search/layout";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { formatMonetary, formatPercentage } from "@web/views/fields/formatters";
 
+class PieChart extends Component {
+    static template = "investment_portfolio.PieChart";
+    static props = ["labels", "data", "title"];
+
+    setup() {
+        this.chart = null;
+        this.canvasRef = useRef("canvas");
+        onWillStart(async () => {
+            await loadBundle("web.chartjs_lib");
+        });
+        onWillUnmount(() => {
+            if (this.chart) {
+                this.chart.destroy();
+            }
+        });
+        useEffect(() => {
+            if (this.chart) {
+                this.chart.destroy();
+            }
+            if (this.canvasRef.el) {
+                this.chart = new Chart(this.canvasRef.el, {
+                    type: 'pie',
+                    data: {
+                        labels: this.props.labels,
+                        datasets: [{
+                            data: this.props.data,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            title: {
+                                display: true,
+                                text: this.props.title
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    }
+}
+
 class PositionDashboard extends Component {
     static template = "investment_portfolio.PositionDashboard";
-    static components = { Layout };
+    static components = { PieChart };
     static props = ["*"];
 
     setup() {
@@ -23,62 +70,13 @@ class PositionDashboard extends Component {
                 chart: {
                     labels: [],
                     data: [],
+                    title: "Positions",
                 }
             },
             positions: [],
         });
         this.orm = useService("orm");
-
-        this.chart = null;
-        this.canvasRef = useRef("canvas");
-        onWillStart(async () => {
-            await loadBundle("web.chartjs_lib");
-            await this.refresh();
-            this.renderChart();
-        });
-        useEffect(() => {
-            this.renderChart();
-            return () => {
-                if (this.chart) {
-                    this.chart.destroy();
-                }
-            };
-        });
-    }
-
-    renderChart() {
-        if (this.chart) {
-            this.chart.destroy();
-        }
-        let config;
-        config = this.getLineChartConfig();
-        this.chart = new Chart(this.canvasRef.el, config);
-    }
-
-    getLineChartConfig() {
-        return {
-            type: 'pie',
-            data: {
-                labels: this.state.liquid.chart.labels,
-                datasets: [{
-                    // label: '',
-                    data: this.state.liquid.chart.data,
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                legend: {
-                    position: 'top',
-                },
-                title: {
-                    display: true,
-                    text: 'Positions'
-                }
-                }
-            }
-        };
+        this.refresh();
     }
 
     async refresh() {
