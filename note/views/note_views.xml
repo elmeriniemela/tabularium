@@ -134,7 +134,7 @@
                 <header>
                     <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}" placeholder="Tags"/>
                     <field name="company_id" groups="base.group_multi_company"/>
-                    <field name="stage_id" widget="statusbar" options="{'clickable': '1'}"/>
+                    <field name="stage_id" widget="statusbar" options="{'clickable': '1', 'fold_field': 'fold'}"/>
                 </header>
                 <group>
                     <field name="name" widget="char"/>
