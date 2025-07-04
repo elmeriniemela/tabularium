@@ -5,21 +5,182 @@
         <div t-att-class="className" t-ref="root">
             <Layout display="this.display" className="'o_dashboard h-100'">
                 <t t-set-slot="layout-buttons">
-                    <button type="button" class="btn btn-primary" t-on-click="this.refresh" >
+                    <button type="button" class="btn btn-primary" t-on-click="this.refresh">
                         <i class="fa fa-refresh" aria-label="Refresh" title="Refresh"/>
                     </button>
                 </t>
 
-                <div class="card d-inline-block m-2">
-                    <div class="card-body">
-                        <h5 class="card-title">Liquid Position</h5>
-                        <p class="card-text">
-                        <span>Position: <t t-esc="state.liquid.position"/></span>
-                        <br/>
-                        <span>Profit: <span t-esc="state.liquid.profit" class="text-success"/></span>
-                        </p>
-                        <div class="o_dashboard_graph">
-                            <canvas t-ref="canvas"/>
+                <div class="m-2">
+                    <div class="row gx-2 gy-2">
+                        <div class="col-sm-6 col-md-4 col-lg-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Liquid Position</h5>
+                                    <p class="card-text">
+                                        <span>Position: <t t-esc="state.liquid.position"/>
+                                        </span>
+                                        <br/>
+                                        <span>Profit: <span t-esc="state.liquid.profit" class="text-success"/>
+                                        </span>
+                                    </p>
+                                    <div class="o_dashboard_graph">
+                                        <canvas t-ref="canvas"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-4 col-lg-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Liquid Position</h5>
+                                    <p class="card-text">
+                                        <span>Position: <t t-esc="state.liquid.position"/>
+                                        </span>
+                                        <br/>
+                                        <span>Profit: <span t-esc="state.liquid.profit" class="text-success"/>
+                                        </span>
+                                    </p>
+                                    <div class="o_dashboard_graph">
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-4 col-lg-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Liquid Position</h5>
+                                    <p class="card-text">
+                                        <span>Position: <t t-esc="state.liquid.position"/>
+                                        </span>
+                                        <br/>
+                                        <span>Profit: <span t-esc="state.liquid.profit" class="text-success"/>
+                                        </span>
+                                    </p>
+                                    <div class="o_dashboard_graph">
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-4 col-lg-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Liquid Position</h5>
+                                    <p class="card-text">
+                                        <span>Position: <t t-esc="state.liquid.position"/>
+                                        </span>
+                                        <br/>
+                                        <span>Profit: <span t-esc="state.liquid.profit" class="text-success"/>
+                                        </span>
+                                    </p>
+                                    <div class="o_dashboard_graph">
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-4 col-lg-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Liquid Position</h5>
+                                    <p class="card-text">
+                                        <span>Position: <t t-esc="state.liquid.position"/>
+                                        </span>
+                                        <br/>
+                                        <span>Profit: <span t-esc="state.liquid.profit" class="text-success"/>
+                                        </span>
+                                    </p>
+                                    <div class="o_dashboard_graph">
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-4 col-lg-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Liquid Position</h5>
+                                    <p class="card-text">
+                                        <span>Position: <t t-esc="state.liquid.position"/>
+                                        </span>
+                                        <br/>
+                                        <span>Profit: <span t-esc="state.liquid.profit" class="text-success"/>
+                                        </span>
+                                    </p>
+                                    <div class="o_dashboard_graph">
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-4 col-lg-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Liquid Position</h5>
+                                    <p class="card-text">
+                                        <span>Position: <t t-esc="state.liquid.position"/>
+                                        </span>
+                                        <br/>
+                                        <span>Profit: <span t-esc="state.liquid.profit" class="text-success"/>
+                                        </span>
+                                    </p>
+                                    <div class="o_dashboard_graph">
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-4 col-lg-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Liquid Position</h5>
+                                    <p class="card-text">
+                                        <span>Position: <t t-esc="state.liquid.position"/>
+                                        </span>
+                                        <br/>
+                                        <span>Profit: <span t-esc="state.liquid.profit" class="text-success"/>
+                                        </span>
+                                    </p>
+                                    <div class="o_dashboard_graph">
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-4 col-lg-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Liquid Position</h5>
+                                    <p class="card-text">
+                                        <span>Position: <t t-esc="state.liquid.position"/>
+                                        </span>
+                                        <br/>
+                                        <span>Profit: <span t-esc="state.liquid.profit" class="text-success"/>
+                                        </span>
+                                    </p>
+                                    <div class="o_dashboard_graph">
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-4 col-lg-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Liquid Position</h5>
+                                    <p class="card-text">
+                                        <span>Position: <t t-esc="state.liquid.position"/>
+                                        </span>
+                                        <br/>
+                                        <span>Profit: <span t-esc="state.liquid.profit" class="text-success"/>
+                                        </span>
+                                    </p>
+                                    <div class="o_dashboard_graph">
+
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
