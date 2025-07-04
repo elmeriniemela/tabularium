@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="investment_portfolio.PositionDashboard">
+        <div t-att-class="className" t-ref="root">
+            <Layout display="this.display" className="'o_dashboard h-100'">
+                <t t-set-slot="layout-buttons">
+                    <button type="button" class="btn btn-primary" t-on-click="this.refresh" >
+                        <i class="fa fa-refresh" aria-label="Refresh" title="Refresh"/>
+                    </button>
+                </t>
+
+                <div class="card d-inline-block m-2">
+                    <div class="card-body">
+                        <h5 class="card-title">my title</h5>
+                        <p class="card-text">
+                        hello layout: <t t-esc="state.value"/>
+                        </p>
+                        <div class="o_dashboard_graph" t-att-class="props.className" t-attf-class="o_graph_{{ props.graphType }}chart">
+                            <canvas t-ref="canvas"/>
+                        </div>
+                    </div>
+                </div>
+            </Layout>
+            hello dashboard
+        </div>
+    </t>
+
+</templates>

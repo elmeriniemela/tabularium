@@ -1,8 +1,9 @@
 <odoo>
 
-    <menuitem name="Investments" id="root_menu" web_icon="investment_portfolio,static/description/icon.png" sequence="1" action="action_current_positions">
+    <menuitem name="Investments" id="root_menu" web_icon="investment_portfolio,static/description/icon.png" sequence="1" action="action_position_dashboard">
 
         <menuitem name="Positions" id="menu_positions" sequence="10">
+            <menuitem id="menu_position_dashboard" action="action_position_dashboard" name="Dashboard" sequence="5"/>
             <menuitem id="menu_current_positions" action="action_current_positions" sequence="10"/>
             <menuitem id="menu_postion_moves" action="action_position_moves" sequence="20"/>
             <menuitem id="menu_liquid_allocations" action="action_liquid_allocations" sequence="30"/>
