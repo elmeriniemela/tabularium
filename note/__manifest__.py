@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Notes',
-    'version': '1.0',
+    'version': '1.1',
     'author': "Elmeri Niemelä",
     'category': 'Productivity/Notes',
     'summary': 'Organize your work with memos',

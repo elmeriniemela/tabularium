@@ -53,6 +53,12 @@ class Note(models.Model):
     tag_ids = fields.Many2many('note.tag', 'note_tags_rel', 'note_id', 'tag_id', string='Tags')
     # modifying property of ``mail.thread`` field
     message_partner_ids = fields.Many2many(compute_sudo=True)
+    displayed_image_id = fields.Many2one('ir.attachment', domain="[('res_model', '=', 'note.note'), ('res_id', '=', id), ('mimetype', 'ilike', 'image')]", string='Cover Image')
+    priority = fields.Selection([
+        ('0', 'Low'),
+        ('1', 'High'),
+    ], default='0', index=True, string="Priority", tracking=True)
+
 
     @api.depends('memo')
     def _compute_name(self):
