@@ -39,6 +39,7 @@ class InvestmentPosition(models.Model):
 
 
     daily_price = fields.Float(related='asset_id.daily_price', readonly=True)
+    daily_price_abs = fields.Float(related='asset_id.daily_price_abs', readonly=True)
     weekly_price = fields.Float(related='asset_id.weekly_price', readonly=True)
     monthly_price = fields.Float(related='asset_id.monthly_price', readonly=True)
     three_month_price = fields.Float(related='asset_id.three_month_price', readonly=True)

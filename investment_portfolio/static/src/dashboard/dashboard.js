@@ -147,7 +147,7 @@ class PositionDashboard extends Component {
     async refreshPositions() {
         var results = await this.orm.call("investment.position", "web_search_read", [], {
             domain: [["liquid", "=", true], ["position", "!=", 0]],
-            order: "daily_price DESC, position DESC",
+            order: "daily_price_abs DESC, position DESC",
             specification: {
                 id: {},
                 name: {},
