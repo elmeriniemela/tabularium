@@ -7,6 +7,7 @@ import { Component, useState, onWillStart, useEffect, useRef } from "@odoo/owl";
 import { Layout } from "@web/search/layout";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
+import { formatMonetary } from "@web/views/fields/formatters";
 
 class PositionDashboard extends Component {
     static template = "investment_portfolio.PositionDashboard";
@@ -19,7 +20,16 @@ class PositionDashboard extends Component {
             controlPanel: {},
             searchPanel: false,
         };
-        this.state = useState({ value: 0 });
+        this.state = useState({
+            liquid: {
+                position: 0.0,
+                profit: 0.0,
+                chart: {
+                    labels: [],
+                    data: [],
+                }
+            }
+        });
         this.orm = useService("orm");
 
         this.chart = null;
@@ -33,6 +43,7 @@ class PositionDashboard extends Component {
                 }
             };
         });
+        this.refresh();
 
     }
 
@@ -47,28 +58,61 @@ class PositionDashboard extends Component {
 
     getLineChartConfig() {
         return {
-            type: 'bar',
+            type: 'pie',
             data: {
-                labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+                labels: this.state.liquid.chart.labels,
                 datasets: [{
-                    label: '# of Votes',
-                    data: [12, 19, 3, 5, 2, 3],
+                    // label: '',
+                    data: this.state.liquid.chart.data,
                     borderWidth: 1
                 }]
             },
             options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
+                responsive: true,
+                plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: 'Positions'
+                }
                 }
             }
         };
     }
 
-    refresh() {
-        this.state.value++;
+    async refresh() {
         // this.action.doAction("investment_portfolio.action_current_positions");
+        var results = await this.orm.call("investment.position", "web_read_group", [], {
+            domain: [["liquid", "=", true], ["position", "!=", 0]],
+            fields: ["position:sum", "profit:sum", "portfolio_id",],
+            groupby: ["portfolio_id"],
+            lazy: true,
+            limit: 10,
+            orderby: "position:sum DESC",
+        });
+
+        let labels = [];
+        let data = [];
+        let position = 0.0;
+        let profit = 0.0;
+        for (const group of results.groups) {
+            labels.push(group.portfolio_id[1]);
+            data.push(group.position);
+            position += group.position;
+            profit += group.profit;
+        }
+        this.state.liquid.position = formatMonetary(position, {
+            currencyId: 1,
+            digits: 2,
+        });
+        this.state.liquid.profit = formatMonetary(profit, {
+            currencyId: 1,
+            digits: 2,
+        });
+        this.state.liquid.chart.labels = labels;
+        this.state.liquid.chart.data = data;
     }
 }
 
