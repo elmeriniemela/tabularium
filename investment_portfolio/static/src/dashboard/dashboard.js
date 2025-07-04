@@ -88,7 +88,7 @@ class PositionDashboard extends Component {
     }
     async refreshPortfolios() {
         var results = await this.orm.call("investment.position", "web_read_group", [], {
-            domain: [["liquid", "=", true], ["position", "!=", 0]],
+            domain: [["liquid", "=", true]],
             fields: ["position:sum", "profit:sum", "portfolio_id",],
             groupby: ["portfolio_id"],
             lazy: true,
@@ -100,9 +100,11 @@ class PositionDashboard extends Component {
         let position = 0.0;
         let profit = 0.0;
         for (const group of results.groups) {
-            labels.push(group.portfolio_id[1]);
-            data.push(group.position);
-            position += group.position;
+            if (group.position !== 0) {
+                labels.push(group.portfolio_id[1]);
+                data.push(group.position);
+                position += group.position;
+            }
             profit += group.profit;
         }
         this.state.liquid.position = formatMonetary(position, {

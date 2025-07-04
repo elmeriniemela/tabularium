@@ -12,7 +12,7 @@
                                 <div class="card-text m-2">
                                     <div class="row o_kpi_row">
                                         <div class="col-4">
-                                            <label>Position</label>
+                                            <label>Total Position</label>
                                         </div>
                                         <div class="col-8 text-end">
                                             <span t-esc="state.liquid.position"/>
@@ -20,7 +20,7 @@
                                     </div>
                                     <div class="row o_kpi_row">
                                         <div class="col-4">
-                                            <label>Profit</label>
+                                            <label>Total Profit</label>
                                         </div>
                                         <div class="col-8 text-end">
                                             <span t-esc="state.liquid.profit" t-att-class="state.liquid.profitClass"/>
