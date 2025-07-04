@@ -43,7 +43,7 @@ class PieChart extends Component {
                         responsive: true,
                         plugins: {
                             legend: {
-                                position: 'top',
+                                position: 'bottom',
                             },
                             title: {
                                 display: true,
