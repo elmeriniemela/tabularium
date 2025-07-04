@@ -24,6 +24,9 @@ class PositionDashboard extends Component {
                     labels: [],
                     data: [],
                 }
+            },
+            gainer: {
+
             }
         });
         this.orm = useService("orm");
@@ -84,7 +87,7 @@ class PositionDashboard extends Component {
             domain: [["liquid", "=", true], ["position", "!=", 0]],
             fields: ["position:sum", "profit:sum", "portfolio_id",],
             groupby: ["portfolio_id"],
-            lazy: true,
+            lazy: false,
             limit: 10,
             orderby: "position:sum DESC",
         });
@@ -93,6 +96,12 @@ class PositionDashboard extends Component {
         let data = [];
         let position = 0.0;
         let profit = 0.0;
+        let gainer = {
+            position: 0.0,
+            profit: 0.0,
+            daily_price: 0.0,
+            daily_price: 0.0,
+        };
         for (const group of results.groups) {
             labels.push(group.portfolio_id[1]);
             data.push(group.position);
@@ -107,6 +116,7 @@ class PositionDashboard extends Component {
             currencyId: 1,
             digits: 2,
         });
+        this.state.liquid.profitClass = profit >= 0 ? "text-success" : "text-danger";
         this.state.liquid.chart.labels = labels;
         this.state.liquid.chart.data = data;
     }
