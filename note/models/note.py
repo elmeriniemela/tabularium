@@ -16,7 +16,6 @@ class Stage(models.Model):
 
 
 class Tag(models.Model):
-
     _name = "note.tag"
     _description = "Note Tag"
 
@@ -29,7 +28,6 @@ class Tag(models.Model):
 
 
 class Note(models.Model):
-
     _name = 'note.note'
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = "Note"
@@ -47,8 +45,7 @@ class Note(models.Model):
     stage_id = fields.Many2one(
         comodel_name='note.stage',
         string='Stage', default=_get_default_stage_id, store=True, readonly=False)
-    open = fields.Boolean(string='Active', default=True)
-    date_done = fields.Date('Date done')
+    active = fields.Boolean(string='Active', default=True)
     color = fields.Integer(string='Color Index')
     tag_ids = fields.Many2many('note.tag', 'note_tags_rel', 'note_id', 'tag_id', string='Tags')
     # modifying property of ``mail.thread`` field
@@ -68,12 +65,6 @@ class Note(models.Model):
                 continue
             text = html2plaintext(note.memo) if note.memo else ''
             note.name = text.strip().replace('*', '').split("\n")[0]
-
-    def action_close(self):
-        return self.write({'open': False, 'date_done': fields.date.today()})
-
-    def action_open(self):
-        return self.write({'open': True})
 
     def write(self, vals):
         if len(self) == 1:
