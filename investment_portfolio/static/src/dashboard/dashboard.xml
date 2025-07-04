@@ -34,7 +34,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <PieChart labels="state.liquid.chart.labels" data="state.liquid.chart.data" title="state.liquid.chart.title" />
+                                <PieChart labels="state.liquid.chart.labels" data="state.liquid.chart.data" title="state.liquid.chart.title" onPieSliceClick.bind="onPieSliceClick" />
                             </div>
                         </div>
                     </div>

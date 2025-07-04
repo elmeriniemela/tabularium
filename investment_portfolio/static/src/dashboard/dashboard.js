@@ -2,6 +2,7 @@
 
 // https://www.odoo.com/documentation/18.0/developer/tutorials/discover_js_framework/02_build_a_dashboard.html
 
+import { _t } from "@web/core/l10n/translation";
 import { loadBundle } from "@web/core/assets";
 import { Component, useState, onWillStart, onWillUnmount, useEffect, onRendered, useRef } from "@odoo/owl";
 import { Layout } from "@web/search/layout";
@@ -11,7 +12,7 @@ import { formatMonetary, formatPercentage } from "@web/views/fields/formatters";
 
 class PieChart extends Component {
     static template = "investment_portfolio.PieChart";
-    static props = ["labels", "data", "title"];
+    static props = ["labels", "data", "title", "onPieSliceClick"];
 
     setup() {
         this.chart = null;
@@ -48,7 +49,14 @@ class PieChart extends Component {
                                 display: true,
                                 text: this.props.title
                             }
+                        },
+                        onClick: (event, elements) => {
+                            if (elements.length) {
+                                const idx = elements[0].index;
+                                this.props.onPieSliceClick(idx);
+                            }
                         }
+
                     }
                 });
             }
@@ -70,6 +78,7 @@ class PositionDashboard extends Component {
                 chart: {
                     labels: [],
                     data: [],
+                    ids: [],
                     title: "Positions",
                 }
             },
@@ -77,6 +86,20 @@ class PositionDashboard extends Component {
         });
         this.orm = useService("orm");
         this.refresh();
+    }
+
+    onPieSliceClick(idx) {
+        this.action.doAction({
+            type: 'ir.actions.act_window',
+            name: this.state.liquid.chart.labels[idx],
+            target: 'current',
+            context: {
+                search_default_portfolio_id: this.state.liquid.chart.ids[idx],
+                search_default_group_name: 1,
+            },
+            res_model: 'investment.position',
+            views: [[false, 'graph']],
+        });
     }
 
     async refresh() {
@@ -95,10 +118,12 @@ class PositionDashboard extends Component {
         });
         let labels = [];
         let data = [];
+        let ids = [];
         let position = 0.0;
         let profit = 0.0;
         for (const group of results.groups) {
             if (group.position !== 0) {
+                ids.push(group.portfolio_id[0]);
                 labels.push(group.portfolio_id[1]);
                 data.push(group.position);
                 position += group.position;
@@ -114,6 +139,7 @@ class PositionDashboard extends Component {
             digits: 2,
         });
         this.state.liquid.profitClass = profit >= 0 ? "text-success" : "text-danger";
+        this.state.liquid.chart.ids = ids;
         this.state.liquid.chart.labels = labels;
         this.state.liquid.chart.data = data;
     }
