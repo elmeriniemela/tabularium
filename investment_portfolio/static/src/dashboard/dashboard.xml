@@ -18,7 +18,7 @@
                         <br/>
                         <span>Profit: <span t-esc="state.liquid.profit" class="text-success"/></span>
                         </p>
-                        <div class="o_dashboard_graph" t-att-class="props.className" t-attf-class="o_graph_{{ props.graphType }}chart">
+                        <div class="o_dashboard_graph">
                             <canvas t-ref="canvas"/>
                         </div>
                     </div>
