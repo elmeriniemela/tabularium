@@ -103,6 +103,17 @@ class PositionDashboard extends Component {
         });
     }
 
+    onClickPosition(record) {
+        this.action.doAction({
+            type: 'ir.actions.act_window',
+            name: record.name,
+            target: 'current',
+            res_id: record.id,
+            res_model: 'investment.position',
+            views: [[false, 'form']],
+        });
+    }
+
     async refresh() {
         this.refreshPositions();
     }
@@ -165,7 +176,7 @@ class PositionDashboard extends Component {
                 hasPosition: record.position === 0 ? 1 : 0,
                 follow: record.follow ? 1 : 0,
                 last_update: timeago(new Date(record.last_update)),
-                last_price: record.is_company_currency ? last_price_own_currency: `${last_price} / ${last_price_own_currency}`,
+                last_price: record.is_company_currency ? last_price_own_currency : `${last_price} / ${last_price_own_currency}`,
                 profit: this.format("monetary", record.profit, true),
                 profit_percent: this.format("percentage", record.profit_percent, true),
                 position: this.format("monetary", record.position),
