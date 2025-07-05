@@ -43,13 +43,13 @@ class CloudInstance(models.Model):
     )
 
     restart_requested = fields.Datetime(
-        tracking=True,
+        tracking=False,
         store=True,
         compute='_compute_restart_requested',
     )
 
     restarted = fields.Datetime(
-        tracking=True,
+        tracking=False,
         readonly=True,
     )
 
@@ -207,27 +207,31 @@ class CloudInstance(models.Model):
         self.ensure_one()
         self.config = self._irpc(method='create', args=(self.uid, self.dns_record_ids.mapped('name'), self.http_port, self.gevent_port, self.module_ids.mapped('name')))
         self.state = 'running'
+        self.message_post(body="Deployed.", subtype_xmlid="cloud_manager.mt_cloud_action")
 
     def action_rebuild(self):
         self.ensure_one()
         self._irpc(method='rebuild', args=(self.uid, self.http_port, self.gevent_port))
         self.state = 'running'
-        self.message_post(body="Rebuilt.")
+        self.message_post(body="Rebuilt.", subtype_xmlid="cloud_manager.mt_cloud_action")
 
     def action_remove(self):
         self.ensure_one()
         self._irpc(method='remove', args=(self.uid, self.http_port, self.gevent_port))
         self.state = 'removed'
+        self.message_post(body="Removed.", subtype_xmlid="cloud_manager.mt_cloud_action")
 
     def action_stop(self):
         self.ensure_one()
         self._irpc(method='stop', args=(self.uid,))
         self.state = 'exited'
+        self.message_post(body="Stopped.", subtype_xmlid="cloud_manager.mt_cloud_action")
 
     def action_start(self):
         self.ensure_one()
         self._irpc(method='start', args=(self.uid,))
         self.state = 'running'
+        self.message_post(body="Started.", subtype_xmlid="cloud_manager.mt_cloud_action")
 
     def action_restart(self):
         self.ensure_one()
@@ -235,15 +239,17 @@ class CloudInstance(models.Model):
             callback_url = self.env.ref('cloud_manager.endpoint_agent_callback').url
             assert callback_url
             self._irpc(method='self_upgrade', args=(self.uid, callback_url), commit_before=True)
+            # Message will be posted by agent call back.
         else:
             self.action_upgrade()
             self._irpc(method='restart', args=(self.uid,))
             self.restarted = fields.Datetime.now()
+            self.message_post(body="Restarted.", subtype_xmlid="cloud_manager.mt_cloud_action")
 
     def action_upgrade(self):
         upgrade = self._irpc(method='upgrade', args=(self.uid,))
         if upgrade:
-            self.message_post(body="Upgraded.")
+            self.message_post(body="Upgraded.", subtype_xmlid="cloud_manager.mt_cloud_action")
             self.upgrade = upgrade
 
 
@@ -254,14 +260,14 @@ class CloudInstance(models.Model):
     def action_backup(self):
         self.ensure_one()
         resp = self._irpc(method='backup', args=(self.uid,))
-        self.message_post(body="Backup created.")
+        self.message_post(body="Backup created.", subtype_xmlid="cloud_manager.mt_cloud_action")
         self.parse_backups(resp['backups'])
 
     def action_reset(self):
         self.ensure_one()
         self._irpc(method='reset', args=(self.uid,))
         self.state = 'running'
-        self.message_post(body="Resetted.")
+        self.message_post(body="Resetted.", subtype_xmlid="cloud_manager.mt_cloud_action")
 
     def action_restore(self):
         self.ensure_one()
@@ -275,7 +281,7 @@ class CloudInstance(models.Model):
     def action_config(self):
         self.ensure_one()
         self._irpc(method='config', args=(self.uid, self.config))
-        self.message_post(body="Config updated.")
+        self.message_post(body="Config updated.", subtype_xmlid="cloud_manager.mt_cloud_action")
 
     def action_sync_urls(self):
         self.ensure_one()
@@ -293,14 +299,16 @@ class CloudInstance(models.Model):
     def parse_callback(self, vals):
         self.ensure_one()
         if vals.get('method') == 'upgrade':
-            self.message_post(body="Upgraded.")
+            body = "Upgraded."
             _logger.info("Posted msg on %s", self)
             if vals.get('logs'):
                 self.upgrade = vals.get('logs')
                 _logger.info("Saved logs on %s", self)
-                self.message_post(body="Saved upgrade logs.")
-
+                body += " Saved upgrade logs."
+            self.message_post(body=body, subtype_xmlid="cloud_manager.mt_cloud_action")
             self.restart_requested = False
+        if vals.get('method') == 'restart':
+            self.message_post(body="Restarted.", subtype_xmlid="cloud_manager.mt_cloud_action")
 
 
     def parse_backups(self, backup_list):

@@ -3,6 +3,13 @@
     <record id="mt_field_changed" model="mail.message.subtype">
         <field name="name">Field Changed</field>
         <field name="res_model">cloud.instance</field>
+        <field name="default" eval="False"/>
+        <field name="description" eval="False"/>
+    </record>
+
+    <record id="mt_cloud_action" model="mail.message.subtype">
+        <field name="name">Cloud Action</field>
+        <field name="res_model">cloud.instance</field>
         <field name="default" eval="True"/>
         <field name="description" eval="False"/>
     </record>
