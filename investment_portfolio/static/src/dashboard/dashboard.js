@@ -334,7 +334,7 @@ class PositionDashboard extends Component {
                 return formatPercentage(value, options.digits || 2)
             case "monetary":
                 var defaultDigits = [2, 2];
-                if (Math.abs(value) >= 10_000) {
+                if (Math.abs(value) >= 1_000) {
                     defaultDigits = [0, 0];
                 }
                 return formatMonetary(value, {
