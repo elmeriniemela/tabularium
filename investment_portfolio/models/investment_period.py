@@ -108,7 +108,7 @@ class InvestmentPeriod(models.Model):
         today = fields.Date.today()
         records = self
         _logger.info(f"Compute period for: {records}")
-        Serie = record.env['investment.timeseries'].browse().sudo()
+        Serie = self.env['investment.timeseries'].browse().sudo()
         for record in records.sudo():
             decimal_places = record.company_id.currency_id.decimal_places
             start_date = record.start_date - relativedelta(days=1)
