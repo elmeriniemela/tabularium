@@ -5,7 +5,6 @@
 import { _t } from "@web/core/l10n/translation";
 import { loadBundle } from "@web/core/assets";
 import { Component, useState, onWillStart, onWillUnmount, useEffect, onRendered, useRef } from "@odoo/owl";
-import { Layout } from "@web/search/layout";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { formatMonetary, formatPercentage } from "@web/views/fields/formatters";
@@ -137,6 +136,7 @@ class PositionDashboard extends Component {
                 }
             },
             positions: [],
+            periods: [],
         });
         this.orm = useService("orm");
         this.userTz = user.tz || luxon.Settings.defaultZone.name;
@@ -157,7 +157,11 @@ class PositionDashboard extends Component {
         });
     }
 
-    onClickPosition(record) {
+    onClickOpenLiquidPortfolios() {
+        return this.action.doAction("investment_portfolio.action_current_positions");
+    }
+
+    onClickOpenPosition(record) {
         this.action.doAction({
             type: 'ir.actions.act_window',
             name: record.name,
@@ -168,10 +172,52 @@ class PositionDashboard extends Component {
         });
     }
 
+    async onClickRefreshAll(record) {
+        var ids = this.state.positions.filter(p => p.hasPosition).map(p => p.id);;
+        var prom = this.orm.call("investment.position", "run_integration", [ids]);
+        prom.then(() => {
+            this.refresh();
+        });
+    }
+
+    async onClickRefreshPrice(record) {
+        var prom = this.orm.call("investment.position", "run_integration", [[record.id]]);
+        prom.then((response) => {
+            this.refreshPositions();
+        })
+    }
+
     async refresh() {
+        this.refreshPeriods();
         this.refreshPositions();
     }
 
+    async refreshPeriods() {
+        var results = await this.orm.call("investment.period", "get_dashboard", [], {
+            domain: [["priority", "=", '1']],
+            specification: {
+                id: {},
+                name: {},
+                profit: {},
+                annualized_irr: {},
+                company_currency_id: {},
+            }
+        });
+
+        let periods = [];
+        for (const record of results.records) {
+            periods.push({
+                id: record.id,
+                name: record.name,
+                profit: this.formatField("monetary", record.profit, true, {currencyId: record.company_currency_id}),
+                annualized_irr: this.formatField("percentage", record.annualized_irr, true),
+            })
+        }
+        this.state.periods = periods;
+
+
+
+    }
     async refreshPositions() {
         var results = await this.orm.call("investment.position", "web_search_read", [], {
             domain: [["liquid", "=", true]],
@@ -220,31 +266,33 @@ class PositionDashboard extends Component {
             var last_price_own_currency = this.format("monetary", record.last_price_own_currency, {currencyId: record.company_currency_id})
             var last_price = this.format("monetary", record.last_price, {currencyId: record.currency_id})
             var last_update_date = new Date(DateTime.fromSQL(record.last_update, { zone: "utc" }).setZone(this.userTz));
-            positions.push({
-                id: record.id,
-                name: record.name,
-                hasPosition: record.position === 0 ? 1 : 0,
-                follow: record.follow ? 1 : 0,
-                last_update: timeago(last_update_date),
-                last_update_iso: last_update_date.toISOString(),
-                last_price: record.is_company_currency ? last_price_own_currency : `${last_price} / ${last_price_own_currency}`,
-                profit: this.formatField("monetary", record.profit, true),
-                profit_percent: this.formatField("percentage", record.profit_percent, true),
-                position: this.formatField("monetary", record.position),
-                daily_price_abs: Math.abs(record.daily_price), // for sorting
-                daily_price: this.formatField("percentage", record.daily_price, true),
-                weekly_price: this.formatField("percentage", record.weekly_price, true),
-                monthly_price: this.formatField("percentage", record.monthly_price, true),
-                six_month_price: this.formatField("percentage", record.six_month_price, true),
-                ytd_price: this.formatField("percentage", record.ytd_price, true),
-                one_year_price: this.formatField("percentage", record.one_year_price, true),
-                chart: {
-                    data: record.chart_one_month.data,
-                    labels: record.chart_one_month.labels,
-                    title: _t('1 Month'),
-                    label: _t('Price'),
-                }
-            });
+            if (record.follow) {
+                positions.push({
+                    id: record.id,
+                    name: record.name,
+                    hasPosition: record.position === 0 ? 0 : 1,
+                    follow: record.follow ? 1 : 0,
+                    last_update: `(${timeago(last_update_date)})`,
+                    last_update_iso: last_update_date.toISOString(),
+                    last_price: record.is_company_currency ? last_price_own_currency : `${last_price} / ${last_price_own_currency}`,
+                    profit: this.formatField("monetary", record.profit, true),
+                    profit_percent: this.formatField("percentage", record.profit_percent, true),
+                    position: this.formatField("monetary", record.position),
+                    daily_price_abs: Math.abs(record.daily_price), // for sorting
+                    daily_price: this.formatField("percentage", record.daily_price, true),
+                    weekly_price: this.formatField("percentage", record.weekly_price, true),
+                    monthly_price: this.formatField("percentage", record.monthly_price, true),
+                    six_month_price: this.formatField("percentage", record.six_month_price, true),
+                    ytd_price: this.formatField("percentage", record.ytd_price, true),
+                    one_year_price: this.formatField("percentage", record.one_year_price, true),
+                    chart: {
+                        data: record.chart_one_month.data,
+                        labels: record.chart_one_month.labels,
+                        title: _t('1 Month'),
+                        label: _t('Price'),
+                    }
+                });
+            }
         }
 
         var porfolios = Object.entries(pdict).map(([key, value]) => (value));
@@ -256,7 +304,7 @@ class PositionDashboard extends Component {
         this.state.liquid.chart.labels = porfolios.map((x) => x.label);
         this.state.liquid.chart.data = porfolios.map((x) => x.position);
 
-        positions.sort((a, b) => a.hasPosition - b.hasPosition || b.follow - a.follow || b.daily_price_abs - a.daily_price_abs || b.position.value - a.position.value);
+        positions.sort((a, b) => b.hasPosition - a.hasPosition || b.follow - a.follow || b.daily_price_abs - a.daily_price_abs || b.position.value - a.position.value);
         this.state.positions = positions;
 
     }

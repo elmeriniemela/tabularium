@@ -4,9 +4,10 @@
         <field name="model">investment.period</field>
         <field name="arch" type="xml">
             <list>
+                <field name="priority" widget="priority"  nolabel="1" width="20px" optional="show"/>
                 <field name="name"/>
-                <field name="start_position"/>
-                <field name="end_position"/>
+                <field name="start_position" optional="show"/>
+                <field name="end_position" optional="show"/>
                 <field name="profit" widget="monetary" decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0"/>
                 <field name="annualized_irr" widget="percentage" decoration-danger="annualized_irr &lt; 0" decoration-success="annualized_irr &gt; 0"/>
                 <field name="start_date" optional="hide"/>
@@ -32,9 +33,12 @@
                             <field name="count_transactions" widget="statinfo" string="Transactions"/>
                         </button>
                     </div>
-                    <div class="oe_title">
-                        <h1>
-                            <field name="name"/>
+                    <div class="oe_title pe-0">
+                        <h1 class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex w-100">
+                                <field name="priority" widget="priority" class="me-3"/>
+                                <field name="name" options="{'line_breaks': False}" widget="text" lass="o_task_name text-truncate w-md-75 w-100 pe-2" placeholder="To-do..."/>
+                            </div>
                         </h1>
                     </div>
                     <notebook>

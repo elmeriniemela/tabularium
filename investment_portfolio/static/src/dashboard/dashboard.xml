@@ -8,7 +8,7 @@
         </div>
     </t>
 
-     <t t-name="investment_portfolio.LineChart">
+    <t t-name="investment_portfolio.LineChart">
         <div class="o_dashboard_graph" t-att-style="props.style">
             <canvas t-ref="canvas"/>
         </div>
@@ -21,7 +21,18 @@
                     <div class="col-sm-6 col-md-4 col-lg-3">
                         <div class="card card-fixed-height">
                             <div class="card-body">
-                                <h5 class="card-title">Liquid Portfolios</h5>
+                                <div class="row">
+                                    <div class="col">
+                                        <h4 class="card-title" t-on-click="() => this.onClickOpenLiquidPortfolios()">
+                                            <a href="#">Liquid Portfolios</a>
+                                        </h4>
+                                    </div>
+                                    <div class="col text-end">
+                                        <button type="button" class="btn" style="padding: 0px;" data-hotkey="r" t-on-click="() => this.onClickRefreshAll()" data-bounce-button="">
+                                            <i class="fa fa-refresh" style="height: 19px" aria-label="Refresh" title="Refresh"/>
+                                        </button>
+                                    </div>
+                                </div>
                                 <div class="card-text m-2">
                                     <div class="row gx-0 gy-0 o_kpi_row">
                                         <div class="col-4">
@@ -31,7 +42,19 @@
                                             <span t-esc="state.liquid.position.fmtValue"/>
                                         </div>
                                     </div>
-                                    <div class="row gx-0 gy-0 o_kpi_row">
+                                    <div t-if="state.periods.length > 0" class="row gx-0 gy-0 o_kpi_row">
+                                        <t t-foreach="state.periods" t-as="record" t-key="record.id">
+                                            <div class="col-4">
+                                                <label t-esc="record.name"/>
+                                            </div>
+                                            <div class="col-8 text-end d-flex justify-content-end align-items-right">
+                                                <span t-esc="record.profit.fmtValue" t-att-class="record.profit.className"/>
+                                                <span style="width: 15px;"> | </span>
+                                                <span style="width: 60px;" t-esc="record.annualized_irr.fmtValue" t-att-class="record.annualized_irr.className"/>
+                                            </div>
+                                        </t>
+                                    </div>
+                                    <div t-else="" class="row gx-0 gy-0 o_kpi_row">
                                         <div class="col-4">
                                             <label>Profit</label>
                                         </div>
@@ -40,17 +63,26 @@
                                         </div>
                                     </div>
                                 </div>
-                                <PieChart labels="state.liquid.chart.labels" data="state.liquid.chart.data" title="state.liquid.chart.title" onPieSliceClick.bind="onPieSliceClick" style="'height: 500px;'" />
+                                <PieChart labels="state.liquid.chart.labels" data="state.liquid.chart.data" title="state.liquid.chart.title" onPieSliceClick.bind="onPieSliceClick" style="'height: 400px;'" />
                             </div>
                         </div>
                     </div>
                     <t t-foreach="state.positions" t-as="record" t-key="record.id">
-                        <div class="col-sm-6 col-md-4 col-lg-3" t-on-click="() => this.onClickPosition(record)">
+                        <div class="col-sm-6 col-md-4 col-lg-3">
                             <div class="card card-fixed-height">
                                 <div class="card-body">
-                                    <h5 class="card-title">
-                                        <span t-esc="record.name"/>
-                                    </h5>
+                                    <div class="row">
+                                        <div class="col">
+                                            <h4 class="card-title" t-on-click="() => this.onClickOpenPosition(record)">
+                                                <a t-esc="record.name" href="#"/>
+                                            </h4>
+                                        </div>
+                                        <div class="col text-end">
+                                            <button type="button" class="btn" style="padding: 0px;" data-hotkey="r" t-on-click="() => this.onClickRefreshPrice(record)" data-bounce-button="">
+                                                <i class="fa fa-refresh" style="height: 19px" aria-label="Refresh" title="Refresh"/>
+                                            </button>
+                                        </div>
+                                    </div>
                                     <div class="card-text m-2">
                                         <div class="row gx-0 gy-0 o_kpi_row">
                                             <div class="col-4">
@@ -58,7 +90,8 @@
                                             </div>
                                             <div class="col-8 text-end">
                                                 <span t-esc="record.last_price"/>
-                                                (<time class="timeago" t-att-datetime="record.last_update_iso" t-esc="record.last_update"/>)
+                                                <span> </span>
+                                                <time class="timeago" t-att-datetime="record.last_update_iso" t-esc="record.last_update"/>
                                             </div>
                                         </div>
                                         <div class="row gx-0 gy-0 o_kpi_row">

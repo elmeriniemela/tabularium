@@ -13,26 +13,26 @@
         <field name="arch" type="xml">
             <list expand="1" default_order="portfolio_id, sequence, id" js_class="positions_list" decoration-muted="not position" decoration-bf="position">
                 <field name="sequence" widget="handle"/>
-                <field name="name" optional="show"/>
-                <field name="ticker" optional="hide"/>
                 <field name="activity_ids" optional="hide" widget="list_activity"/>
-                <field name="last_price" optional="show" digits="[2,2]"/>
+                <field name="name" optional="show" width="100px"/>
+                <field name="ticker" optional="hide"/>
+                <field name="last_price" optional="show" digits="[2,2]" width="100px"/>
                 <field name="ath_price" optional="hide" digits="[2,2]"/>
                 <field name="current_ath_drawdown" widget="percentage" optional="hide"/>
                 <field name="drawdown_price" optional="hide" digits="[2,2]"/>
-                <field name="last_update" optional="show" widget="timeago"/>
-                <field name="daily_price" widget="percentage" decoration-danger="daily_price &lt; 0" decoration-success="daily_price &gt; 0" optional="show"/>
-                <field name="weekly_price" widget="percentage" decoration-danger="weekly_price &lt; 0" decoration-success="weekly_price &gt; 0" optional="show"/>
-                <field name="monthly_price" widget="percentage" decoration-danger="monthly_price &lt; 0" decoration-success="monthly_price &gt; 0" optional="show"/>
-                <field name="three_month_price" widget="percentage" decoration-danger="three_month_price &lt; 0" decoration-success="three_month_price &gt; 0" optional="show"/>
-                <field name="six_month_price" widget="percentage" decoration-danger="six_month_price &lt; 0" decoration-success="six_month_price &gt; 0" optional="show"/>
-                <field name="ytd_price" widget="percentage" decoration-danger="ytd_price &lt; 0" decoration-success="ytd_price &gt; 0" optional="show"/>
-                <field name="one_year_price" widget="percentage" decoration-danger="one_year_price &lt; 0" decoration-success="one_year_price &gt; 0" optional="show"/>
-                <field name="three_year_price" widget="percentage" decoration-danger="three_year_price &lt; 0" decoration-success="three_year_price &gt; 0" optional="show"/>
-                <field name="five_year_price" widget="percentage" decoration-danger="five_year_price &lt; 0" decoration-success="five_year_price &gt; 0" optional="show"/>
-                <field name="ten_year_price" widget="percentage" decoration-danger="ten_year_price &lt; 0" decoration-success="ten_year_price &gt; 0" optional="hide"/>
+                <field name="last_update" optional="show" widget="timeago"  nolabel="1" width="30px"/>
+                <field name="daily_price" widget="percentage" decoration-danger="daily_price &lt; 0" decoration-success="daily_price &gt; 0" optional="show" width="70px"/>
+                <field name="weekly_price" widget="percentage" decoration-danger="weekly_price &lt; 0" decoration-success="weekly_price &gt; 0" optional="show"  width="70px"/>
+                <field name="monthly_price" widget="percentage" decoration-danger="monthly_price &lt; 0" decoration-success="monthly_price &gt; 0" optional="show"  width="70px"/>
+                <field name="three_month_price" widget="percentage" decoration-danger="three_month_price &lt; 0" decoration-success="three_month_price &gt; 0" optional="show"  width="70px"/>
+                <field name="six_month_price" widget="percentage" decoration-danger="six_month_price &lt; 0" decoration-success="six_month_price &gt; 0" optional="show"  width="70px"/>
+                <field name="ytd_price" widget="percentage" decoration-danger="ytd_price &lt; 0" decoration-success="ytd_price &gt; 0" optional="show"  width="70px"/>
+                <field name="one_year_price" widget="percentage" decoration-danger="one_year_price &lt; 0" decoration-success="one_year_price &gt; 0" optional="show"  width="70px"/>
+                <field name="three_year_price" widget="percentage" decoration-danger="three_year_price &lt; 0" decoration-success="three_year_price &gt; 0" optional="show"  width="70px"/>
+                <field name="five_year_price" widget="percentage" decoration-danger="five_year_price &lt; 0" decoration-success="five_year_price &gt; 0" optional="show"  width="70px"/>
+                <field name="ten_year_price" widget="percentage" decoration-danger="ten_year_price &lt; 0" decoration-success="ten_year_price &gt; 0" optional="hide" width="70px"/>
 
-                <field name="quantity" digits="[2,2]" optional="show"/>
+                <field name="quantity" digits="[2,2]" optional="show" width="70px"/>
                 <field name="position" optional="show" sum="Total Position" digits="[2,2]"/>
                 <field name="position_currency" optional="hide" sum="Total Position" digits="[2,2]"/>
                 <field name="plausible_drawdown_position" optional="hide" sum="Total Position"/>
@@ -40,8 +40,8 @@
                 <field name="max_investment" optional="hide"/>
                 <field name="cost_basis" optional="hide"/>
 
-                <field name="profit" decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0" optional="show" sum="Total Profit" digits="[2,2]"/>
-                <field name="profit_percent" widget="percentage" decoration-danger="profit_percent &lt; 0" decoration-success="profit_percent &gt; 0" optional="show"/>
+                <field name="profit" decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0" optional="show" sum="Total Profit" digits="[2,2]" width="100px"/>
+                <field name="profit_percent" widget="percentage" decoration-danger="profit_percent &lt; 0" decoration-success="profit_percent &gt; 0" optional="show" width="70px"/>
 
                 <field name="currency_id" optional="hide"/>
                 <field name="endpoint_id" optional="hide"/>

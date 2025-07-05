@@ -84,7 +84,6 @@ class InvestmentAsset(models.Model):
 
 
     daily_price = fields.Float(compute='_compute_last_price', store=True, aggregator='avg', string="1 Day")
-    daily_price_abs = fields.Float(compute='_compute_last_price', store=True, aggregator='avg', string="1 Day")
     weekly_price = fields.Float(compute='_compute_last_price', store=True, aggregator='avg', string="1 Week")
     monthly_price = fields.Float(compute='_compute_last_price', store=True, aggregator='avg', string="1 Month")
     three_month_price = fields.Float(compute='_compute_last_price', store=True, aggregator='avg', string="3 Months")
@@ -237,7 +236,6 @@ class InvestmentAsset(models.Model):
 
         for record in self.sudo():
             record.daily_price = percent_change(record.daily_price_id, record.last_price_id)
-            record.daily_price_abs = abs(record.daily_price)
             record.weekly_price = percent_change(record.weekly_price_id, record.last_price_id)
             record.monthly_price = percent_change(record.monthly_price_id, record.last_price_id)
             record.three_month_price = percent_change(record.three_month_price_id, record.last_price_id)

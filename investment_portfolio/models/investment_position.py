@@ -39,7 +39,6 @@ class InvestmentPosition(models.Model):
 
 
     daily_price = fields.Float(related='asset_id.daily_price', readonly=True)
-    daily_price_abs = fields.Float(related='asset_id.daily_price_abs', readonly=True)
     weekly_price = fields.Float(related='asset_id.weekly_price', readonly=True)
     monthly_price = fields.Float(related='asset_id.monthly_price', readonly=True)
     three_month_price = fields.Float(related='asset_id.three_month_price', readonly=True)
@@ -120,6 +119,7 @@ class InvestmentPosition(models.Model):
     position = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', help="Current value of this position.")
     position_abs = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', help="Current value of this position.")
     position_currency = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='currency_id', help="Current value of this position in the underlying currency.")
+    # TODO: daily_value = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='currency_id', help="Change in value today.")
     plausible_drawdown_position = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', help="Value of this position after a plausible drawdown.")
     investment = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id')
     max_investment = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id')

@@ -18,6 +18,11 @@ class InvestmentPeriod(models.Model):
 
     name = fields.Char(required=True)
 
+    priority = fields.Selection([
+        ('0', 'Low'),
+        ('1', 'High'),
+    ], default='0', index=True, string="Priority", tracking=True)
+
     start_date = fields.Date(required=True, tracking=True, default=fields.Date.context_today)
     end_date = fields.Date(required=True, tracking=True, default=fields.Date.context_today)
 
@@ -53,6 +58,16 @@ class InvestmentPeriod(models.Model):
         )
     )
     debug_xirr = fields.Text(compute='_compute_period', store=True)
+
+
+    @api.model
+    def get_dashboard(self, domain, specification, offset=0, limit=None, order=None, count_limit=None):
+        today = fields.Date.today()
+        records = self.search_fetch(domain, list(specification.keys())+['end_date'], offset=offset, limit=limit, order=order)
+        records.filtered(lambda r: r.end_date >= today).action_compute()
+        values_records = records.web_read(specification)
+        return self._format_web_search_read_results(domain, values_records, offset, limit, count_limit)
+
 
     def action_view_timeseries(self):
         return {
@@ -152,7 +167,7 @@ class InvestmentPeriod(models.Model):
                         sign = -1
 
                     if not float_is_zero(trans.payment, precision_digits=trans.company_currency_id.decimal_places):
-                        _logger.info(f"{position.name}, {trans.ttype}: {sign * abs(trans.payment)}")
+                        _logger.debug(f"{position.name}, {trans.ttype}: {sign * abs(trans.payment)}")
                         values.append(sign * abs(trans.payment))
                         dates.append(trans.time.date())
 
