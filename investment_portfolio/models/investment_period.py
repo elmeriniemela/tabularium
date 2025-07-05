@@ -173,7 +173,10 @@ class InvestmentPeriod(models.Model):
 
                 if not float_is_zero(end_series.position, precision_digits=end_series.company_currency_id.decimal_places):
                     values.append(end_series.position)
-                    dates.append(end_date)
+                    close_on = record.end_date # might be far in the future
+                    if end_date == today:
+                        close_on = close_on.replace(year=today.year)
+                    dates.append(close_on) # calculate as if we would closeed open positions at the end of the year. otherwise 1% gain in first day of the year, would result in 365% gain annualized which adds too much noise.
 
             annualized_irr = 0
             if values:
