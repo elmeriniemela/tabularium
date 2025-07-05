@@ -119,7 +119,6 @@ class InvestmentPosition(models.Model):
     position = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', help="Current value of this position.")
     position_abs = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', help="Current value of this position.")
     position_currency = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='currency_id', help="Current value of this position in the underlying currency.")
-    daily_profit = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', help="Change in value today.")
     plausible_drawdown_position = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='currency_id', help="Value of this position after a plausible drawdown.")
     investment = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id')
     max_investment = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id')
@@ -131,6 +130,16 @@ class InvestmentPosition(models.Model):
     profit = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', aggregator='sum')
     profit_percent = fields.Float(compute='_compute_position_aggregate', store=True, aggregator='avg')
 
+    daily_profit = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id')
+    weekly_profit = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id')
+    monthly_profit = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id')
+    three_month_profit = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id')
+    six_month_profit = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id')
+    ytd_profit = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id')
+    one_year_profit = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id')
+    three_year_profit = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id')
+    five_year_profit = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id')
+    ten_year_profit = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id')
 
     is_cash = fields.Boolean(
         compute='_compute_is_cash',
@@ -179,8 +188,7 @@ class InvestmentPosition(models.Model):
         'company_currency_id',
     )
     def _compute_position_aggregate(self):
-        Serie = self.env['investment.timeseries'].browse().sudo()
-        fnames = ['position', 'profit', ]
+
         for record in self:
             record.last_price_own_currency = record.last_price_id.currency_id._convert(
                 from_amount=record.last_price_id.price or 0.0,
@@ -192,30 +200,86 @@ class InvestmentPosition(models.Model):
             record.position_currency = record.last_price * record.quantity
             record.position_abs = abs(record.position)
 
-
-            last = record.last_price_id.time.date()
-            serie = Serie.search_fetch(
-                domain=[
-                    ('position_id', 'in', record.ids),
-                    ('date', 'in', [last, last - relativedelta(days=1)]),
-                    ('company_id', '=', record.company_id.id),
-                ],
-                field_names=fnames,
-                order='date asc'
-            )
-            record.daily_profit = 0
-            if len(serie) == 2:
-                yesterday, today = serie
-                if today.date == fields.Date.today():
-                    today.refresh_price()
-                    today._compute_timeseries_aggregate()
-                    record.daily_profit = today.profit - yesterday.profit
-
         protected = [f for f in self._fields.values() if f.compute == '_compute_position_aggregate']
         with self.env.protecting(protected, self): # do not allow depends recursion, as these create only simulated transactions.
             self.update_realized_fifo()
 
         self._compute_cost_basis()
+        self._compute_range_profits()
+
+    def _compute_range_profits(self):
+        Serie = self.env['investment.timeseries'].browse().sudo()
+        dates = []
+        for rec in self:
+            dates.extend([
+                rec.last_price_id.date,
+                rec.asset_id.daily_price_id.date,
+                rec.asset_id.weekly_price_id.date,
+                rec.asset_id.monthly_price_id.date,
+                rec.asset_id.three_month_price_id.date,
+                rec.asset_id.six_month_price_id.date,
+                rec.asset_id.ytd_price_id.date,
+                rec.asset_id.one_year_price_id.date,
+                rec.asset_id.three_year_price_id.date,
+                rec.asset_id.five_year_price_id.date,
+                rec.asset_id.ten_year_price_id.date,
+            ])
+
+
+        res = Serie.sudo().search_fetch(
+            domain=[
+                ('position_id', 'in', self.ids),
+                ('date', 'in', dates),
+                ('company_id', 'in', self.company_id.ids),
+            ],
+            field_names=['company_id', 'position_id', 'date', 'profit'],
+        )
+
+
+        profits = {}
+        for serie in res:
+            profits[(serie.company_id.id, serie.position_id.id, serie.date)] = serie
+
+
+        for rec in self:
+            last = profits.get((rec.company_id.id, rec.id, rec.last_price_id.date), Serie.browse())
+            if last:
+                last.refresh_price()
+                last._compute_timeseries_aggregate()
+
+            daily = profits.get((rec.company_id.id, rec.id, rec.asset_id.daily_price_id.date), Serie.browse())
+            rec.daily_profit = last.profit - daily.profit
+
+            weekly = profits.get((rec.company_id.id, rec.id, rec.asset_id.weekly_price_id.date), Serie.browse())
+            rec.weekly_profit = last.profit - weekly.profit
+
+            monthly = profits.get((rec.company_id.id, rec.id, rec.asset_id.monthly_price_id.date), Serie.browse())
+            rec.monthly_profit = last.profit - monthly.profit
+
+            six_month = profits.get((rec.company_id.id, rec.id, rec.asset_id.six_month_price_id.date), Serie.browse())
+            rec.six_month_profit = last.profit - six_month.profit
+
+            three_month = profits.get((rec.company_id.id, rec.id, rec.asset_id.three_month_price_id.date), Serie.browse())
+            rec.three_month_profit = last.profit - three_month.profit
+
+            three_month = profits.get((rec.company_id.id, rec.id, rec.asset_id.three_month_price_id.date), Serie.browse())
+            rec.three_month_profit = last.profit - three_month.profit
+
+            ytd = profits.get((rec.company_id.id, rec.id, rec.asset_id.ytd_price_id.date), Serie.browse())
+            rec.ytd_profit = last.profit - ytd.profit
+
+            one_year = profits.get((rec.company_id.id, rec.id, rec.asset_id.one_year_price_id.date), Serie.browse())
+            rec.one_year_profit = last.profit - one_year.profit
+
+            three_year = profits.get((rec.company_id.id, rec.id, rec.asset_id.three_year_price_id.date), Serie.browse())
+            rec.three_year_profit = last.profit - three_year.profit
+
+            five_year = profits.get((rec.company_id.id, rec.id, rec.asset_id.five_year_price_id.date), Serie.browse())
+            rec.five_year_profit = last.profit - five_year.profit
+
+            ten_year = profits.get((rec.company_id.id, rec.id, rec.asset_id.ten_year_price_id.date), Serie.browse())
+            rec.ten_year_profit = last.profit - ten_year.profit
+
 
     def recompute_value(self):
         assets = self.mapped('asset_id')

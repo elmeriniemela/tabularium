@@ -24,6 +24,7 @@ class InvestmentAssetPrice(models.Model):
 
 
     time = fields.Datetime(required=True, default=fields.Datetime.now, index=True)
+    date = fields.Date(compute='_compute_date')
 
     prediction = fields.Boolean(index=True)
 
@@ -39,6 +40,10 @@ class InvestmentAssetPrice(models.Model):
     _sql_constraints = [
         ('unique_price', 'unique(asset_id, time)', 'Price for this time is already configured!'),
     ]
+
+    def _compute_date(self):
+        for record in self:
+            record.date = record.time.date()
 
     @api.depends('price', 'time')
     def _compute_display_name(self):

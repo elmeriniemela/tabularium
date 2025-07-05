@@ -128,40 +128,50 @@
                                             <div class="col-4">
                                                 <label>1 Week</label>
                                             </div>
-                                            <div class="col-8 text-end">
-                                                <span t-esc="record.weekly_price.fmtValue" t-att-class="record.weekly_price.className"/>
+                                            <div class="col-8 text-end d-flex justify-content-end align-items-right">
+                                                <span t-esc="record.weekly_profit.fmtValue" t-att-class="record.weekly_profit.className"/>
+                                                <span style="width: 15px;"> | </span>
+                                                <span style="width: 60px;" t-esc="record.weekly_price.fmtValue" t-att-class="record.weekly_price.className"/>
                                             </div>
                                         </div>
                                         <div class="row gx-0 gy-0 o_kpi_row">
                                             <div class="col-4">
                                                 <label>1 Month</label>
                                             </div>
-                                            <div class="col-8 text-end">
-                                                <span t-esc="record.monthly_price.fmtValue" t-att-class="record.monthly_price.className"/>
+                                            <div class="col-8 text-end d-flex justify-content-end align-items-right">
+                                                <span t-esc="record.monthly_profit.fmtValue" t-att-class="record.monthly_profit.className"/>
+                                                <span style="width: 15px;"> | </span>
+                                                <span style="width: 60px;" t-esc="record.monthly_price.fmtValue" t-att-class="record.monthly_price.className"/>
                                             </div>
                                         </div>
                                         <div class="row gx-0 gy-0 o_kpi_row">
                                             <div class="col-4">
                                                 <label>6 Months</label>
                                             </div>
-                                            <div class="col-8 text-end">
-                                                <span t-esc="record.six_month_price.fmtValue" t-att-class="record.six_month_price.className"/>
+                                            <div class="col-8 text-end d-flex justify-content-end align-items-right">
+                                                <span t-esc="record.six_month_profit.fmtValue" t-att-class="record.six_month_profit.className"/>
+                                                <span style="width: 15px;"> | </span>
+                                                <span style="width: 60px;" t-esc="record.six_month_price.fmtValue" t-att-class="record.six_month_price.className"/>
                                             </div>
                                         </div>
                                         <div class="row gx-0 gy-0 o_kpi_row">
                                             <div class="col-4">
                                                 <label>YTD</label>
                                             </div>
-                                            <div class="col-8 text-end">
-                                                <span t-esc="record.ytd_price.fmtValue" t-att-class="record.ytd_price.className"/>
+                                            <div class="col-8 text-end d-flex justify-content-end align-items-right">
+                                                <span t-esc="record.ytd_profit.fmtValue" t-att-class="record.ytd_profit.className"/>
+                                                <span style="width: 15px;"> | </span>
+                                                <span style="width: 60px;" t-esc="record.ytd_price.fmtValue" t-att-class="record.ytd_price.className"/>
                                             </div>
                                         </div>
                                         <div class="row gx-0 gy-0 o_kpi_row">
                                             <div class="col-4">
                                                 <label>1 Year</label>
                                             </div>
-                                            <div class="col-8 text-end">
-                                                <span t-esc="record.one_year_price.fmtValue" t-att-class="record.one_year_price.className"/>
+                                            <div class="col-8 text-end d-flex justify-content-end align-items-right">
+                                                <span t-esc="record.one_year_profit.fmtValue" t-att-class="record.one_year_profit.className"/>
+                                                <span style="width: 15px;"> | </span>
+                                                <span style="width: 60px;" t-esc="record.one_year_price.fmtValue" t-att-class="record.one_year_price.className"/>
                                             </div>
                                         </div>
                                     </div>
