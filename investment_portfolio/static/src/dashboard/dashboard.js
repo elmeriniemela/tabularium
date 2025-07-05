@@ -9,6 +9,7 @@ import { Layout } from "@web/search/layout";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { formatMonetary, formatPercentage } from "@web/views/fields/formatters";
+import { timeago } from "@timeago_widget/timeago/widget"
 
 class PieChart extends Component {
     static template = "investment_portfolio.PieChart";
@@ -114,9 +115,21 @@ class PositionDashboard extends Component {
                 id: {},
                 name: {},
                 follow: {},
+                last_update: {},
+                last_price: {},
+                last_price_own_currency: {},
+                is_company_currency: {},
+                currency_id: {},
+                company_currency_id: {},
                 position: {},
                 profit: {},
+                profit_percent: {},
                 daily_price: {},
+                weekly_price: {},
+                monthly_price: {},
+                six_month_price: {},
+                ytd_price: {},
+                one_year_price: {},
                 portfolio_id: { fields: { display_name: {} } },
             }
         });
@@ -138,15 +151,31 @@ class PositionDashboard extends Component {
                 pdict[pid] = obj;
             }
 
+            var last_price_own_currency = formatMonetary(record.last_price_own_currency, {
+                currencyId: record.company_currency_id,
+                digits: 2,
+            })
+            var last_price = formatMonetary(record.last_price, {
+                currencyId: record.currency_id,
+                digits: 2,
+            })
             positions.push({
                 id: record.id,
                 name: record.name,
-                hasPosition: record.position === 0 ? 1: 0,
-                follow: record.follow ? 1: 0,
-                position: this.format("monetary", record.position),
+                hasPosition: record.position === 0 ? 1 : 0,
+                follow: record.follow ? 1 : 0,
+                last_update: timeago(new Date(record.last_update)),
+                last_price: record.is_company_currency ? last_price_own_currency: `${last_price} / ${last_price_own_currency}`,
                 profit: this.format("monetary", record.profit, true),
+                profit_percent: this.format("percentage", record.profit_percent, true),
+                position: this.format("monetary", record.position),
+                daily_price_abs: Math.abs(record.daily_price), // for sorting
                 daily_price: this.format("percentage", record.daily_price, true),
-                daily_price_abs: this.format("percentage", Math.abs(record.daily_price)),
+                weekly_price: this.format("percentage", record.weekly_price, true),
+                monthly_price: this.format("percentage", record.monthly_price, true),
+                six_month_price: this.format("percentage", record.six_month_price, true),
+                ytd_price: this.format("percentage", record.ytd_price, true),
+                one_year_price: this.format("percentage", record.one_year_price, true),
             });
         }
 
@@ -159,13 +188,13 @@ class PositionDashboard extends Component {
         this.state.liquid.chart.labels = porfolios.map((x) => x.label);
         this.state.liquid.chart.data = porfolios.map((x) => x.position);
 
-        positions.sort((a, b) =>  a.hasPosition - b.hasPosition || b.follow - a.follow || b.daily_price_abs.value - a.daily_price_abs.value || b.position.value - a.position.value);
+        positions.sort((a, b) => a.hasPosition - b.hasPosition || b.follow - a.follow || b.daily_price_abs - a.daily_price_abs || b.position.value - a.position.value);
         this.state.positions = positions;
 
     }
 
 
-    format(type, value, isProfit=false) {
+    format(type, value, isProfit = false, options = {}) {
         var className = '';
         if (isProfit) {
             if (value >= 0.0001) {
@@ -178,15 +207,15 @@ class PositionDashboard extends Component {
             case "percentage":
                 return {
                     value: value,
-                    fmtValue: formatPercentage(value, 2),
+                    fmtValue: formatPercentage(value, options.digits || 2),
                     className: className,
                 }
             case "monetary":
                 return {
                     value: value,
                     fmtValue: formatMonetary(value, {
-                        currencyId: 1,
-                        digits: 2,
+                        currencyId: options.currencyId || 1,
+                        digits: options.digits || 2,
                     }),
                     className: className,
                 }

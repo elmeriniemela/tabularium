@@ -38,20 +38,29 @@
                             </div>
                         </div>
                     </div>
-                    <t t-foreach="state.positions" t-as="position" t-key="position.id">
+                    <t t-foreach="state.positions" t-as="record" t-key="record.id">
                         <div class="col-sm-6 col-md-4 col-lg-3">
                             <div class="card">
                                 <div class="card-body">
                                     <h5 class="card-title">
-                                        <span t-esc="position.name"/>
+                                        <span t-esc="record.name"/>
                                     </h5>
                                     <div class="card-text m-2">
+                                        <div class="row o_kpi_row">
+                                            <div class="col-5">
+                                                <label>Last Price</label>
+                                            </div>
+                                            <div class="col-7 text-end">
+                                                <span t-esc="record.last_price"/>
+                                                (<span t-esc="record.last_update"/>)
+                                            </div>
+                                        </div>
                                         <div class="row o_kpi_row">
                                             <div class="col-5">
                                                 <label>Position</label>
                                             </div>
                                             <div class="col-7 text-end">
-                                                <span t-esc="position.position.fmtValue"/>
+                                                <span t-esc="record.position.fmtValue"/>
                                             </div>
                                         </div>
                                         <div class="row o_kpi_row">
@@ -59,15 +68,59 @@
                                                 <label>Profit</label>
                                             </div>
                                             <div class="col-7 text-end">
-                                                <span t-esc="position.profit.fmtValue" t-att-class="position.profit.className"/>
+                                                <span t-esc="record.profit.fmtValue" t-att-class="record.profit.className"/>
+                                                <span> / </span>
+                                                <span t-esc="record.profit_percent.fmtValue" t-att-class="record.profit_percent.className"/>
                                             </div>
                                         </div>
+
+
                                         <div class="row o_kpi_row">
                                             <div class="col-5">
                                                 <label>1 day</label>
                                             </div>
                                             <div class="col-7 text-end">
-                                                <span t-esc="position.daily_price.fmtValue" t-att-class="position.daily_price.className"/>
+                                                <span t-esc="record.daily_price.fmtValue" t-att-class="record.daily_price.className"/>
+                                            </div>
+                                        </div>
+                                        <div class="row o_kpi_row">
+                                            <div class="col-5">
+                                                <label>1 Week</label>
+                                            </div>
+                                            <div class="col-7 text-end">
+                                                <span t-esc="record.weekly_price.fmtValue" t-att-class="record.weekly_price.className"/>
+                                            </div>
+                                        </div>
+                                        <div class="row o_kpi_row">
+                                            <div class="col-5">
+                                                <label>1 Month</label>
+                                            </div>
+                                            <div class="col-7 text-end">
+                                                <span t-esc="record.monthly_price.fmtValue" t-att-class="record.monthly_price.className"/>
+                                            </div>
+                                        </div>
+                                        <div class="row o_kpi_row">
+                                            <div class="col-5">
+                                                <label>6 Monts</label>
+                                            </div>
+                                            <div class="col-7 text-end">
+                                                <span t-esc="record.six_month_price.fmtValue" t-att-class="record.six_month_price.className"/>
+                                            </div>
+                                        </div>
+                                        <div class="row o_kpi_row">
+                                            <div class="col-5">
+                                                <label>YTD</label>
+                                            </div>
+                                            <div class="col-7 text-end">
+                                                <span t-esc="record.ytd_price.fmtValue" t-att-class="record.ytd_price.className"/>
+                                            </div>
+                                        </div>
+                                        <div class="row o_kpi_row">
+                                            <div class="col-5">
+                                                <label>1 year</label>
+                                            </div>
+                                            <div class="col-7 text-end">
+                                                <span t-esc="record.one_year_price.fmtValue" t-att-class="record.one_year_price.className"/>
                                             </div>
                                         </div>
                                     </div>
