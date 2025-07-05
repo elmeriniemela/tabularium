@@ -154,6 +154,15 @@ class InvestmentTimeseries(models.Model):
         return super().web_read_group(domain, fields, groupby, limit=limit, offset=offset, orderby=orderby, lazy=lazy)
 
 
+    def refresh_price(self):
+        today = datetime.date.today()
+        for serie in self:
+            if serie.date == today:
+                serie.price_id = self.env['investment.asset.price'].search([
+                    ('prediction', '=', False),
+                    ('asset_id', '=', serie.position_id.asset_id.id),
+                ], limit=1, order='time desc') # update the latest price when not doing predictions.
+
     @api.depends('position_id', 'date')
     def _compute_timeseries_aggregate(self):
         _logger.info(f"Compute time series aggregate on {self.mapped('position_id.name')} for {len(self)} records.")

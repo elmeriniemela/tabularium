@@ -119,8 +119,8 @@ class InvestmentPosition(models.Model):
     position = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', help="Current value of this position.")
     position_abs = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', help="Current value of this position.")
     position_currency = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='currency_id', help="Current value of this position in the underlying currency.")
-    # TODO: daily_value = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='currency_id', help="Change in value today.")
-    plausible_drawdown_position = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', help="Value of this position after a plausible drawdown.")
+    daily_profit = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', help="Change in value today.")
+    plausible_drawdown_position = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='currency_id', help="Value of this position after a plausible drawdown.")
     investment = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id')
     max_investment = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id')
     cost_basis = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', help="Average price across every purchase.")
@@ -179,6 +179,8 @@ class InvestmentPosition(models.Model):
         'company_currency_id',
     )
     def _compute_position_aggregate(self):
+        Serie = self.env['investment.timeseries'].browse().sudo()
+        fnames = ['position', 'profit', ]
         for record in self:
             record.last_price_own_currency = record.last_price_id.currency_id._convert(
                 from_amount=record.last_price_id.price or 0.0,
@@ -189,6 +191,25 @@ class InvestmentPosition(models.Model):
             record.update(record._get_position(record.last_price_own_currency, record.transaction_ids))
             record.position_currency = record.last_price * record.quantity
             record.position_abs = abs(record.position)
+
+
+            last = record.last_price_id.time.date()
+            serie = Serie.search_fetch(
+                domain=[
+                    ('position_id', 'in', record.ids),
+                    ('date', 'in', [last, last - relativedelta(days=1)]),
+                    ('company_id', '=', record.company_id.id),
+                ],
+                field_names=fnames,
+                order='date asc'
+            )
+            record.daily_profit = 0
+            if len(serie) == 2:
+                yesterday, today = serie
+                if today.date == fields.Date.today():
+                    today.refresh_price()
+                    today._compute_timeseries_aggregate()
+                    record.daily_profit = today.profit - yesterday.profit
 
         protected = [f for f in self._fields.values() if f.compute == '_compute_position_aggregate']
         with self.env.protecting(protected, self): # do not allow depends recursion, as these create only simulated transactions.
@@ -285,11 +306,8 @@ class InvestmentPosition(models.Model):
                     recompute += serie
                 elif prediction:
                     recompute += serie
-                elif position_id.env.context.get('force_recompute') or (date == today):
-                    serie.price_id = self.env['investment.asset.price'].search([
-                        ('prediction', '=', False),
-                        ('asset_id', '=', position_id.asset_id.id),
-                    ], limit=1, order='time desc') # update the latest price when not doing predictions.
+                elif (date == today):
+                    serie.refresh_price()
                     recompute += serie
 
                 if date == today:

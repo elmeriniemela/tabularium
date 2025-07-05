@@ -145,11 +145,7 @@ class InvestmentPeriod(models.Model):
             )
 
             if is_future:
-                for serie in all_ends:
-                    serie.price_id = self.env['investment.asset.price'].search([
-                        ('prediction', '=', False),
-                        ('asset_id', '=', serie.position_id.asset_id.id),
-                    ], limit=1, order='time desc') # update the latest price when not doing predictions.
+                all_ends.refresh_price()
                 all_ends._compute_timeseries_aggregate()
 
             starts_map = {s.position_id: s for s in all_starts} # date_timeseries_unique

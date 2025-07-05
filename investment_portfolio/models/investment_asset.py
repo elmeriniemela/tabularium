@@ -137,7 +137,7 @@ class InvestmentAsset(models.Model):
         ]).unlink()
 
 
-    def price_at_date(self, date):
+    def price_at_date(self, date, raise_if_not_found=True):
         self.ensure_one()
         time_cutoff = datetime.datetime(date.year, date.month, date.day, 0, 0, 0) # This has to be the end of day.
         err_msg = "No price for %s at %s." % (self.ticker, time_cutoff)
@@ -196,9 +196,11 @@ class InvestmentAsset(models.Model):
             #     })
 
             else:
-                raise RuntimeError(err_msg)
+                if raise_if_not_found:
+                    raise RuntimeError(err_msg)
 
-        assert at_price_id, err_msg
+        if raise_if_not_found:
+            assert at_price_id, err_msg
         return at_price_id
 
 
@@ -255,49 +257,49 @@ class InvestmentAsset(models.Model):
 
     def _compute_daily_prices(self):
         "for performance reasons, this is ran only once a day via cron"
-        def latest_before(record, time):
-            latest_before_id = record.env['investment.asset.price'].search([
-                ('asset_id', '=', record.id),
-                ('time', '<', time),
-                ('prediction', '=', False),
-            ], limit=1)
-            # if not latest_before_id:
-            #     latest_before_id = record.env['investment.asset.price'].search([
-            #         ('asset_id', '=', record.id),
-            #         ('prediction', '=', False),
-            #     ], limit=1, order='time asc') # oldest possible.
-            return latest_before_id
+        # def latest_before(record, time):
+        #     latest_before_id = record.env['investment.asset.price'].search([
+        #         ('asset_id', '=', record.id),
+        #         ('time', '<', time),
+        #         ('prediction', '=', False),
+        #     ], limit=1)
+        #     # if not latest_before_id:
+        #     #     latest_before_id = record.env['investment.asset.price'].search([
+        #     #         ('asset_id', '=', record.id),
+        #     #         ('prediction', '=', False),
+        #     #     ], limit=1, order='time asc') # oldest possible.
+        #     return latest_before_id
 
-        def earliest_closing_after(record, time):
-            "This is how google finance calculates YTD, 1Y, 5Y etc. They basically take the first daily closing price after the date."
-            earliest_after_id = record.env['investment.asset.price'].search([
-                ('asset_id', '=', record.id),
-                ('time', '>', time),
-                ('prediction', '=', False),
-            ], limit=1, order='time asc')
+        # def earliest_closing_after(record, time):
+        #     "This is how google finance calculates YTD, 1Y, 5Y etc. They basically take the first daily closing price after the date."
+        #     earliest_after_id = record.env['investment.asset.price'].search([
+        #         ('asset_id', '=', record.id),
+        #         ('time', '>', time),
+        #         ('prediction', '=', False),
+        #     ], limit=1, order='time asc')
 
-            if not earliest_after_id:
-                return latest_before(record, time)
+        #     if not earliest_after_id:
+        #         return latest_before(record, time)
 
-            earliest_closing_after_id = record.env['investment.asset.price'].search([
-                ('asset_id', '=', record.id),
-                ('time', '<=', earliest_after_id.time.replace(hour=23, minute=59, second=59)),
-                ('prediction', '=', False),
-            ], limit=1, order='time desc')
-            return earliest_closing_after_id
+        #     earliest_closing_after_id = record.env['investment.asset.price'].search([
+        #         ('asset_id', '=', record.id),
+        #         ('time', '<=', earliest_after_id.time.replace(hour=23, minute=59, second=59)),
+        #         ('prediction', '=', False),
+        #     ], limit=1, order='time desc')
+        #     return earliest_closing_after_id
 
         for record in self.sudo():
             record.last_price_id = record.price_ids[:1]
-            record.daily_price_id = latest_before(record, fields.Datetime.now().replace(hour=0, minute=0, second=0))
-            record.weekly_price_id = latest_before(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(weeks=1))
-            record.monthly_price_id = latest_before(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(months=1))
-            record.three_month_price_id = latest_before(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(months=3))
-            record.six_month_price_id = latest_before(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(months=6))
-            record.ytd_price_id = earliest_closing_after(record, fields.Datetime.now().replace(day=1, month=1, hour=0, minute=0, second=0))
-            record.one_year_price_id = earliest_closing_after(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(years=1))
-            record.three_year_price_id = earliest_closing_after(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(years=3))
-            record.five_year_price_id = earliest_closing_after(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(years=5))
-            record.ten_year_price_id = earliest_closing_after(record, fields.Datetime.now().replace(hour=0, minute=0, second=0)-relativedelta(years=10))
+            record.daily_price_id = record.price_at_date(fields.Date.today()-relativedelta(days=1), raise_if_not_found=False)
+            record.weekly_price_id = record.price_at_date(fields.Date.today()-relativedelta(weeks=1), raise_if_not_found=False)
+            record.monthly_price_id = record.price_at_date(fields.Date.today()-relativedelta(months=1), raise_if_not_found=False)
+            record.three_month_price_id = record.price_at_date(fields.Date.today()-relativedelta(months=3), raise_if_not_found=False)
+            record.six_month_price_id = record.price_at_date(fields.Date.today()-relativedelta(months=6), raise_if_not_found=False)
+            record.ytd_price_id = record.price_at_date(fields.Date.today().replace(day=1, month=1), raise_if_not_found=False)
+            record.one_year_price_id = record.price_at_date(fields.Date.today()-relativedelta(years=1), raise_if_not_found=False)
+            record.three_year_price_id = record.price_at_date(fields.Date.today()-relativedelta(years=3), raise_if_not_found=False)
+            record.five_year_price_id = record.price_at_date(fields.Date.today()-relativedelta(years=5), raise_if_not_found=False)
+            record.ten_year_price_id = record.price_at_date(fields.Date.today()-relativedelta(years=10), raise_if_not_found=False)
 
     def _inverse_last_price(self):
         Price = self.env['investment.asset.price']
