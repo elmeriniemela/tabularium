@@ -68,7 +68,12 @@ class InvestmentPositionTransaction(models.Model):
     quantity = fields.Float(digits='Investment Asset quantity', tracking=True)
     quantity_adjusted = fields.Float(aggregator='avg', compute='_compute_quantity_adjusted', digits='Investment Asset quantity')
 
-    time = fields.Datetime(required=True, default=fields.Datetime.now, tracking=True)
+    time = fields.Datetime(
+        required=True,
+        default=fields.Datetime.now,
+        index=True,
+        tracking=True,
+    )
 
     profit = fields.Monetary(compute='_compute_profit', currency_field='company_currency_id')
 
@@ -93,6 +98,7 @@ class InvestmentPositionTransaction(models.Model):
         required=True,
         default='record',
         tracking=True,
+        index=True,
     )
 
     category_id = fields.Many2one(related='asset_id.category_id', store=True, readonly=True)
