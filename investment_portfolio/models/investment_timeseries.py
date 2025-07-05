@@ -157,16 +157,21 @@ class InvestmentTimeseries(models.Model):
     @api.depends('position_id', 'date')
     def _compute_timeseries_aggregate(self):
         _logger.info(f"Compute time series aggregate on {self.mapped('position_id.name')} for {len(self)} records.")
+        Transaction = self.env['investment.position.transaction'].browse()
+        transactions = Transaction.search([
+            ('position_id', 'in', self.mapped('position_id').ids),
+            ('usage', 'in', ('record', 'prediction')),
+        ])
+        trans_map = {}
+        for trans in transactions:
+            trans_map[trans.position_id] = trans_map.get(trans.position_id, Transaction) + trans
+
         for record in self:
             if not record.position_id:
                 continue
 
             time_cutoff = datetime.datetime(record.date.year, record.date.month, record.date.day, 23, 59, 0)
-            record.transaction_ids = record.env['investment.position.transaction'].search([
-                ('time', '<=', time_cutoff),
-                ('position_id', '=', record.position_id.id),
-                ('usage', 'in', ('record', 'prediction')),
-            ]) # latest but before date
+            record.transaction_ids = trans_map.get(trans.position_id, Transaction).filtered(lambda t: t.time <= time_cutoff) # latest but before date
 
             record.last_price_own_currency = record.price_id.currency_id._convert(
                 from_amount=record.price_id.price,

@@ -108,7 +108,9 @@ class InvestmentPeriod(models.Model):
         today = fields.Date.today()
         records = self
         _logger.info(f"Compute period for: {records}")
-        for record in records:
+        Serie = record.env['investment.timeseries'].browse().sudo()
+        for record in records.sudo():
+            decimal_places = record.company_id.currency_id.decimal_places
             start_date = record.start_date - relativedelta(days=1)
             is_future = record.end_date >= today
             end_date = today if is_future else record.end_date
@@ -124,7 +126,7 @@ class InvestmentPeriod(models.Model):
 
 
             fnames = ['position', 'profit', 'company_currency_id', 'transaction_ids',]
-            all_starts = record.env['investment.timeseries'].search_fetch(
+            all_starts = Serie.search_fetch(
                 domain=[
                     ('position_id', 'in', posdomain.ids),
                     ('date', '=', start_date),
@@ -133,7 +135,7 @@ class InvestmentPeriod(models.Model):
                 field_names=fnames,
             )
 
-            all_ends = record.env['investment.timeseries'].search_fetch(
+            all_ends = Serie.search_fetch(
                 domain=[
                     ('position_id', 'in', posdomain.ids),
                     ('date', '=', end_date),
@@ -157,22 +159,24 @@ class InvestmentPeriod(models.Model):
             values = []
             dates = []
 
-            # import pdb; pdb.set_trace()
+
+            txs = record.env['investment.position.transaction'].browse().sudo()
+            srs = Serie.browse()
             for pos in posdomain:
-                start_series = starts_map.get(pos, record.env['investment.timeseries'].browse())
-                end_series = ends_map.get(pos, record.env['investment.timeseries'].browse())
-                record.timeseries_ids += start_series + end_series
+                start_series = starts_map.get(pos, Serie.browse())
+                end_series = ends_map.get(pos, Serie.browse())
+                srs += start_series + end_series
                 record.start_position += start_series.position
                 record.end_position += end_series.position
                 record.profit += (end_series.profit - start_series.profit)
 
 
-                if not float_is_zero(start_series.position, precision_digits=start_series.company_currency_id.decimal_places):
+                if not float_is_zero(start_series.position, precision_digits=decimal_places):
                     values.append(-start_series.position)
                     dates.append(start_date)
 
                 transactions = (end_series.transaction_ids - start_series.transaction_ids).filtered(lambda t: t.usage == 'record')
-                record.transaction_ids += transactions
+                txs += transactions
 
                 for trans in transactions:
                     sign = 1
@@ -185,12 +189,12 @@ class InvestmentPeriod(models.Model):
                     elif trans.ttype == 'cost':
                         sign = -1
 
-                    if not float_is_zero(trans.payment, precision_digits=trans.company_currency_id.decimal_places):
+                    if not float_is_zero(trans.payment, precision_digits=decimal_places):
                         # _logger.info(f"{pos.name}, {trans.ttype}: {sign * abs(trans.payment)}") # do not trigger unecdessary reads
                         values.append(sign * abs(trans.payment))
                         dates.append(trans.time.date())
 
-                if not float_is_zero(end_series.position, precision_digits=end_series.company_currency_id.decimal_places):
+                if not float_is_zero(end_series.position, precision_digits=decimal_places):
                     values.append(end_series.position)
                     close_on = record.end_date # might be far in the future
                     if is_future:
@@ -205,6 +209,8 @@ class InvestmentPeriod(models.Model):
                     _logger.exception(error)
 
             record.annualized_irr = annualized_irr
+            record.timeseries_ids = srs
+            record.transaction_ids = txs
             record.count_timeseries = len(record.timeseries_ids)
             record.count_transactions = len(record.transaction_ids)
             record.debug_xirr = f'{dates=}\n{values=}'
