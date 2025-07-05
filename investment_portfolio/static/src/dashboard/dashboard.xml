@@ -22,7 +22,7 @@
                                             <label>Total Position</label>
                                         </div>
                                         <div class="col-7 text-end">
-                                            <span t-esc="state.liquid.position"/>
+                                            <span t-esc="state.liquid.position.fmtValue"/>
                                         </div>
                                     </div>
                                     <div class="row o_kpi_row">
@@ -30,7 +30,7 @@
                                             <label>Total Profit</label>
                                         </div>
                                         <div class="col-7 text-end">
-                                            <span t-esc="state.liquid.profit" t-att-class="state.liquid.profitClass"/>
+                                            <span t-esc="state.liquid.profit.fmtValue" t-att-class="state.liquid.profit.className"/>
                                         </div>
                                     </div>
                                 </div>
@@ -51,7 +51,7 @@
                                                 <label>Position</label>
                                             </div>
                                             <div class="col-7 text-end">
-                                                <span t-esc="position.position"/>
+                                                <span t-esc="position.position.fmtValue"/>
                                             </div>
                                         </div>
                                         <div class="row o_kpi_row">
@@ -59,7 +59,7 @@
                                                 <label>Profit</label>
                                             </div>
                                             <div class="col-7 text-end">
-                                                <span t-esc="position.profit" t-att-class="position.profitClass"/>
+                                                <span t-esc="position.profit.fmtValue" t-att-class="position.profit.className"/>
                                             </div>
                                         </div>
                                         <div class="row o_kpi_row">
@@ -67,7 +67,7 @@
                                                 <label>1 day</label>
                                             </div>
                                             <div class="col-7 text-end">
-                                                <span t-esc="position.daily_price" t-att-class="position.daily_priceClass"/>
+                                                <span t-esc="position.daily_price.fmtValue" t-att-class="position.daily_price.className"/>
                                             </div>
                                         </div>
                                     </div>

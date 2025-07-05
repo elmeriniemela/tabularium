@@ -103,78 +103,94 @@ class PositionDashboard extends Component {
     }
 
     async refresh() {
-        this.refreshPortfolios();
         this.refreshPositions();
-
-    }
-    async refreshPortfolios() {
-        var results = await this.orm.call("investment.position", "web_read_group", [], {
-            domain: [["liquid", "=", true]],
-            fields: ["position:sum", "profit:sum", "portfolio_id",],
-            groupby: ["portfolio_id"],
-            lazy: true,
-            limit: 10,
-            orderby: "position:sum DESC",
-        });
-        let labels = [];
-        let data = [];
-        let ids = [];
-        let position = 0.0;
-        let profit = 0.0;
-        for (const group of results.groups) {
-            if (group.position !== 0) {
-                ids.push(group.portfolio_id[0]);
-                labels.push(group.portfolio_id[1]);
-                data.push(group.position);
-                position += group.position;
-            }
-            profit += group.profit;
-        }
-        this.state.liquid.position = formatMonetary(position, {
-            currencyId: 1,
-            digits: 2,
-        });
-        this.state.liquid.profit = formatMonetary(profit, {
-            currencyId: 1,
-            digits: 2,
-        });
-        this.state.liquid.profitClass = profit >= 0 ? "text-success" : "text-danger";
-        this.state.liquid.chart.ids = ids;
-        this.state.liquid.chart.labels = labels;
-        this.state.liquid.chart.data = data;
     }
 
     async refreshPositions() {
         var results = await this.orm.call("investment.position", "web_search_read", [], {
-            domain: [["liquid", "=", true], ["position", "!=", 0]],
-            order: "daily_price_abs DESC, position DESC",
+            domain: [["liquid", "=", true]],
+            order: "position DESC",
             specification: {
                 id: {},
                 name: {},
+                follow: {},
                 position: {},
                 profit: {},
                 daily_price: {},
+                portfolio_id: { fields: { display_name: {} } },
             }
         });
-        let positons = [];
+        let positions = [];
+        let pdict = {};
+        let total_position = 0.0;
+        let total_profit = 0.0;
         for (const record of results.records) {
-            positons.push({
+            total_position += record.position;
+            total_profit += record.profit;
+            var pid = record.portfolio_id.id;
+            var pname = record.portfolio_id.display_name;
+
+            if (record.position !== 0) {
+                var obj = pdict[pid] || {};
+                obj.position = (obj.position || 0) + record.position;
+                obj.label = pname;
+                obj.id = pid;
+                pdict[pid] = obj;
+            }
+
+            positions.push({
                 id: record.id,
                 name: record.name,
-                position: formatMonetary(record.position, {
-                    currencyId: 1,
-                    digits: 2,
-                }),
-                profit: formatMonetary(record.profit, {
-                    currencyId: 1,
-                    digits: 2,
-                }),
-                daily_price: formatPercentage(record.daily_price, 2),
-                profitClass: record.profit >= 0 ? "text-success" : "text-danger",
-                daily_priceClass: record.daily_price >= 0 ? "text-success" : "text-danger",
+                hasPosition: record.position === 0 ? 1: 0,
+                follow: record.follow ? 1: 0,
+                position: this.format("monetary", record.position),
+                profit: this.format("monetary", record.profit, true),
+                daily_price: this.format("percentage", record.daily_price, true),
+                daily_price_abs: this.format("percentage", Math.abs(record.daily_price)),
             });
         }
-        this.state.positions = positons;
+
+        var porfolios = Object.entries(pdict).map(([key, value]) => (value));
+        porfolios.sort((a, b) => b.position - a.position);
+
+        this.state.liquid.position = this.format("monetary", total_position);
+        this.state.liquid.profit = this.format("monetary", total_profit, true);
+        this.state.liquid.chart.ids = porfolios.map((x) => x.id);
+        this.state.liquid.chart.labels = porfolios.map((x) => x.label);
+        this.state.liquid.chart.data = porfolios.map((x) => x.position);
+
+        positions.sort((a, b) =>  a.hasPosition - b.hasPosition || b.follow - a.follow || b.daily_price_abs.value - a.daily_price_abs.value || b.position.value - a.position.value);
+        this.state.positions = positions;
+
+    }
+
+
+    format(type, value, isProfit=false) {
+        let profitClass = isProfit ? value >= 0 ? "text-success" : "text-danger": '';
+        switch (type) {
+            case "percentage":
+                return {
+                    value: value,
+                    fmtValue: formatPercentage(value, 2),
+                    className: profitClass,
+                }
+            case "monetary":
+                return {
+                    value: value,
+                    fmtValue: formatMonetary(value, {
+                        currencyId: 1,
+                        digits: 2,
+                    }),
+                    className: profitClass,
+                }
+            default:
+                console.log(`Unknown type for format ${type}.`);
+                return {
+                    value: value,
+                    fmtValue: value,
+                    className: profitClass,
+                }
+        }
 
     }
 }
