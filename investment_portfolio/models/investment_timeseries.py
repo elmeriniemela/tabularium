@@ -171,7 +171,7 @@ class InvestmentTimeseries(models.Model):
                 continue
 
             time_cutoff = datetime.datetime(record.date.year, record.date.month, record.date.day, 23, 59, 0)
-            record.transaction_ids = trans_map.get(trans.position_id, Transaction).filtered(lambda t: t.time <= time_cutoff) # latest but before date
+            record.transaction_ids = trans_map.get(record.position_id, Transaction).filtered(lambda t: t.time <= time_cutoff) # latest but before date
 
             record.last_price_own_currency = record.price_id.currency_id._convert(
                 from_amount=record.price_id.price,
