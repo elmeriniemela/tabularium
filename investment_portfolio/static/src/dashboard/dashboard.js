@@ -231,6 +231,7 @@ class PositionDashboard extends Component {
                 last_price_own_currency: {},
                 is_company_currency: {},
                 currency_id: {},
+                endpoint_id: {},
                 company_currency_id: {},
                 position: {},
                 profit: {},
@@ -271,6 +272,7 @@ class PositionDashboard extends Component {
                     id: record.id,
                     name: record.name,
                     hasPosition: record.position === 0 ? 0 : 1,
+                    hasEndpoint: record.endpoint_id ? 1 : 0,
                     follow: record.follow ? 1 : 0,
                     last_update: `(${timeago(last_update_date)})`,
                     last_update_iso: last_update_date.toISOString(),
@@ -278,7 +280,7 @@ class PositionDashboard extends Component {
                     profit: this.formatField("monetary", record.profit, true),
                     profit_percent: this.formatField("percentage", record.profit_percent, true),
                     position: this.formatField("monetary", record.position),
-                    daily_price_abs: Math.abs(record.daily_price), // for sorting
+                    mover: Math.abs(record.daily_price* Math.max(record.position, 1)), // for sorting
                     daily_price: this.formatField("percentage", record.daily_price, true),
                     weekly_price: this.formatField("percentage", record.weekly_price, true),
                     monthly_price: this.formatField("percentage", record.monthly_price, true),
@@ -304,7 +306,7 @@ class PositionDashboard extends Component {
         this.state.liquid.chart.labels = porfolios.map((x) => x.label);
         this.state.liquid.chart.data = porfolios.map((x) => x.position);
 
-        positions.sort((a, b) => b.hasPosition - a.hasPosition || b.follow - a.follow || b.daily_price_abs - a.daily_price_abs || b.position.value - a.position.value);
+        positions.sort((a, b) => b.follow - a.follow || b.mover - a.mover || b.hasEndpoint - a.hasEndpoint ||  b.position.value - a.position.value);
         this.state.positions = positions;
 
     }
