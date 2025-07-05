@@ -3,6 +3,7 @@
     <record model="ir.actions.client" id="action_position_dashboard">
         <field name="name">Dashboard</field>
         <field name="tag">investment_portfolio.dashboard</field>
+        <field name="path">dashboard</field>
     </record>
 
 

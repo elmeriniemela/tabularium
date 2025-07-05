@@ -163,6 +163,8 @@ class InvestmentPosition(models.Model):
     plan_auto_realize = fields.Boolean()
     plan_allow_past = fields.Boolean()
 
+    chart_one_month = fields.Json(compute='_compute_chart_one_month', exportable=False)
+
     @api.depends(
         'transaction_ids',
         'transaction_ids.quantity',
@@ -582,3 +584,25 @@ class InvestmentPosition(models.Model):
 
             record.cost_basis_currency = sum(realized.mapped(f'{mapped}_payment_currency')) / record.quantity if record.quantity else 0 # buy_payment_currency or sell_payment_currency
             record.cost_basis = sum(realized.mapped(f'{mapped}_payment')) / record.quantity if record.quantity else 0 # buy_payment or sell_payment
+
+    def _compute_chart_one_month(self):
+        now = fields.Datetime.now()
+        time = now.replace(hour=0, minute=0, second=0)-relativedelta(months=1)
+        self.env.cr.execute(
+            """
+            SELECT asset_id, DATE_TRUNC('DAY', "time") AS day, AVG(price) AS price
+            FROM investment_asset_price
+            WHERE asset_id IN %s AND time > %s AND time <= %s
+            GROUP BY asset_id, day
+            ORDER BY asset_id, day
+            """,
+            (tuple(self.mapped('asset_id').ids), time, now)
+        )
+        per_asset = {}
+        for (asset_id, dt, price) in self.env.cr.fetchall():
+            chart = per_asset.setdefault(asset_id, {'data': [], 'labels': []})
+            chart['data'].append(price)
+            chart['labels'].append(dt.date().strftime('%d.%m.'))
+
+        for record in self:
+            record.chart_one_month = per_asset.get(record.asset_id.id, {'data': [], 'labels': []})

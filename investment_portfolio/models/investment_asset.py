@@ -62,7 +62,7 @@ class InvestmentAsset(models.Model):
         default=lambda self: self.env.company,
     )
 
-    last_price_id = fields.Many2one(string='Last Price Record', comodel_name='investment.asset.price')
+    last_price_id = fields.Many2one(string='Last Price Record', comodel_name='investment.asset.price', index=True)
     last_update = fields.Datetime(related='last_price_id.time', store=True)
     last_price = fields.Monetary(string="Last Price", related='last_price_id.price', store=True, currency_field='currency_id', aggregator=None, inverse='_inverse_last_price')
     expected_yearly_appreciation = fields.Float(aggregator='avg', default=0.0, digits='Investment Asset Interest', tracking=True)
@@ -71,16 +71,16 @@ class InvestmentAsset(models.Model):
     current_ath_drawdown = fields.Float(string="Current ATH drawdown", compute='_compute_ath_price', aggregator=None, store=True)
     drawdown_price = fields.Monetary(string='Plausible Drawdown Price', currency_field='currency_id', compute='_compute_ath_price', aggregator=None, store=True)
 
-    daily_price_id = fields.Many2one(comodel_name='investment.asset.price')
-    weekly_price_id = fields.Many2one(comodel_name='investment.asset.price')
-    monthly_price_id = fields.Many2one(comodel_name='investment.asset.price')
-    three_month_price_id = fields.Many2one(comodel_name='investment.asset.price')
-    six_month_price_id = fields.Many2one(comodel_name='investment.asset.price')
-    ytd_price_id = fields.Many2one(comodel_name='investment.asset.price')
-    one_year_price_id = fields.Many2one(comodel_name='investment.asset.price')
-    three_year_price_id = fields.Many2one(comodel_name='investment.asset.price')
-    five_year_price_id = fields.Many2one(comodel_name='investment.asset.price')
-    ten_year_price_id = fields.Many2one(comodel_name='investment.asset.price')
+    daily_price_id = fields.Many2one(comodel_name='investment.asset.price', index=True)
+    weekly_price_id = fields.Many2one(comodel_name='investment.asset.price', index=True)
+    monthly_price_id = fields.Many2one(comodel_name='investment.asset.price', index=True)
+    three_month_price_id = fields.Many2one(comodel_name='investment.asset.price', index=True)
+    six_month_price_id = fields.Many2one(comodel_name='investment.asset.price', index=True)
+    ytd_price_id = fields.Many2one(comodel_name='investment.asset.price', index=True)
+    one_year_price_id = fields.Many2one(comodel_name='investment.asset.price', index=True)
+    three_year_price_id = fields.Many2one(comodel_name='investment.asset.price', index=True)
+    five_year_price_id = fields.Many2one(comodel_name='investment.asset.price', index=True)
+    ten_year_price_id = fields.Many2one(comodel_name='investment.asset.price', index=True)
 
 
     daily_price = fields.Float(compute='_compute_last_price', store=True, aggregator='avg', string="1 Day")

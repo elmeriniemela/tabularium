@@ -6,3 +6,9 @@
     padding-top: 8px;
     border-bottom: 1px solid rgba(192, 192, 192, 0.57);
 }
+
+.card-fixed-height {
+    height: 640px;
+    // @include media-breakpoint-up(xxl) {
+    // }
+}

@@ -15,7 +15,7 @@ const { DateTime } = luxon;
 
 class PieChart extends Component {
     static template = "investment_portfolio.PieChart";
-    static props = ["labels", "data", "title", "onPieSliceClick"];
+    static props = ["labels", "data", "title", "onPieSliceClick", "style"];
 
     setup() {
         this.chart = null;
@@ -44,6 +44,7 @@ class PieChart extends Component {
                     },
                     options: {
                         responsive: true,
+                        maintainAspectRatio: false,
                         plugins: {
                             legend: {
                                 position: 'bottom',
@@ -67,9 +68,59 @@ class PieChart extends Component {
     }
 }
 
+
+class LineChart extends Component {
+    static template = "investment_portfolio.LineChart";
+    static props = ["labels", "data", "title", "label", "style"];
+
+    setup() {
+        this.chart = null;
+        this.canvasRef = useRef("canvas");
+        onWillStart(async () => {
+            await loadBundle("web.chartjs_lib");
+        });
+        onWillUnmount(() => {
+            if (this.chart) {
+                this.chart.destroy();
+            }
+        });
+        useEffect(() => {
+            if (this.chart) {
+                this.chart.destroy();
+            }
+            if (this.canvasRef.el) {
+                this.chart = new Chart(this.canvasRef.el, {
+                    type: 'line',
+                    data: {
+                        labels: this.props.labels,
+                        datasets: [{
+                            label: this.props.label,
+                            data: this.props.data,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                            },
+                            title: {
+                                display: true,
+                                text: this.props.title
+                            }
+                        },
+                    }
+                });
+            }
+        });
+    }
+}
+
 class PositionDashboard extends Component {
     static template = "investment_portfolio.PositionDashboard";
-    static components = { PieChart };
+    static components = { PieChart, LineChart };
     static props = ["*"];
 
     setup() {
@@ -82,7 +133,7 @@ class PositionDashboard extends Component {
                     labels: [],
                     data: [],
                     ids: [],
-                    title: "Positions",
+                    title: _t("Positions"),
                 }
             },
             positions: [],
@@ -144,6 +195,7 @@ class PositionDashboard extends Component {
                 six_month_price: {},
                 ytd_price: {},
                 one_year_price: {},
+                chart_one_month: {},
                 portfolio_id: { fields: { display_name: {} } },
             }
         });
@@ -186,6 +238,12 @@ class PositionDashboard extends Component {
                 six_month_price: this.formatField("percentage", record.six_month_price, true),
                 ytd_price: this.formatField("percentage", record.ytd_price, true),
                 one_year_price: this.formatField("percentage", record.one_year_price, true),
+                chart: {
+                    data: record.chart_one_month.data,
+                    labels: record.chart_one_month.labels,
+                    title: _t('1 Month'),
+                    label: _t('Price'),
+                }
             });
         }
 
