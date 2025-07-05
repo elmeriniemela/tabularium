@@ -162,14 +162,8 @@ class PositionDashboard extends Component {
                 pdict[pid] = obj;
             }
 
-            var last_price_own_currency = formatMonetary(record.last_price_own_currency, {
-                currencyId: record.company_currency_id,
-                digits: 2,
-            })
-            var last_price = formatMonetary(record.last_price, {
-                currencyId: record.currency_id,
-                digits: 2,
-            })
+            var last_price_own_currency = this.format("monetary", record.last_price_own_currency, {currencyId: record.company_currency_id})
+            var last_price = this.format("monetary", record.last_price, {currencyId: record.currency_id})
             positions.push({
                 id: record.id,
                 name: record.name,
@@ -177,24 +171,24 @@ class PositionDashboard extends Component {
                 follow: record.follow ? 1 : 0,
                 last_update: timeago(new Date(record.last_update)),
                 last_price: record.is_company_currency ? last_price_own_currency : `${last_price} / ${last_price_own_currency}`,
-                profit: this.format("monetary", record.profit, true),
-                profit_percent: this.format("percentage", record.profit_percent, true),
-                position: this.format("monetary", record.position),
+                profit: this.formatField("monetary", record.profit, true),
+                profit_percent: this.formatField("percentage", record.profit_percent, true),
+                position: this.formatField("monetary", record.position),
                 daily_price_abs: Math.abs(record.daily_price), // for sorting
-                daily_price: this.format("percentage", record.daily_price, true),
-                weekly_price: this.format("percentage", record.weekly_price, true),
-                monthly_price: this.format("percentage", record.monthly_price, true),
-                six_month_price: this.format("percentage", record.six_month_price, true),
-                ytd_price: this.format("percentage", record.ytd_price, true),
-                one_year_price: this.format("percentage", record.one_year_price, true),
+                daily_price: this.formatField("percentage", record.daily_price, true),
+                weekly_price: this.formatField("percentage", record.weekly_price, true),
+                monthly_price: this.formatField("percentage", record.monthly_price, true),
+                six_month_price: this.formatField("percentage", record.six_month_price, true),
+                ytd_price: this.formatField("percentage", record.ytd_price, true),
+                one_year_price: this.formatField("percentage", record.one_year_price, true),
             });
         }
 
         var porfolios = Object.entries(pdict).map(([key, value]) => (value));
         porfolios.sort((a, b) => b.position - a.position);
 
-        this.state.liquid.position = this.format("monetary", total_position);
-        this.state.liquid.profit = this.format("monetary", total_profit, true);
+        this.state.liquid.position = this.formatField("monetary", total_position);
+        this.state.liquid.profit = this.formatField("monetary", total_profit, true);
         this.state.liquid.chart.ids = porfolios.map((x) => x.id);
         this.state.liquid.chart.labels = porfolios.map((x) => x.label);
         this.state.liquid.chart.data = porfolios.map((x) => x.position);
@@ -205,7 +199,7 @@ class PositionDashboard extends Component {
     }
 
 
-    format(type, value, isProfit = false, options = {}) {
+    formatField(type, value, isProfit = false, options = {}) {
         var className = '';
         if (isProfit) {
             if (value >= 0.0001) {
@@ -214,29 +208,29 @@ class PositionDashboard extends Component {
                 className = 'text-danger';
             }
         }
+
+        return {
+            value: value,
+            fmtValue: this.format(type, value, options),
+            className: className,
+        }
+    }
+    format(type, value, options = {}) {
         switch (type) {
             case "percentage":
-                return {
-                    value: value,
-                    fmtValue: formatPercentage(value, options.digits || 2),
-                    className: className,
-                }
+                return formatPercentage(value, options.digits || 2)
             case "monetary":
-                return {
-                    value: value,
-                    fmtValue: formatMonetary(value, {
-                        currencyId: options.currencyId || 1,
-                        digits: options.digits || 2,
-                    }),
-                    className: className,
+                var defaultDigits = [2, 2];
+                if (Math.abs(value) >= 10_000) {
+                    defaultDigits = [0, 0];
                 }
+                return formatMonetary(value, {
+                    currencyId: options.currencyId || 1,
+                    digits: options.digits || defaultDigits,
+                })
             default:
                 console.log(`Unknown type for format ${type}.`);
-                return {
-                    value: value,
-                    fmtValue: value,
-                    className: className,
-                }
+                return value
         }
     }
 }
