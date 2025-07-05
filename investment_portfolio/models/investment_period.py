@@ -173,7 +173,7 @@ class InvestmentPeriod(models.Model):
 
                 if not float_is_zero(end_series.position, precision_digits=end_series.company_currency_id.decimal_places):
                     values.append(end_series.position)
-                    dates.append(record.end_date)
+                    dates.append(end_date)
 
             annualized_irr = 0
             if values:
