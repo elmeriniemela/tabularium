@@ -19,7 +19,7 @@
                                 <div class="card-text m-2">
                                     <div class="row gx-0 gy-0 o_kpi_row">
                                         <div class="col-4">
-                                            <label>Total Position</label>
+                                            <label>Position</label>
                                         </div>
                                         <div class="col-8 text-end">
                                             <span t-esc="state.liquid.position.fmtValue"/>
@@ -27,7 +27,7 @@
                                     </div>
                                     <div class="row gx-0 gy-0 o_kpi_row">
                                         <div class="col-4">
-                                            <label>Total Profit</label>
+                                            <label>Profit</label>
                                         </div>
                                         <div class="col-8 text-end">
                                             <span t-esc="state.liquid.profit.fmtValue" t-att-class="state.liquid.profit.className"/>
@@ -52,7 +52,7 @@
                                             </div>
                                             <div class="col-8 text-end">
                                                 <span t-esc="record.last_price"/>
-                                                (<span t-esc="record.last_update"/>)
+                                                (<time class="timeago" t-att-datetime="record.last_update_iso" t-esc="record.last_update"/>)
                                             </div>
                                         </div>
                                         <div class="row gx-0 gy-0 o_kpi_row">

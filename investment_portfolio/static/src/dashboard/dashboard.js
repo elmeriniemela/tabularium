@@ -10,6 +10,8 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { formatMonetary, formatPercentage } from "@web/views/fields/formatters";
 import { timeago } from "@timeago_widget/timeago/widget"
+import { user } from "@web/core/user";
+const { DateTime } = luxon;
 
 class PieChart extends Component {
     static template = "investment_portfolio.PieChart";
@@ -86,6 +88,7 @@ class PositionDashboard extends Component {
             positions: [],
         });
         this.orm = useService("orm");
+        this.userTz = user.tz || luxon.Settings.defaultZone.name;
         this.refresh();
     }
 
@@ -164,12 +167,14 @@ class PositionDashboard extends Component {
 
             var last_price_own_currency = this.format("monetary", record.last_price_own_currency, {currencyId: record.company_currency_id})
             var last_price = this.format("monetary", record.last_price, {currencyId: record.currency_id})
+            var last_update_date = new Date(DateTime.fromSQL(record.last_update, { zone: "utc" }).setZone(this.userTz));
             positions.push({
                 id: record.id,
                 name: record.name,
                 hasPosition: record.position === 0 ? 1 : 0,
                 follow: record.follow ? 1 : 0,
-                last_update: timeago(new Date(record.last_update)),
+                last_update: timeago(last_update_date),
+                last_update_iso: last_update_date.toISOString(),
                 last_price: record.is_company_currency ? last_price_own_currency : `${last_price} / ${last_price_own_currency}`,
                 profit: this.formatField("monetary", record.profit, true),
                 profit_percent: this.formatField("percentage", record.profit_percent, true),
@@ -230,7 +235,7 @@ class PositionDashboard extends Component {
                 })
             default:
                 console.log(`Unknown type for format ${type}.`);
-                return value
+                return `${value}`
         }
     }
 }
