@@ -77,7 +77,7 @@
 
                                         <div class="row gx-0 gy-0 o_kpi_row">
                                             <div class="col-4">
-                                                <label>1 day</label>
+                                                <label>1 Day</label>
                                             </div>
                                             <div class="col-8 text-end">
                                                 <span t-esc="record.daily_price.fmtValue" t-att-class="record.daily_price.className"/>
@@ -101,7 +101,7 @@
                                         </div>
                                         <div class="row gx-0 gy-0 o_kpi_row">
                                             <div class="col-4">
-                                                <label>6 Monts</label>
+                                                <label>6 Months</label>
                                             </div>
                                             <div class="col-8 text-end">
                                                 <span t-esc="record.six_month_price.fmtValue" t-att-class="record.six_month_price.className"/>
@@ -117,7 +117,7 @@
                                         </div>
                                         <div class="row gx-0 gy-0 o_kpi_row">
                                             <div class="col-4">
-                                                <label>1 year</label>
+                                                <label>1 Year</label>
                                             </div>
                                             <div class="col-8 text-end">
                                                 <span t-esc="record.one_year_price.fmtValue" t-att-class="record.one_year_price.className"/>

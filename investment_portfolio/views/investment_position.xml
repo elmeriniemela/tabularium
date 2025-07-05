@@ -184,7 +184,7 @@
                         </page>
                         <page string="Thesis">
                             <field name="thesis_id"/>
-                            <field name="thesis2" invisible="not thesis_id"/>
+                            <field name="thesis" invisible="not thesis_id"/>
                         </page>
                     </notebook>
                 </sheet>
