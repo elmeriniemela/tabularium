@@ -166,13 +166,20 @@ class PositionDashboard extends Component {
 
 
     format(type, value, isProfit=false) {
-        let profitClass = isProfit ? value >= 0 ? "text-success" : "text-danger": '';
+        var className = '';
+        if (isProfit) {
+            if (value >= 0.0001) {
+                className = 'text-success';
+            } else if (value <= -0.0001) {
+                className = 'text-danger';
+            }
+        }
         switch (type) {
             case "percentage":
                 return {
                     value: value,
                     fmtValue: formatPercentage(value, 2),
-                    className: profitClass,
+                    className: className,
                 }
             case "monetary":
                 return {
@@ -181,17 +188,16 @@ class PositionDashboard extends Component {
                         currencyId: 1,
                         digits: 2,
                     }),
-                    className: profitClass,
+                    className: className,
                 }
             default:
                 console.log(`Unknown type for format ${type}.`);
                 return {
                     value: value,
                     fmtValue: value,
-                    className: profitClass,
+                    className: className,
                 }
         }
-
     }
 }
 
