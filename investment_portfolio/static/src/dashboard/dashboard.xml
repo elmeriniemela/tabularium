@@ -3,13 +3,13 @@
 
 
     <t t-name="investment_portfolio.PieChart">
-        <div class="o_dashboard_graph" t-att-style="props.style">
+        <div class="o_dashboard_graph o_pie_chart" t-att-style="props.style">
             <canvas t-ref="canvas"/>
         </div>
     </t>
 
     <t t-name="investment_portfolio.LineChart">
-        <div class="o_dashboard_graph" t-att-style="props.style">
+        <div class="o_dashboard_graph o_line_chart" t-att-style="props.style">
             <canvas t-ref="canvas"/>
         </div>
     </t>
@@ -18,8 +18,8 @@
         <div t-ref="root" style="overflow: auto; height: 100%;">
             <div class="m-2">
                 <div class="row gx-2 gy-2">
-                    <div class="col-sm-6 col-md-4 col-lg-3">
-                        <div class="card card-fixed-height">
+                    <div class="col-sm-6 col-lg-4 col-xxl-3">
+                        <div class="card o_dasboard_card">
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col">
@@ -42,8 +42,8 @@
                                             <span t-esc="state.liquid.position.fmtValue"/>
                                         </div>
                                     </div>
-                                    <div t-if="state.periods.length > 0" class="row gx-0 gy-0 o_kpi_row">
-                                        <t t-foreach="state.periods" t-as="record" t-key="record.id">
+                                    <t t-if="state.periods.length > 0">
+                                        <div  class="row gx-0 gy-0 o_kpi_row" t-foreach="state.periods" t-as="record" t-key="record.id">
                                             <div class="col-4">
                                                 <label t-esc="record.name"/>
                                             </div>
@@ -52,8 +52,8 @@
                                                 <span style="width: 15px;"> | </span>
                                                 <span style="width: 60px;" t-esc="record.annualized_irr.fmtValue" t-att-class="record.annualized_irr.className"/>
                                             </div>
-                                        </t>
-                                    </div>
+                                        </div>
+                                    </t>
                                     <div t-else="" class="row gx-0 gy-0 o_kpi_row">
                                         <div class="col-4">
                                             <label>Profit</label>
@@ -63,13 +63,13 @@
                                         </div>
                                     </div>
                                 </div>
-                                <PieChart labels="state.liquid.chart.labels" data="state.liquid.chart.data" title="state.liquid.chart.title" onPieSliceClick.bind="onPieSliceClick" style="'height: 400px;'" />
+                                <PieChart labels="state.liquid.chart.labels" data="state.liquid.chart.data" title="state.liquid.chart.title" onPieSliceClick.bind="onPieSliceClick" style="''" />
                             </div>
                         </div>
                     </div>
                     <t t-foreach="state.positions" t-as="record" t-key="record.id">
-                        <div class="col-sm-6 col-md-4 col-lg-3">
-                            <div class="card card-fixed-height">
+                        <div class="col-sm-6 col-lg-4 col-xxl-3">
+                            <div class="card o_dasboard_card">
                                 <div class="card-body">
                                     <div class="row">
                                         <div class="col">
@@ -163,7 +163,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <LineChart labels="record.chart.labels" data="record.chart.data" title="record.chart.title" label="record.chart.label" style="'height: 300px;'"/>
+                                    <LineChart labels="record.chart.labels" data="record.chart.data" title="record.chart.title" label="record.chart.label" style="''"/>
                                 </div>
                             </div>
                         </div>
