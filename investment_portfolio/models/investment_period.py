@@ -110,7 +110,8 @@ class InvestmentPeriod(models.Model):
         _logger.info(f"Compute period for: {records}")
         for record in records:
             start_date = record.start_date - relativedelta(days=1)
-            end_date = record.end_date if today > record.end_date else today
+            is_future = record.end_date >= today
+            end_date = today if is_future else record.end_date
 
             record.timeseries_ids = False
             record.transaction_ids = False
@@ -119,29 +120,47 @@ class InvestmentPeriod(models.Model):
             record.profit = 0.0
 
             domain = safe_eval(record.domain)
-            positions = record.env['investment.position'].search(domain)
+            posdomain = record.env['investment.position'].search(domain)
+
+
+            fnames = ['position', 'profit', 'company_currency_id', 'transaction_ids',]
+            all_starts = record.env['investment.timeseries'].search_fetch(
+                domain=[
+                    ('position_id', 'in', posdomain.ids),
+                    ('date', '=', start_date),
+                    ('company_id', '=', record.company_id.id),
+                ],
+                field_names=fnames,
+            )
+
+            all_ends = record.env['investment.timeseries'].search_fetch(
+                domain=[
+                    ('position_id', 'in', posdomain.ids),
+                    ('date', '=', end_date),
+                    ('company_id', '=', record.company_id.id),
+                ],
+                field_names=fnames,
+            )
+
+            if is_future:
+                for serie in all_ends:
+                    serie.price_id = self.env['investment.asset.price'].search([
+                        ('prediction', '=', False),
+                        ('asset_id', '=', serie.position_id.asset_id.id),
+                    ], limit=1, order='time desc') # update the latest price when not doing predictions.
+                all_ends._compute_timeseries_aggregate()
+
+            starts_map = {s.position_id: s for s in all_starts} # date_timeseries_unique
+            ends_map = {s.position_id: s for s in all_ends} # date_timeseries_unique
+
 
             values = []
             dates = []
-            for position in positions:
-                start_series = record.env['investment.timeseries'].search([
-                    ('position_id', '=', position.id),
-                    ('date', '=', start_date),
-                    ('company_id', '=', record.company_id.id),
-                ])
-                end_series = record.env['investment.timeseries'].search([
-                    ('position_id', '=', position.id),
-                    ('date', '=', end_date),
-                    ('company_id', '=', record.company_id.id),
-                ])
-                if end_date == today:
-                    for serie in end_series:
-                        serie.price_id = self.env['investment.asset.price'].search([
-                            ('prediction', '=', False),
-                            ('asset_id', '=', position.asset_id.id),
-                        ], limit=1, order='time desc') # update the latest price when not doing predictions.
-                    end_series._compute_timeseries_aggregate()
 
+            # import pdb; pdb.set_trace()
+            for pos in posdomain:
+                start_series = starts_map.get(pos, record.env['investment.timeseries'].browse())
+                end_series = ends_map.get(pos, record.env['investment.timeseries'].browse())
                 record.timeseries_ids += start_series + end_series
                 record.start_position += start_series.position
                 record.end_position += end_series.position
@@ -167,14 +186,14 @@ class InvestmentPeriod(models.Model):
                         sign = -1
 
                     if not float_is_zero(trans.payment, precision_digits=trans.company_currency_id.decimal_places):
-                        _logger.debug(f"{position.name}, {trans.ttype}: {sign * abs(trans.payment)}")
+                        # _logger.info(f"{pos.name}, {trans.ttype}: {sign * abs(trans.payment)}") # do not trigger unecdessary reads
                         values.append(sign * abs(trans.payment))
                         dates.append(trans.time.date())
 
                 if not float_is_zero(end_series.position, precision_digits=end_series.company_currency_id.decimal_places):
                     values.append(end_series.position)
                     close_on = record.end_date # might be far in the future
-                    if end_date == today:
+                    if is_future:
                         close_on = close_on.replace(year=today.year)
                     dates.append(close_on) # calculate as if we would closeed open positions at the end of the year. otherwise 1% gain in first day of the year, would result in 365% gain annualized which adds too much noise.
 
