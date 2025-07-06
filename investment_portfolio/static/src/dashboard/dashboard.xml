@@ -119,9 +119,9 @@
                                                 <label>1 Day</label>
                                             </div>
                                             <div class="col-8 text-end d-flex justify-content-end align-items-right">
-                                                <span t-esc="record.daily_profit.fmtValue" t-att-class="record.daily_profit.className"/>
+                                                <span t-esc="record.daily_profit.fmtValue" t-att-class="record.daily_profit.className" t-on-click="() => this.onClickProfitChange(record, 'daily_timeseries_id')"/>
                                                 <span style="width: 15px;"> | </span>
-                                                <span style="width: 60px;" t-esc="record.daily_price.fmtValue" t-att-class="record.daily_price.className"/>
+                                                <span style="width: 60px;" t-esc="record.daily_price.fmtValue" t-att-class="record.daily_price.className" t-on-click="() => this.onClickPriceChange(record, 'daily_price_id')"/>
                                             </div>
                                         </div>
                                         <div class="row gx-0 gy-0 o_kpi_row">
@@ -129,9 +129,9 @@
                                                 <label>1 Week</label>
                                             </div>
                                             <div class="col-8 text-end d-flex justify-content-end align-items-right">
-                                                <span t-esc="record.weekly_profit.fmtValue" t-att-class="record.weekly_profit.className"/>
+                                                <span t-esc="record.weekly_profit.fmtValue" t-att-class="record.weekly_profit.className" t-on-click="() => this.onClickProfitChange(record, 'weekly_timeseries_id')"/>
                                                 <span style="width: 15px;"> | </span>
-                                                <span style="width: 60px;" t-esc="record.weekly_price.fmtValue" t-att-class="record.weekly_price.className"/>
+                                                <span style="width: 60px;" t-esc="record.weekly_price.fmtValue" t-att-class="record.weekly_price.className" t-on-click="() => this.onClickPriceChange(record, 'weekly_price_id')"/>
                                             </div>
                                         </div>
                                         <div class="row gx-0 gy-0 o_kpi_row">
@@ -139,9 +139,9 @@
                                                 <label>1 Month</label>
                                             </div>
                                             <div class="col-8 text-end d-flex justify-content-end align-items-right">
-                                                <span t-esc="record.monthly_profit.fmtValue" t-att-class="record.monthly_profit.className"/>
+                                                <span t-esc="record.monthly_profit.fmtValue" t-att-class="record.monthly_profit.className" t-on-click="() => this.onClickProfitChange(record, 'monthly_timeseries_id')"/>
                                                 <span style="width: 15px;"> | </span>
-                                                <span style="width: 60px;" t-esc="record.monthly_price.fmtValue" t-att-class="record.monthly_price.className"/>
+                                                <span style="width: 60px;" t-esc="record.monthly_price.fmtValue" t-att-class="record.monthly_price.className" t-on-click="() => this.onClickPriceChange(record, 'monthly_price_id')"/>
                                             </div>
                                         </div>
                                         <div class="row gx-0 gy-0 o_kpi_row">
@@ -149,9 +149,9 @@
                                                 <label>6 Months</label>
                                             </div>
                                             <div class="col-8 text-end d-flex justify-content-end align-items-right">
-                                                <span t-esc="record.six_month_profit.fmtValue" t-att-class="record.six_month_profit.className"/>
+                                                <span t-esc="record.six_month_profit.fmtValue" t-att-class="record.six_month_profit.className"  t-on-click="() => this.onClickProfitChange(record, 'six_month_timeseries_id')"/>
                                                 <span style="width: 15px;"> | </span>
-                                                <span style="width: 60px;" t-esc="record.six_month_price.fmtValue" t-att-class="record.six_month_price.className"/>
+                                                <span style="width: 60px;" t-esc="record.six_month_price.fmtValue" t-att-class="record.six_month_price.className" t-on-click="() => this.onClickPriceChange(record, 'six_month_price_id')"/>
                                             </div>
                                         </div>
                                         <div class="row gx-0 gy-0 o_kpi_row">
@@ -159,9 +159,9 @@
                                                 <label>YTD</label>
                                             </div>
                                             <div class="col-8 text-end d-flex justify-content-end align-items-right">
-                                                <span t-esc="record.ytd_profit.fmtValue" t-att-class="record.ytd_profit.className"/>
+                                                <span t-esc="record.ytd_profit.fmtValue" t-att-class="record.ytd_profit.className"  t-on-click="() => this.onClickProfitChange(record, 'ytd_timeseries_id')"/>
                                                 <span style="width: 15px;"> | </span>
-                                                <span style="width: 60px;" t-esc="record.ytd_price.fmtValue" t-att-class="record.ytd_price.className"/>
+                                                <span style="width: 60px;" t-esc="record.ytd_price.fmtValue" t-att-class="record.ytd_price.className" t-on-click="() => this.onClickPriceChange(record, 'ytd_price_id')"/>
                                             </div>
                                         </div>
                                         <div class="row gx-0 gy-0 o_kpi_row">
@@ -169,9 +169,9 @@
                                                 <label>1 Year</label>
                                             </div>
                                             <div class="col-8 text-end d-flex justify-content-end align-items-right">
-                                                <span t-esc="record.one_year_profit.fmtValue" t-att-class="record.one_year_profit.className"/>
+                                                <span t-esc="record.one_year_profit.fmtValue" t-att-class="record.one_year_profit.className"  t-on-click="() => this.onClickProfitChange(record, 'one_year_timeseries_id')"/>
                                                 <span style="width: 15px;"> | </span>
-                                                <span style="width: 60px;" t-esc="record.one_year_price.fmtValue" t-att-class="record.one_year_price.className"/>
+                                                <span style="width: 60px;" t-esc="record.one_year_price.fmtValue" t-att-class="record.one_year_price.className" t-on-click="() => this.onClickPriceChange(record, 'one_year_price_id')"/>
                                             </div>
                                         </div>
                                     </div>

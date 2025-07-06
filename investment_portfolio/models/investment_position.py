@@ -141,6 +141,19 @@ class InvestmentPosition(models.Model):
     five_year_profit = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id')
     ten_year_profit = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id')
 
+
+    last_timeseries_id = fields.Many2one(compute='_compute_position_aggregate', store=True, comodel_name='investment.timeseries', index=True)
+    daily_timeseries_id = fields.Many2one(compute='_compute_position_aggregate', store=True, comodel_name='investment.timeseries', index=True)
+    weekly_timeseries_id = fields.Many2one(compute='_compute_position_aggregate', store=True, comodel_name='investment.timeseries', index=True)
+    monthly_timeseries_id = fields.Many2one(compute='_compute_position_aggregate', store=True, comodel_name='investment.timeseries', index=True)
+    three_month_timeseries_id = fields.Many2one(compute='_compute_position_aggregate', store=True, comodel_name='investment.timeseries', index=True)
+    six_month_timeseries_id = fields.Many2one(compute='_compute_position_aggregate', store=True, comodel_name='investment.timeseries', index=True)
+    ytd_timeseries_id = fields.Many2one(compute='_compute_position_aggregate', store=True, comodel_name='investment.timeseries', index=True)
+    one_year_timeseries_id = fields.Many2one(compute='_compute_position_aggregate', store=True, comodel_name='investment.timeseries', index=True)
+    three_year_timeseries_id = fields.Many2one(compute='_compute_position_aggregate', store=True, comodel_name='investment.timeseries', index=True)
+    five_year_timeseries_id = fields.Many2one(compute='_compute_position_aggregate', store=True, comodel_name='investment.timeseries', index=True)
+    ten_year_timeseries_id = fields.Many2one(compute='_compute_position_aggregate', store=True, comodel_name='investment.timeseries', index=True)
+
     is_cash = fields.Boolean(
         compute='_compute_is_cash',
     )
@@ -240,44 +253,45 @@ class InvestmentPosition(models.Model):
             profits[(serie.position_id.id, serie.date)] = serie
 
 
+        all_lasts = Serie.browse()
         for rec in self:
-            last = profits.get((rec.id, rec.last_price_id.date), Serie.browse())
-            if last:
-                last.refresh_price()
-                last._compute_timeseries_aggregate()
+            all_lasts += profits.get((rec.id, rec.last_price_id.date), Serie.browse())
 
-            daily = profits.get((rec.id, rec.asset_id.daily_price_id.date), Serie.browse())
-            rec.daily_profit = last.profit - daily.profit
+        all_lasts.refresh_price()
+        all_lasts._compute_timeseries_aggregate()
 
-            weekly = profits.get((rec.id, rec.asset_id.weekly_price_id.date), Serie.browse())
-            rec.weekly_profit = last.profit - weekly.profit
+        for rec in self:
+            rec.last_timeseries_id = profits.get((rec.id, rec.last_price_id.date), Serie.browse())
 
-            monthly = profits.get((rec.id, rec.asset_id.monthly_price_id.date), Serie.browse())
-            rec.monthly_profit = last.profit - monthly.profit
+            rec.daily_timeseries_id = profits.get((rec.id, rec.asset_id.daily_price_id.date), Serie.browse())
+            rec.daily_profit = rec.last_timeseries_id.profit - rec.daily_timeseries_id.profit
 
-            six_month = profits.get((rec.id, rec.asset_id.six_month_price_id.date), Serie.browse())
-            rec.six_month_profit = last.profit - six_month.profit
+            rec.weekly_timeseries_id = profits.get((rec.id, rec.asset_id.weekly_price_id.date), Serie.browse())
+            rec.weekly_profit = rec.last_timeseries_id.profit - rec.weekly_timeseries_id.profit
 
-            three_month = profits.get((rec.id, rec.asset_id.three_month_price_id.date), Serie.browse())
-            rec.three_month_profit = last.profit - three_month.profit
+            rec.monthly_timeseries_id = profits.get((rec.id, rec.asset_id.monthly_price_id.date), Serie.browse())
+            rec.monthly_profit = rec.last_timeseries_id.profit - rec.monthly_timeseries_id.profit
 
-            three_month = profits.get((rec.id, rec.asset_id.three_month_price_id.date), Serie.browse())
-            rec.three_month_profit = last.profit - three_month.profit
+            rec.three_month_timeseries_id = profits.get((rec.id, rec.asset_id.three_month_price_id.date), Serie.browse())
+            rec.three_month_profit = rec.last_timeseries_id.profit - rec.three_month_timeseries_id.profit
 
-            ytd = profits.get((rec.id, rec.asset_id.ytd_price_id.date), Serie.browse())
-            rec.ytd_profit = last.profit - ytd.profit
+            rec.six_month_timeseries_id = profits.get((rec.id, rec.asset_id.six_month_price_id.date), Serie.browse())
+            rec.six_month_profit = rec.last_timeseries_id.profit - rec.six_month_timeseries_id.profit
 
-            one_year = profits.get((rec.id, rec.asset_id.one_year_price_id.date), Serie.browse())
-            rec.one_year_profit = last.profit - one_year.profit
+            rec.ytd_timeseries_id = profits.get((rec.id, rec.asset_id.ytd_price_id.date), Serie.browse())
+            rec.ytd_profit = rec.last_timeseries_id.profit - rec.ytd_timeseries_id.profit
 
-            three_year = profits.get((rec.id, rec.asset_id.three_year_price_id.date), Serie.browse())
-            rec.three_year_profit = last.profit - three_year.profit
+            rec.one_year_timeseries_id = profits.get((rec.id, rec.asset_id.one_year_price_id.date), Serie.browse())
+            rec.one_year_profit = rec.last_timeseries_id.profit - rec.one_year_timeseries_id.profit
 
-            five_year = profits.get((rec.id, rec.asset_id.five_year_price_id.date), Serie.browse())
-            rec.five_year_profit = last.profit - five_year.profit
+            rec.three_year_timeseries_id = profits.get((rec.id, rec.asset_id.three_year_price_id.date), Serie.browse())
+            rec.three_year_profit = rec.last_timeseries_id.profit - rec.three_year_timeseries_id.profit
 
-            ten_year = profits.get((rec.id, rec.asset_id.ten_year_price_id.date), Serie.browse())
-            rec.ten_year_profit = last.profit - ten_year.profit
+            rec.five_year_timeseries_id = profits.get((rec.id, rec.asset_id.five_year_price_id.date), Serie.browse())
+            rec.five_year_profit = rec.last_timeseries_id.profit - rec.five_year_timeseries_id.profit
+
+            rec.ten_year_timeseries_id = profits.get((rec.id, rec.asset_id.ten_year_price_id.date), Serie.browse())
+            rec.ten_year_profit = rec.last_timeseries_id.profit - rec.ten_year_timeseries_id.profit
 
 
     def recompute_value(self):
@@ -300,6 +314,31 @@ class InvestmentPosition(models.Model):
         assets = records.mapped('asset_id').filtered(lambda a: a.sudo().endpoint_id.state == 'active')
         assets.run_integration()
         _logger.info("Price refresed for %s assets", len(assets))
+
+
+
+    def action_show_price_change(self, field):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Price change'),
+            'res_model': 'investment.asset.price',
+            'view_mode': 'list',
+            'views': [[False, 'list'], [False, 'form']],
+            'domain': [('id', 'in', (self.asset_id[field] + self.asset_id.last_price_id).ids)],
+        }
+
+    def action_show_profit_change(self, field):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Investment Timeseries'),
+            'res_model': 'investment.timeseries',
+            'view_mode': 'list',
+            'views': [[False, 'list'], [False, 'form']],
+            'domain': [('id', 'in', (self[field] + self.last_timeseries_id).ids)],
+        }
+
 
 
     def generate_timeseries(self):

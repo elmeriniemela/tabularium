@@ -180,6 +180,20 @@ class PositionDashboard extends Component {
         });
     }
 
+    async onClickPriceChange(record, field) {
+        var prom = this.orm.call("investment.position", "action_show_price_change", [[record.id], field]);
+        prom.then((response) => {
+            this.action.doAction(response);
+        });
+    }
+
+    async onClickProfitChange(record, field) {
+        var prom = this.orm.call("investment.position", "action_show_profit_change", [[record.id], field]);
+        prom.then((response) => {
+            this.action.doAction(response);
+        });
+    }
+
     async onClickRefreshPrice(record) {
         var prom = this.orm.call("investment.position", "run_integration", [[record.id]]);
         prom.then((response) => {
