@@ -95,13 +95,14 @@
                         <page string="Other Info">
                             <group>
                                 <group>
+                                    <field name="last_price_id" domain="[('asset_id', '=', id), ('prediction', '=', False)]"/>
                                     <field name="daily_price_id" domain="[('asset_id', '=', id), ('prediction', '=', False)]"/>
                                     <field name="weekly_price_id" domain="[('asset_id', '=', id), ('prediction', '=', False)]"/>
                                     <field name="monthly_price_id" domain="[('asset_id', '=', id), ('prediction', '=', False)]"/>
                                     <field name="three_month_price_id" domain="[('asset_id', '=', id), ('prediction', '=', False)]"/>
-                                    <field name="six_month_price_id" domain="[('asset_id', '=', id), ('prediction', '=', False)]"/>
                                 </group>
                                 <group>
+                                    <field name="six_month_price_id" domain="[('asset_id', '=', id), ('prediction', '=', False)]"/>
                                     <field name="ytd_price_id" domain="[('asset_id', '=', id), ('prediction', '=', False)]"/>
                                     <field name="one_year_price_id" domain="[('asset_id', '=', id), ('prediction', '=', False)]"/>
                                     <field name="three_year_price_id" domain="[('asset_id', '=', id), ('prediction', '=', False)]"/>

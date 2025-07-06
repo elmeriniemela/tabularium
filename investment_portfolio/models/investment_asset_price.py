@@ -37,9 +37,86 @@ class InvestmentAssetPrice(models.Model):
 
     display_name = fields.Char(compute='_compute_display_name', store=True)
 
+    split_ids = fields.One2many(
+        comodel_name='investment.asset.split',
+        inverse_name='price_id',
+        readonly=True,
+    )
+
+    timeseries_ids = fields.One2many(
+        comodel_name='investment.timeseries',
+        inverse_name='price_id',
+        readonly=True,
+    )
+
+    asset_ids = fields.Many2many(
+        comodel_name='investment.asset',
+        compute='_compute_asset_ids',
+        readonly=True,
+
+    )
+
     _sql_constraints = [
         ('unique_price', 'unique(asset_id, time)', 'Price for this time is already configured!'),
     ]
+
+
+    def action_view_assets(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Investment Asset'),
+            'res_model': 'investment.asset',
+            'view_mode': 'list',
+            'views': [[False, 'list'], [False, 'form']],
+            'domain': [('id', 'in', self.mapped('asset_ids').ids)],
+        }
+
+    def action_view_timeseries(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Investment Timeseries'),
+            'res_model': 'investment.timeseries',
+            'view_mode': 'list',
+            'views': [[False, 'list'], [False, 'form']],
+            'domain': [('id', 'in', self.mapped('timeseries_ids').ids)],
+        }
+
+    def action_view_splits(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Investment Split'),
+            'res_model': 'investment.split',
+            'view_mode': 'list',
+            'views': [[False, 'list'], [False, 'form']],
+            'domain': [('id', 'in', self.mapped('split_ids').ids)],
+        }
+
+
+    def _compute_asset_ids(self):
+        Asset = self.env["investment.asset"].browse()
+        price_field_maps = {}
+        price_fields = [
+            'last_price_id', 'daily_price_id', 'weekly_price_id', 'monthly_price_id', 'three_month_price_id',
+            'six_month_price_id', 'ytd_price_id', 'one_year_price_id', 'three_year_price_id', 'five_year_price_id',
+            'ten_year_price_id',
+        ]
+        for field in price_fields:
+            price_field_maps[field] = dict(Asset._read_group(
+                domain=[
+                    (field, 'in', self.ids),
+                ],
+                groupby=[field],
+                aggregates=["id:recordset"],
+            ))
+
+
+        for record in self:
+            assert len(Asset) == 0
+            assets = Asset.browse()
+            for field in price_fields:
+                assets += price_field_maps[field].get(record, Asset)
+            record.asset_ids = assets
+
 
     def _compute_date(self):
         for record in self:

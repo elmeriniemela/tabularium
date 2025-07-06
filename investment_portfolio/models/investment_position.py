@@ -230,54 +230,53 @@ class InvestmentPosition(models.Model):
             domain=[
                 ('position_id', 'in', self.ids),
                 ('date', 'in', dates),
-                ('company_id', 'in', self.company_id.ids),
             ],
-            field_names=['company_id', 'position_id', 'date', 'profit'],
+            field_names=['position_id', 'date', 'profit'],
         )
 
 
         profits = {}
         for serie in res:
-            profits[(serie.company_id.id, serie.position_id.id, serie.date)] = serie
+            profits[(serie.position_id.id, serie.date)] = serie
 
 
         for rec in self:
-            last = profits.get((rec.company_id.id, rec.id, rec.last_price_id.date), Serie.browse())
+            last = profits.get((rec.id, rec.last_price_id.date), Serie.browse())
             if last:
                 last.refresh_price()
                 last._compute_timeseries_aggregate()
 
-            daily = profits.get((rec.company_id.id, rec.id, rec.asset_id.daily_price_id.date), Serie.browse())
+            daily = profits.get((rec.id, rec.asset_id.daily_price_id.date), Serie.browse())
             rec.daily_profit = last.profit - daily.profit
 
-            weekly = profits.get((rec.company_id.id, rec.id, rec.asset_id.weekly_price_id.date), Serie.browse())
+            weekly = profits.get((rec.id, rec.asset_id.weekly_price_id.date), Serie.browse())
             rec.weekly_profit = last.profit - weekly.profit
 
-            monthly = profits.get((rec.company_id.id, rec.id, rec.asset_id.monthly_price_id.date), Serie.browse())
+            monthly = profits.get((rec.id, rec.asset_id.monthly_price_id.date), Serie.browse())
             rec.monthly_profit = last.profit - monthly.profit
 
-            six_month = profits.get((rec.company_id.id, rec.id, rec.asset_id.six_month_price_id.date), Serie.browse())
+            six_month = profits.get((rec.id, rec.asset_id.six_month_price_id.date), Serie.browse())
             rec.six_month_profit = last.profit - six_month.profit
 
-            three_month = profits.get((rec.company_id.id, rec.id, rec.asset_id.three_month_price_id.date), Serie.browse())
+            three_month = profits.get((rec.id, rec.asset_id.three_month_price_id.date), Serie.browse())
             rec.three_month_profit = last.profit - three_month.profit
 
-            three_month = profits.get((rec.company_id.id, rec.id, rec.asset_id.three_month_price_id.date), Serie.browse())
+            three_month = profits.get((rec.id, rec.asset_id.three_month_price_id.date), Serie.browse())
             rec.three_month_profit = last.profit - three_month.profit
 
-            ytd = profits.get((rec.company_id.id, rec.id, rec.asset_id.ytd_price_id.date), Serie.browse())
+            ytd = profits.get((rec.id, rec.asset_id.ytd_price_id.date), Serie.browse())
             rec.ytd_profit = last.profit - ytd.profit
 
-            one_year = profits.get((rec.company_id.id, rec.id, rec.asset_id.one_year_price_id.date), Serie.browse())
+            one_year = profits.get((rec.id, rec.asset_id.one_year_price_id.date), Serie.browse())
             rec.one_year_profit = last.profit - one_year.profit
 
-            three_year = profits.get((rec.company_id.id, rec.id, rec.asset_id.three_year_price_id.date), Serie.browse())
+            three_year = profits.get((rec.id, rec.asset_id.three_year_price_id.date), Serie.browse())
             rec.three_year_profit = last.profit - three_year.profit
 
-            five_year = profits.get((rec.company_id.id, rec.id, rec.asset_id.five_year_price_id.date), Serie.browse())
+            five_year = profits.get((rec.id, rec.asset_id.five_year_price_id.date), Serie.browse())
             rec.five_year_profit = last.profit - five_year.profit
 
-            ten_year = profits.get((rec.company_id.id, rec.id, rec.asset_id.ten_year_price_id.date), Serie.browse())
+            ten_year = profits.get((rec.id, rec.asset_id.ten_year_price_id.date), Serie.browse())
             rec.ten_year_profit = last.profit - ten_year.profit
 
 

@@ -20,15 +20,27 @@
         <field name="arch" type="xml">
             <form>
                 <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" type="object" icon="fa-tasks" name="action_view_assets" invisible="not asset_ids">
+                            <field name="asset_ids" widget="statinfo" string="Assets"/>
+                        </button>
+                        <button class="oe_stat_button" type="object" icon="fa-tasks" name="action_view_timeseries" invisible="not timeseries_ids">
+                            <field name="timeseries_ids" widget="statinfo" string="Timeseries"/>
+                        </button>
+                        <button class="oe_stat_button" type="object" icon="fa-tasks" name="action_view_splits" invisible="not split_ids">
+                            <field name="split_ids" widget="statinfo" string="Splits"/>
+                        </button>
+                    </div>
                     <group>
                         <group>
                             <field name="time"/>
                             <field name="price"/>
                             <field name="prediction"/>
+                            <field name="interpolated"/>
                         </group>
                         <group>
-                            <field name="currency_id" invisible="not context.get('show_all')"/>
-                            <field name="asset_id" invisible="not context.get('show_all')"/>
+                            <field name="currency_id"/>
+                            <field name="asset_id"/>
                         </group>
                     </group>
                 </sheet>
