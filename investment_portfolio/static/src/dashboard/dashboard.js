@@ -232,9 +232,11 @@ class PositionDashboard extends Component {
 
 
     }
-    async refreshPositions() {
-        var results = await this.orm.call("investment.position", "web_search_read", [], {
-            domain: [["liquid", "=", true]],
+
+
+    async fetchPositions(domain=[]) {
+        return this.orm.call("investment.position", "web_search_read", [], {
+            domain: ([["liquid", "=", true]].concat(domain)),
             order: "position DESC",
             specification: {
                 id: {},
@@ -266,6 +268,49 @@ class PositionDashboard extends Component {
                 portfolio_id: { fields: { display_name: {} } },
             }
         });
+    }
+
+    recToPosition(record) {
+        var last_price_own_currency = this.format("monetary", record.last_price_own_currency, {currencyId: record.company_currency_id})
+        var last_price = this.format("monetary", record.last_price, {currencyId: record.currency_id})
+        var last_update_date = new Date(DateTime.fromSQL(record.last_update, { zone: "utc" }).setZone(this.userTz));
+        return {
+            id: record.id,
+            name: record.name,
+            hasPosition: record.position === 0 ? 0 : 1,
+            hasEndpoint: record.endpoint_id ? 1 : 0,
+            follow: record.follow ? 1 : 0,
+            last_update: `(${timeago(last_update_date)})`,
+            last_update_iso: last_update_date.toISOString(),
+            last_price: record.is_company_currency ? last_price_own_currency : `${last_price} / ${last_price_own_currency}`,
+            profit: this.formatField("monetary", record.profit, true),
+            profit_percent: this.formatField("percentage", record.profit_percent, true),
+            position: this.formatField("monetary", record.position),
+            mover: Math.abs(record.daily_price* Math.max(record.position, 1)), // for sorting
+            daily_price: this.formatField("percentage", record.daily_price, true),
+            weekly_price: this.formatField("percentage", record.weekly_price, true),
+            monthly_price: this.formatField("percentage", record.monthly_price, true),
+            six_month_price: this.formatField("percentage", record.six_month_price, true),
+            ytd_price: this.formatField("percentage", record.ytd_price, true),
+            one_year_price: this.formatField("percentage", record.one_year_price, true),
+            daily_profit: this.formatField("monetary", record.daily_profit, true, {currencyId: record.company_currency_id}),
+            weekly_profit: this.formatField("monetary", record.weekly_profit, true, {currencyId: record.company_currency_id}),
+            monthly_profit: this.formatField("monetary", record.monthly_profit, true, {currencyId: record.company_currency_id}),
+            six_month_profit: this.formatField("monetary", record.six_month_profit, true, {currencyId: record.company_currency_id}),
+            ytd_profit: this.formatField("monetary", record.ytd_profit, true, {currencyId: record.company_currency_id}),
+            one_year_profit: this.formatField("monetary", record.one_year_profit, true, {currencyId: record.company_currency_id}),
+            chart: {
+                data: record.chart_one_month.data,
+                labels: record.chart_one_month.labels,
+                title: _t('1 Month'),
+                label: _t('Price'),
+            }
+        }
+
+    }
+
+    async refreshPositions() {
+        var results = await this.fetchPositions();
         let positions = [];
         let pdict = {};
         let total_position = 0.0;
@@ -283,43 +328,8 @@ class PositionDashboard extends Component {
                 obj.id = pid;
                 pdict[pid] = obj;
             }
-
-            var last_price_own_currency = this.format("monetary", record.last_price_own_currency, {currencyId: record.company_currency_id})
-            var last_price = this.format("monetary", record.last_price, {currencyId: record.currency_id})
-            var last_update_date = new Date(DateTime.fromSQL(record.last_update, { zone: "utc" }).setZone(this.userTz));
             if (record.follow) {
-                positions.push({
-                    id: record.id,
-                    name: record.name,
-                    hasPosition: record.position === 0 ? 0 : 1,
-                    hasEndpoint: record.endpoint_id ? 1 : 0,
-                    follow: record.follow ? 1 : 0,
-                    last_update: `(${timeago(last_update_date)})`,
-                    last_update_iso: last_update_date.toISOString(),
-                    last_price: record.is_company_currency ? last_price_own_currency : `${last_price} / ${last_price_own_currency}`,
-                    profit: this.formatField("monetary", record.profit, true),
-                    profit_percent: this.formatField("percentage", record.profit_percent, true),
-                    position: this.formatField("monetary", record.position),
-                    mover: Math.abs(record.daily_price* Math.max(record.position, 1)), // for sorting
-                    daily_price: this.formatField("percentage", record.daily_price, true),
-                    weekly_price: this.formatField("percentage", record.weekly_price, true),
-                    monthly_price: this.formatField("percentage", record.monthly_price, true),
-                    six_month_price: this.formatField("percentage", record.six_month_price, true),
-                    ytd_price: this.formatField("percentage", record.ytd_price, true),
-                    one_year_price: this.formatField("percentage", record.one_year_price, true),
-                    daily_profit: this.formatField("monetary", record.daily_profit, true, {currencyId: record.company_currency_id}),
-                    weekly_profit: this.formatField("monetary", record.weekly_profit, true, {currencyId: record.company_currency_id}),
-                    monthly_profit: this.formatField("monetary", record.monthly_profit, true, {currencyId: record.company_currency_id}),
-                    six_month_profit: this.formatField("monetary", record.six_month_profit, true, {currencyId: record.company_currency_id}),
-                    ytd_profit: this.formatField("monetary", record.ytd_profit, true, {currencyId: record.company_currency_id}),
-                    one_year_profit: this.formatField("monetary", record.one_year_profit, true, {currencyId: record.company_currency_id}),
-                    chart: {
-                        data: record.chart_one_month.data,
-                        labels: record.chart_one_month.labels,
-                        title: _t('1 Month'),
-                        label: _t('Price'),
-                    }
-                });
+                positions.push(this.recToPosition(record));
             }
         }
 
