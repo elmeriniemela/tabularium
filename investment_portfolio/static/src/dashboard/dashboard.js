@@ -103,6 +103,7 @@ class LineChart extends Component {
                         maintainAspectRatio: false,
                         plugins: {
                             legend: {
+                                display: false,
                                 position: 'bottom',
                             },
                             title: {
@@ -172,7 +173,7 @@ class PositionDashboard extends Component {
         });
     }
 
-    async onClickRefreshAll(record) {
+    async onClickRefreshAll() {
         var ids = this.state.positions.filter(p => p.hasPosition).map(p => p.id);;
         var prom = this.orm.call("investment.position", "run_integration", [ids]);
         prom.then(() => {
@@ -261,12 +262,14 @@ class PositionDashboard extends Component {
                 six_month_price: {},
                 ytd_price: {},
                 one_year_price: {},
+                five_year_price: {},
                 daily_profit: {},
                 weekly_profit: {},
                 monthly_profit: {},
                 six_month_profit: {},
                 ytd_profit: {},
                 one_year_profit: {},
+                five_year_profit: {},
                 chart_one_month: {},
                 portfolio_id: { fields: { display_name: {} } },
             }
@@ -296,12 +299,14 @@ class PositionDashboard extends Component {
             six_month_price: this.formatField("percentage", record.six_month_price, true),
             ytd_price: this.formatField("percentage", record.ytd_price, true),
             one_year_price: this.formatField("percentage", record.one_year_price, true),
+            five_year_price: this.formatField("percentage", record.five_year_price, true),
             daily_profit: this.formatField("monetary", record.daily_profit, true, {currencyId: record.company_currency_id}),
             weekly_profit: this.formatField("monetary", record.weekly_profit, true, {currencyId: record.company_currency_id}),
             monthly_profit: this.formatField("monetary", record.monthly_profit, true, {currencyId: record.company_currency_id}),
             six_month_profit: this.formatField("monetary", record.six_month_profit, true, {currencyId: record.company_currency_id}),
             ytd_profit: this.formatField("monetary", record.ytd_profit, true, {currencyId: record.company_currency_id}),
             one_year_profit: this.formatField("monetary", record.one_year_profit, true, {currencyId: record.company_currency_id}),
+            five_year_profit: this.formatField("monetary", record.five_year_profit, true, {currencyId: record.company_currency_id}),
             chart: {
                 data: record.chart_one_month.data,
                 labels: record.chart_one_month.labels,
@@ -370,7 +375,12 @@ class PositionDashboard extends Component {
     format(type, value, options = {}) {
         switch (type) {
             case "percentage":
-                return formatPercentage(value, options.digits || 2)
+                var defaultDigits = [2, 2];
+                if (Math.abs(value) >= 10) {
+                    defaultDigits = [0, 0];
+                    value = Number.parseFloat((value*100).toFixed(0)) / 100
+                }
+                return formatPercentage(value, options.digits || defaultDigits)
             case "monetary":
                 var defaultDigits = [2, 2];
                 if (Math.abs(value) >= 1_000) {

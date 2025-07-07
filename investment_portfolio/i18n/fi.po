@@ -86,6 +86,8 @@ msgid "4 Years"
 msgstr "4 vuotta"
 
 #. module: investment_portfolio
+#. odoo-javascript
+#: code:addons/investment_portfolio/static/src/dashboard/dashboard.xml:0
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__five_year_price
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__five_year_price
 #: model_terms:ir.ui.view,arch_db:investment_portfolio.asset_transaction_search
