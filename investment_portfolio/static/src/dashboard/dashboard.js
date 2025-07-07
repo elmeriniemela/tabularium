@@ -195,9 +195,12 @@ class PositionDashboard extends Component {
     }
 
     async onClickRefreshPrice(record) {
-        var prom = this.orm.call("investment.position", "run_integration", [[record.id]]);
-        prom.then((response) => {
-            this.refreshPositions();
+        var prom = this.fetchPositions([['id', '=', record.id]], true);
+        prom.then((results) => {
+            for (const record of results.records) {
+                var update = this.state.positions.find((pos) => pos.id === record.id) // hash map would be faster, but there aren't more than 100's of positions to track usually
+                Object.assign(update, this.recToPosition(record))
+            }
         })
     }
 
@@ -234,10 +237,10 @@ class PositionDashboard extends Component {
     }
 
 
-    async fetchPositions(domain=[]) {
-        return this.orm.call("investment.position", "web_search_read", [], {
+    async fetchPositions(domain=[], run_integration=false) {
+        return this.orm.call("investment.position", "get_dashboard", [], {
             domain: ([["liquid", "=", true]].concat(domain)),
-            order: "position DESC",
+            run_integration: run_integration,
             specification: {
                 id: {},
                 name: {},

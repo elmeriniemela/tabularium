@@ -726,3 +726,12 @@ class InvestmentPosition(models.Model):
 
         for record in self:
             record.chart_one_month = per_asset.get(record.asset_id.id, {'data': [], 'labels': []})
+
+
+    @api.model
+    def get_dashboard(self, domain, specification, offset=0, limit=None, order=None, count_limit=None, run_integration=False):
+        records = self.search_fetch(domain, specification.keys(), offset=offset, limit=limit, order=order)
+        if run_integration:
+            records.run_integration()
+        values_records = records.web_read(specification)
+        return self._format_web_search_read_results(domain, values_records, offset, limit, count_limit)
