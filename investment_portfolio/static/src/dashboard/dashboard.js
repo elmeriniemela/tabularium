@@ -292,7 +292,7 @@ class PositionDashboard extends Component {
             profit: this.formatField("monetary", record.profit, true),
             profit_percent: this.formatField("percentage", record.profit_percent, true),
             position: this.formatField("monetary", record.position),
-            mover: Math.abs(record.daily_price* Math.max(record.position, 1)), // for sorting
+            mover: Math.abs(record.daily_price) * Math.max(Math.abs(record.position), 1), // for sorting
             daily_price: this.formatField("percentage", record.daily_price, true),
             weekly_price: this.formatField("percentage", record.weekly_price, true),
             monthly_price: this.formatField("percentage", record.monthly_price, true),
