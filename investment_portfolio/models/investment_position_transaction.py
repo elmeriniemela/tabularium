@@ -134,7 +134,8 @@ class InvestmentPositionTransaction(models.Model):
     @api.onchange('quantity')
     def _onchange_quantity(self):
         if not self.payment and not self.ids:
-            self.payment = abs(self.quantity) * self.position_id.last_price_own_currency
+            self.payment_currency = abs(self.quantity) * self.exchange_rate
+            self._inverse_payment_currency()
 
     def _compute_display_name(self):
         for record in self:

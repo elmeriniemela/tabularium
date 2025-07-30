@@ -7,7 +7,8 @@
                 <field name="position_id" optional="hide"/>
                 <field name="time"  optional="show"/>
                 <field name="quantity" sum="Total"  optional="show"/>
-                <field name="payment" sum="Total" optional="show"/>
+                <field name="payment_currency" optional="show"/>
+                <field name="payment" sum="Total" optional="hide"/>
                 <field name="ttype" optional="show"/>
                 <field name="cash_flow" optional="hide" sum="Total"/>
                 <field name="description" optional="show"/>
