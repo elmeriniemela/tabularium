@@ -121,6 +121,8 @@ class InvestmentPositionMove(models.Model):
     @api.depends('transaction_ids')
     def _compute_profit(self):
         for move in self:
-            move.profit = sum(move.transaction_ids.mapped('profit'))
+            tx = move.transaction_ids
+            tx._compute_profit() # for some reason, we need to call it here when zeroing transaction values from move form.
+            move.profit = sum(tx.mapped('profit'))
 
 

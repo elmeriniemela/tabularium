@@ -56,8 +56,8 @@
         <field name="model">investment.position.move</field>
         <field name="arch" type="xml">
             <search>
-                <field name="name"/>
                 <field name="position_ids"/>
+                <field name="name"/>
                 <separator/>
                 <filter name="date_filter" date="time"/>
                 <separator/>
