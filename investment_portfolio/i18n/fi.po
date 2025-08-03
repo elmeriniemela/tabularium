@@ -1000,7 +1000,9 @@ msgstr "Sijoitus aikasarjat"
 
 #. module: investment_portfolio
 #. odoo-python
+#: code:addons/investment_portfolio/models/investment_asset_price.py:0
 #: code:addons/investment_portfolio/models/investment_period.py:0
+#: code:addons/investment_portfolio/models/investment_position.py:0
 msgid "Investment Timeseries"
 msgstr "Sijoitus aikasarja"
 
@@ -2270,6 +2272,21 @@ msgstr "Tuotto/kustannus"
 #: model:ir.model.fields,field_description:investment_portfolio.field_investment_asset__ytd_price_id
 msgid "Ytd Price"
 msgstr "YTD hinta"
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__ytd_profit
+msgid "Ytd Profit"
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.model.fields,field_description:investment_portfolio.field_investment_position__ytd_timeseries_id
+msgid "Ytd Timeseries"
+msgstr ""
+
+#. module: investment_portfolio
+#: model:ir.model,name:investment_portfolio.model_investment_period_position
+msgid "investment.period.position"
+msgstr ""
 
 #. module: investment_portfolio
 #. odoo-python
