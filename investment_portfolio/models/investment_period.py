@@ -15,6 +15,7 @@ _logger = logging.getLogger(__name__)
 
 class InvestmentPeriod(models.Model):
     _name = 'investment.period.position'
+    _description = 'Investment Period Position'
     _rec_name = 'position_id'
     _order = 'profit, id'
 
