@@ -1,0 +1,49 @@
+<odoo>
+    <record id="period_position_tree" model="ir.ui.view">
+        <field name="name">investment.period.position.list</field>
+        <field name="model">investment.period.position</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="period_id" optional="hide"/>
+                <field name="position_id" optional="show"/>
+                <field name="profit" optional="show"  decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0"/>
+                <field name="company_currency_id" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="period_position_form" model="ir.ui.view">
+        <field name="name">investment.period.position.form</field>
+        <field name="model">investment.period.position</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="period_id"/>
+                        <field name="position_id"/>
+                        <field name="profit"  decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0"/>
+                        <field name="company_currency_id"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="period_position_search" model="ir.ui.view">
+        <field name="name">investment.period.position.search</field>
+        <field name="model">investment.period.position</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="position_id"/>
+            </search>
+        </field>
+    </record>
+
+
+    <record id="action_period_positions" model="ir.actions.act_window">
+        <field name="name">Period Positions</field>
+        <field name="res_model">investment.period.position</field>
+        <field name="view_mode">list,form,graph</field>
+    </record>
+
+</odoo>

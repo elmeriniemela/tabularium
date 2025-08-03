@@ -26,6 +26,9 @@
             <form>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" type="object" icon="fa-tasks" name="action_view_positions">
+                            <field name="count_positions" widget="statinfo" string="Positions"/>
+                        </button>
                         <button class="oe_stat_button" type="object" icon="fa-tasks" name="action_view_timeseries">
                             <field name="count_timeseries" widget="statinfo" string="Timeseries"/>
                         </button>

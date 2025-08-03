@@ -8,7 +8,36 @@ from odoo.tools.safe_eval import safe_eval
 import logging
 from psycopg2 import OperationalError
 
+from collections import defaultdict
+
 _logger = logging.getLogger(__name__)
+
+
+class InvestmentPeriod(models.Model):
+    _name = 'investment.period.position'
+    _rec_name = 'position_id'
+    _order = 'profit, id'
+
+    company_id = fields.Many2one(related='period_id.company_id')
+    company_currency_id = fields.Many2one(related='company_id.currency_id', string="Company Currency")
+
+    position_id = fields.Many2one(
+        comodel_name='investment.position',
+        required=True,
+        readonly=True,
+        ondelete='cascade',
+    )
+
+    period_id = fields.Many2one(
+        comodel_name='investment.period',
+        required=True,
+        readonly=True,
+        ondelete='cascade',
+    )
+
+    profit = fields.Monetary(currency_field='company_currency_id')
+
+
 
 class InvestmentPeriod(models.Model):
     _name = 'investment.period'
@@ -41,8 +70,10 @@ class InvestmentPeriod(models.Model):
 
     timeseries_ids = fields.Many2many(comodel_name='investment.timeseries', compute='_compute_period', store=True)
     transaction_ids = fields.Many2many(comodel_name='investment.position.transaction', compute='_compute_period', store=True)
+    position_ids = fields.One2many(comodel_name='investment.period.position', inverse_name='period_id', compute='_compute_period', store=True)
     count_timeseries = fields.Integer(compute='_compute_period', store=True)
     count_transactions = fields.Integer(compute='_compute_period', store=True)
+    count_positions = fields.Integer(compute='_compute_period', store=True)
     start_position = fields.Monetary(compute='_compute_period', currency_field='company_currency_id', store=True)
     end_position = fields.Monetary(compute='_compute_period', currency_field='company_currency_id', store=True)
     profit = fields.Monetary(compute='_compute_period', currency_field='company_currency_id', store=True, tracking=True)
@@ -70,23 +101,36 @@ class InvestmentPeriod(models.Model):
 
 
     def action_view_timeseries(self):
+        records = self.mapped('timeseries_ids')
         return {
             'type': 'ir.actions.act_window',
             'name': _('Investment Timeseries'),
-            'res_model': 'investment.timeseries',
+            'res_model': records._name,
             'view_mode': 'list',
             'views': [[False, 'list'], [False, 'form']],
-            'domain': [('id', 'in', self.mapped('timeseries_ids').ids)],
+            'domain': [('id', 'in', records.ids)],
         }
 
     def action_view_transactions(self):
+        records = self.mapped('transaction_ids')
         return {
             'type': 'ir.actions.act_window',
             'name': _('Investment Transactions'),
-            'res_model': 'investment.position.transaction',
+            'res_model': records._name,
             'view_mode': 'list',
             'views': [[False, 'list'], [False, 'form']],
-            'domain': [('id', 'in', self.mapped('transaction_ids').ids)],
+            'domain': [('id', 'in', records.ids)],
+        }
+
+    def action_view_positions(self):
+        records = self.mapped('position_ids')
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Investment Positions'),
+            'res_model': records._name,
+            'view_mode': 'list',
+            'views': [[False, 'list'], [False, 'form']],
+            'domain': [('id', 'in', records.ids)],
         }
 
 
@@ -155,6 +199,8 @@ class InvestmentPeriod(models.Model):
             values = []
             dates = []
 
+            positions = defaultdict(float)
+
 
             txs = record.env['investment.position.transaction'].browse().sudo()
             srs = Serie.browse()
@@ -168,6 +214,7 @@ class InvestmentPeriod(models.Model):
 
 
                 if not float_is_zero(start_series.position, precision_digits=decimal_places):
+                    positions[start_series.position_id] += -start_series.position
                     values.append(-start_series.position)
                     dates.append(start_date)
 
@@ -187,11 +234,13 @@ class InvestmentPeriod(models.Model):
 
                     if not float_is_zero(trans.payment, precision_digits=decimal_places):
                         # _logger.info(f"{pos.name}, {trans.ttype}: {sign * abs(trans.payment)}") # do not trigger unecdessary reads
+                        positions[trans.position_id] += sign * abs(trans.payment)
                         values.append(sign * abs(trans.payment))
                         dates.append(trans.time.date())
 
                 if not float_is_zero(end_series.position, precision_digits=decimal_places):
                     values.append(end_series.position)
+                    positions[end_series.position_id] += end_series.position
                     close_on = record.end_date # might be far in the future
                     if is_future:
                         close_on = close_on.replace(year=today.year)
@@ -210,3 +259,21 @@ class InvestmentPeriod(models.Model):
             record.count_timeseries = len(record.timeseries_ids)
             record.count_transactions = len(record.transaction_ids)
             record.debug_xirr = f'{dates=}\n{values=}'
+
+            existing_pos = {r.position_id: r for r  in record.position_ids}
+            seen = record.env['investment.period.position'].browse()
+            for position, profit in positions.items():
+                if position in existing_pos:
+                    existing_pos[position].profit = profit
+                else:
+                    existing_pos[position] = record.env['investment.period.position'].create({
+                        'position_id': position.id,
+                        'period_id': record._origin.id,
+                        'profit': profit,
+                    })
+
+                seen += existing_pos[position]
+
+            record.position_ids = seen
+            record.count_positions = len(seen)
+
