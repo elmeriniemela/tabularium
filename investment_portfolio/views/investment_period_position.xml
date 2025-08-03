@@ -6,7 +6,7 @@
             <list>
                 <field name="period_id" optional="hide"/>
                 <field name="position_id" optional="show"/>
-                <field name="profit" optional="show"  decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0"/>
+                <field name="profit" optional="show"  decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0" sum="Total Profit"/>
                 <field name="company_currency_id" optional="hide"/>
             </list>
         </field>
