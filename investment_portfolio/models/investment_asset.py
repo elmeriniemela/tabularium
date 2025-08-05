@@ -375,6 +375,9 @@ class InvestmentAsset(models.Model):
         if price_id:
             price_id.price = price
         else:
+            now = fields.Datetime.now()
+            if time > now:
+                time = now # dont create future prices
             price_id = Price.create({
                 'asset_id': self.id,
                 'time': time,
