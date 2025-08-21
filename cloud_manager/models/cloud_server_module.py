@@ -11,7 +11,12 @@ class CloudServerModule(models.Model):
     _name = 'cloud.server.module'
     _description = 'Cloud Server Module'
     _inherit = ['mail.thread']
-    _order = 'id desc'
+    _order = 'sequence, id desc'
+
+    sequence = fields.Integer(
+        string="Sequence",
+        default=0,  # Set default=0 to avoid false values and messed up sequence order inside same parent
+    )
 
     active = fields.Boolean(
         tracking=True,
@@ -39,6 +44,7 @@ class CloudServerModule(models.Model):
     )
 
     url = fields.Char(
+        string="URL",
         required=True,
         tracking=True,
     )

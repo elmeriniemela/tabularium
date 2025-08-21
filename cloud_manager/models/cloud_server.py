@@ -41,6 +41,7 @@ class CloudServer(models.Model):
     )
 
     cname = fields.Char(
+        string="CNAME",
         required=True,
         tracking=True,
         default='localhost',
@@ -82,7 +83,7 @@ class CloudServer(models.Model):
         string="Modules",
         comodel_name='cloud.server.module',
         inverse_name='server_id',
-        readonly=True,
+        readonly=False,
     )
 
     diff_ids = fields.One2many(

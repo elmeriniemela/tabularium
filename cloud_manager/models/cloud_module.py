@@ -10,6 +10,12 @@ class CloudModule(models.Model):
     _name = 'cloud.module'
     _description = 'Cloud Module'
     _inherit = ['mail.thread']
+    _order = 'sequence, id desc'
+
+    sequence = fields.Integer(
+        string="Sequence",
+        default=0,  # Set default=0 to avoid false values and messed up sequence order inside same parent
+    )
 
     name = fields.Char(
         required=True,
