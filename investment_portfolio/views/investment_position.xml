@@ -11,7 +11,7 @@
         <field name="name">investment.position.list</field>
         <field name="model">investment.position</field>
         <field name="arch" type="xml">
-            <list expand="1" default_order="portfolio_id, sequence, id" js_class="positions_list" decoration-muted="not position" decoration-bf="position">
+            <list expand="1" default_order="portfolio_id, sequence, id" decoration-muted="not position" decoration-bf="position">
                 <field name="sequence" widget="handle"/>
                 <field name="activity_ids" optional="hide" widget="list_activity"/>
                 <field name="name" optional="show" width="100px"/>

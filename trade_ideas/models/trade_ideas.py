@@ -1,10 +1,66 @@
 # -*- coding: utf-8 -*-
 
 from odoo import api, fields, models, _
+import glob
+
+class BigInteger(fields.Integer):
+    column_type = ('int8', 'int8')
+
+fields.BigInteger = BigInteger
 
 
-class TradeIdeas(models.AbstractModel):
-    _name = "trade.ideas"
+class TradeAggs(models.AbstractModel):
+    _name = "trade.aggs"
+    _description = "Trade Aggs"
+
+    ticker = fields.Char()
+    volume = fields.Float()
+    open = fields.Float()
+    close = fields.Float()
+    high = fields.Float()
+    low = fields.Float()
+    window_start = fields.BigInteger()
+    transactions = fields.BigInteger()
+
+    def _import_aggs(self, path):
+        fnames = glob.glob(f'{path}/*.csv.gz')
+        fnames.sort()
+        for i, fname in enumerate(fnames):
+            if i % 100 == 0:
+                print(f"{i} / {len(fnames)}")
+            self.env.cr.execute(f"COPY {self._table}(ticker,volume,open,close,high,low,window_start,transactions) FROM PROGRAM 'gzip -dc {fname}' DELIMITER ',' CSV HEADER NULL ''")
+
+
+
+class DayAggs(models.Model):
+    _name = "min.aggs"
+    _inherit = ['trade.aggs']
+    _description = "Min Aggs"
+
+    def cron_import(self):
+        self._import_aggs('/home/elmeri/Work/polygon/us_stocks_sip/minute_aggs_v1/*/*')
+
+    # ticker,volume,open,close,high,low,window_start,transactions
+    # A,115,89.53,89.53,89.53,89.53,1594033200000000000,2
+    # A,101,89.8,89.8,89.8,89.8,1594037220000000000,2
+    # A,100,89.01,89.01,89.01,89.01,1594038480000000000,1
+    # A,40541,89.02,89.43,89.43,89.02,1594042200000000000,
+
+
+class DayAggs(models.Model):
+    _name = "day.aggs"
+    _inherit = ['trade.aggs']
+    _description = "Day Aggs"
+    # COPY day_aggs(ticker,volume,open,close,high,low,window_start,transactions) FROM PROGRAM 'gzip -dc /home/elmeri/Work/polygon/2020-07-06.csv.gz' DELIMITER ',' CSV HEADER NULL '';
+
+
+    def cron_import(self):
+        self._import_aggs('/home/elmeri/Work/polygon/us_stocks_sip/day_aggs_v1/*/*')
+
+
+    # ticker,volume,open,close,high,low,window_start,transactions
+    # A,1409981,89.02,89.31,90.64,89.02,1594008000000000000,15449
+    # AA,7084253,11.35,11.47,11.5748,11.02,1594008000000000000,34347
 
     def cron_analyze(self):
         import pandas as pd

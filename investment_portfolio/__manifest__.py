@@ -51,7 +51,6 @@
     ],
     'assets': {
         'web.assets_backend': [
-            'investment_portfolio/static/src/list/*',
             'investment_portfolio/static/src/dashboard/*',
         ],
     }
