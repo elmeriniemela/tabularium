@@ -50,6 +50,7 @@ class InvestmentAssetPrice(models.Model):
     )
 
     asset_ids = fields.Many2many(
+        string="Linked assets",
         comodel_name='investment.asset',
         compute='_compute_asset_ids',
         readonly=True,
