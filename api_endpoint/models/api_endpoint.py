@@ -125,6 +125,7 @@ class ApiEndpoint(models.Model):
             'UserError': exceptions.UserError,
             'AccessError': exceptions.AccessError,
             'import_xml': functools.partial(import_xml, self.env.cr),
+            'locals': locals,
         })
 
 
