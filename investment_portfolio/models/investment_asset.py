@@ -1,23 +1,19 @@
 # -*- coding: utf-8 -*-
 
 from odoo import api, models, fields, _
-from odoo.exceptions import ValidationError
-from odoo.tools import float_is_zero, float_compare, date_utils
-import traceback
+from odoo.tools import date_utils
 from dateutil.relativedelta import relativedelta
-from dateutil import rrule
 import pytz
 import datetime
 import logging
-from concurrent.futures import ThreadPoolExecutor
-import functools
+
 _logger = logging.getLogger(__name__)
 
 
 class InvestmentAsset(models.Model):
     _name = 'investment.asset'
     _description = 'Investment Asset'
-    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _inherit = ['mail.thread', 'mail.activity.mixin', 'aquire.lock.mixin']
     _order = 'sequence, id'
     _rec_name = 'ticker'
 
@@ -322,7 +318,13 @@ class InvestmentAsset(models.Model):
                 })
 
 
+
+
     def _exec_integration(self):
+        if not self.acquire_lock():
+            _logger.info("Unable to run integration as records are locked %s", self)
+            return
+
         _logger.info("Run integration on %s", self.mapped('ticker'))
         integration = self.mapped('endpoint_id')
         integration.ensure_one()
@@ -337,19 +339,11 @@ class InvestmentAsset(models.Model):
             else:
                 _logger.info("Skip integration on %s as %s is closed.", asset.ticker, asset.exchange_id.name)
 
-        max_workers = int(self.env['ir.config_parameter'].sudo().get_param('investment_portfolio.integration.threads', '3'))
         for integration, assets in per_integration.items():
             if integration.multi_record:
                 assets._exec_integration()
             else:
-                if max_workers and len(assets) >= max_workers:
-                    _logger.info("Start ThreadPoolExecutor(max_workers=%d)", max_workers)
-                    with ThreadPoolExecutor(max_workers=max_workers) as executor:
-                        # Map tasks to thread pool
-                        executor.map(Asset.thread_run_integration, assets.ids)
-                else:
-                    for asset in assets: asset._exec_integration()
-
+                for asset in assets: asset._exec_integration()
 
         _logger.info("Done")
 

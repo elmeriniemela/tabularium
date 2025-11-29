@@ -6,9 +6,9 @@ from odoo.tools import float_is_zero
 
 from odoo.tools.safe_eval import safe_eval
 import logging
-from psycopg2 import OperationalError
 
 from collections import defaultdict
+from pyxirr import xirr
 
 _logger = logging.getLogger(__name__)
 
@@ -42,7 +42,7 @@ class InvestmentPeriod(models.Model):
 
 class InvestmentPeriod(models.Model):
     _name = 'investment.period'
-    _inherit = ['mail.thread']
+    _inherit = ['mail.thread', 'aquire.lock.mixin']
     _description = 'Investment Period'
     _order = 'name desc, id desc'
 
@@ -145,11 +145,14 @@ class InvestmentPeriod(models.Model):
         return super().copy(default)
 
     def action_compute(self):
+        if not self.acquire_lock():
+            _logger.info("Unable to compute as records are locked %s", self)
+            return
+
         self._compute_period()
 
     @api.depends('start_date', 'end_date', 'domain')
     def _compute_period(self):
-        from pyxirr import xirr
         today = fields.Date.today()
         records = self
         _logger.info(f"Compute period for: {records}")
