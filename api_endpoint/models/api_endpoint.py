@@ -503,7 +503,7 @@ class ApiEndpoint(models.Model):
                 raise exceptions.UserError(_("Unable to initiate, check integration parameters."))
             globals_dict = self._get_globals()
             safe_eval(self.initiator, globals_dict, mode="exec", nocopy=True)
-        except Exception as error: # not handled by .produce() call, we need our own handling here.
+        except Exception as error:
             self.env.cr.rollback()
             if commit and self.state == 'active': # if still active, it means that error was not handled by .produce() call, we need our own handling here.
                 self._mark_error()
