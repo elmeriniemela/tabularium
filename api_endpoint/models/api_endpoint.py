@@ -279,14 +279,21 @@ class ApiEndpoint(models.Model):
         tracking=True,
     )
 
-    cron_frequency = fields.Selection(
-        selection=[
-            ('low', 'Low'),
-            ('mid', 'Mid'),
-            ('high', 'High'),
-        ],
+    cron_id = fields.Many2one(
+        comodel_name='ir.cron',
         tracking=True,
+        ondelete='restrict',
+        domain=[
+            ('model_id.model', '=', 'api.endpoint'),
+            ('code', '=', 'model.cron_run()'),
+        ]
     )
+
+    backoff = fields.Integer(tracking=True)
+    to_skip = fields.Integer(tracking=True)
+
+    cron_interval_number = fields.Integer(related='cron_id.interval_number', readonly=True)
+    cron_interval_type = fields.Selection(related='cron_id.interval_type', readonly=True)
 
     multi_record = fields.Boolean(
         default=False,
@@ -483,6 +490,10 @@ class ApiEndpoint(models.Model):
 
     def action_execute(self):
         self.ensure_one()
+        if self.to_skip > 0:
+            self.to_skip -= 1
+            _logger.info("Skipped action_execute due to error backoff")
+            return
         commit = self.env.context.get('force_commit') or self.auto_commit
         raise_exc = self.env.context.get('raise_exc', True)
         assert raise_exc or commit, "If you want to bypass the error, you need to set force_commit=True."
@@ -492,11 +503,10 @@ class ApiEndpoint(models.Model):
                 raise exceptions.UserError(_("Unable to initiate, check integration parameters."))
             globals_dict = self._get_globals()
             safe_eval(self.initiator, globals_dict, mode="exec", nocopy=True)
-        except Exception as error:
+        except Exception as error: # not handled by .produce() call, we need our own handling here.
             self.env.cr.rollback()
-            if commit:
-                if self.state == 'active':
-                    self.state = 'error'
+            if commit and self.state == 'active': # if still active, it means that error was not handled by .produce() call, we need our own handling here.
+                self._mark_error()
                 self.message_post(body=(str(error)), subtype_xmlid='api_endpoint.mt_integration_error', message_type='comment')
                 self.env.cr.commit()
             if raise_exc or not commit: # Commit required, silent bypass is not allowed
@@ -509,6 +519,10 @@ class ApiEndpoint(models.Model):
 
     def produce(self, variables):
         self.ensure_one()
+        if self.to_skip > 0:
+            self.to_skip -= 1
+            _logger.info("Skipped produce due to error backoff")
+            return
         self = self.sudo() # All the internals of this function should be run as root, but the _get_globals will demote the user.
         commit = self.env.context.get('force_commit') or self.auto_commit
         raise_exc = self.env.context.get('raise_exc', True)
@@ -530,21 +544,38 @@ class ApiEndpoint(models.Model):
         except Exception as error:
             self.env.cr.rollback()
             if commit:
-                if self.state == 'active':
-                    self.state = 'error'
+                self._mark_error()
                 self.message_post(body=(str(error)), subtype_xmlid='api_endpoint.mt_integration_error', message_type='comment')
                 self.env.cr.commit()
             if raise_exc or not commit: # Commit required, silent bypass is not allowed
+                error._producer_handled = True
                 raise error
         else:
-            if self.state == 'error':
-                self.state = 'active'
+            self._mark_active()
 
         if commit:
             self.env.cr.commit()
         if self.auto_consume:
             self._consume(globals_dict)
         return globals_dict
+
+
+    def _mark_error(self):
+        if self.state == 'active':
+            self.state = 'error'
+
+        if not self.backoff:
+            self.backoff = 1
+        else:
+            self.backoff *= 2
+        self.to_skip = self.backoff
+
+
+    def _mark_active(self):
+        if self.state == 'error':
+            self.state = 'active'
+            self.to_skip = 0
+            self.backoff = 0
 
 
     def _serialize_dict(self, globals_dict, original_dict):
@@ -666,8 +697,12 @@ class ApiEndpoint(models.Model):
 
 
     @api.model
-    def cron_run(self, frequency):
-        for rec in self.search([('cron_frequency', '=', frequency),('role', '=', 'active')]).sudo():
+    def cron_run(self):
+        progress = self.env['ir.cron.progress'].browse(self.env.context.get('ir_cron_progress_id') or 0).exists()
+        if not (progress and progress.cron_id):
+            raise exceptions.ValidationError(_("Unable to run, cron progress is missing: %s") % progress)
+
+        for rec in self.search([('cron_id', '=', progress.cron_id.id),('role', '=', 'active')]).sudo():
             _logger.info("Execute %s", rec.name)
             rec.with_context(force_commit=True, raise_exc=False).action_execute()
             rec.env.cr.commit()

@@ -4,7 +4,7 @@
         <field name="name">Low frequency API endpoints.</field>
         <field name="model_id" ref="model_api_endpoint"/>
         <field name="state">code</field>
-        <field name="code">model.cron_run(frequency='low')</field>
+        <field name="code">model.cron_run()</field>
         <field name="user_id" ref="base.user_root"/>
     </record>
 
@@ -12,7 +12,7 @@
         <field name="name">Mid frequency API endpoints.</field>
         <field name="model_id" ref="model_api_endpoint"/>
         <field name="state">code</field>
-        <field name="code">model.cron_run(frequency='mid')</field>
+        <field name="code">model.cron_run()</field>
         <field name="user_id" ref="base.user_root"/>
     </record>
 
@@ -20,7 +20,7 @@
         <field name="name">High frequency API endpoints.</field>
         <field name="model_id" ref="model_api_endpoint"/>
         <field name="state">code</field>
-        <field name="code">model.cron_run(frequency='high')</field>
+        <field name="code">model.cron_run()</field>
         <field name="user_id" ref="base.user_root"/>
     </record>
 

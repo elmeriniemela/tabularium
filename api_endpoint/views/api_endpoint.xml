@@ -14,7 +14,7 @@
                 <field name="comm_method" optional="show"/>
                 <field name="file_format" optional="show"/>
                 <field name="location" optional="show"/>
-                <field name="cron_frequency" optional="show"/>
+                <field name="cron_id" optional="show"/>
                 <field name="multi_record" widget="boolean_toggle" optional="show"/>
                 <field name="auto_consume" widget="boolean_toggle" optional="show"/>
                 <field name="auto_commit" widget="boolean_toggle" optional="show"/>
@@ -62,7 +62,12 @@
                             <field name="sequence_id" invisible="not sequence_id" required="False"/>
                             <field name="user_id" widget="many2one_avatar_user"/>
                             <field name="company_id" groups="base.group_multi_company"/>
-                            <field name="cron_frequency" invisible="role != 'active'"/>
+                            <field name="cron_id" invisible="role != 'active'" options="{'no_create': 1}"/>
+                            <label for="cron_interval_number" string="Execute Every" invisible="not cron_id"/>
+                            <div invisible="not cron_id">
+                                <field name="cron_interval_number" class="oe_inline"/>
+                                <field name="cron_interval_type" class="oe_inline"/>
+                            </div>
                             <field name="multi_record" widget="boolean_toggle"/>
                             <field name="auto_consume" widget="boolean_toggle"/>
                             <field name="auto_commit" widget="boolean_toggle"/>
@@ -77,6 +82,8 @@
                             <field name="response_format"/>
                             <field name="ttl"/>
                             <field name="auto_code" widget="boolean_toggle"/>
+                            <field name="backoff" invisible="not backoff"/>
+                            <field name="to_skip" invisible="not backoff"/>
                         </group>
                     </group>
                     <label for="documentation"/>
