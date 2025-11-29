@@ -4,7 +4,7 @@ import logging
 import secrets
 import os
 from odoo import models, api, fields, exceptions, _
-from odoo.exceptions import ValidationError
+from dateutil.relativedelta import relativedelta
 import configparser as ConfigParser
 
 _logger = logging.getLogger(__name__)
@@ -95,6 +95,11 @@ class CloudInstance(models.Model):
     backup_ids = fields.One2many(
         comodel_name='cloud.backup',
         inverse_name='instance_id',
+        readonly=True,
+    )
+
+    latest_backup_missing = fields.Boolean(
+        tracking=True,
         readonly=True,
     )
 
@@ -313,6 +318,10 @@ class CloudInstance(models.Model):
 
     def parse_backups(self, backup_list):
         self.ensure_one()
+        if not backup_list:
+            self.latest_backup_missing = True
+            return
+
         existing = {b.name: b for b in self.backup_ids}
         found = self.env['cloud.backup']
 
@@ -326,5 +335,10 @@ class CloudInstance(models.Model):
             })
             existing[fname] = backup
             found += backup
+
+        check_time = fields.Datetime.now() - relativedelta(hours=36)
+        if max(found.mapped('timestamp')) < check_time:
+            self.latest_backup_missing = True
+
 
         (self.backup_ids - found).unlink()

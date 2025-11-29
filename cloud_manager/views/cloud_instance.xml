@@ -12,6 +12,7 @@
                 <field name="http_port" optional="show"/>
                 <field name="gevent_port" optional="show"/>
                 <field name="restart_requested" optional="show"/>
+                <field name="latest_backup_missing" optional="show"/>
                 <field name="state" optional="show"/>
             </list>
         </field>
@@ -55,6 +56,7 @@
                             <field name="http_port" required="0" invisible="http_port == 0"/>
                             <field name="gevent_port" required="0" invisible="gevent_port == 0"/>
                             <field name="is_self" widget="boolean_toggle"/>
+                            <field name="latest_backup_missing" invisible="not latest_backup_missing" />
                         </group>
                     </group>
                     <notebook>
