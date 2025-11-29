@@ -336,9 +336,12 @@ class CloudInstance(models.Model):
             existing[fname] = backup
             found += backup
 
-        check_time = fields.Datetime.now() - relativedelta(hours=36)
-        if max(found.mapped('timestamp')) < check_time:
+        now = fields.Datetime.now()
+        check_time = now - relativedelta(hours=36)
+        if max(found.mapped('timestamp'), default=now) < check_time:
             self.latest_backup_missing = True
+        else:
+            self.latest_backup_missing = False
 
 
         (self.backup_ids - found).unlink()
