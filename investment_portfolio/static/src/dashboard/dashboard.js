@@ -159,7 +159,7 @@ class PositionDashboard extends Component {
     }
 
     onClickOpenLiquidPortfolios() {
-        return this.action.doAction("investment_portfolio.action_current_positions");
+        return this.action.doAction("investment_portfolio.action_liquid_positions");
     }
 
     onClickOpenPosition(record) {

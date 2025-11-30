@@ -268,8 +268,16 @@
         <field name="res_model">investment.position</field>
         <field name="view_mode">list,form,graph</field>
         <field name="path">positions</field>
+        <field name="context">{'search_default_group_portfolio_id': 1, 'search_default_follow': 1, 'search_default_open': 1}</field>
+    </record>
+
+    <record id="action_liquid_positions" model="ir.actions.act_window">
+        <field name="name">Liquid positions</field>
+        <field name="res_model">investment.position</field>
+        <field name="view_mode">list,form,graph</field>
         <field name="context">{'search_default_group_portfolio_id': 1, 'search_default_follow': 1, 'search_default_liquid': 1, 'search_default_open': 1}</field>
     </record>
+
 
     <record id="action_all_positions" model="ir.actions.act_window">
         <field name="name">All positions</field>
@@ -282,7 +290,7 @@
         <field name="name">Liquid Allocations</field>
         <field name="res_model">investment.position</field>
         <field name="view_mode">graph,list,form</field>
-        <field name="context">{'search_default_group_name': 1, 'search_default_liquid': 1,}</field>
+        <field name="context">{'search_default_group_category_id': 1, 'search_default_liquid': 1,}</field>
         <field
             name="view_ids"
             eval="[
