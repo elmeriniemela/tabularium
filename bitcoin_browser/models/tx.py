@@ -29,6 +29,7 @@ class BitcoinTx(models.Model):
     weight = fields.BigInteger(help="The transaction's weight (between vsize*4-3 and vsize*4)")
     locktime = fields.BigInteger(help="Locktime sets the earliest time a transaction can be mined in to a block. You can use locktime to make sure that a transaction is locked until a specific block height, or a point in time.")
     fee = fields.Float(help="A transaction fee is the remainder of a bitcoin transaction. Transaction fees are claimed by miners through the coinbase transaction.", digits='Bitcoin Decimal')
+    blocktime = fields.Datetime(help="The block time expressed in UNIX epoch time")
 
     vin_ids = fields.One2many(
         comodel_name='bitcoin.tx.in',
@@ -118,6 +119,7 @@ class BitcoinTx(models.Model):
         return  {
             'in_active_chain': rawtx.get('in_active_chain'),
             'txid': rawtx['txid'],
+            'blocktime': datetime.datetime.fromtimestamp(rawtx['blocktime']) if 'blocktime' in rawtx else False,
             'hash': rawtx['hash'],
             'version': rawtx['version'],
             'size': rawtx['size'],
