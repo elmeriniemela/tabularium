@@ -98,6 +98,7 @@ class CashflowImport(models.TransientModel):
             'io': io,
             'self': self.env['cashflow.entry'],
             'fp': fp,
+            'fname': attachment_id.name,
             'pandas': pandas,
             '_logger': _logger,
             'pdfminer': pdfminer,
