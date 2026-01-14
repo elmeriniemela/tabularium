@@ -394,12 +394,12 @@ class InvestmentAsset(models.Model):
                 ('name', '=', time.date()),
             ])
             if rate_record:
-                rate_record.write({'rate': price})
+                rate_record.write({'inverse_company_rate': price})
             else:
                 Rate.create({
                     'name': time.date(),
                     'currency_id': currency_id.id,
-                    'rate': price,
+                    'inverse_company_rate': price,
                 })
 
 
