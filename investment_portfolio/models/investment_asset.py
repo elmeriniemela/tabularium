@@ -58,6 +58,12 @@ class InvestmentAsset(models.Model):
         default=lambda self: self.env.company,
     )
 
+    update_currency_ids = fields.One2many(
+        comodel_name='res.currency',
+        inverse_name='asset_id',
+        readonly=True,
+    )
+
     last_price_id = fields.Many2one(string='Last Price Record', comodel_name='investment.asset.price', index=True)
     last_update = fields.Datetime(related='last_price_id.time', store=True)
     last_price = fields.Monetary(string="Last Price", related='last_price_id.price', store=True, currency_field='currency_id', aggregator=None, inverse='_inverse_last_price')
@@ -380,5 +386,20 @@ class InvestmentAsset(models.Model):
 
         if not self.last_price_id or self.last_price_id.time <= time:
             self.sudo().last_price_id = price_id
+
+        Rate = self.env['res.currency.rate']
+        for currency_id in self.sudo().update_currency_ids:
+            rate_record = Rate.search([
+                ('currency_id', '=', currency_id.id),
+                ('name', '=', time.date()),
+            ])
+            if rate_record:
+                rate_record.write({'rate': price})
+            else:
+                Rate.create({
+                    'name': time.date(),
+                    'currency_id': currency_id.id,
+                    'rate': price,
+                })
 
 
