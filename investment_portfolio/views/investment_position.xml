@@ -160,6 +160,9 @@
                             <field name="transaction_ids" context="{'default_position_id': id, 'default_exchange_rate': last_price}"/>
                         </page>
                         <page string="Realized Gains/Losses">
+                            <group>
+                                <field name="compute_realized" widget="boolean_toggle"/>
+                            </group>
                             <field name="realized_ids" context="{'default_position_id': id}"/>
                         </page>
                         <page string="Plans">

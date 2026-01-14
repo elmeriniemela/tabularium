@@ -64,9 +64,9 @@
                 <separator/>
                 <group expand="1" string="Group by">
                     <filter string="Sell Date" name="group_sell_date" context="{'group_by': 'sell_date:year'}"/>
-                    <filter string="Asset" name="group_position_id" context="{'group_by': 'position_id'}"/>
-                    <filter string="Portfolio" name="group_portfolio_id" context="{'group_by': 'portfolio_id'}"/>
                     <filter string="Category" name="group_category_id" context="{'group_by': 'category_id'}"/>
+                    <filter string="Portfolio" name="group_portfolio_id" context="{'group_by': 'portfolio_id'}"/>
+                    <filter string="Position" name="group_position_id" context="{'group_by': 'position_id'}"/>
                 </group>
             </search>
         </field>
@@ -86,8 +86,8 @@
     <record id="action_realized" model="ir.actions.act_window">
         <field name="name">Assets Realized</field>
         <field name="res_model">investment.asset.realized</field>
-        <field name="view_mode">list,graph,form</field>
-        <field name="context">{'search_default_group_sell_date': 1, 'search_default_not_simulated': 1}</field>
+        <field name="view_mode">list,graph,form,pivot</field>
+        <field name="context">{'search_default_group_sell_date': 1, 'search_default_not_simulated': 1, 'search_default_group_portfolio_id': 1, 'search_default_group_position_id': 1}</field>
     </record>
 
 </odoo>

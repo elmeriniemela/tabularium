@@ -40,7 +40,7 @@ def load_library():
     # note: for a mapping between bitcoin-core/secp256k1 git tags and .so.V libtool version numbers,
     #       see https://github.com/bitcoin-core/secp256k1/pull/1055#issuecomment-1227505189
     tested_libversions = [2, 1, 0, ]  # try latest version first
-    libnames = []
+    libnames = ["libsecp256k1.so"]
     if sys.platform == 'darwin':
         for v in tested_libversions:
             libnames.append(f"libsecp256k1.{v}.dylib")
@@ -72,6 +72,8 @@ def load_library():
     if not secp256k1:
         _logger.error(f'libsecp256k1 library failed to load. exceptions: {repr(exceptions)}')
         return None
+    else:
+        _logger.info(f"libsecp256k1 loaded from {libpath}")
 
     try:
         secp256k1.secp256k1_context_create.argtypes = [c_uint]

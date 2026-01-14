@@ -114,6 +114,7 @@ class InvestmentPosition(models.Model):
     )
 
     follow = fields.Boolean(default=True)
+    compute_realized = fields.Boolean(default=True)
 
     quantity = fields.Float(compute='_compute_position_aggregate', inverse='_inverse_quantity', readonly=False, store=True, digits='Investment Asset quantity', aggregator=None)
     position = fields.Monetary(compute='_compute_position_aggregate', store=True, currency_field='company_currency_id', help="Current value of this position.")
@@ -199,6 +200,7 @@ class InvestmentPosition(models.Model):
         'last_price_id.price',
         'currency_id',
         'company_currency_id',
+        'compute_realized',
     )
     def _compute_position_aggregate(self):
 
@@ -601,6 +603,9 @@ class InvestmentPosition(models.Model):
         qty_precision = self.env['decimal.precision'].precision_get('Investment Asset quantity')
         for position in self:
             if not isinstance(position.id, int):
+                continue
+            if not position.compute_realized:
+                position.realized_ids.unlink()
                 continue
 
             valid = position.env['investment.asset.realized'].browse()
