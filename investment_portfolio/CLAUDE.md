@@ -4,7 +4,7 @@
 
 This is an **Odoo addon module** for comprehensive investment portfolio management. It enables tracking, analyzing, and forecasting investment positions across multiple asset classes including stocks, cryptocurrencies, bonds, and other financial instruments.
 
-**Current Odoo Version**: 18.0 (working branch), with version 16.0 as main branch
+**Current Odoo Version**: 18.0 (main branch)
 
 ## Environment Setup
 
