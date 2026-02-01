@@ -17,17 +17,29 @@ class TestAssetAdvanced(InvestmentTestCommon):
 
     def test_ath_drawdown_below_ath(self):
         """When last price is below ATH, drawdown is positive"""
-        # Create a higher historical price to be the ATH
+        asset = self.env['investment.asset'].create({
+            'ticker': 'ATH-DRAWDOWN',
+            'category_id': self.category.id,
+            'currency_id': self.currency_eur.id,
+            'expected_yearly_appreciation': 0.10,
+            'plausible_ath_drawdown': 0.30,
+        })
         now = datetime.now()
         self.env['investment.asset.price'].create({
-            'asset_id': self.asset.id,
+            'asset_id': asset.id,
             'time': now - timedelta(days=45),
             'price': 120.0,
         })
-        self.asset._compute_ath_price()
+        last_price = self.env['investment.asset.price'].create({
+            'asset_id': asset.id,
+            'time': now - timedelta(hours=1),
+            'price': 100.0,
+        })
+        asset.last_price_id = last_price
+        asset._compute_ath_price()
         # ATH = 120, last = 100, drawdown = (120 - 100) / 120 = 0.1667
-        self.assertAlmostEqual(self.asset.ath_price, 120.0, places=2)
-        self.assertAlmostEqual(self.asset.current_ath_drawdown, 20.0 / 120.0, places=4)
+        self.assertAlmostEqual(asset.ath_price, 120.0, places=2)
+        self.assertAlmostEqual(asset.current_ath_drawdown, 20.0 / 120.0, places=4)
 
     def test_drawdown_price_calculation(self):
         """drawdown_price = (1 - plausible_ath_drawdown) * ath_price"""

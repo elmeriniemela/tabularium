@@ -1,8 +1,14 @@
-# -*- coding: utf-8 -*-
-
 from . import test_transaction
+from . import test_transaction_advanced
 from . import test_position
+from . import test_position_advanced
 from . import test_realized
+from . import test_realized_advanced
 from . import test_asset
+from . import test_asset_advanced
 from . import test_period
 from . import test_helpers
+from . import test_exchange
+from . import test_move
+from . import test_timeseries
+from . import test_plan_timeseries
