@@ -116,7 +116,7 @@
                             <field name="is_company_currency" invisible="1"/>
                             <label for="last_price"/>
                             <div>
-                                <field name="last_price" class="oe_inline" readonly="endpoint_id"/>
+                                <field name="last_price" class="oe_inline" readonly="False"/>
                                 <span invisible="is_company_currency"> / <field name="last_price_own_currency" class="oe_inline"/>
                                 </span>
                                 <span> (<field name="last_update" widget="timeago" class="oe_inline"/>) </span>
