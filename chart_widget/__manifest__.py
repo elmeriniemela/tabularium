@@ -26,5 +26,8 @@
         "chart_widget.lightweight_charts": [
             'chart_widget/static/src/lib/*.js',
         ],
+        'web.assets_unit_tests': [
+            'chart_widget/static/tests/**/*',
+        ],
     }
 }
