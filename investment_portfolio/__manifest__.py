@@ -9,6 +9,7 @@
     'depends': [
         'mail',
         'timeago_widget',
+        'chart_widget',
         'api_endpoint',
         'version_control',
     ],
