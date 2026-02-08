@@ -1,7 +1,4 @@
-.d2h-diff-table {
-    font-size: 11px;
-}
-
-.diff {
-    max-width: 1712px;
+.chart-widget {
+    width: 100%;
+    height: 400px;
 }

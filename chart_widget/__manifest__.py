@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "Diff Widget",
+    'name': "Chart Widget",
     'author': "Elmeri Niemelä",
     'website': "https://eniemela.fi",
     'license': 'LGPL-3',
@@ -15,13 +15,12 @@
     ],
     'assets': {
         'web.assets_backend': [
-            'diff_widget/static/src/xml/widget.xml',
-            'diff_widget/static/src/js/widget.js',
-            'diff_widget/static/src/css/widget.css',
+            'chart_widget/static/src/xml/widget.xml',
+            'chart_widget/static/src/js/widget.js',
+            'chart_widget/static/src/css/widget.css',
         ],
-        "diff_widget.diff2html" : [
-            'diff_widget/static/src/lib/*.js',
-            'diff_widget/static/src/lib/*.css',
+        "chart_widget.lightweight_charts": [
+            'chart_widget/static/src/lib/*.js',
         ]
     }
 }
