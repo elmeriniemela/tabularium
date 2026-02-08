@@ -60,31 +60,13 @@ export class ChartRenderer extends Component {
         });
 
         for (const seriesConfig of data.series) {
-            let series;
             const options = {};
             if (seriesConfig.title) {
                 options.title = seriesConfig.title;
             }
 
-            switch (seriesConfig.type) {
-                case "Candlestick":
-                    series = this.chart.addCandlestickSeries(options);
-                    break;
-                case "Area":
-                    series = this.chart.addAreaSeries(options);
-                    break;
-                case "Baseline":
-                    series = this.chart.addBaselineSeries(options);
-                    break;
-                case "Histogram":
-                    series = this.chart.addHistogramSeries(options);
-                    break;
-                case "Line":
-                default:
-                    series = this.chart.addLineSeries(options);
-                    break;
-            }
-
+            const definition = LWC[`${seriesConfig.type}Series`] || LWC.LineSeries;
+            const series = this.chart.addSeries(definition, options);
             series.setData(seriesConfig.data);
         }
 
