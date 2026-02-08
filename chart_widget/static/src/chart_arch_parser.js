@@ -1,0 +1,58 @@
+/** @odoo-module **/
+
+import { visitXML } from "@web/core/utils/xml";
+
+const SERIES_TYPES = ["line", "area", "histogram", "baseline", "candlestick"];
+const OHLC_TYPES = ["open", "high", "low", "close"];
+
+export class ChartArchParser {
+    parse(arch, fields = {}) {
+        const archInfo = {
+            timeField: null,
+            seriesFields: [],
+            title: "",
+        };
+
+        const ohlcFields = {};
+
+        visitXML(arch, (node) => {
+            switch (node.tagName) {
+                case "chart": {
+                    const title = node.getAttribute("string");
+                    if (title) {
+                        archInfo.title = title;
+                    }
+                    break;
+                }
+                case "field": {
+                    const fieldName = node.getAttribute("name");
+                    const type = node.getAttribute("type");
+
+                    if (type === "time") {
+                        archInfo.timeField = fieldName;
+                    } else if (OHLC_TYPES.includes(type)) {
+                        ohlcFields[type] = fieldName;
+                    } else if (SERIES_TYPES.includes(type)) {
+                        const string = node.getAttribute("string");
+                        archInfo.seriesFields.push({
+                            fieldName,
+                            type,
+                            string: string || fields[fieldName]?.string || fieldName,
+                        });
+                    }
+                    break;
+                }
+            }
+        });
+
+        if (Object.keys(ohlcFields).length > 0) {
+            archInfo.seriesFields.push({
+                type: "candlestick",
+                ohlcFields,
+                string: "OHLC",
+            });
+        }
+
+        return archInfo;
+    }
+}

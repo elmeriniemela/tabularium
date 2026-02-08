@@ -5,7 +5,7 @@
     'website': "https://eniemela.fi",
     'license': 'LGPL-3',
     'category': 'Uncategorized',
-    'version': '0.1',
+    'version': '0.2',
     'depends': [
         'web',
     ],
@@ -15,12 +15,16 @@
     ],
     'assets': {
         'web.assets_backend': [
-            'chart_widget/static/src/xml/widget.xml',
-            'chart_widget/static/src/js/widget.js',
-            'chart_widget/static/src/css/widget.css',
+            'chart_widget/static/src/chart_arch_parser.js',
+            'chart_widget/static/src/chart_model.js',
+            'chart_widget/static/src/chart_renderer.js',
+            'chart_widget/static/src/chart_renderer.xml',
+            'chart_widget/static/src/chart_controller.js',
+            'chart_widget/static/src/chart_controller.xml',
+            'chart_widget/static/src/chart_view.js',
         ],
         "chart_widget.lightweight_charts": [
             'chart_widget/static/src/lib/*.js',
-        ]
+        ],
     }
 }
