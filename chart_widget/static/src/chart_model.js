@@ -41,20 +41,34 @@ export class ChartModel extends Model {
         const { timeField, seriesFields, fields } = this.metaData;
         const isDatetime = fields[timeField]?.type === "datetime";
 
+        // Filter records without a time value and deduplicate by time
+        // (lightweight-charts requires strictly unique ascending time values)
+        const seen = new Set();
+        const validRecords = [];
+        for (let i = records.length - 1; i >= 0; i--) {
+            const r = records[i];
+            if (!r[timeField]) {
+                continue;
+            }
+            const time = this._toTimestamp(r[timeField], isDatetime);
+            if (!seen.has(time)) {
+                seen.add(time);
+                validRecords.push(r);
+            }
+        }
+        validRecords.reverse();
+
         const series = [];
 
         for (const sf of seriesFields) {
             if (sf.type === "candlestick") {
-                const data = records.map((r) => {
-                    const time = this._toTimestamp(r[timeField], isDatetime);
-                    return {
-                        time,
-                        open: r[sf.ohlcFields.open] || 0,
-                        high: r[sf.ohlcFields.high] || 0,
-                        low: r[sf.ohlcFields.low] || 0,
-                        close: r[sf.ohlcFields.close] || 0,
-                    };
-                });
+                const data = validRecords.map((r) => ({
+                    time: this._toTimestamp(r[timeField], isDatetime),
+                    open: r[sf.ohlcFields.open] || 0,
+                    high: r[sf.ohlcFields.high] || 0,
+                    low: r[sf.ohlcFields.low] || 0,
+                    close: r[sf.ohlcFields.close] || 0,
+                }));
                 series.push({ type: "Candlestick", data, title: sf.string });
             } else {
                 const typeMap = {
@@ -63,7 +77,7 @@ export class ChartModel extends Model {
                     histogram: "Histogram",
                     baseline: "Baseline",
                 };
-                const data = records.map((r) => ({
+                const data = validRecords.map((r) => ({
                     time: this._toTimestamp(r[timeField], isDatetime),
                     value: r[sf.fieldName] || 0,
                 }));

@@ -79,6 +79,17 @@
         </field>
     </record>
 
+    <record id="asset_price_chart" model="ir.ui.view">
+        <field name="name">investment.asset.price.chart</field>
+        <field name="model">investment.asset.price</field>
+        <field name="arch" type="xml">
+            <chart type="line">
+                <field name="time" type="time"/>
+                <field name="price" type="line"/>
+            </chart>
+        </field>
+    </record>
+
     <record id="action_price_interpolate_cagr" model="ir.actions.server">
         <field name="name">Interpolate CAGR</field>
         <field name="model_id" ref="model_investment_asset_price"/>
@@ -91,7 +102,7 @@
     <record id="action_prices" model="ir.actions.act_window">
         <field name="name">Asset Prices</field>
         <field name="res_model">investment.asset.price</field>
-        <field name="view_mode">list,graph,form</field>
+        <field name="view_mode">list,graph,chart,form</field>
     </record>
 
 </odoo>
