@@ -279,15 +279,23 @@ class PositionDashboard extends Component {
     recToPosition(record) {
         var last_price_own_currency = this.format("monetary", record.last_price_own_currency, {currencyId: record.company_currency_id})
         var last_price = this.format("monetary", record.last_price, {currencyId: record.currency_id})
-        var last_update_date = new Date(DateTime.fromSQL(record.last_update, { zone: "utc" }).setZone(this.userTz));
+        if (record.last_price) {
+            var last_update_date = new Date(DateTime.fromSQL(record.last_update, { zone: "utc" }).setZone(this.userTz));
+            var last_update_timeago = `(${timeago(last_update_date)})`;
+            var last_update_iso = last_update_date.toISOString();
+        } else {
+            var last_update_date = false;
+            var last_update_timeago = false;
+            var last_update_iso = false;
+        }
         return {
             id: record.id,
             name: record.name,
             hasPosition: record.position === 0 ? 0 : 1,
             hasEndpoint: record.endpoint_id ? 1 : 0,
             follow: record.follow ? 1 : 0,
-            last_update: `(${timeago(last_update_date)})`,
-            last_update_iso: last_update_date.toISOString(),
+            last_update: last_update_timeago,
+            last_update_iso: last_update_iso,
             last_price: record.is_company_currency ? last_price_own_currency : `${last_price} / ${last_price_own_currency}`,
             profit: this.formatField("monetary", record.profit, true),
             profit_percent: this.formatField("percentage", record.profit_percent, true),
