@@ -48,6 +48,7 @@ class InvestmentAssetRealized(models.Model):
     buy_payment_currency = fields.Monetary(compute='_compute_profit', store=True, aggregator=None, currency_field='currency_id')
     buy_date = fields.Date(compute='_compute_profit', store=True)
     buy_fee = fields.Monetary(compute='_compute_profit', store=True, currency_field='company_currency_id')
+    realized_date = fields.Date(compute='_compute_profit', store=True)
 
     profit = fields.Monetary(string='Profit/Loss', compute='_compute_profit', store=True, currency_field='company_currency_id')
 
@@ -72,6 +73,8 @@ class InvestmentAssetRealized(models.Model):
             record.buy_payment_currency = record.buy_batch_id.payment_currency * buy_portion
 
             record.profit = record.sell_price - record.sell_fee - record.buy_price - record.buy_fee
+            record.realized_date = max([record.buy_date, record.sell_date])
+
 
 
     _sql_constraints = [

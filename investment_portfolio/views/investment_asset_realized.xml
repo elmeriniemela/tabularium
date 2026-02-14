@@ -57,13 +57,16 @@
         <field name="model">investment.asset.realized</field>
         <field name="arch" type="xml">
             <search>
-                <filter name="sell_date" date="sell_date"/>
+                <filter name="realized_date" date="realized_date"/>
+                <separator/>
+                <filter string="Profit" name="profit" domain="[('profit', '&gt;', 0)]"/>
+                <filter string="Loss" name="loss" domain="[('profit', '&lt;', 0)]"/>
                 <separator/>
                 <filter string="Not Simulated" name="not_simulated" domain="[('simulated', '=', False)]"/>
                 <filter string="Simulated" name="simulated" domain="[('simulated', '=', True)]"/>
                 <separator/>
                 <group expand="1" string="Group by">
-                    <filter string="Sell Date" name="group_sell_date" context="{'group_by': 'sell_date:year'}"/>
+                    <filter string="Realized Date" name="group_realized_date" context="{'group_by': 'realized_date:year'}"/>
                     <filter string="Category" name="group_category_id" context="{'group_by': 'category_id'}"/>
                     <filter string="Portfolio" name="group_portfolio_id" context="{'group_by': 'portfolio_id'}"/>
                     <filter string="Position" name="group_position_id" context="{'group_by': 'position_id'}"/>
@@ -87,7 +90,7 @@
         <field name="name">Assets Realized</field>
         <field name="res_model">investment.asset.realized</field>
         <field name="view_mode">list,graph,form,pivot</field>
-        <field name="context">{'search_default_group_sell_date': 1, 'search_default_not_simulated': 1, 'search_default_group_portfolio_id': 1, 'search_default_group_position_id': 1}</field>
+        <field name="context">{'search_default_group_realized_date': 1, 'search_default_not_simulated': 1, 'search_default_group_portfolio_id': 1, 'search_default_group_position_id': 1}</field>
     </record>
 
 </odoo>
