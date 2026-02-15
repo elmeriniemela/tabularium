@@ -1,0 +1,443 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <record id="investment_portfolio.investment_position_209" model="investment.position">
+        <field name="id" eval="209"/>
+        <field name="name">IGLN</field>
+        <field name="sequence" eval="1"/>
+        <field name="follow" eval="True"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_208"/>
+    </record>
+    <record id="investment_portfolio.investment_position_193" model="investment.position">
+        <field name="id" eval="193"/>
+        <field name="name">IONQ</field>
+        <field name="sequence" eval="2"/>
+        <field name="follow" eval="True"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_192"/>
+    </record>
+    <record id="investment_portfolio.investment_position_226" model="investment.position">
+        <field name="id" eval="226"/>
+        <field name="name">QBTS</field>
+        <field name="sequence" eval="3"/>
+        <field name="follow" eval="True"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_225"/>
+    </record>
+    <record id="investment_portfolio.investment_position_280" model="investment.position">
+        <field name="id" eval="280"/>
+        <field name="name">RGTI</field>
+        <field name="sequence" eval="4"/>
+        <field name="follow" eval="True"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_279"/>
+    </record>
+    <record id="investment_portfolio.investment_position_29" model="investment.position">
+        <field name="id" eval="29"/>
+        <field name="name">EUR</field>
+        <field name="sequence" eval="5"/>
+        <field name="follow" eval="True"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_29"/>
+    </record>
+    <record id="investment_portfolio.investment_position_198" model="investment.position">
+        <field name="id" eval="198"/>
+        <field name="name">USD</field>
+        <field name="sequence" eval="6"/>
+        <field name="follow" eval="True"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_301_6a02fe43"/>
+    </record>
+    <record id="investment_portfolio.investment_position_270" model="investment.position">
+        <field name="id" eval="270"/>
+        <field name="name">STRC</field>
+        <field name="sequence" eval="7"/>
+        <field name="follow" eval="True"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_269"/>
+    </record>
+    <record id="investment_portfolio.investment_position_64" model="investment.position">
+        <field name="id" eval="64"/>
+        <field name="name">META</field>
+        <field name="sequence" eval="8"/>
+        <field name="follow" eval="True"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_64"/>
+    </record>
+    <record id="investment_portfolio.investment_position_216" model="investment.position">
+        <field name="id" eval="216"/>
+        <field name="name">IGLD</field>
+        <field name="sequence" eval="8"/>
+        <field name="follow" eval="False"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_215"/>
+    </record>
+    <record id="investment_portfolio.investment_position_282" model="investment.position">
+        <field name="id" eval="282"/>
+        <field name="name">BMNR</field>
+        <field name="sequence" eval="9"/>
+        <field name="follow" eval="True"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_281"/>
+    </record>
+    <record id="investment_portfolio.investment_position_234" model="investment.position">
+        <field name="id" eval="234"/>
+        <field name="name">STRD</field>
+        <field name="sequence" eval="10"/>
+        <field name="follow" eval="True"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_233"/>
+    </record>
+    <record id="investment_portfolio.investment_position_212" model="investment.position">
+        <field name="id" eval="212"/>
+        <field name="name">MSTR 16MAY25 200 P</field>
+        <field name="sequence" eval="11"/>
+        <field name="follow" eval="False"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_211"/>
+    </record>
+    <record id="investment_portfolio.investment_position_238" model="investment.position">
+        <field name="id" eval="238"/>
+        <field name="name">SRPT</field>
+        <field name="sequence" eval="12"/>
+        <field name="follow" eval="True"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_237"/>
+    </record>
+    <record id="investment_portfolio.investment_position_236" model="investment.position">
+        <field name="id" eval="236"/>
+        <field name="name">MSTR 13JUN25 395 C</field>
+        <field name="sequence" eval="13"/>
+        <field name="follow" eval="False"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_235"/>
+    </record>
+    <record id="investment_portfolio.investment_position_228" model="investment.position">
+        <field name="id" eval="228"/>
+        <field name="name">MSTR 03JUL25 395 P</field>
+        <field name="sequence" eval="14"/>
+        <field name="follow" eval="False"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_227"/>
+    </record>
+    <record id="investment_portfolio.investment_position_272" model="investment.position">
+        <field name="id" eval="272"/>
+        <field name="name">IBIT 21NOV25 70 C</field>
+        <field name="sequence" eval="15"/>
+        <field name="follow" eval="False"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_271"/>
+    </record>
+    <record id="investment_portfolio.investment_position_254" model="investment.position">
+        <field name="id" eval="254"/>
+        <field name="name">BRR</field>
+        <field name="sequence" eval="16"/>
+        <field name="follow" eval="True"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_253"/>
+    </record>
+    <record id="investment_portfolio.investment_position_245" model="investment.position">
+        <field name="id" eval="245"/>
+        <field name="name">MSTR JUN 18 '26 80 Call</field>
+        <field name="sequence" eval="17"/>
+        <field name="follow" eval="False"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_246"/>
+    </record>
+    <record id="investment_portfolio.investment_position_128" model="investment.position">
+        <field name="id" eval="128"/>
+        <field name="name">GLD</field>
+        <field name="sequence" eval="18"/>
+        <field name="follow" eval="True"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_127"/>
+    </record>
+    <record id="investment_portfolio.investment_position_197" model="investment.position">
+        <field name="id" eval="197"/>
+        <field name="name">MSTR 04APR25 360 C</field>
+        <field name="sequence" eval="19"/>
+        <field name="follow" eval="False"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_196"/>
+    </record>
+    <record id="investment_portfolio.investment_position_133_76655375" model="investment.position">
+        <field name="id" eval="133"/>
+        <field name="name">VUCF</field>
+        <field name="sequence" eval="20"/>
+        <field name="follow" eval="True"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_132"/>
+    </record>
+    <record id="investment_portfolio.investment_position_195" model="investment.position">
+        <field name="id" eval="195"/>
+        <field name="name">MSTR 21MAR25 305 C</field>
+        <field name="sequence" eval="21"/>
+        <field name="follow" eval="False"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_194"/>
+    </record>
+    <record id="investment_portfolio.investment_position_214" model="investment.position">
+        <field name="id" eval="214"/>
+        <field name="name">SXRV</field>
+        <field name="sequence" eval="22"/>
+        <field name="follow" eval="True"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_213"/>
+    </record>
+    <record id="investment_portfolio.investment_position_219" model="investment.position">
+        <field name="id" eval="219"/>
+        <field name="name">NAKA (D.Bailey)</field>
+        <field name="sequence" eval="23"/>
+        <field name="follow" eval="True"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_218"/>
+    </record>
+    <record id="investment_portfolio.investment_position_221" model="investment.position">
+        <field name="id" eval="221"/>
+        <field name="name">3350.T</field>
+        <field name="sequence" eval="24"/>
+        <field name="follow" eval="True"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_220"/>
+    </record>
+    <record id="investment_portfolio.investment_position_230" model="investment.position">
+        <field name="id" eval="230"/>
+        <field name="name">CEP / XXI</field>
+        <field name="sequence" eval="25"/>
+        <field name="follow" eval="True"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_229"/>
+    </record>
+    <record id="investment_portfolio.investment_position_224" model="investment.position">
+        <field name="id" eval="224"/>
+        <field name="name">MSTR Jun27'25 330 Put</field>
+        <field name="sequence" eval="26"/>
+        <field name="follow" eval="False"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_223"/>
+    </record>
+    <record id="investment_portfolio.investment_position_244" model="investment.position">
+        <field name="id" eval="244"/>
+        <field name="name">3M8</field>
+        <field name="sequence" eval="27"/>
+        <field name="follow" eval="True"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_243"/>
+    </record>
+    <record id="investment_portfolio.investment_position_252" model="investment.position">
+        <field name="id" eval="252"/>
+        <field name="name">IBIT 15AUG25 62 C</field>
+        <field name="sequence" eval="28"/>
+        <field name="follow" eval="False"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_251"/>
+    </record>
+    <record id="investment_portfolio.investment_position_248" model="investment.position">
+        <field name="id" eval="248"/>
+        <field name="name">MSTR 15AUG25 440 C</field>
+        <field name="sequence" eval="29"/>
+        <field name="follow" eval="False"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_247"/>
+    </record>
+    <record id="investment_portfolio.investment_position_256" model="investment.position">
+        <field name="id" eval="256"/>
+        <field name="name">IBIT 31OCT25 70 C</field>
+        <field name="sequence" eval="30"/>
+        <field name="follow" eval="False"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_255"/>
+    </record>
+    <record id="investment_portfolio.investment_position_260" model="investment.position">
+        <field name="id" eval="260"/>
+        <field name="name">SQNS 16JAN26 5 C</field>
+        <field name="sequence" eval="31"/>
+        <field name="follow" eval="False"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_259"/>
+    </record>
+    <record id="investment_portfolio.investment_position_205" model="investment.position">
+        <field name="id" eval="205"/>
+        <field name="name">STRF</field>
+        <field name="sequence" eval="33"/>
+        <field name="follow" eval="True"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_204"/>
+    </record>
+    <record id="investment_portfolio.investment_position_146" model="investment.position">
+        <field name="id" eval="146"/>
+        <field name="name">STRK</field>
+        <field name="sequence" eval="34"/>
+        <field name="follow" eval="True"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_145"/>
+    </record>
+    <record id="investment_portfolio.investment_position_72" model="investment.position">
+        <field name="id" eval="72"/>
+        <field name="name">NVDA</field>
+        <field name="sequence" eval="35"/>
+        <field name="follow" eval="True"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_72"/>
+    </record>
+    <record id="investment_portfolio.investment_position_151" model="investment.position">
+        <field name="id" eval="151"/>
+        <field name="name">PLTR</field>
+        <field name="sequence" eval="36"/>
+        <field name="follow" eval="True"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_150"/>
+    </record>
+    <record id="investment_portfolio.investment_position_49" model="investment.position">
+        <field name="id" eval="49"/>
+        <field name="name">TLT</field>
+        <field name="sequence" eval="37"/>
+        <field name="follow" eval="True"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_49"/>
+    </record>
+    <record id="investment_portfolio.investment_position_232" model="investment.position">
+        <field name="id" eval="232"/>
+        <field name="name">IBIT</field>
+        <field name="sequence" eval="38"/>
+        <field name="follow" eval="True"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_231"/>
+    </record>
+    <record id="investment_portfolio.investment_position_242" model="investment.position">
+        <field name="id" eval="242"/>
+        <field name="name">SWC.AQ</field>
+        <field name="sequence" eval="39"/>
+        <field name="follow" eval="False"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_241"/>
+    </record>
+    <record id="investment_portfolio.investment_position_250" model="investment.position">
+        <field name="id" eval="250"/>
+        <field name="name">STX</field>
+        <field name="sequence" eval="40"/>
+        <field name="follow" eval="True"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_249"/>
+    </record>
+    <record id="investment_portfolio.investment_position_258" model="investment.position">
+        <field name="id" eval="258"/>
+        <field name="name">SQNS</field>
+        <field name="sequence" eval="41"/>
+        <field name="follow" eval="True"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_257"/>
+    </record>
+    <record id="investment_portfolio.investment_position_266" model="investment.position">
+        <field name="id" eval="266"/>
+        <field name="name">XYZ</field>
+        <field name="sequence" eval="42"/>
+        <field name="follow" eval="True"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_48"/>
+    </record>
+    <record id="investment_portfolio.investment_position_265" model="investment.position">
+        <field name="id" eval="265"/>
+        <field name="name">IBCI.AS</field>
+        <field name="sequence" eval="43"/>
+        <field name="follow" eval="True"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_264"/>
+    </record>
+    <record id="investment_portfolio.investment_position_268" model="investment.position">
+        <field name="id" eval="268"/>
+        <field name="name">OPEN</field>
+        <field name="sequence" eval="44"/>
+        <field name="follow" eval="True"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_267"/>
+    </record>
+    <record id="investment_portfolio.investment_position_278" model="investment.position">
+        <field name="id" eval="278"/>
+        <field name="name">QQQ 29AUG25 567 P</field>
+        <field name="sequence" eval="45"/>
+        <field name="follow" eval="False"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_277"/>
+    </record>
+    <record id="investment_portfolio.investment_position_274" model="investment.position">
+        <field name="id" eval="274"/>
+        <field name="name">FIG</field>
+        <field name="sequence" eval="46"/>
+        <field name="follow" eval="True"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_273"/>
+    </record>
+    <record id="investment_portfolio.investment_position_84" model="investment.position">
+        <field name="id" eval="84"/>
+        <field name="name">Marathon Digital Holdings Inc</field>
+        <field name="sequence" eval="47"/>
+        <field name="follow" eval="False"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_82"/>
+    </record>
+    <record id="investment_portfolio.investment_position_200" model="investment.position">
+        <field name="id" eval="200"/>
+        <field name="name">Riot Platforms, Inc. (RIOT)</field>
+        <field name="sequence" eval="48"/>
+        <field name="follow" eval="False"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_199"/>
+    </record>
+    <record id="investment_portfolio.investment_position_203" model="investment.position">
+        <field name="id" eval="203"/>
+        <field name="name">GME</field>
+        <field name="sequence" eval="49"/>
+        <field name="follow" eval="False"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_202"/>
+    </record>
+    <record id="investment_portfolio.investment_position_284" model="investment.position">
+        <field name="id" eval="284"/>
+        <field name="name">SPY 17DEC27 550 P</field>
+        <field name="sequence" eval="False"/>
+        <field name="follow" eval="True"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_283"/>
+    </record>
+    <record id="investment_portfolio.investment_position_286" model="investment.position">
+        <field name="id" eval="286"/>
+        <field name="name">RGTI 16JAN26 18 P</field>
+        <field name="sequence" eval="False"/>
+        <field name="follow" eval="True"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_285"/>
+    </record>
+    <record id="investment_portfolio.investment_position_288" model="investment.position">
+        <field name="id" eval="288"/>
+        <field name="name">QBTS 16JAN26 19 P</field>
+        <field name="sequence" eval="False"/>
+        <field name="follow" eval="True"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_287"/>
+    </record>
+    <record id="investment_portfolio.investment_position_296" model="investment.position">
+        <field name="id" eval="296"/>
+        <field name="name">IBIT 02JAN26 50 C</field>
+        <field name="sequence" eval="False"/>
+        <field name="follow" eval="True"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_295"/>
+    </record>
+    <record id="investment_portfolio.investment_position_303" model="investment.position">
+        <field name="id" eval="303"/>
+        <field name="name">AEM</field>
+        <field name="sequence" eval="False"/>
+        <field name="follow" eval="True"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_302"/>
+    </record>
+    <record id="investment_portfolio.investment_position_307" model="investment.position">
+        <field name="id" eval="307"/>
+        <field name="name">IB1T</field>
+        <field name="sequence" eval="False"/>
+        <field name="follow" eval="True"/>
+        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
+        <field name="asset_id" ref="investment_portfolio.investment_asset_306"/>
+    </record>
+</odoo>

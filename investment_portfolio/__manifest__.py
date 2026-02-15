@@ -46,6 +46,8 @@
     'demo': [
         'demo/categories.xml',
         'demo/portfolios.xml',
+        'demo/ibkr_assets.xml',
+        'demo/ibkr_positions.xml',
         'demo/assets.xml',
         'demo/investment.asset.price.csv',
         'demo/investment.position.transaction.csv',

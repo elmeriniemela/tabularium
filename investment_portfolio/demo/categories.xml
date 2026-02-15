@@ -1,39 +1,48 @@
 <?xml version='1.0' encoding='utf-8'?>
 <odoo>
     <record id="investment_portfolio.category_crypto" model="investment.category">
-        <field name="id" eval="2"/>
         <field name="liquid" eval="True"/>
         <field name="name">Cryptocurrency</field>
         <field name="sequence" eval="1"/>
     </record>
     <record id="investment_portfolio.category_stocks" model="investment.category">
-        <field name="id" eval="3"/>
         <field name="liquid" eval="True"/>
         <field name="name">Stocks</field>
         <field name="sequence" eval="2"/>
     </record>
     <record id="investment_portfolio.category_bonds" model="investment.category">
-        <field name="id" eval="7"/>
         <field name="liquid" eval="True"/>
         <field name="name">Bonds</field>
         <field name="sequence" eval="3"/>
     </record>
     <record id="investment_portfolio.category_real_estate" model="investment.category">
-        <field name="id" eval="4"/>
         <field name="liquid" eval="False"/>
         <field name="name">Real Estate</field>
         <field name="sequence" eval="4"/>
     </record>
     <record id="investment_portfolio.category_forest_property" model="investment.category">
-        <field name="id" eval="1"/>
         <field name="liquid" eval="False"/>
         <field name="name">Forest Property</field>
         <field name="sequence" eval="5"/>
     </record>
     <record id="investment_portfolio.category_debt" model="investment.category">
-        <field name="id" eval="9"/>
         <field name="liquid" eval="False"/>
         <field name="name">Debt</field>
+        <field name="sequence" eval="7"/>
+    </record>
+    <record id="investment_portfolio.category_cash" model="investment.category">
+        <field name="liquid" eval="True"/>
+        <field name="name">Cash</field>
+        <field name="sequence" eval="7"/>
+    </record>
+    <record id="investment_portfolio.category_options" model="investment.category">
+        <field name="liquid" eval="True"/>
+        <field name="name">Options</field>
+        <field name="sequence" eval="7"/>
+    </record>
+    <record id="investment_portfolio.category_commodity" model="investment.category">
+        <field name="liquid" eval="True"/>
+        <field name="name">Commodity</field>
         <field name="sequence" eval="7"/>
     </record>
 </odoo>

@@ -4,4 +4,8 @@
         <field name="name">Liquid portfolio</field>
         <field name="sequence" eval="1"/>
     </record>
+    <record id="investment_portfolio.ibkr" model="investment.portfolio">
+        <field name="name">IBKR</field>
+        <field name="sequence" eval="1"/>
+    </record>
 </odoo>
