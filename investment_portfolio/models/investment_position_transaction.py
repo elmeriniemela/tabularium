@@ -323,11 +323,7 @@ class InvestmentPositionTransaction(models.Model):
             if not (quantity and tx.payment and tx.exchange_rate):
                 tx.fee = 0.0
             else:
-                cmp_payment = tx.payment
-                if tx.currency_rate_id:
-                    cmp_payment *= tx.currency_rate_id.company_rate
-
-                tx.fee = abs(cmp_payment/quantity - tx.exchange_rate) * quantity
+                tx.fee = abs(tx.payment_currency/quantity - tx.exchange_rate) * quantity
 
     def _inverse_fee(self):
         for tx in self:
@@ -335,12 +331,7 @@ class InvestmentPositionTransaction(models.Model):
             if not (quantity and tx.payment and tx.exchange_rate):
                 tx.exchange_rate = 0.0
             else:
-                cmp_payment = tx.payment
-                if tx.currency_rate_id:
-                    cmp_payment *= tx.currency_rate_id.company_rate
-
-                tx.exchange_rate = (cmp_payment/quantity - tx.fee/quantity)
-
+                tx.exchange_rate = (tx.payment_currency/quantity - tx.fee/quantity)
 
     @api.depends('position_id.asset_id.split_ids', 'position_id.asset_id.split_ids.factor')
     def _compute_quantity_adjusted(self):
