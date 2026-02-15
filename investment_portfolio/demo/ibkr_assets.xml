@@ -224,13 +224,6 @@
         <field name="category_id" ref="investment_portfolio.category_stocks"/>
         <field name="currency_id" ref="base.EUR"/>
     </record>
-    <record id="investment_portfolio.investment_asset_246" model="investment.asset">
-        <field name="id" eval="246"/>
-        <field name="sequence" eval="False"/>
-        <field name="ticker">MSTR JUN 18 '26 80 Call</field>
-        <field name="category_id" ref="investment_portfolio.category_options"/>
-        <field name="currency_id" ref="base.USD"/>
-    </record>
     <record id="investment_portfolio.investment_asset_247" model="investment.asset">
         <field name="id" eval="247"/>
         <field name="sequence" eval="False"/>

@@ -136,14 +136,6 @@
         <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
         <field name="asset_id" ref="investment_portfolio.investment_asset_253"/>
     </record>
-    <record id="investment_portfolio.investment_position_245" model="investment.position">
-        <field name="id" eval="245"/>
-        <field name="name">MSTR JUN 18 '26 80 Call</field>
-        <field name="sequence" eval="17"/>
-        <field name="follow" eval="False"/>
-        <field name="portfolio_id" ref="investment_portfolio.ibkr"/>
-        <field name="asset_id" ref="investment_portfolio.investment_asset_246"/>
-    </record>
     <record id="investment_portfolio.investment_position_128" model="investment.position">
         <field name="id" eval="128"/>
         <field name="name">GLD</field>
