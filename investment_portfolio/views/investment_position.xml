@@ -61,7 +61,7 @@
                 <field name="plan_yearly_interest" widget="percentage" optional="hide"/>
                 <field name="plan_total_cash_flow" optional="hide"/>
 
-                <button title="Update price" icon="fa-refresh" name="run_integration" type="object" invisible="not endpoint_id"/>
+                <button title="Update price" icon="fa-refresh" name="run_integration" type="object" invisible="not endpoint_id" context="{'force_fetch': True}"/>
             </list>
         </field>
     </record>
@@ -94,7 +94,7 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <button name="run_integration" type="object" string="Update price" icon="fa-download" invisible="not endpoint_id"/>
+                    <button name="run_integration" type="object" string="Update price" icon="fa-download" invisible="not endpoint_id" context="{'force_fetch': True}"/>
                     <button name="%(action_prices)d" string="Prices" type="action" context="{'search_default_asset_id': asset_id, 'search_default_realized': 1, 'search_default_group_time': 1}" class="oe_stat_button" icon="fa-usd">
                     </button>
                 </header>
