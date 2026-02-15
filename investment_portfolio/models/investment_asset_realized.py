@@ -60,14 +60,26 @@ class InvestmentAssetRealized(models.Model):
         for record in self:
             sell_portion = (record.quantity / abs(record.sell_batch_id.quantity_adjusted))
             record.sell_date = record.sell_batch_id.time.date()
-            record.sell_fee = record.sell_batch_id.fee * sell_portion
+            sell_fee_currency = record.sell_batch_id.fee * sell_portion
+            record.sell_fee = record.currency_id._convert(
+                from_amount=sell_fee_currency,
+                to_currency=record.company_currency_id,
+                company=record.company_id,
+                date=record.sell_batch_id.time,
+            )
             record.sell_price = record.sell_batch_id.payment * sell_portion + record.sell_fee # TODO: should we minus the fee?
             record.sell_payment = record.sell_batch_id.payment * sell_portion
             record.sell_payment_currency = record.sell_batch_id.payment_currency * sell_portion
 
             buy_portion = (record.quantity / abs(record.buy_batch_id.quantity_adjusted))
             record.buy_date = record.buy_batch_id.time.date()
-            record.buy_fee = record.buy_batch_id.fee * buy_portion
+            buy_fee_currency = record.buy_batch_id.fee * buy_portion
+            record.buy_fee = record.currency_id._convert(
+                from_amount=buy_fee_currency,
+                to_currency=record.company_currency_id,
+                company=record.company_id,
+                date=record.buy_batch_id.time,
+            )
             record.buy_price = record.buy_batch_id.payment * buy_portion - record.buy_fee
             record.buy_payment = record.buy_batch_id.payment * buy_portion
             record.buy_payment_currency = record.buy_batch_id.payment_currency * buy_portion

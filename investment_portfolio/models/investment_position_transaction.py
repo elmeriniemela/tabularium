@@ -44,7 +44,7 @@ class InvestmentPositionTransaction(models.Model):
     company_currency_id = fields.Many2one(related='position_id.company_currency_id')
     company_id = fields.Many2one(related='position_id.company_id')
 
-    payment = fields.Monetary(required=True, currency_field='company_currency_id', tracking=True)
+    payment = fields.Monetary(required=False, currency_field='company_currency_id', tracking=True)
     payment_currency = fields.Monetary(
         compute='_compute_payment_currency',
         inverse='_inverse_payment_currency',
@@ -63,7 +63,7 @@ class InvestmentPositionTransaction(models.Model):
     )
     inverse_company_rate = fields.Float(related='currency_rate_id.inverse_company_rate', readonly=True)
 
-    fee = fields.Monetary(readonly=False,  compute='_compute_fee', inverse='_inverse_fee', currency_field='company_currency_id')
+    fee = fields.Monetary(readonly=False,  compute='_compute_fee', inverse='_inverse_fee', currency_field='currency_id')
 
     quantity = fields.Float(digits='Investment Asset quantity', tracking=True)
     quantity_adjusted = fields.Float(aggregator='avg', compute='_compute_quantity_adjusted', digits='Investment Asset quantity')
@@ -323,11 +323,11 @@ class InvestmentPositionTransaction(models.Model):
             if not (quantity and tx.payment and tx.exchange_rate):
                 tx.fee = 0.0
             else:
-                cmp_exchange_rate = tx.exchange_rate
+                cmp_payment = tx.payment
                 if tx.currency_rate_id:
-                    cmp_exchange_rate *= tx.currency_rate_id.inverse_company_rate
+                    cmp_payment *= tx.currency_rate_id.company_rate
 
-                tx.fee = abs(tx.payment/quantity - cmp_exchange_rate) * quantity
+                tx.fee = abs(cmp_payment/quantity - tx.exchange_rate) * quantity
 
     def _inverse_fee(self):
         for tx in self:
@@ -335,15 +335,11 @@ class InvestmentPositionTransaction(models.Model):
             if not (quantity and tx.payment and tx.exchange_rate):
                 tx.exchange_rate = 0.0
             else:
-                cmp_fee = tx.fee
-                if tx.currency_rate_id:
-                    cmp_fee *= tx.currency_rate_id.company_rate
-
                 cmp_payment = tx.payment
                 if tx.currency_rate_id:
                     cmp_payment *= tx.currency_rate_id.company_rate
 
-                tx.exchange_rate = (cmp_payment/quantity - cmp_fee/quantity)
+                tx.exchange_rate = (cmp_payment/quantity - tx.fee/quantity)
 
 
     @api.depends('position_id.asset_id.split_ids', 'position_id.asset_id.split_ids.factor')

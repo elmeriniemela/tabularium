@@ -148,6 +148,55 @@ class TestTransactionAdvanced(InvestmentTestCommon):
         self.tx_buy1._compute_payment_currency()
         self.assertAlmostEqual(self.tx_buy1.payment_currency, 900.0, places=2)
 
+    def test_fee_uses_asset_currency_when_company_differs(self):
+        """Fee compute/inverse uses asset currency when currencies differ"""
+        usd = self.env.ref('base.USD')
+        now = datetime.now()
+        rate = self.env['res.currency.rate'].search([
+            ('name', '=', now.date()),
+            ('currency_id', '=', usd.id),
+            ('company_id', '=', self.company.id),
+        ], limit=1)
+        if rate:
+            rate.inverse_company_rate = 0.5  # 1 USD = 0.5 EUR -> 1 EUR = 2 USD
+        else:
+            self.env['res.currency.rate'].create({
+                'name': now.date(),
+                'currency_id': usd.id,
+                'company_id': self.company.id,
+                'inverse_company_rate': 0.5,
+            })
+        asset_usd = self.env['investment.asset'].create({
+            'ticker': 'TEST-USD',
+            'category_id': self.category.id,
+            'currency_id': usd.id,
+            'expected_yearly_appreciation': 0.10,
+            'plausible_ath_drawdown': 0.30,
+        })
+        position_usd = self.env['investment.position'].create({
+            'name': 'USD Position',
+            'asset_id': asset_usd.id,
+            'portfolio_id': self.portfolio.id,
+            'company_id': self.company.id,
+        })
+        tx = self.env['investment.position.transaction'].create({
+            'position_id': position_usd.id,
+            'quantity': 5.0,
+            'exchange_rate': 90.0,
+            'payment': 250.0,  # 500 USD payment_currency at the configured FX rate
+            'time': now - timedelta(days=1),
+        })
+
+        # fee = |payment_currency/qty - exchange_rate| * qty, in asset currency
+        expected_fee = abs(tx.payment_currency / 5.0 - 90.0) * 5.0
+        self.assertAlmostEqual(tx.fee, expected_fee, places=2)
+        self.assertEqual(tx._fields['fee'].currency_field, 'currency_id')
+
+        # inverse: exchange_rate = payment_currency/qty - fee/qty, in asset currency
+        tx.fee = 25.0
+        expected_exchange_rate = tx.payment_currency / 5.0 - 25.0 / 5.0
+        self.assertAlmostEqual(tx.exchange_rate, expected_exchange_rate, places=2)
+
     def test_quantity_adjusted_multiple_splits(self):
         """Multiple splits compound on quantity adjustment"""
         now = datetime.now()
