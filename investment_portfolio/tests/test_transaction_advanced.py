@@ -197,6 +197,60 @@ class TestTransactionAdvanced(InvestmentTestCommon):
         expected_exchange_rate = tx.payment_currency / 5.0 - 25.0 / 5.0
         self.assertAlmostEqual(tx.exchange_rate, expected_exchange_rate, places=2)
 
+    def test_fee_precision_not_based_on_payment_currency_rounding(self):
+        """Fee must use payment*rate, not potentially stale payment_currency."""
+        usd = self.env.ref('base.USD')
+        now = datetime.now()
+        rate_date = (now - timedelta(days=1)).date()
+        rate = self.env['res.currency.rate'].search([
+            ('name', '=', rate_date),
+            ('currency_id', '=', usd.id),
+            ('company_id', '=', self.company.id),
+        ], limit=1)
+        if rate:
+            rate.company_rate = 1.0001
+        else:
+            rate = self.env['res.currency.rate'].create({
+                'name': rate_date,
+                'currency_id': usd.id,
+                'company_id': self.company.id,
+                'company_rate': 1.0001,
+            })
+
+        asset_usd = self.env['investment.asset'].create({
+            'ticker': 'TEST-USD-PRECISION',
+            'category_id': self.category.id,
+            'currency_id': usd.id,
+            'expected_yearly_appreciation': 0.10,
+            'plausible_ath_drawdown': 0.30,
+        })
+        position_usd = self.env['investment.position'].create({
+            'name': 'USD Position Precision',
+            'asset_id': asset_usd.id,
+            'portfolio_id': self.portfolio.id,
+            'company_id': self.company.id,
+        })
+        tx = self.env['investment.position.transaction'].create({
+            'position_id': position_usd.id,
+            'quantity': 1.0,
+            'exchange_rate': 1000.2,
+            'payment': 1000.0,
+            'time': now - timedelta(days=1),
+        })
+
+        initial_payment_currency = tx.payment_currency
+        self.assertAlmostEqual(tx.fee, 0.1, places=2)
+
+        rate.company_rate = 1.0004
+        expected_fee = abs(tx.payment * tx.currency_rate_id.company_rate - tx.exchange_rate)
+        stale_payment_currency_fee = abs(initial_payment_currency - tx.exchange_rate)
+
+        self.assertAlmostEqual(tx.payment_currency, initial_payment_currency, places=6)
+        self.assertAlmostEqual(tx.fee, expected_fee, places=6)
+        self.assertAlmostEqual(tx.fee, 0.2, places=2)
+        self.assertAlmostEqual(stale_payment_currency_fee, 0.1, places=2)
+        self.assertNotAlmostEqual(tx.fee, stale_payment_currency_fee, places=2)
+
     def test_quantity_adjusted_multiple_splits(self):
         """Multiple splits compound on quantity adjustment"""
         now = datetime.now()

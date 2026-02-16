@@ -328,7 +328,7 @@ class InvestmentPositionTransaction(models.Model):
             if not (quantity and tx.payment and tx.exchange_rate):
                 tx.fee = 0.0
             else:
-                cmp_payment = tx.payment
+                cmp_payment = tx.payment # do the rate conversion manually instead of using payment_currency, as it causes decimal rounding errors
                 if tx.currency_rate_id:
                     cmp_payment *= tx.currency_rate_id.company_rate
 
@@ -340,7 +340,7 @@ class InvestmentPositionTransaction(models.Model):
             if not (quantity and tx.payment and tx.exchange_rate):
                 tx.exchange_rate = 0.0
             else:
-                cmp_payment = tx.payment
+                cmp_payment = tx.payment # do the rate conversion manually instead of using payment_currency, as it causes decimal rounding errors
                 if tx.currency_rate_id:
                     cmp_payment *= tx.currency_rate_id.company_rate
 
