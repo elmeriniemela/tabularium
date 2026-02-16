@@ -46,6 +46,7 @@
                         <group>
                             <field name="position_id"/>
                             <field name="move_id"/>
+                            <field name="external_ref"/>
                             <field name="time"/>
                             <field name="quantity"/>
                             <field name="payment"/>

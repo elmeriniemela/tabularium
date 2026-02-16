@@ -38,6 +38,11 @@ class InvestmentPositionTransaction(models.Model):
         tracking=True,
     )
 
+    external_ref = fields.Char(
+        index=True,
+        tracking=True,
+    )
+
     asset_id = fields.Many2one(related='position_id.asset_id')
 
     currency_id = fields.Many2one(related='position_id.currency_id')
