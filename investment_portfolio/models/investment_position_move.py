@@ -51,6 +51,13 @@ class InvestmentPositionMove(models.Model):
         search='_search_position_ids',
     )
 
+    portfolio_ids = fields.Many2many(
+        comodel_name='investment.portfolio',
+        string="Portfolios",
+        compute='_compute_portfolio_ids',
+        search='_search_portfolio_ids',
+    )
+
     note_id = fields.Many2one(
         string="Note ID",
         comodel_name='investment.position.note',
@@ -66,6 +73,30 @@ class InvestmentPositionMove(models.Model):
     _sql_constraints = [
         ('unique_name', 'unique(name, company_id)', 'A move with this name already exists!'),
     ]
+
+    def _compute_portfolio_ids(self):
+        for record in self:
+            record.portfolio_ids = record.transaction_ids.mapped('portfolio_id')
+
+    def _search_portfolio_ids(self, operator, value):
+        if isinstance(value, bool):
+            # portfolios is set
+            # portfolios is not set
+            return [('transaction_ids', operator, value)]
+
+        domain = []
+        if operator in expression.NEGATIVE_TERM_OPERATORS:
+            # Normal negative term operators do not work intuitively through One2many lists.
+            # We need to negate outside of the leaf using '!', to have behaviour which makes sense to a user.
+            # portfolios does not contain X
+            # portfolios is not equal to X
+            # We need to actually do the
+            operator = expression.TERM_OPERATORS_NEGATION[operator]
+            domain.append('!')
+
+        domain.append(('transaction_ids.portfolio_id', operator, value))
+        _logger.debug(domain)
+        return domain
 
     def _compute_position_ids(self):
         for record in self:

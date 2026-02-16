@@ -142,6 +142,8 @@
             <search>
                 <field name="position_id"/>
                 <field name="description"/>
+                <field name="portfolio_id"/>
+                <field name="category_id"/>
                 <separator/>
                 <filter name="date_filter" date="time"/>
                 <separator/>
@@ -181,6 +183,7 @@
                     <filter string="Category" name="group_category_id" context="{'group_by': 'category_id'}"/>
                     <filter string="Type" name="group_ttype" context="{'group_by': 'ttype'}"/>
                     <filter string="Position" name="group_position_id" context="{'group_by': 'position_id'}"/>
+                    <filter string="Time" name="group_time" context="{'group_by': 'time:day'}"/>
                 </group>
             </search>
         </field>

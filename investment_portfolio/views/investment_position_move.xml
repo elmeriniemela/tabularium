@@ -7,6 +7,7 @@
                 <field name="name"/>
                 <field name="time"/>
                 <field name="position_ids" widget="many2many_tags"/>
+                <field name="portfolio_ids" widget="many2many_tags"/>
                 <field name="profit" decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0"/>
                 <field name="cash_flow" decoration-danger="cash_flow &lt; 0" decoration-success="cash_flow &gt; 0"/>
             </list>
@@ -27,6 +28,7 @@
                     <group>
                         <group>
                             <field name="company_id"/>
+                            <field name="portfolio_ids" widget="many2many_tags"/>
                             <field name="profit" decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0"/>
                         </group>
                         <group>
@@ -57,6 +59,7 @@
         <field name="arch" type="xml">
             <search>
                 <field name="position_ids"/>
+                <field name="portfolio_ids"/>
                 <field name="name"/>
                 <separator/>
                 <filter name="date_filter" date="time"/>
