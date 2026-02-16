@@ -203,7 +203,7 @@
     </record>
 
     <record id="action_find_move" model="ir.actions.server">
-        <field name="name">Make a move</field>
+        <field name="name">Find a move</field>
         <field name="model_id" ref="model_investment_position_transaction"/>
         <field name="binding_model_id" ref="model_investment_position_transaction"/>
         <field name="state">code</field>
