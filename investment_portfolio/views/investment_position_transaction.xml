@@ -141,6 +141,7 @@
         <field name="arch" type="xml">
             <search>
                 <field name="position_id"/>
+                <field name="description"/>
                 <separator/>
                 <filter name="date_filter" date="time"/>
                 <separator/>
