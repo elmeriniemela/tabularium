@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from datetime import timedelta
 from odoo import api, models, fields, Command, _
 from odoo.exceptions import ValidationError
 from odoo.tools import float_is_zero, float_utils
@@ -124,6 +125,8 @@ class InvestmentPositionTransaction(models.Model):
         tracking=True,
     )
 
+    is_split = fields.Boolean()
+
     cash_flow = fields.Monetary(
         compute='_compute_report',
         help="Cash flow related to this transaction. Positive sum means that money went in to the position, negative sum means that money came out of the position.",
@@ -165,7 +168,46 @@ class InvestmentPositionTransaction(models.Model):
         for record in self:
             record.kanban_quantity = f'{qty_to_str(record.quantity)} {units} @ {money_to_str(record.exchange_rate, record.currency_id)}'
 
+    def find_move(self):
+        if not self:
+            raise ValidationError(_("No transactions selected!"))
 
+        company = self.env.company
+
+        for record in self:
+            if record.move_id:
+                raise ValidationError(_("Transaction '%s' already has a move!") % record.display_name)
+
+            if record.company_id != company:
+                raise ValidationError(_("Transaction '%s' already belongs to a different company!") % record.display_name)
+
+        dates = set(self.mapped(lambda tx: tx.time.date()))
+        if len(dates) != 1:
+            raise ValidationError(_("Selected transactions must all be on the same date!"))
+
+        date = next(iter(dates))
+        portfolios = set(self.mapped('portfolio_id').ids)
+        start = fields.Datetime.to_datetime(date)
+        stop = start + timedelta(days=1)
+        move = self.env['investment.position.move'].search([
+            ('company_id', '=', company.id),
+            ('time', '>=', start),
+            ('time', '<', stop),
+            ('transaction_ids.portfolio_id', 'in', list(portfolios)),
+        ]).filtered(lambda m: set(m.transaction_ids.mapped('portfolio_id').ids) == portfolios)
+
+        if len(move) != 1:
+            raise ValidationError(_("Expected exactly one move for %s and selected portfolios, found %s.") % (date, len(move)))
+
+        self.write({'move_id': move.id})
+
+        return {
+            'type': 'ir.actions.act_window',
+            'view_mode': 'form',
+            'res_model': move._name,
+            'res_id': move.id,
+            'target': 'current',
+        }
 
     def make_move(self):
         if not self:
@@ -252,20 +294,19 @@ class InvestmentPositionTransaction(models.Model):
                 tx.payment = tx.payment_currency
 
 
-    @api.depends('payment', 'quantity')
+    @api.depends('payment', 'quantity', 'is_split')
     def _compute_report(self):
         for record in self:
+            if record.is_split:
+                record.ttype = 'split'
+                continue
             if record.quantity > 0:
                 if record.payment > 0:
                     record.ttype = 'buy'
                     record.cash_flow = record.payment
-                elif float_is_zero(record.payment, precision_digits=record.company_currency_id.decimal_places):
-                    record.ttype = 'split'
-                    record.cash_flow = 0.0
                 else:
-                    record.ttype = False
-                    record.cash_flow = False
-                    _logger.error("Invalid type: %s", record)
+                    record.ttype = 'yield'
+                    record.cash_flow = -record.payment
             elif record.quantity < 0:
                 if record.payment > 0:
                     record.ttype = 'sell'

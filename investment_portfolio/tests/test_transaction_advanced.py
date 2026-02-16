@@ -284,3 +284,82 @@ class TestTransactionAdvanced(InvestmentTestCommon):
         self.tx_buy1.make_move()
         with self.assertRaises(Exception):
             self.tx_buy1.make_move()
+
+    def test_find_move_links_and_opens_single_match(self):
+        """find_move links to exactly one same-date same-portfolio move"""
+        time = datetime.now() - timedelta(days=2)
+        move = self.env['investment.position.move'].create({
+            'time': time.replace(hour=12, minute=0, second=0, microsecond=0),
+            'company_id': self.company.id,
+        })
+        tx_existing = self.env['investment.position.transaction'].create({
+            'position_id': self.position.id,
+            'quantity': 1.0,
+            'exchange_rate': 100.0,
+            'payment': 100.0,
+            'time': time,
+        })
+        tx_existing.move_id = move
+        tx = self.env['investment.position.transaction'].create({
+            'position_id': self.position.id,
+            'quantity': 2.0,
+            'exchange_rate': 100.0,
+            'payment': 200.0,
+            'time': time,
+        })
+
+        result = tx.find_move()
+        self.assertEqual(result['res_model'], 'investment.position.move')
+        self.assertEqual(result['res_id'], move.id)
+        self.assertEqual(tx.move_id, move)
+
+    def test_find_move_raises_if_no_matching_move(self):
+        """find_move raises when no same-date same-portfolio move exists"""
+        tx = self.env['investment.position.transaction'].create({
+            'position_id': self.position.id,
+            'quantity': 2.0,
+            'exchange_rate': 100.0,
+            'payment': 200.0,
+            'time': datetime.now() - timedelta(days=2),
+        })
+
+        with self.assertRaises(Exception):
+            tx.find_move()
+
+    def test_find_move_raises_if_multiple_matching_moves(self):
+        """find_move raises when more than one move matches"""
+        time = datetime.now() - timedelta(days=2)
+        move1 = self.env['investment.position.move'].create({
+            'time': time.replace(hour=10, minute=0, second=0, microsecond=0),
+            'company_id': self.company.id,
+        })
+        move2 = self.env['investment.position.move'].create({
+            'time': time.replace(hour=14, minute=0, second=0, microsecond=0),
+            'company_id': self.company.id,
+        })
+        tx_existing1 = self.env['investment.position.transaction'].create({
+            'position_id': self.position.id,
+            'quantity': 1.0,
+            'exchange_rate': 100.0,
+            'payment': 100.0,
+            'time': time,
+        })
+        tx_existing2 = self.env['investment.position.transaction'].create({
+            'position_id': self.position.id,
+            'quantity': 1.0,
+            'exchange_rate': 100.0,
+            'payment': 100.0,
+            'time': time,
+        })
+        tx_existing1.move_id = move1
+        tx_existing2.move_id = move2
+        tx = self.env['investment.position.transaction'].create({
+            'position_id': self.position.id,
+            'quantity': 2.0,
+            'exchange_rate': 100.0,
+            'payment': 200.0,
+            'time': time,
+        })
+
+        with self.assertRaises(Exception):
+            tx.find_move()

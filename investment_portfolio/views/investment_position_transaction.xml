@@ -10,6 +10,7 @@
                 <field name="payment_currency" optional="show"/>
                 <field name="payment" sum="Total" optional="hide"/>
                 <field name="ttype" optional="show"/>
+                <field name="is_split" optional="hide"/>
                 <field name="cash_flow" optional="hide" sum="Total"/>
                 <field name="description" optional="show"/>
                 <field name="exchange_rate" optional="show"/>
@@ -200,6 +201,15 @@
         <field name="state">code</field>
         <field name="code">action = records.make_move()</field>
     </record>
+
+    <record id="action_find_move" model="ir.actions.server">
+        <field name="name">Make a move</field>
+        <field name="model_id" ref="model_investment_position_transaction"/>
+        <field name="binding_model_id" ref="model_investment_position_transaction"/>
+        <field name="state">code</field>
+        <field name="code">action = records.find_move()</field>
+    </record>
+
 
     <record id="action_transactions_per_month" model="ir.actions.act_window">
         <field name="name">Transactions per month</field>
