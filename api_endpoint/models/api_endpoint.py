@@ -519,10 +519,11 @@ class ApiEndpoint(models.Model):
 
     def produce(self, variables):
         self.ensure_one()
+        globals_dict = self._get_globals()
         if self.to_skip > 0:
             self.to_skip -= 1
             _logger.info("Skipped produce due to error backoff")
-            return
+            return globals_dict
         self = self.sudo() # All the internals of this function should be run as root, but the _get_globals will demote the user.
         commit = self.env.context.get('force_commit') or self.auto_commit
         raise_exc = self.env.context.get('raise_exc', True)
@@ -530,7 +531,6 @@ class ApiEndpoint(models.Model):
         try:
             if self.state not in ['active', 'error']:
                 raise exceptions.UserError(_("Unable to produce, invalid state: %s.") % self.state)
-            globals_dict = self._get_globals()
             serialized_vars = self._serialize_dict(globals_dict, variables)
             serialized_ctx = self._serialize_dict(globals_dict, self.env.context)
             globals_dict.update(variables)

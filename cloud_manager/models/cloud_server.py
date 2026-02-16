@@ -153,7 +153,7 @@ class CloudServer(models.Model):
             kwargs['args'] = tuple()
         if 'commit_before' not in kwargs:
             kwargs['commit_before'] = False
-        return self.endpoint_id.produce(kwargs)['obj']
+        return self.endpoint_id.produce(kwargs).get('obj')
 
     def parse_status(self, obj):
         self.ensure_one()
