@@ -3,7 +3,7 @@
         <field name="name">investment.position.transaction.list</field>
         <field name="model">investment.position.transaction</field>
         <field name="arch" type="xml">
-            <list editable="top" limit="1000">
+            <list editable="top" limit="40">
                 <field name="position_id" optional="hide"/>
                 <field name="time"  optional="show"/>
                 <field name="quantity" sum="Total"  optional="show"/>
