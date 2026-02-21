@@ -144,6 +144,7 @@
                 <field name="description"/>
                 <field name="portfolio_id"/>
                 <field name="category_id"/>
+                <field name="external_ref"/>
                 <separator/>
                 <filter name="date_filter" date="time"/>
                 <separator/>
