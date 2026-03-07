@@ -38,7 +38,7 @@ class DayAggs(models.Model):
     _description = "Min Aggs"
 
     def cron_import(self):
-        self._import_aggs('/home/elmeri/Work/polygon/us_stocks_sip/minute_aggs_v1/*/*')
+        self._import_aggs('/home/elmeri/Odoo/src/polygon/us_stocks_sip/minute_aggs_v1/*/*')
 
     # ticker,volume,open,close,high,low,window_start,transactions
     # A,115,89.53,89.53,89.53,89.53,1594033200000000000,2
@@ -51,11 +51,11 @@ class DayAggs(models.Model):
     _name = "day.aggs"
     _inherit = ['trade.aggs']
     _description = "Day Aggs"
-    # COPY day_aggs(ticker,volume,open,close,high,low,window_start,transactions) FROM PROGRAM 'gzip -dc /home/elmeri/Work/polygon/2020-07-06.csv.gz' DELIMITER ',' CSV HEADER NULL '';
+    # COPY day_aggs(ticker,volume,open,close,high,low,window_start,transactions) FROM PROGRAM 'gzip -dc /home/elmeri/Odoo/src/polygon/2020-07-06.csv.gz' DELIMITER ',' CSV HEADER NULL '';
 
 
     def cron_import(self):
-        self._import_aggs('/home/elmeri/Work/polygon/us_stocks_sip/day_aggs_v1/*/*')
+        self._import_aggs('/home/elmeri/Odoo/src/polygon/us_stocks_sip/day_aggs_v1/*/*')
 
 
     # ticker,volume,open,close,high,low,window_start,transactions
