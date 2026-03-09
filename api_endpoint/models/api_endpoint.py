@@ -15,7 +15,7 @@ from odoo.tools.safe_eval import safe_eval, test_python_expr, wrap_module, datet
 from odoo.tools.convert import xml_import as XMLImport
 from odoo.http import request
 
-requests = wrap_module(__import__('requests'), ['get', 'post', 'put', 'delete', 'request'])
+requests = wrap_module(__import__('requests'), {'get': None, 'post': None, 'put': None, 'delete': None, 'request': None, 'exceptions': ['ReadTimeout', 'Timeout', 'ConnectionError']})
 io = wrap_module(__import__('io'), ['StringIO', 'BytesIO'])
 pandas = wrap_module(__import__('pandas'), ['read_csv', 'read_excel', 'DataFrame'])
 re = wrap_module(__import__('re'), ['findall', 'sub'])
