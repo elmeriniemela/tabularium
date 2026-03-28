@@ -43,8 +43,8 @@ class TestTransaction(InvestmentTestCommon):
         })
         self.assertEqual(tx_cost.ttype, 'cost')
 
-    def test_split_classification(self):
-        """qty > 0, payment = 0 => split"""
+    def test_yield_classification(self):
+        """qty > 0, payment = 0 => yield"""
         tx_split = self.env['investment.position.transaction'].create({
             'position_id': self.position.id,
             'quantity': 10.0,
@@ -52,7 +52,7 @@ class TestTransaction(InvestmentTestCommon):
             'payment': 0.0,
             'time': datetime.now() - timedelta(days=1),
         })
-        self.assertEqual(tx_split.ttype, 'split')
+        self.assertEqual(tx_split.ttype, 'yield')
 
     def test_cash_flow_buy(self):
         """Buy cash_flow = payment (positive, money flows into position)"""

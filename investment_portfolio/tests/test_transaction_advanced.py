@@ -105,7 +105,7 @@ class TestTransactionAdvanced(InvestmentTestCommon):
         self.tx_buy2._compute_profit()
         self.assertAlmostEqual(self.tx_buy2.profit, 25.0, places=2)
 
-    def test_profit_split_is_zero(self):
+    def test_profit_yield_is_zero(self):
         """Split transaction has zero profit"""
         tx = self.env['investment.position.transaction'].create({
             'position_id': self.position.id,
@@ -113,6 +113,7 @@ class TestTransactionAdvanced(InvestmentTestCommon):
             'exchange_rate': 0.0,
             'payment': 0.0,
             'time': datetime.now() - timedelta(days=2),
+            'is_split': True,
         })
         tx._compute_profit()
         self.assertAlmostEqual(tx.profit, 0.0, places=2)
