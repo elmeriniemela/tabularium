@@ -29,6 +29,7 @@ class InvestmentExchange(models.Model):
     next_close = fields.Datetime(compute='_compute_open_close')
     next_open = fields.Datetime(compute='_compute_open_close')
     is_open = fields.Boolean(compute='_compute_open_close')
+    is_recently_open = fields.Boolean(compute='_compute_open_close')
 
 
     tz = fields.Selection(_tz_get, string="Timezone", default=lambda self: self.env.context.get('tz'))
@@ -61,7 +62,9 @@ class InvestmentExchange(models.Model):
 
         for ex in self:
             tz = pytz.timezone(ex.tz)
-            now = datetime.datetime.now(tz)
+            now_utc = fields.Datetime.now()
+            now_local = pytz.UTC.localize(now_utc).astimezone(tz)
+            now = now_local
             if not ex.weekend_trading:
                 while now.isoweekday() in [6,7]:
                     now += datetime.timedelta(days=1)
@@ -84,9 +87,22 @@ class InvestmentExchange(models.Model):
             closing_times = [ex.closing_time] + [g.closing_time for g in gaps if g.closing_time]
             ex.next_close = utclize(localize(tz, next_open, min(closing_times)))
 
-            now = fields.Datetime.now()
-            ex.is_open = (ex.next_open <= now and ex.next_close >= now)
+            ex.is_open = (ex.next_open <= now_utc and ex.next_close >= now_utc)
 
+            today_open = localize(tz, now_local, ex.opening_time)
+            today_gaps = ex.gap_ids.filtered(lambda g: g.date == now_local.date())
+            today_has_trading = ex.weekend_trading or now_local.isoweekday() not in [6,7]
+            today_has_trading = today_has_trading and not any(
+                g.closing_datetime.astimezone(tz) <= today_open for g in today_gaps
+            )
+            if not today_has_trading:
+                ex.is_recently_open = ex.is_open
+                continue
+
+            closing_times = [ex.closing_time] + [g.closing_time for g in today_gaps if g.closing_time]
+            today_close = localize(tz, now_local, min(closing_times))
+            recently_open_until = today_close + datetime.timedelta(minutes=30)
+            ex.is_recently_open = ex.is_open or (today_close <= now_local <= recently_open_until)
 
 
 

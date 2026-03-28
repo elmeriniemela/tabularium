@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
+from odoo import fields
 from odoo.tests import tagged, TransactionCase
 from datetime import date, datetime, timedelta
+from unittest.mock import patch
 
 
 @tagged('post_install', '-at_install')
@@ -39,6 +41,43 @@ class TestExchange(TransactionCase):
         """is_open is a boolean value"""
         self.exchange._compute_open_close()
         self.assertIsInstance(self.exchange.is_open, bool)
+
+    def test_is_recently_open_boolean(self):
+        """is_recently_open is a boolean value"""
+        self.exchange._compute_open_close()
+        self.assertIsInstance(self.exchange.is_recently_open, bool)
+
+    def test_is_recently_open_30_minutes_after_close(self):
+        """is_recently_open stays true right after close"""
+        exchange = self.env['investment.exchange'].create({
+            'name': 'Recently Open Exchange',
+            'opening_time': 9.0,
+            'closing_time': 16.0,
+            'tz': 'UTC',
+            'weekend_trading': True,
+        })
+
+        with patch.object(fields.Datetime, 'now', return_value=datetime(2025, 1, 15, 16, 15, 0)):
+            exchange._compute_open_close()
+
+        self.assertFalse(exchange.is_open)
+        self.assertTrue(exchange.is_recently_open)
+
+    def test_is_recently_open_false_after_30_minutes(self):
+        """is_recently_open turns false after 30 minutes"""
+        exchange = self.env['investment.exchange'].create({
+            'name': 'Not Recently Open Exchange',
+            'opening_time': 9.0,
+            'closing_time': 16.0,
+            'tz': 'UTC',
+            'weekend_trading': True,
+        })
+
+        with patch.object(fields.Datetime, 'now', return_value=datetime(2025, 1, 15, 16, 31, 0)):
+            exchange._compute_open_close()
+
+        self.assertFalse(exchange.is_open)
+        self.assertFalse(exchange.is_recently_open)
 
     def test_exchange_gap(self):
         """Gap creates a closure on specific date"""
