@@ -42,3 +42,9 @@ coverage.xml
 # Backup files
 *~
 *.swp
+
+# Agent configurations
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+odoorc.conf
