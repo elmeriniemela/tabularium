@@ -2,11 +2,12 @@
 
 from odoo import api, models, fields, _
 from odoo.tools import float_compare
+from odoo.tools.misc import formatLang
 
 class InvestmentAssetRealized(models.Model):
     _name = 'investment.asset.realized'
     _description = 'Asset Realized'
-    _order = 'sell_date desc, buy_date desc'
+    _order = 'realized_date asc, id asc'
 
     position_id = fields.Many2one(
         comodel_name='investment.position',
@@ -90,7 +91,14 @@ class InvestmentAssetRealized(models.Model):
             record.realized_date = max([record.buy_date, record.sell_date])
             record.is_profit = float_compare(record.profit, 0, precision_digits=2) > 0
 
-
+    def _get_report_totals(self):
+        return {
+            'profit': formatLang(self.env, sum(self.mapped('profit')), digits=2),
+            'sell_price': formatLang(self.env, sum(self.mapped('sell_price')), digits=2),
+            'sell_fee': formatLang(self.env, sum(self.mapped('sell_fee')), digits=2),
+            'buy_price': formatLang(self.env, sum(self.mapped('buy_price')), digits=2),
+            'buy_fee': formatLang(self.env, sum(self.mapped('buy_fee')), digits=2),
+        }
 
     _sql_constraints = [
         ('unique_realized', 'UNIQUE(sell_batch_id, buy_batch_id)', 'A realization for this aquisition/sell link already exists!'),

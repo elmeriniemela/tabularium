@@ -9,6 +9,7 @@
                 <field name="company_currency_id" optional="hide"/>
                 <field name="quantity" sum="Total Volume"/>
                 <field name="profit" sum="Total Profit"/>
+                <field name="realized_date" optional="hide"/>
                 <field name="sell_batch_id" optional="hide"/>
                 <field name="sell_date"/>
                 <field name="sell_price"/>
@@ -37,6 +38,7 @@
                             <field name="sell_date"/>
                             <field name="sell_price"/>
                             <field name="sell_fee"/>
+                            <field name="realized_date"/>
                         </group>
                         <group>
                             <field name="position_id"/>
@@ -58,6 +60,8 @@
         <field name="model">investment.asset.realized</field>
         <field name="arch" type="xml">
             <search>
+                <field name="position_id"/>
+                <separator/>
                 <filter name="realized_date" date="realized_date"/>
                 <separator/>
                 <filter string="Profit" name="profit" domain="[('profit', '&gt;', 0)]"/>

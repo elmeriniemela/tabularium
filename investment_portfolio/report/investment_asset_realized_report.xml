@@ -1,0 +1,117 @@
+<odoo>
+    <record id="paperformat_asset_realized" model="report.paperformat">
+        <field name="name">Assets Realized A4 Landscape</field>
+        <field name="format">A4</field>
+        <field name="orientation">Landscape</field>
+        <field name="dpi">90</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">10</field>
+        <field name="margin_top">15</field>
+        <field name="margin_bottom">5</field>
+        <field name="margin_left">5</field>
+        <field name="margin_right">5</field>
+    </record>
+
+    <record id="action_report_asset_realized" model="ir.actions.report">
+        <field name="name">Assets Realized</field>
+        <field name="model">investment.asset.realized</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">investment_portfolio.report_asset_realized_document</field>
+        <field name="report_file">investment_portfolio.report_asset_realized_document</field>
+        <field name="paperformat_id" ref="investment_portfolio.paperformat_asset_realized"/>
+        <field name="binding_model_id" ref="model_investment_asset_realized"/>
+        <field name="binding_type">report</field>
+        <field name="multi" eval="True"/>
+    </record>
+
+    <template id="report_asset_realized_document">
+        <t t-call="web.html_container">
+            <t t-call="web.internal_layout">
+                <div class="page">
+                    <t t-set="totals" t-value="docs._get_report_totals()"/>
+                    <div id="informations" class="d-flex justify-content-between  mb-4">
+                        <div>
+                            <span t-if="True">Profit/Loss: </span>
+                            <strong t-out="totals['profit']"/>
+                        </div>
+                        <div>
+                            <span t-if="True">Sell Price: </span>
+                            <strong t-out="totals['sell_price']"/>
+                        </div>
+                        <div>
+                            <span t-if="True">Sell Fees: </span>
+                            <strong t-out="totals['sell_fee']"/>
+                        </div>
+                        <div>
+                            <span t-if="True">Buy Price: </span>
+                            <strong t-out="totals['buy_price']"/>
+                        </div>
+                        <div>
+                            <span t-if="True">Buy Fees: </span>
+                            <strong t-out="totals['buy_fee']"/>
+                        </div>
+                    </div>
+
+                    <table class="table o_main_table table-sm table-bordered w-100">
+                        <colgroup>
+                            <col style="width: 60px;"/>
+                            <col/>
+                            <col/>
+                            <col/>
+                            <col/>
+                            <col/>
+                            <col/>
+                            <col/>
+                            <col/>
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th class="text-end">Quantity</th>
+                                <th class="text-end">Profit/Loss</th>
+                                <th>Sell Date</th>
+                                <th class="text-end">Sell Price</th>
+                                <th class="text-end">Sell Fee</th>
+                                <th>Buy Date</th>
+                                <th class="text-end">Buy Price</th>
+                                <th class="text-end">Buy Fee</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="docs" t-as="record">
+                                <td>
+                                    <span t-field="record.position_id"/>
+                                </td>
+                                <td class="text-end">
+                                    <span t-field="record.quantity"/>
+                                </td>
+                                <td class="text-end">
+                                    <span t-field="record.profit"/>
+                                </td>
+                                <td>
+                                    <span t-field="record.sell_date"/>
+                                </td>
+                                <td class="text-end">
+                                    <span t-field="record.sell_price"/>
+                                </td>
+                                <td class="text-end">
+                                    <span t-field="record.sell_fee"/>
+                                </td>
+                                <td>
+                                    <span t-field="record.buy_date"/>
+                                </td>
+                                <td class="text-end">
+                                    <span t-field="record.buy_price"/>
+                                </td>
+                                <td class="text-end">
+                                    <span t-field="record.buy_fee"/>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

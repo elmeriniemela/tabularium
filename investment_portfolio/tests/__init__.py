@@ -4,6 +4,7 @@ from . import test_position
 from . import test_position_advanced
 from . import test_realized
 from . import test_realized_advanced
+from . import test_realized_report
 from . import test_asset
 from . import test_asset_advanced
 from . import test_period
