@@ -25,6 +25,7 @@ class TestRealizedAdvanced(InvestmentTestCommon):
 
     def test_fifo_sell_dates(self):
         """Realized sell_date and buy_date match transaction dates"""
+        self.company.partner_id.tz = 'UTC'
         pos = self.env['investment.position'].create({
             'name': 'FIFO Dates',
             'asset_id': self.asset.id,
@@ -53,6 +54,37 @@ class TestRealizedAdvanced(InvestmentTestCommon):
         self.assertEqual(len(realized), 1)
         self.assertEqual(realized.buy_date, buy_time.date())
         self.assertEqual(realized.sell_date, sell_time.date())
+
+    def test_fifo_sell_dates_use_company_timezone(self):
+        """Realized sell_date and buy_date use company partner timezone"""
+        self.company.partner_id.tz = 'Europe/Helsinki'
+        pos = self.env['investment.position'].create({
+            'name': 'FIFO TZ Dates',
+            'asset_id': self.asset.id,
+            'portfolio_id': self.portfolio.id,
+            'company_id': self.company.id,
+        })
+        buy_time = datetime(2025, 1, 1, 22, 30, 0)
+        sell_time = datetime(2025, 1, 2, 22, 30, 0)
+        self.env['investment.position.transaction'].create({
+            'position_id': pos.id,
+            'quantity': 10.0,
+            'exchange_rate': 50.0,
+            'payment': 500.0,
+            'time': buy_time,
+        })
+        self.env['investment.position.transaction'].create({
+            'position_id': pos.id,
+            'quantity': -10.0,
+            'exchange_rate': 60.0,
+            'payment': 600.0,
+            'time': sell_time,
+        })
+        pos._compute_position_aggregate()
+        realized = pos.realized_ids.filtered(lambda r: not r.simulated)
+        self.assertEqual(len(realized), 1)
+        self.assertEqual(realized.buy_date, datetime(2025, 1, 2).date())
+        self.assertEqual(realized.sell_date, datetime(2025, 1, 3).date())
 
     def test_fifo_partial_quantities(self):
         """FIFO matching correctly splits across buys"""

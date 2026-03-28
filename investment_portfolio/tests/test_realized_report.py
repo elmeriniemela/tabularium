@@ -2,6 +2,7 @@
 
 from datetime import datetime, timedelta
 from odoo.tests import tagged
+from odoo.tools.misc import formatLang
 from .common import InvestmentTestCommon
 
 
@@ -43,11 +44,22 @@ class TestRealizedReport(InvestmentTestCommon):
         self.assertEqual(len(realized), 2)
 
         totals = realized._get_report_totals()
-        self.assertAlmostEqual(totals['profit'], 150.0, places=2)
-        self.assertAlmostEqual(totals['sell_price'], 300.0, places=2)
-        self.assertAlmostEqual(totals['buy_price'], 150.0, places=2)
+        self.assertEqual(totals['profit'], formatLang(self.env, 150.0, digits=2))
+        self.assertEqual(totals['sell_price'], formatLang(self.env, 300.0, digits=2))
+        self.assertEqual(totals['buy_price'], formatLang(self.env, 150.0, digits=2))
 
     def test_report_action_binding(self):
         report_action = self.env.ref('investment_portfolio.action_report_asset_realized')
         self.assertEqual(report_action.model, 'investment.asset.realized')
         self.assertTrue(report_action.multi)
+
+    def test_report_render_qweb_html(self):
+        self.position._compute_position_aggregate()
+        realized = self.position.realized_ids.filtered(lambda rec: not rec.simulated)
+        self.assertTrue(realized)
+
+        report_action = self.env.ref('investment_portfolio.action_report_asset_realized')
+        html, report_type = report_action._render_qweb_html(report_action, realized.ids)
+
+        self.assertEqual(report_type, 'html')
+        self.assertTrue(html)
