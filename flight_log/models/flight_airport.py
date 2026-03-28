@@ -18,10 +18,10 @@ class FightAirport(models.Model):
     sequence = fields.Integer()
 
     @api.model
-    def _name_search(self, name, domain=None, operator='ilike', limit=None, order=None):
-        resp = super()._name_search(name, domain=domain, operator=operator, limit=limit, order=order)
+    def name_search(self, name='', args=None, operator='ilike', limit=100):
+        resp = super().name_search(name=name, args=args, operator=operator, limit=limit)
         if not resp and self.env.context.get('import_file'):
-            resp = super()._name_search(name, domain=domain, operator='ilike', limit=limit, order=order)
+            resp = super().name_search(name=name, args=args, operator='ilike', limit=limit)
         return resp
 
 

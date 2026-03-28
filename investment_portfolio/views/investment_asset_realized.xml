@@ -17,6 +17,7 @@
                 <field name="buy_date"/>
                 <field name="buy_price"/>
                 <field name="buy_fee"/>
+                <field name="is_profit" optional="hide"/>
                 <field name="simulated" optional="hide"/>
             </list>
         </field>
@@ -70,6 +71,7 @@
                     <filter string="Category" name="group_category_id" context="{'group_by': 'category_id'}"/>
                     <filter string="Portfolio" name="group_portfolio_id" context="{'group_by': 'portfolio_id'}"/>
                     <filter string="Position" name="group_position_id" context="{'group_by': 'position_id'}"/>
+                    <filter string="Is profit" name="group_is_profit" context="{'group_by': 'is_profit'}"/>
                 </group>
             </search>
         </field>

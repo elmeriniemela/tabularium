@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import api, models, fields, _
+from odoo.tools import float_compare
 
 class InvestmentAssetRealized(models.Model):
     _name = 'investment.asset.realized'
@@ -37,20 +38,21 @@ class InvestmentAssetRealized(models.Model):
     quantity = fields.Float(digits='Investment Asset quantity')
     simulated = fields.Boolean(compute='_compute_simulated', store=True)
 
-    sell_price = fields.Monetary(compute='_compute_profit', store=True, aggregator=None, currency_field='company_currency_id')
-    sell_payment = fields.Monetary(compute='_compute_profit', store=True, aggregator=None, currency_field='company_currency_id')
+    sell_price = fields.Float(compute='_compute_profit', store=True, digits=[2,2])
+    sell_payment = fields.Float(compute='_compute_profit', store=True, aggregator=None, digits=[2,2])
     sell_payment_currency = fields.Monetary(compute='_compute_profit', store=True, aggregator=None, currency_field='currency_id')
     sell_date = fields.Date(compute='_compute_profit', store=True)
-    sell_fee = fields.Monetary(compute='_compute_profit', store=True, currency_field='company_currency_id')
+    sell_fee = fields.Float(compute='_compute_profit', store=True, digits=[2,2])
 
-    buy_price = fields.Monetary(compute='_compute_profit', store=True, aggregator=None, currency_field='company_currency_id')
-    buy_payment = fields.Monetary(compute='_compute_profit', store=True, aggregator=None, currency_field='company_currency_id')
+    buy_price = fields.Float(compute='_compute_profit', store=True, digits=[2,2])
+    buy_payment = fields.Float(compute='_compute_profit', store=True, aggregator=None, digits=[2,2])
     buy_payment_currency = fields.Monetary(compute='_compute_profit', store=True, aggregator=None, currency_field='currency_id')
     buy_date = fields.Date(compute='_compute_profit', store=True)
-    buy_fee = fields.Monetary(compute='_compute_profit', store=True, currency_field='company_currency_id')
+    buy_fee = fields.Float(compute='_compute_profit', store=True, digits=[2,2])
     realized_date = fields.Date(compute='_compute_profit', store=True)
 
-    profit = fields.Monetary(string='Profit/Loss', compute='_compute_profit', store=True, currency_field='company_currency_id')
+    profit = fields.Float(string='Profit/Loss', compute='_compute_profit', store=True, digits=[2,2])
+    is_profit = fields.Boolean(compute='_compute_profit', store=True)
 
     @api.depends('sell_batch_id.usage', 'buy_batch_id.usage')
     def _compute_simulated(self):
@@ -86,6 +88,7 @@ class InvestmentAssetRealized(models.Model):
 
             record.profit = record.sell_price - record.sell_fee - record.buy_price - record.buy_fee
             record.realized_date = max([record.buy_date, record.sell_date])
+            record.is_profit = float_compare(record.profit, 0, precision_digits=2) > 0
 
 
 
