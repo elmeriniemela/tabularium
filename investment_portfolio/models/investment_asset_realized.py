@@ -74,7 +74,7 @@ class InvestmentAssetRealized(models.Model):
                 from_amount=sell_fee_currency,
                 to_currency=record.company_currency_id,
                 company=record.company_id,
-                date=record.sell_batch_id.time,
+                date=record.sell_date,
             )
             record.sell_price = record.sell_batch_id.payment * sell_portion + record.sell_fee # TODO: should we minus the fee?
             record.sell_payment = record.sell_batch_id.payment * sell_portion
@@ -91,7 +91,7 @@ class InvestmentAssetRealized(models.Model):
                 from_amount=buy_fee_currency,
                 to_currency=record.company_currency_id,
                 company=record.company_id,
-                date=record.buy_batch_id.time,
+                date=record.buy_date,
             )
             record.buy_price = record.buy_batch_id.payment * buy_portion - record.buy_fee
             record.buy_payment = record.buy_batch_id.payment * buy_portion

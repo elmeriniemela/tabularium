@@ -15,3 +15,4 @@ from . import test_exchange
 from . import test_move
 from . import test_timeseries
 from . import test_plan_timeseries
+from . import test_functional_integration
