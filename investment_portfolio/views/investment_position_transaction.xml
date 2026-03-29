@@ -48,26 +48,28 @@
                         <group>
                             <field name="position_id"/>
                             <field name="move_id"/>
-                            <field name="external_ref"/>
                             <field name="time"/>
                             <field name="quantity"/>
                             <field name="payment"/>
                             <field name="payment_currency" invisible="not currency_rate_id"/>
-                        </group>
-                        <group>
                             <field name="exchange_rate"/>
-                            <field name="fee" readonly="1"/>
-                            <field name="currency_id"/>
                             <label for="currency_rate_id" invisible="not currency_rate_id"/>
                             <div invisible="not currency_rate_id">
                                 <field name="inverse_company_rate" digits="[6,6]" class="oe_inline"/>
                                 <span>@</span>
                                 <field name="currency_rate_id" class="oe_inline"/>
                             </div>
-                            <field name="description"/>
+                        </group>
+                        <group>
+                            <field name="currency_id"/>
+                            <field name="company_currency_id" invisible="True"/>
+                            <field name="fee_currency" readonly="1"/>
+                            <field name="fee" readonly="1"/>
                             <field name="profit" decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0"/>
-                            <field name="usage" groups="base.group_no_one"/>
                             <field name="is_locked"/>
+                            <field name="usage" groups="base.group_no_one"/>
+                            <field name="description"/>
+                            <field name="external_ref"/>
                             <field name="active" widget="boolean_toggle"/>
                         </group>
                     </group>

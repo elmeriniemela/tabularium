@@ -491,7 +491,7 @@ class InvestmentPosition(models.Model):
                 if date < end:
                     if position_id.plan_type == 'acquire':
                         if position_id.plan_payment:
-                            trans = {'description': f'{i}: Acquisition', 'quantity': position_id.plan_payment/price, 'payment': position_id.plan_payment, 'exchange_rate': price, 'fee': position_id.plan_fee}
+                            trans = {'description': f'{i}: Acquisition', 'quantity': position_id.plan_payment/price, 'payment': position_id.plan_payment, 'exchange_rate': price}
                             Transaction.create({**base_vals, **trans})
                         if position_id.plan_yield:
                             trans = {'description': f'{i}', 'quantity': 0, 'payment': position_id.plan_yield, 'exchange_rate': price}
@@ -507,11 +507,12 @@ class InvestmentPosition(models.Model):
                         interest = PV*rate
                         reduction = P-interest+position_id.plan_fee
                         dsum = (-reduction) + (-interest) + (position_id.plan_fee)
+                        qty = float(f'{-reduction/curr_price:.2f}')
                         reduction_vals = {
                             'description': f'{i}: {-reduction:.2f} + {-interest:.2f} + {position_id.plan_fee:.2f} = {dsum:.2f}',
-                            'quantity': float(f'{-reduction/curr_price:.2f}'), 'payment': abs(P), 'fee': position_id.plan_fee, 'exchange_rate': 1}
-                        tr = Transaction.create({**base_vals, **reduction_vals})
-                        tr.fee = position_id.plan_fee
+                            'quantity': qty, 'payment': abs(P),
+                            'exchange_rate': (abs(P)/qty - position_id.plan_fee/qty)}
+                        Transaction.create({**base_vals, **reduction_vals})
                         PV -= reduction
                     elif position_id.plan_type == 'cashflow':
                         if position_id.plan_yield:

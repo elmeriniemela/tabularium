@@ -68,7 +68,7 @@ class TestTransaction(InvestmentTestCommon):
 
     def test_fee_computation(self):
         """Fee = |payment/qty - exchange_rate| * qty (same currency)"""
-        # Buy 10 @ 90 with total payment 910 => fee_per_unit = |910/10 - 90| = 1 => fee = 10
+        # Buy 10 @ 90 with total payment 910 => fee_per_unit = |910/10 - 90| = 1 => fee_currency = 10
         tx = self.env['investment.position.transaction'].create({
             'position_id': self.position.id,
             'quantity': 10.0,
@@ -76,11 +76,11 @@ class TestTransaction(InvestmentTestCommon):
             'payment': 910.0,
             'time': datetime.now() - timedelta(days=3),
         })
-        self.assertAlmostEqual(tx.fee, 10.0, places=2)
+        self.assertAlmostEqual(tx.fee_currency, 10.0, places=2)
 
     def test_fee_zero_when_no_fee(self):
         """Fee is 0 when payment/qty == exchange_rate"""
-        self.assertAlmostEqual(self.tx_buy1.fee, 0.0, places=2)
+        self.assertAlmostEqual(self.tx_buy1.fee_currency, 0.0, places=2)
 
     def test_quantity_adjusted_no_split(self):
         """Without splits, quantity_adjusted == quantity"""

@@ -136,7 +136,7 @@ class TestRealizedAdvanced(InvestmentTestCommon):
             'company_id': self.company.id,
         })
         now = datetime.now()
-        # Buy 10 @ exchange_rate=50, payment=520 (fee = |520/10-50|*10 = 20)
+        # Buy 10 @ exchange_rate=50, payment=520 (fee_currency = |520/10-50|*10 = 20)
         self.env['investment.position.transaction'].create({
             'position_id': pos.id,
             'quantity': 10.0,
@@ -144,7 +144,7 @@ class TestRealizedAdvanced(InvestmentTestCommon):
             'payment': 520.0,
             'time': now - timedelta(days=20),
         })
-        # Sell 10 @ exchange_rate=60, payment=580 (fee = |580/10-60|*10 = 20)
+        # Sell 10 @ exchange_rate=60, payment=580 (fee_currency = |580/10-60|*10 = 20)
         self.env['investment.position.transaction'].create({
             'position_id': pos.id,
             'quantity': -10.0,

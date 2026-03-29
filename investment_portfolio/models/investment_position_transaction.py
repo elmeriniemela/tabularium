@@ -65,11 +65,13 @@ class InvestmentPositionTransaction(models.Model):
         comodel_name='res.currency.rate',
         compute='_compute_currency_rate_id',
         store=True,
+        tracking=True,
         readonly=False,
     )
     inverse_company_rate = fields.Float(related='currency_rate_id.inverse_company_rate', readonly=True)
 
-    fee = fields.Monetary(readonly=False,  compute='_compute_fee', inverse='_inverse_fee', currency_field='currency_id')
+    fee_currency = fields.Monetary(readonly=False,  compute='_compute_fee', currency_field='currency_id')
+    fee = fields.Monetary(readonly=False,  compute='_compute_fee', currency_field='company_currency_id')
 
     quantity = fields.Float(digits='Investment Asset quantity', tracking=True)
     quantity_adjusted = fields.Float(aggregator='avg', compute='_compute_quantity_adjusted', digits='Investment Asset quantity')
@@ -355,12 +357,17 @@ class InvestmentPositionTransaction(models.Model):
 
     @api.depends('currency_id', 'time')
     def _compute_currency_rate_id(self):
+        # env['investment.position.transaction'].search([])._compute_currency_rate_id()
         for tx in self:
             if tx.currency_id != tx.company_currency_id:
+                date = fields.Datetime.context_timestamp(
+                    tx.with_context(tz=tx.company_id.partner_id.tz),
+                    tx.time,
+                ).date()
                 rate = tx.env['res.currency.rate'].search([
                     ('currency_id', '=', tx.currency_id.id),
                     ('company_id', '=', tx.company_id.id),
-                    ('name', '=', tx.time.date()),
+                    ('name', '=', date),
                 ])
                 if not rate:
                     previous = tx.env['res.currency.rate'].search([
@@ -369,7 +376,7 @@ class InvestmentPositionTransaction(models.Model):
                     ], order='name desc', limit=1)
                     rate = tx.env['res.currency.rate'].create({
                         'currency_id': tx.currency_id.id,
-                        'name': tx.time.date(),
+                        'name': date,
                         'rate': previous.rate or 0.0,
                         'company_id': tx.company_id.id,
                     })
@@ -394,26 +401,16 @@ class InvestmentPositionTransaction(models.Model):
         for tx in self:
             quantity = abs(tx.quantity)
             if not (quantity and tx.payment and tx.exchange_rate):
-                tx.fee = 0.0
+                tx.fee_currency = 0.0
             else:
-                cmp_payment = tx.payment # do the rate conversion manually instead of using payment_currency, as it causes decimal rounding errors
+                pmt_currency = tx.payment # do the rate conversion manually instead of using payment_currency, as it causes decimal rounding errors
+                exh_rate_currency = tx.exchange_rate # company currency
                 if tx.currency_rate_id:
-                    cmp_payment *= tx.currency_rate_id.company_rate
+                    pmt_currency *= tx.currency_rate_id.company_rate
+                    exh_rate_currency *= tx.currency_rate_id.inverse_company_rate
 
-                tx.fee = abs(cmp_payment/quantity - tx.exchange_rate) * quantity
-
-    def _inverse_fee(self):
-        for tx in self:
-            quantity = abs(tx.quantity)
-            if not (quantity and tx.payment and tx.exchange_rate):
-                tx.exchange_rate = 0.0
-            else:
-                cmp_payment = tx.payment # do the rate conversion manually instead of using payment_currency, as it causes decimal rounding errors
-                if tx.currency_rate_id:
-                    cmp_payment *= tx.currency_rate_id.company_rate
-
-                tx.exchange_rate = (cmp_payment/quantity - tx.fee/quantity)
-
+                tx.fee_currency = abs(pmt_currency/quantity - tx.exchange_rate) * quantity
+                tx.fee = abs(tx.payment/quantity - exh_rate_currency) * quantity
 
     @api.depends('position_id.asset_id.split_ids', 'position_id.asset_id.split_ids.factor')
     def _compute_quantity_adjusted(self):

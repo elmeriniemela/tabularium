@@ -121,7 +121,7 @@ class TestTransactionAdvanced(InvestmentTestCommon):
     def test_fee_with_different_exchange_rate(self):
         """Fee calculated from payment/qty vs exchange_rate difference"""
         # Buy 5 @ exchange_rate=90, but payment=500 (so 100/unit)
-        # fee = |500/5 - 90| * 5 = |100-90| * 5 = 50
+        # fee_currency = |500/5 - 90| * 5 = |100-90| * 5 = 50
         tx = self.env['investment.position.transaction'].create({
             'position_id': self.position.id,
             'quantity': 5.0,
@@ -129,12 +129,12 @@ class TestTransactionAdvanced(InvestmentTestCommon):
             'payment': 500.0,
             'time': datetime.now() - timedelta(days=3),
         })
-        self.assertAlmostEqual(tx.fee, 50.0, places=2)
+        self.assertAlmostEqual(tx.fee_currency, 50.0, places=2)
 
     def test_fee_sell_transaction(self):
         """Fee on sell transaction"""
         # Sell 3 @ exchange_rate=100, payment=330 (110/unit)
-        # fee = |330/3 - 100| * 3 = 10 * 3 = 30
+        # fee_currency = |330/3 - 100| * 3 = 10 * 3 = 30
         tx = self.env['investment.position.transaction'].create({
             'position_id': self.position.id,
             'quantity': -3.0,
@@ -142,7 +142,7 @@ class TestTransactionAdvanced(InvestmentTestCommon):
             'payment': 330.0,
             'time': datetime.now() - timedelta(days=3),
         })
-        self.assertAlmostEqual(tx.fee, 30.0, places=2)
+        self.assertAlmostEqual(tx.fee_currency, 30.0, places=2)
 
     def test_payment_currency_same_currency(self):
         """Same currency: payment_currency = payment"""
@@ -188,15 +188,10 @@ class TestTransactionAdvanced(InvestmentTestCommon):
             'time': now - timedelta(days=1),
         })
 
-        # fee = |payment_currency/qty - exchange_rate| * qty, in asset currency
+        # fee_currency = |payment_currency/qty - exchange_rate| * qty, in asset currency
         expected_fee = abs(tx.payment_currency / 5.0 - 90.0) * 5.0
-        self.assertAlmostEqual(tx.fee, expected_fee, places=2)
-        self.assertEqual(tx._fields['fee'].currency_field, 'currency_id')
-
-        # inverse: exchange_rate = payment_currency/qty - fee/qty, in asset currency
-        tx.fee = 25.0
-        expected_exchange_rate = tx.payment_currency / 5.0 - 25.0 / 5.0
-        self.assertAlmostEqual(tx.exchange_rate, expected_exchange_rate, places=2)
+        self.assertAlmostEqual(tx.fee_currency, expected_fee, places=2)
+        self.assertEqual(tx._fields['fee_currency'].currency_field, 'currency_id')
 
     def test_fee_precision_not_based_on_payment_currency_rounding(self):
         """Fee must use payment*rate, not potentially stale payment_currency."""
@@ -240,17 +235,17 @@ class TestTransactionAdvanced(InvestmentTestCommon):
         })
 
         initial_payment_currency = tx.payment_currency
-        self.assertAlmostEqual(tx.fee, 0.1, places=2)
+        self.assertAlmostEqual(tx.fee_currency, 0.1, places=2)
 
         rate.company_rate = 1.0004
         expected_fee = abs(tx.payment * tx.currency_rate_id.company_rate - tx.exchange_rate)
         stale_payment_currency_fee = abs(initial_payment_currency - tx.exchange_rate)
 
         self.assertAlmostEqual(tx.payment_currency, initial_payment_currency, places=6)
-        self.assertAlmostEqual(tx.fee, expected_fee, places=6)
-        self.assertAlmostEqual(tx.fee, 0.2, places=2)
+        self.assertAlmostEqual(tx.fee_currency, expected_fee, places=6)
+        self.assertAlmostEqual(tx.fee_currency, 0.2, places=2)
         self.assertAlmostEqual(stale_payment_currency_fee, 0.1, places=2)
-        self.assertNotAlmostEqual(tx.fee, stale_payment_currency_fee, places=2)
+        self.assertNotAlmostEqual(tx.fee_currency, stale_payment_currency_fee, places=2)
 
     def test_quantity_adjusted_multiple_splits(self):
         """Multiple splits compound on quantity adjustment"""

@@ -412,16 +412,6 @@ class TestFunctionalIntegration(InvestmentTestCommon):
         tx._fill_daily_price()
         self.assertTrue(self.env['investment.asset.price'].search([('transaction_id', '=', tx.id)], limit=1))
 
-        tx_zero = self.env['investment.position.transaction'].create({
-            'position_id': self.position.id,
-            'quantity': 0.0,
-            'exchange_rate': 10.0,
-            'payment': 1.0,
-            'time': fields.Datetime.now(),
-        })
-        tx_zero.fee = 5.0
-        self.assertEqual(tx_zero.exchange_rate, 0.0)
-
         with self.assertRaises(ValidationError):
             self.env['investment.position.transaction'].browse().find_move()
         with self.assertRaises(ValidationError):
