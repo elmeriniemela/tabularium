@@ -400,7 +400,7 @@ class InvestmentPositionTransaction(models.Model):
     def _compute_fee(self):
         for tx in self:
             quantity = abs(tx.quantity)
-            if not (quantity and tx.payment and tx.exchange_rate):
+            if not (quantity and tx.payment and tx.exchange_rate and tx.ttype in ['buy', 'sell']):
                 tx.fee_currency = 0.0
             else:
                 pmt_currency = tx.payment # do the rate conversion manually instead of using payment_currency, as it causes decimal rounding errors
@@ -409,8 +409,9 @@ class InvestmentPositionTransaction(models.Model):
                     pmt_currency *= tx.currency_rate_id.company_rate
                     exh_rate_currency *= tx.currency_rate_id.inverse_company_rate
 
-                tx.fee_currency = abs(pmt_currency/quantity - tx.exchange_rate) * quantity
-                tx.fee = abs(tx.payment/quantity - exh_rate_currency) * quantity
+                sign = -1 if tx.ttype == 'sell' else 1
+                tx.fee_currency = sign * (pmt_currency/quantity - tx.exchange_rate) * quantity
+                tx.fee = sign * (tx.payment/quantity - exh_rate_currency) * quantity
 
     @api.depends('position_id.asset_id.split_ids', 'position_id.asset_id.split_ids.factor')
     def _compute_quantity_adjusted(self):

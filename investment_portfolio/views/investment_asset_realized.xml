@@ -12,12 +12,12 @@
                 <field name="realized_date" optional="hide"/>
                 <field name="sell_batch_id" optional="hide"/>
                 <field name="sell_date"/>
-                <field name="sell_price"/>
-                <field name="sell_fee"/>
+                <field name="sell_price" sum="Total Sell Price"/>
+                <field name="sell_fee" sum="Total Sell Fee"/>
                 <field name="buy_batch_id" optional="hide"/>
                 <field name="buy_date"/>
-                <field name="buy_price"/>
-                <field name="buy_fee"/>
+                <field name="buy_price" sum="Total Buy Price"/>
+                <field name="buy_fee" sum="Total Buy Fee"/>
                 <field name="is_profit" optional="hide"/>
                 <field name="is_locked" optional="hide"/>
                 <field name="simulated" optional="hide"/>
