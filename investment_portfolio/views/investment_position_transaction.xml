@@ -20,6 +20,7 @@
                 <field name="profit" decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0" optional="show"  digits="[2,2]"/>
                 <field name="liquid" optional="hide"/>
                 <field name="category_id" optional="hide"/>
+                <field name="is_locked" optional="hide"/>
                 <field name="prediction" optional="hide" widget="boolean_toggle"/>
                 <field name="company_currency_id" optional="hide"/>
                 <button title="Details" icon="fa-info-circle" name="open_form" type="object"/>
@@ -66,6 +67,7 @@
                             <field name="description"/>
                             <field name="profit" decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0"/>
                             <field name="usage" groups="base.group_no_one"/>
+                            <field name="is_locked"/>
                             <field name="active" widget="boolean_toggle"/>
                         </group>
                     </group>

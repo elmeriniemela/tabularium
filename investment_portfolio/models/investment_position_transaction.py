@@ -80,6 +80,7 @@ class InvestmentPositionTransaction(models.Model):
         index=True,
         tracking=True,
     )
+    is_locked = fields.Boolean(compute='_compute_is_locked')
 
     profit = fields.Monetary(compute='_compute_profit', currency_field='company_currency_id')
 
@@ -247,6 +248,32 @@ class InvestmentPositionTransaction(models.Model):
             'res_id': self.id,
             'target': 'current',
         }
+
+    def _check_lock_time(self):
+        for record in self:
+            if record.is_locked:
+                raise ValidationError(_("You cannot modify transaction entries (%s UTC) before the company lock time (%s UTC).") % (record.time, record.company_id.investment_lock_time))
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        records._check_lock_time()
+        return records
+
+    def write(self, vals):
+        self._check_lock_time()
+        result = super().write(vals)
+        self._check_lock_time()
+        return result
+
+    def unlink(self):
+        self._check_lock_time()
+        return super().unlink()
+
+    @api.depends('company_id.investment_lock_time', 'time')
+    def _compute_is_locked(self):
+        for record in self:
+            record.is_locked = bool(record.company_id.investment_lock_time and record.time < record.company_id.investment_lock_time)
 
 
     @api.depends('usage')

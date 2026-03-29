@@ -603,16 +603,17 @@ class InvestmentPosition(models.Model):
 
         qty_precision = self.env['decimal.precision'].precision_get('Investment Asset quantity')
         for position in self:
+            not_locked = position.realized_ids.filtered(lambda r: not r.is_locked)
             if not isinstance(position.id, int):
                 continue
             if not position.compute_realized:
-                position.realized_ids.unlink()
+                not_locked.unlink()
                 continue
 
             valid = position.env['investment.asset.realized'].browse()
 
-            existing = {(r.sell_batch_id, r.buy_batch_id): r for r in position.realized_ids}
-            transactions = position.transaction_ids.sorted(key=lambda s: s.time)
+            existing = {(r.sell_batch_id, r.buy_batch_id): r for r in not_locked}
+            transactions = position.transaction_ids.sorted(key=lambda s: s.time).filtered(lambda t: not t.is_locked)
             sells = transactions.filtered(lambda t: t.ttype == 'sell')
             buys = transactions.filtered(lambda t: t.ttype == 'buy')
             simulated = transactions.search([('position_id', '=', position.id), ('usage', '=', 'realized')])
@@ -653,12 +654,12 @@ class InvestmentPosition(models.Model):
                     if key in existing:
                         existing[key].write(vals)
                     else:
-                        existing[key] = position.realized_ids.create(vals)
+                        existing[key] = not_locked.create(vals)
 
                     existing[key]._compute_profit()
                     valid |= existing[key]
 
-            (position.realized_ids - valid).unlink()
+            (not_locked - valid).unlink()
 
 
     def _get_position(self, market_price, transaction_ids):

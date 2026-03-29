@@ -18,3 +18,4 @@ from . import investment_milestone
 from . import investment_period
 from . import investment_timeseries
 from . import res_currency
+from . import res_company

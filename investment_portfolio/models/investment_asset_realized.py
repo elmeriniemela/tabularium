@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import api, models, fields, _
+from odoo.exceptions import ValidationError
 from odoo.tools import float_compare
 from odoo.tools.misc import formatLang
 
@@ -54,6 +55,7 @@ class InvestmentAssetRealized(models.Model):
 
     profit = fields.Float(string='Profit/Loss', compute='_compute_profit', store=True, digits=[2,2])
     is_profit = fields.Boolean(compute='_compute_profit', store=True)
+    is_locked = fields.Boolean(compute='_compute_is_locked')
 
     @api.depends('sell_batch_id.usage', 'buy_batch_id.usage')
     def _compute_simulated(self):
@@ -98,6 +100,34 @@ class InvestmentAssetRealized(models.Model):
             record.profit = record.sell_price - record.sell_fee - record.buy_price - record.buy_fee
             record.realized_date = max([record.buy_date, record.sell_date])
             record.is_profit = float_compare(record.profit, 0, precision_digits=2) > 0
+
+    @api.depends('company_id.investment_lock_time', 'buy_batch_id.time', 'sell_batch_id.time')
+    def _compute_is_locked(self):
+        for record in self:
+            realized_time = max([record.buy_batch_id.time, record.sell_batch_id.time])
+            record.is_locked = bool(record.company_id.investment_lock_time and realized_time < record.company_id.investment_lock_time)
+
+    def _check_lock_time(self):
+        for record in self:
+            if record.is_locked:
+                realized_time = max([record.buy_batch_id.time, record.sell_batch_id.time])
+                raise ValidationError(_("You cannot modify realized entries (%s UTC) before the company lock time (%s UTC).") % (realized_time, record.company_id.investment_lock_time))
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        records._check_lock_time()
+        return records
+
+    def write(self, vals):
+        self._check_lock_time()
+        result = super().write(vals)
+        self._check_lock_time()
+        return result
+
+    def unlink(self):
+        self._check_lock_time()
+        return super().unlink()
 
     def _get_report_totals(self):
         return {
