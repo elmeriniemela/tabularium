@@ -182,7 +182,7 @@ class TogglEntry(models.Model):
             export_id = record.export_id or False
             if export_id and record.parent_id and not record.parent_id.export_id:
                 # Move to parent
-                (record | record.parent_id).flush()
+                (record | record.parent_id).flush_recordset(['export_id'])
                 record.env.cr.execute(f"UPDATE {record._table} SET export_id=NULL WHERE id={record.id}")
                 record.env.cr.execute(f"UPDATE {record._table} SET export_id={export_id} WHERE id={record.parent_id.id}")
 
@@ -199,11 +199,12 @@ class TogglEntry(models.Model):
             record.time_period = ', '.join(f"{time_str(e.date_start)} - {time_str(e.date_stop)}" for e in entries)
 
     def write(self, vals):
-        res = super().write(vals)
+        children = self.env['toggl.entry']
         if 'name' in vals:
             children = self.mapped('child_ids')
-            if children: # recursion condition
-                children.write({'name': vals['name']})
+        res = super().write(vals)
+        if children: # recursion condition
+            children.write({'name': vals['name']})
         return res
 
     def action_open_form(self):
@@ -269,7 +270,9 @@ class TogglEntry(models.Model):
             result = server_models.execute_kw(dbname, uid, pwd, *method_args)
             if not export_id:
                 record.export_id = result
-            record.env.cr.commit() # we need to commit, since the export is committed in the target system.
+
+            if not tools.config.options['test_enable']: # pragma: no cover
+                record.env.cr.commit() # we need to commit, since the export is committed in the target system.
         self.update_timesheet_price()
         self.lock()
 
@@ -353,4 +356,3 @@ class TogglEntry(models.Model):
     def _compute_revenue(self):
         for record in self:
             record.revenue = record.rounded_duration * record.timesheet_price
-
