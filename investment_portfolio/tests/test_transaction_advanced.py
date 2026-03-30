@@ -149,6 +149,100 @@ class TestTransactionAdvanced(InvestmentTestCommon):
         self.tx_buy1._compute_payment_currency()
         self.assertAlmostEqual(self.tx_buy1.payment_currency, 900.0, places=2)
 
+    def test_currency_and_fee_values_match_dump(self):
+        """Cross-currency buy matches payment/fee values from dump data."""
+        usd = self.env.ref('base.USD')
+        usd.rounding = 0.0001
+        self.currency_eur.rounding = 0.001
+        tx_time = datetime(2024, 8, 19, 15, 55, 54)
+        rate = self.env['res.currency.rate'].search([
+            ('name', '=', tx_time.date()),
+            ('currency_id', '=', usd.id),
+            ('company_id', '=', self.company.id),
+        ], limit=1)
+        if rate:
+            rate.inverse_company_rate = 0.9060270000000001
+        else:
+            self.env['res.currency.rate'].create({
+                'name': tx_time.date(),
+                'currency_id': usd.id,
+                'company_id': self.company.id,
+                'inverse_company_rate': 0.9060270000000001,
+            })
+
+        asset_usd = self.env['investment.asset'].create({
+            'ticker': 'ASTS',
+            'category_id': self.category.id,
+            'currency_id': usd.id,
+            'expected_yearly_appreciation': 0.10,
+            'plausible_ath_drawdown': 0.30,
+        })
+        position_usd = self.env['investment.position'].create({
+            'name': 'Nordnet',
+            'asset_id': asset_usd.id,
+            'portfolio_id': self.portfolio.id,
+            'company_id': self.company.id,
+        })
+        tx = self.env['investment.position.transaction'].create({
+            'position_id': position_usd.id,
+            'quantity': 50.0,
+            'exchange_rate': 36.3,
+            'payment': 1659.44,
+            'time': tx_time,
+            'description': 'ASTS osto',
+        })
+
+        self.assertAlmostEqual(tx.payment_currency, 1831.56, places=2)
+        self.assertAlmostEqual(tx.fee, 15.00, places=2)
+        self.assertAlmostEqual(tx.fee_currency, 16.56, places=2)
+
+    def test_currency_and_fee_values_match_sell_dump(self):
+        """Cross-currency sell matches payment/fee values from dump data."""
+        usd = self.env.ref('base.USD')
+        usd.rounding = 0.0001
+        self.currency_eur.rounding = 0.0001
+        tx_time = datetime(2025, 2, 10, 16, 39, 48)
+        rate = self.env['res.currency.rate'].search([
+            ('name', '=', tx_time.date()),
+            ('currency_id', '=', usd.id),
+            ('company_id', '=', self.company.id),
+        ], limit=1)
+        if rate:
+            rate.inverse_company_rate = 0.9665560000000001
+        else:
+            self.env['res.currency.rate'].create({
+                'name': tx_time.date(),
+                'currency_id': usd.id,
+                'company_id': self.company.id,
+                'inverse_company_rate': 0.9665560000000001,
+            })
+
+        asset_usd = self.env['investment.asset'].create({
+            'ticker': 'ASTS-SELL',
+            'category_id': self.category.id,
+            'currency_id': usd.id,
+            'expected_yearly_appreciation': 0.10,
+            'plausible_ath_drawdown': 0.30,
+        })
+        position_usd = self.env['investment.position'].create({
+            'name': 'Nordnet Sell',
+            'asset_id': asset_usd.id,
+            'portfolio_id': self.portfolio.id,
+            'company_id': self.company.id,
+        })
+        tx = self.env['investment.position.transaction'].create({
+            'position_id': position_usd.id,
+            'quantity': -50.0,
+            'exchange_rate': 32.2555,
+            'payment': 1543.84,
+            'time': tx_time,
+            'description': 'ASTS myynti',
+        })
+
+        self.assertAlmostEqual(tx.payment_currency, 1597.26, places=2)
+        self.assertAlmostEqual(tx.fee, 15.00, places=2)
+        self.assertAlmostEqual(tx.fee_currency, 15.52, places=2)
+
     def test_fee_uses_asset_currency_when_company_differs(self):
         """Fee compute/inverse uses asset currency when currencies differ"""
         usd = self.env.ref('base.USD')
