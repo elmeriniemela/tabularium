@@ -134,7 +134,7 @@ class TestTransactionAdvanced(InvestmentTestCommon):
     def test_fee_sell_transaction(self):
         """Fee on sell transaction"""
         # Sell 3 @ exchange_rate=100, payment=330 (110/unit)
-        # fee_currency = |330/3 - 100| * 3 = 10 * 3 = 30
+        # Signed fee on sell: -1 * (330/3 - 100) * 3 = -30
         tx = self.env['investment.position.transaction'].create({
             'position_id': self.position.id,
             'quantity': -3.0,
@@ -142,7 +142,7 @@ class TestTransactionAdvanced(InvestmentTestCommon):
             'payment': 330.0,
             'time': datetime.now() - timedelta(days=3),
         })
-        self.assertAlmostEqual(tx.fee_currency, 30.0, places=2)
+        self.assertAlmostEqual(tx.fee_currency, -30.0, places=2)
 
     def test_payment_currency_same_currency(self):
         """Same currency: payment_currency = payment"""
@@ -235,16 +235,16 @@ class TestTransactionAdvanced(InvestmentTestCommon):
         })
 
         initial_payment_currency = tx.payment_currency
-        self.assertAlmostEqual(tx.fee_currency, 0.1, places=2)
+        self.assertAlmostEqual(tx.fee_currency, -0.1, places=2)
 
         rate.company_rate = 1.0004
-        expected_fee = abs(tx.payment * tx.currency_rate_id.company_rate - tx.exchange_rate)
-        stale_payment_currency_fee = abs(initial_payment_currency - tx.exchange_rate)
+        expected_fee = tx.payment * tx.currency_rate_id.company_rate - tx.exchange_rate
+        stale_payment_currency_fee = initial_payment_currency - tx.exchange_rate
 
         self.assertAlmostEqual(tx.payment_currency, initial_payment_currency, places=6)
         self.assertAlmostEqual(tx.fee_currency, expected_fee, places=6)
         self.assertAlmostEqual(tx.fee_currency, 0.2, places=2)
-        self.assertAlmostEqual(stale_payment_currency_fee, 0.1, places=2)
+        self.assertAlmostEqual(stale_payment_currency_fee, -0.1, places=2)
         self.assertNotAlmostEqual(tx.fee_currency, stale_payment_currency_fee, places=2)
 
     def test_quantity_adjusted_multiple_splits(self):

@@ -1,5 +1,6 @@
 from . import test_transaction
 from . import test_transaction_lock
+from . import test_currency_rate_lock
 from . import test_transaction_advanced
 from . import test_position
 from . import test_position_advanced
