@@ -262,10 +262,26 @@ class InvestmentPositionTransaction(models.Model):
         records._check_lock_time()
         return records
 
+    def _get_locked_fields(self):
+        return {
+            'active',
+            'position_id',
+            'payment',
+            'payment_currency',
+            'exchange_rate',
+            'currency_rate_id',
+            'quantity',
+            'time',
+            'usage',
+            'ttype',
+            'is_split',
+        }
+
     def write(self, vals):
-        self._check_lock_time()
+        do_check = set(vals.keys()) & self._get_locked_fields()
+        if do_check: self._check_lock_time()
         result = super().write(vals)
-        self._check_lock_time()
+        if do_check: self._check_lock_time()
         return result
 
     def unlink(self):
