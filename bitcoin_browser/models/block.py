@@ -5,7 +5,7 @@ import tinyrpc
 import logging
 from dateutil.relativedelta import relativedelta
 
-from odoo import api, exceptions, fields, models, Command, _
+from odoo import api, tools, exceptions, fields, models, Command, _
 
 
 _logger = logging.getLogger(__name__)
@@ -77,7 +77,9 @@ class BitcoinBlock(models.Model):
         current_block = self.search([('hash', '=', current_hash)])
         confirmations = 1
         while mintime <= current_block.mediantime:
-            self.env.cr.commit()
+            if not tools.config.options['test_enable']: # pragma: no cover
+                self.env.cr.commit()
+
             confirmations +=1
             _logger.info("Update block %s.", current_block.height)
             current_block = self.search([('hash', '=', current_block.previousblockhash)])
@@ -133,7 +135,8 @@ class BitcoinBlock(models.Model):
             _logger.info("Update block at height %s.", record.height)
             vals = record.fetchblock(tx=True)
             record.write(vals)
-            record.env.cr.commit()
+            if not tools.config.options['test_enable']: # pragma: no cover
+                record.env.cr.commit()
 
     @api.model
     @api.returns('self')
