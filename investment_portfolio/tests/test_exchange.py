@@ -2,6 +2,9 @@
 
 from odoo.tests import tagged, TransactionCase
 from datetime import date, datetime, timedelta
+from unittest.mock import patch
+
+import pytz
 
 
 @tagged('post_install', '-at_install')
@@ -83,3 +86,22 @@ class TestExchange(TransactionCase):
         })
         crypto._compute_open_close()
         self.assertIsNotNone(crypto.next_open)
+
+    def test_weekend_skip_branch_with_patched_now(self):
+        eastern = pytz.timezone('US/Eastern')
+        saturday_noon = eastern.localize(datetime(2026, 4, 4, 12, 0, 0))
+        real_datetime = datetime
+
+        class PatchedDateTime(real_datetime):
+            @classmethod
+            def now(cls, tz=None):
+                return saturday_noon if tz else saturday_noon.replace(tzinfo=None)
+
+        with patch(
+            'odoo.addons.investment_portfolio.models.investment_exchange.datetime.datetime',
+            PatchedDateTime,
+        ):
+            self.exchange._compute_open_close()
+
+        next_open_local = pytz.UTC.localize(self.exchange.next_open).astimezone(eastern)
+        self.assertEqual(next_open_local.isoweekday(), 1)

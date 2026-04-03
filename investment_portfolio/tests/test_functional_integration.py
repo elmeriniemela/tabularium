@@ -757,7 +757,7 @@ class TestFunctionalIntegration(InvestmentTestCommon):
             'price_id': latest_price.id,
         })
         prediction_date = fields.Date.today().replace(month=12, day=31)
-        if prediction_date <= fields.Date.today():
+        if prediction_date <= fields.Date.today(): # pragma: no cover
             prediction_date = prediction_date.replace(year=prediction_date.year + 1)
         self.env['investment.timeseries'].create({
             'position_id': position.id,
