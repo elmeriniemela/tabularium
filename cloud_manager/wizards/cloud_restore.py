@@ -23,6 +23,16 @@ class CloudRestore(models.TransientModel):
         ondelete='cascade',
     )
 
+    method = fields.Selection(
+        selection=[
+            ('restore', 'Restore'),
+            ('oca_migrate', 'OCA Migrate'),
+        ],
+        required=True,
+        default='restore',
+    )
+
     def action_restore(self):
-        return self.backup_id._restore(self.instance_id)
+        self.ensure_one()
+        return self.backup_id._restore(self.method, self.instance_id)
 
