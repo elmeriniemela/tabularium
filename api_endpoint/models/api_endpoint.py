@@ -729,7 +729,6 @@ class ApiEndpoint(models.Model):
                     if not config.options['test_enable']: # pragma: no cover
                         msg.env.cr.commit() # Save all and release msg lock.
 
-                msg.env.flush_all()
                 assert msg.state != 'produced', "Programming error, break infinite while loop."
 
 
@@ -739,6 +738,7 @@ class ApiEndpoint(models.Model):
         """
         self.ensure_one()
         Msg = self.env['api.message']
+        Msg.flush_model(['endpoint_id', 'state']) # ensure state changes are flushed
         self.env.cr.execute(f"SELECT id FROM {Msg._table} WHERE endpoint_id=%s AND state='produced' ORDER BY id ASC LIMIT 1 FOR UPDATE SKIP LOCKED", (self.id,))
         ids = self.env.cr.fetchall()
         if ids:

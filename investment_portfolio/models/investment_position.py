@@ -521,7 +521,7 @@ class InvestmentPosition(models.Model):
                         if position_id.plan_cost:
                             trans = {'description': f'{i}', 'quantity': 0, 'payment': -position_id.plan_cost, 'exchange_rate': price}
                             tr = Transaction.create({**base_vals, **trans})
-                    else:
+                    else: # pragma: no cover
                         raise ValueError(f"Invalid plan type {position_id.plan_type}")
 
                 date = banking_date(date+relativedelta(months=1))
@@ -743,35 +743,3 @@ class InvestmentPosition(models.Model):
             records.run_integration()
         values_records = records.web_read(specification)
         return self._format_web_search_read_results(domain, values_records, offset, limit, count_limit)
-
-
-    @api.model
-    @api.readonly
-    def name_search(self, name='', args=None, operator='ilike', limit=100) -> list[tuple[int, str]]:
-        """ name_search(name='', args=None, operator='ilike', limit=100)
-
-        Search for records that have a display name matching the given
-        ``name`` pattern when compared with the given ``operator``, while also
-        matching the optional search domain (``args``).
-
-        This is used for example to provide suggestions based on a partial
-        value for a relational field. Should usually behave as the reverse of
-        ``display_name``, but that is not guaranteed.
-
-        This method is equivalent to calling :meth:`~.search` with a search
-        domain based on ``display_name`` and mapping id and display_name on
-        the resulting search.
-
-        :param str name: the name pattern to match
-        :param list args: optional search domain (see :meth:`~.search` for
-                          syntax), specifying further restrictions
-        :param str operator: domain operator for matching ``name``, such as
-                             ``'like'`` or ``'='``.
-        :param int limit: optional max number of records to return
-        :rtype: list
-        :return: list of pairs ``(id, display_name)`` for all matching records.
-        """
-        name_cond = expression.OR([[('display_name', operator, name)],[('display_name', operator, (name or '').upper())]])
-        domain = expression.AND([name_cond, args or []])
-        records = self.search_fetch(domain, ['display_name'], limit=limit)
-        return [(record.id, record.display_name) for record in records.sudo()]

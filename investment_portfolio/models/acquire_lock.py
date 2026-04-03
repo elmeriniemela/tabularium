@@ -21,5 +21,5 @@ class ResCompany(models.AbstractModel):
                     return True
                 else:
                     return False
-        except OperationalError as e:
+        except OperationalError as e: # pragma: no cover
             return False

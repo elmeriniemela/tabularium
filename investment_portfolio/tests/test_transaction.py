@@ -17,10 +17,6 @@ class TestTransaction(InvestmentTestCommon):
         """qty < 0, payment > 0 => sell"""
         self.assertEqual(self.tx_sell1.ttype, 'sell')
 
-    def test_yield_classification(self):
-        """qty = 0, payment > 0 => yield"""
-        self.assertEqual(self.tx_yield1.ttype, 'yield')
-
     def test_cost_classification(self):
         """qty = 0, payment < 0 => cost"""
         tx_cost = self.env['investment.position.transaction'].create({
@@ -45,6 +41,7 @@ class TestTransaction(InvestmentTestCommon):
 
     def test_yield_classification(self):
         """qty > 0, payment = 0 => yield"""
+        self.assertEqual(self.tx_yield1.ttype, 'yield')
         tx_split = self.env['investment.position.transaction'].create({
             'position_id': self.position.id,
             'quantity': 10.0,

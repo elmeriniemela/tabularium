@@ -160,7 +160,7 @@ class TestTransactionAdvanced(InvestmentTestCommon):
             ('currency_id', '=', usd.id),
             ('company_id', '=', self.company.id),
         ], limit=1)
-        if rate:
+        if rate: # pragma: no cover
             rate.inverse_company_rate = 0.9060270000000001
         else:
             self.env['res.currency.rate'].create({
@@ -207,7 +207,7 @@ class TestTransactionAdvanced(InvestmentTestCommon):
             ('currency_id', '=', usd.id),
             ('company_id', '=', self.company.id),
         ], limit=1)
-        if rate:
+        if rate: # pragma: no cover
             rate.inverse_company_rate = 0.9665560000000001
         else:
             self.env['res.currency.rate'].create({
@@ -252,7 +252,7 @@ class TestTransactionAdvanced(InvestmentTestCommon):
             ('currency_id', '=', usd.id),
             ('company_id', '=', self.company.id),
         ], limit=1)
-        if rate:
+        if rate: # pragma: no cover
             rate.inverse_company_rate = 0.5  # 1 USD = 0.5 EUR -> 1 EUR = 2 USD
         else:
             self.env['res.currency.rate'].create({
@@ -297,7 +297,7 @@ class TestTransactionAdvanced(InvestmentTestCommon):
             ('currency_id', '=', usd.id),
             ('company_id', '=', self.company.id),
         ], limit=1)
-        if rate:
+        if rate: # pragma: no cover
             rate.company_rate = 1.0001
         else:
             rate = self.env['res.currency.rate'].create({

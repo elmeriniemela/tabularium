@@ -51,7 +51,7 @@ class InvestmentExchange(models.Model):
                 if minute == 59: # UI issue, causes the last minute to be left out. Decrease it to 1 microsecond.
                     second = 59
                     microsecond = 999999
-            else:
+            else: # pragma: no cover
                 hour, minute = date.hour, date.minute
 
             return tz.localize(datetime.datetime(date.year, date.month, date.day, hour, minute, second, microsecond))

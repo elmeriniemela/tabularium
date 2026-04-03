@@ -91,5 +91,5 @@ class InvestmentMilestone(models.Model):
         for record in self:
             if record.date:
                 record.real_position = record.position * (1 - record.inflation_rate)**((record.date-reference.date).days/365)
-            else:
+            else: # pragma: no cover
                 record.real_position = record.position

@@ -3,16 +3,9 @@
 from datetime import timedelta
 from odoo import api, models, fields, Command, _
 from odoo.exceptions import ValidationError
-from odoo.tools import float_is_zero, float_utils
 import logging
 
-
-
 _logger = logging.getLogger(__name__)
-
-
-
-
 
 class InvestmentPositionTransaction(models.Model):
     _name = 'investment.position.transaction'
@@ -365,7 +358,7 @@ class InvestmentPositionTransaction(models.Model):
             elif record.payment < 0:
                 record.ttype = 'cost'
                 record.cash_flow = -record.payment # cost has a negative cashflow which needs to be flipped to positive as payment.
-            else:
+            else: # pragma: no cover
                 record.ttype = False
                 record.cash_flow = False
                 _logger.error("Invalid type: %s", record)

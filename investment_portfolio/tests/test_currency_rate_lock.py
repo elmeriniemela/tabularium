@@ -68,6 +68,14 @@ class TestCurrencyRateLock(TransactionCase):
         with self.assertRaises(ValidationError):
             rate.unlink()
 
+    def test_unlink_allowed_without_lock_time(self):
+        company = self._create_company()
+        rate = self._create_rate(company, rate_date=date(2025, 1, 4))
+        rate_id = rate.id
+
+        rate.unlink()
+        self.assertFalse(self.env['res.currency.rate'].browse(rate_id).exists())
+
     def test_is_locked_computed(self):
         company = self._create_company()
         rate = self._create_rate(company)

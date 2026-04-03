@@ -142,6 +142,69 @@ class TestFunctionalIntegration(InvestmentTestCommon):
         asset.action_compute_daily_prices()
         asset.cron_daily_prices()
 
+    def test_asset_invalidate_prediction_ath_splits_and_daily_fallback(self):
+        asset = self.env['investment.asset'].create({
+            'ticker': 'ATH-SPLIT-ASSET',
+            'category_id': self.category.id,
+            'currency_id': self.currency_eur.id,
+            'expected_yearly_appreciation': 0.05,
+            'plausible_ath_drawdown': 0.25,
+        })
+        now = fields.Datetime.now().replace(minute=0, second=0, microsecond=0)
+        predicted = self.env['investment.asset.price'].create({
+            'asset_id': asset.id,
+            'time': now + timedelta(days=5),
+            'price': 200.0,
+            'prediction': True,
+        })
+        asset.invalidate_predicted_prices()
+        self.assertFalse(predicted.exists())
+
+        price_1 = self.env['investment.asset.price'].create({
+            'asset_id': asset.id,
+            'time': now - timedelta(days=700),
+            'price': 90.0,
+        })
+        price_2 = self.env['investment.asset.price'].create({
+            'asset_id': asset.id,
+            'time': now - timedelta(days=650),
+            'price': 110.0,
+        })
+        price_3 = self.env['investment.asset.price'].create({
+            'asset_id': asset.id,
+            'time': now - timedelta(days=600),
+            'price': 80.0,
+        })
+        self.env['investment.asset.price'].create({
+            'asset_id': asset.id,
+            'time': now - timedelta(days=550),
+            'price': 120.0,
+        })
+        self.env['investment.asset.split'].create({
+            'price_id': price_2.id,
+            'factor': 2.0,
+        })
+        self.env['investment.asset.split'].create({
+            'price_id': price_3.id,
+            'factor': 1.5,
+        })
+        asset.last_price_id = asset.price_ids[:1]
+        asset._compute_ath_price()
+        self.assertGreater(asset.ath_price, 0.0)
+
+        fallback_asset = self.env['investment.asset'].create({
+            'ticker': 'YTD-FALLBACK-ASSET',
+            'category_id': self.category.id,
+            'currency_id': self.currency_eur.id,
+        })
+        old_price = self.env['investment.asset.price'].create({
+            'asset_id': fallback_asset.id,
+            'time': now - timedelta(days=900),
+            'price': 77.0,
+        })
+        fallback_asset._compute_daily_prices()
+        self.assertEqual(fallback_asset.ytd_price_id, old_price)
+
     def test_asset_inverse_last_price_new_day_and_position_inverse(self):
         asset = self.env['investment.asset'].create({
             'ticker': 'INV-PRICE',
@@ -268,6 +331,7 @@ class TestFunctionalIntegration(InvestmentTestCommon):
         self.assertEqual(behind.state, 'behind')
         self.assertEqual(reached.state, 'reached')
         self.assertEqual(missed.state, 'missed')
+        self.assertIsInstance(ahead.real_position, float)
 
         copied = behind.copy()
         self.assertTrue(copied.name.endswith('(copy)'))
@@ -416,6 +480,67 @@ class TestFunctionalIntegration(InvestmentTestCommon):
             self.env['investment.position.transaction'].browse().find_move()
         with self.assertRaises(ValidationError):
             self.env['investment.position.transaction'].browse().make_move()
+
+    def test_transaction_find_move_and_currency_format_branches(self):
+        move = self.env['investment.position.move'].create({
+            'time': self.tx_buy1.time,
+            'company_id': self.company.id,
+        })
+        self.tx_buy1.move_id = move
+        with self.assertRaises(ValidationError):
+            self.tx_buy1.find_move()
+        self.tx_buy1.move_id = False
+
+        tx_day_a = self.env['investment.position.transaction'].create({
+            'position_id': self.position.id,
+            'quantity': 1.0,
+            'exchange_rate': 10.0,
+            'payment': 10.0,
+            'time': fields.Datetime.now() - timedelta(days=2),
+        })
+        tx_day_b = self.env['investment.position.transaction'].create({
+            'position_id': self.position.id,
+            'quantity': 1.0,
+            'exchange_rate': 11.0,
+            'payment': 11.0,
+            'time': fields.Datetime.now() - timedelta(days=1),
+        })
+        with self.assertRaises(ValidationError):
+            (tx_day_a + tx_day_b).find_move()
+
+        usd = self.env.ref('base.USD')
+        usd.position = 'before'
+        rate = self.env['res.currency.rate'].create({
+            'name': fields.Date.today(),
+            'currency_id': usd.id,
+            'company_id': self.company.id,
+            'inverse_company_rate': 0.5,
+        })
+        usd_asset = self.env['investment.asset'].create({
+            'ticker': 'USD-ASSET',
+            'category_id': self.category.id,
+            'currency_id': usd.id,
+        })
+        usd_position = self.env['investment.position'].create({
+            'name': 'USD Position',
+            'asset_id': usd_asset.id,
+            'portfolio_id': self.portfolio.id,
+            'company_id': self.company.id,
+        })
+        usd_tx = self.env['investment.position.transaction'].create({
+            'position_id': usd_position.id,
+            'quantity': 1.0,
+            'exchange_rate': 20.0,
+            'payment': 10.0,
+            'time': fields.Datetime.now(),
+        })
+        usd_tx._compute_kanban_quantity()
+        self.assertIn(f'@ {usd.symbol} ', usd_tx.kanban_quantity)
+
+        usd_tx.currency_rate_id = rate
+        usd_tx.payment_currency = 200.0
+        usd_tx._inverse_payment_currency()
+        self.assertAlmostEqual(usd_tx.payment, 100.0, places=2)
 
     def test_transaction_company_validation_paths(self):
         company_2 = self.env['res.company'].create({'name': 'Company Two'})
@@ -594,6 +719,85 @@ class TestFunctionalIntegration(InvestmentTestCommon):
             ('date', '=', fields.Date.today()),
         ], limit=1))
 
+    def test_position_generate_timeseries_existing_prediction_today_and_forced_today(self):
+        now = fields.Datetime.now().replace(minute=0, second=0, microsecond=0)
+        asset = self.env['investment.asset'].create({
+            'ticker': 'TS-EXISTING-ASSET',
+            'category_id': self.category.id,
+            'currency_id': self.currency_eur.id,
+        })
+        self.env['investment.asset.price'].create({
+            'asset_id': asset.id,
+            'time': now - timedelta(days=10),
+            'price': 100.0,
+        })
+        latest_price = self.env['investment.asset.price'].create({
+            'asset_id': asset.id,
+            'time': now - timedelta(hours=1),
+            'price': 105.0,
+        })
+        asset.last_price_id = latest_price
+        position = self.env['investment.position'].create({
+            'name': 'Timeseries Existing Position',
+            'asset_id': asset.id,
+            'portfolio_id': self.portfolio.id,
+            'company_id': self.company.id,
+            'plan_months': 0,
+        })
+        self.env['investment.position.transaction'].create({
+            'position_id': position.id,
+            'quantity': 1.0,
+            'exchange_rate': 100.0,
+            'payment': 100.0,
+            'time': now - timedelta(days=9),
+        })
+        self.env['investment.timeseries'].create({
+            'position_id': position.id,
+            'date': fields.Date.today(),
+            'price_id': latest_price.id,
+        })
+        prediction_date = fields.Date.today().replace(month=12, day=31)
+        if prediction_date <= fields.Date.today():
+            prediction_date = prediction_date.replace(year=prediction_date.year + 1)
+        self.env['investment.timeseries'].create({
+            'position_id': position.id,
+            'date': prediction_date,
+            'price_id': latest_price.id,
+        })
+        position.generate_timeseries()
+
+        future_asset = self.env['investment.asset'].create({
+            'ticker': 'TS-FUTURE-ASSET',
+            'category_id': self.category.id,
+            'currency_id': self.currency_eur.id,
+        })
+        self.env['investment.asset.price'].create({
+            'asset_id': future_asset.id,
+            'time': now - timedelta(days=1),
+            'price': 10.0,
+        })
+        future_asset.last_price_id = future_asset.price_ids[:1]
+        future_position = self.env['investment.position'].create({
+            'name': 'Timeseries Future Position',
+            'asset_id': future_asset.id,
+            'portfolio_id': self.portfolio.id,
+            'company_id': self.company.id,
+            'plan_months': 0,
+        })
+        future_tx = self.env['investment.position.transaction'].create({
+            'position_id': future_position.id,
+            'quantity': 0.0,
+            'exchange_rate': 0.0,
+            'payment': 10.0,
+            'time': datetime(2056, 1, 5, 12, 0, 0),
+        })
+        self.assertEqual(future_tx.time.year, 2056)
+        future_position.generate_timeseries()
+        self.assertTrue(self.env['investment.timeseries'].search([
+            ('position_id', '=', future_position.id),
+            ('date', '=', fields.Date.today()),
+        ], limit=1))
+
     def test_position_generate_plan_extra_paths(self):
         now = fields.Datetime.now()
 
@@ -715,7 +919,7 @@ class TestFunctionalIntegration(InvestmentTestCommon):
         for any_asset in self.env['investment.asset'].search([]).filtered(lambda a: not a.last_price_id):
             if any_asset.price_ids:
                 any_asset.last_price_id = any_asset.price_ids[:1]
-            else:
+            else: # pragma: no cover
                 any_asset.last_price_id = self.env['investment.asset.price'].create({
                     'asset_id': any_asset.id,
                     'time': fields.Datetime.now(),
@@ -781,3 +985,48 @@ class TestFunctionalIntegration(InvestmentTestCommon):
             'date': fields.Date.today(),
         })
         scratch._compute_timeseries_aggregate()
+
+    def test_period_cost_branch_is_included_in_compute(self):
+        asset = self.env['investment.asset'].create({
+            'ticker': 'PERIOD-COST-ASSET',
+            'category_id': self.category.id,
+            'currency_id': self.currency_eur.id,
+        })
+        last_price = self.env['investment.asset.price'].create({
+            'asset_id': asset.id,
+            'time': fields.Datetime.now() - timedelta(days=4),
+            'price': 10.0,
+        })
+        asset.last_price_id = last_price
+        position = self.env['investment.position'].create({
+            'name': 'Period Cost Position',
+            'asset_id': asset.id,
+            'portfolio_id': self.portfolio.id,
+            'company_id': self.company.id,
+            'plan_months': 0,
+        })
+        self.env['investment.position.transaction'].create({
+            'position_id': position.id,
+            'quantity': 2.0,
+            'exchange_rate': 10.0,
+            'payment': 20.0,
+            'time': fields.Datetime.now() - timedelta(days=3),
+        })
+        cost_tx = self.env['investment.position.transaction'].create({
+            'position_id': position.id,
+            'quantity': 0.0,
+            'exchange_rate': 0.0,
+            'payment': -5.0,
+            'time': fields.Datetime.now() - timedelta(days=2),
+        })
+        position.generate_timeseries()
+
+        period = self.env['investment.period'].create({
+            'name': 'Period Cost Branch',
+            'start_date': fields.Date.today() - timedelta(days=5),
+            'end_date': fields.Date.today() - timedelta(days=1),
+            'domain': "[('id', '=', %d)]" % position.id,
+            'company_id': self.company.id,
+        })
+        period.action_compute()
+        self.assertIn(cost_tx, period.transaction_ids)
