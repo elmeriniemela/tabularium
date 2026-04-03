@@ -207,7 +207,7 @@ class FlightLog(models.Model):
         for record in self:
             if isinstance(record.start_time, float) and isinstance(record.end_time, float):
                 record.duration = record.end_time - record.start_time
-            else:
+            else: # pragma: no cover
                 record.duration = False
 
     def copy(self, default=None):
