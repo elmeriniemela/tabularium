@@ -89,7 +89,7 @@ class Base(models.AbstractModel):
                 except etree.XMLSyntaxError:
                     try:
                         xmlval = etree.HTML(val)
-                    except etree.XMLSyntaxError:
+                    except etree.XMLSyntaxError: # pragma: no cover
                         field.text = val
                     else:
                         field.set('type', 'html')
