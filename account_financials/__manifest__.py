@@ -5,7 +5,7 @@
     'website': 'https://eniemela.fi',
     'license': 'LGPL-3',
     'category': 'Accounting',
-    'version': '0.1.3',
+    'version': '1.0.0',
     'depends': [
         'account',
     ],
