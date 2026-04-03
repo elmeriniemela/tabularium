@@ -11,7 +11,19 @@ from lxml import etree
 import html
 from odoo import models, exceptions, fields, api, _
 import datetime as realdt
-from odoo.tools.safe_eval import safe_eval, test_python_expr, wrap_module, datetime, dateutil
+from odoo.tools.safe_eval import (
+    wrap_module,
+    datetime,
+    dateutil,
+    CodeType,
+    check_values,
+    compile_codeobj,
+    assert_valid_codeobj,
+    _BUILTINS,
+    _SAFE_OPCODES,
+    unsafe_eval,
+    _BUBBLEUP_EXCEPTIONS,
+)
 from odoo.tools.convert import xml_import as XMLImport
 from odoo.tools import config
 from odoo.http import request
@@ -48,6 +60,33 @@ urllib = wrap_module(__import__('urllib'), {mod: getattr(urllib, mod).__all__ fo
 
 _logger = logging.getLogger(__name__)
 
+
+def safe_eval(expr, /, context, *, mode="eval", filename=None):
+    """Adapted from odoo.tools.safe_eval.safe_eval to use GlobalsDict instead of regular dict in the evaluation.
+    """
+    if type(expr) is CodeType: # pragma: no cover
+        raise TypeError("safe_eval does not allow direct evaluation of code objects.")
+
+    check_values(context)
+
+    globals_dict = GlobalsDict(context or {}, __builtins__=dict(_BUILTINS))
+
+    c = compile_codeobj(expr, filename=filename, mode=mode)
+    assert_valid_codeobj(_SAFE_OPCODES, c, expr)
+    try:
+        # empty locals dict makes the eval behave like top-level code
+        return unsafe_eval(c, globals_dict, None)
+
+    except _BUBBLEUP_EXCEPTIONS:
+        raise
+
+    except Exception as e:
+        raise ValueError('%r while evaluating\n%r' % (e, expr))
+
+    finally:
+        if context is not None:
+            del globals_dict['__builtins__']
+            context.update(globals_dict)
 
 
 def json_encoder(o):
@@ -504,7 +543,7 @@ class ApiEndpoint(models.Model):
             if not (self.initiator and self.role == 'active'):
                 raise exceptions.UserError(_("Unable to initiate, check integration parameters."))
             globals_dict = self._get_globals()
-            safe_eval(self.initiator, globals_dict, mode="exec", nocopy=True)
+            safe_eval(self.initiator, globals_dict, mode="exec")
         except Exception as error:
             if not config.options['test_enable']: # pragma: no cover
                 self.env.cr.rollback()
@@ -518,7 +557,7 @@ class ApiEndpoint(models.Model):
 
     def action_test(self):
         globals_dict = self._get_globals()
-        safe_eval(self.test_example or '', globals_dict, mode="exec", nocopy=True)
+        safe_eval(self.test_example or '', globals_dict, mode="exec")
 
 
     def produce(self, variables):
@@ -539,7 +578,7 @@ class ApiEndpoint(models.Model):
             serialized_ctx = self._serialize_dict(globals_dict, self.env.context)
             globals_dict.update(variables)
             copied_globals_dict = globals_dict.copy() # To prevent sharing new vars between Producer and Consumer. These vars are not stored in message queue.
-            safe_eval((self.hardcoded_producer or '') + (self.producer or ''), copied_globals_dict, mode="exec", nocopy=True)
+            safe_eval((self.hardcoded_producer or '') + (self.producer or ''), copied_globals_dict, mode="exec")
             if 'obj' in copied_globals_dict:
                 globals_dict['obj'] = copied_globals_dict['obj']
             else:
@@ -598,7 +637,7 @@ class ApiEndpoint(models.Model):
                 d[key] = EvalModel(val)
 
         serialized_dict = str(d)
-        assert isinstance(safe_eval(serialized_dict, globals_dict, nocopy=True), dict), "Ensure that the dict can be evaluated from message queue."
+        assert isinstance(safe_eval(serialized_dict, globals_dict), dict), "Ensure that the dict can be evaluated from message queue."
         return serialized_dict
 
 
@@ -619,7 +658,7 @@ class ApiEndpoint(models.Model):
         raise_exc = self.env.context.get('raise_exc', True)
         assert raise_exc or commit, "If you want to bypass the error, you need to set force_commit=True."
         try:
-            safe_eval((self.hardcoded_consumer or '') + (self.consumer or ''), globals_dict, mode="exec", nocopy=True)
+            safe_eval((self.hardcoded_consumer or '') + (self.consumer or ''), globals_dict, mode="exec")
         except Exception as error:
             if not config.options['test_enable']: # pragma: no cover
                 self.env.cr.rollback()

@@ -10,7 +10,6 @@ class MailThread(models.AbstractModel):
         inverse_name='res_id',
         string='Version Control',
         domain=lambda self: [('model', '=', self._name)],
-        auto_join=True,
     )
 
     version_control_count = fields.Integer(

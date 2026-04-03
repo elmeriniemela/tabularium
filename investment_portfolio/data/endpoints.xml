@@ -1,5 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
-<odoo noupdate="1">
+<odoo>
+    <data noupdate="1">
     <record id="investment_portfolio.api_endpoint_31" model="api.endpoint">
         <field name="id" eval="31"/>
         <field name="name">yfinance</field>
@@ -110,7 +111,7 @@ obj = resp.json()</field>
         <field name="file_format">json</field>
         <field name="response_format" eval="False"/>
         <field name="auto_code" eval="False"/>
-        <field name="documentation" type="xml">
+        <field name="documentation" type="html">
             <p>
                 <a href="https://docs.kraken.com/api/docs/futures-api/trading/get-history">https://docs.kraken.com/api/docs/futures-api/trading/get-history</a>
             </p>
@@ -399,7 +400,7 @@ asset.price_upsert(time=timedt, price=float(price_str))</field>
         <field name="file_format">xml</field>
         <field name="response_format" eval="False"/>
         <field name="auto_code" eval="False"/>
-        <field name="documentation" type="xml">
+        <field name="documentation" type="html">
             <p>Fetches asset prices from another Odoo instance, and imports them here. The asset ticker is used as the identifier between two systems.</p>
         </field>
         <field name="test_example" eval="False"/>
@@ -446,4 +447,5 @@ obj = xslt(obj, asset_id=lxml.etree.XSLT.strparam(str(asset.id))).getroot()
 import_xml(obj)
 </field>
     </record>
+    </data>
 </odoo>

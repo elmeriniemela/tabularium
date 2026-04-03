@@ -52,12 +52,11 @@ class BitcoinTx(models.Model):
         help="The inputs where outputs of this transaction are spent.",
     )
 
-    _sql_constraints = [
-        ('uniq', 'unique(txid)', 'TXID should be unique!')
-    ]
+    _uniq_txid = models.Constraint('UNIQUE(txid)', 'TXID should be unique!')
 
     @api.model
-    @api.returns('self')
+    @api.private
+    @api.readonly
     def search_fetch(self, domain, field_names, offset=0, limit=None, order=None):
         res = super().search_fetch(domain, field_names, offset=offset, limit=limit, order=order)
         if not self.env.context.get('disable_auto_populate') and len(domain) == 1:
@@ -188,10 +187,8 @@ class BitcoinIn(models.Model):
         help="The UTXO this input consumed. Empty for coinbase inputs.",
     )
 
-    _sql_constraints = [
-        ('uniq_vout', 'unique(vout_tx_id, vout)', 'Same transaction output can not be spent twice!'),
-        ('uniq_coinbase', 'unique(coinbase)', 'The coinbase should be unique!'),
-    ]
+    _uniq_vout = models.Constraint('UNIQUE(vout_tx_id, vout)', 'Same transaction output can not be spent twice!')
+    _uniq_coinbase = models.Constraint('UNIQUE(coinbase)', 'The coinbase should be unique!')
 
     @api.depends('coinbase')
     def _compute_coinbase_ascii(self):
@@ -259,9 +256,7 @@ class BitcoinOut(models.Model):
         help="The input where this UTXO was consumed. If empty, then can be spent."
     )
 
-    _sql_constraints = [
-        ('uniq', 'unique(tx_id, n)', 'The VOUT index must be unique within a transaction')
-    ]
+    _uniq_tx_output = models.Constraint('UNIQUE(tx_id, n)', 'The VOUT index must be unique within a transaction')
 
     def _compute_spent_input_id(self):
         Input = self.env['bitcoin.tx.in']

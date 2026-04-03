@@ -18,7 +18,7 @@ _logger = logging.getLogger(__name__)
 
 class Export(stdexp.Export):
 
-    @http.route('/web/export/formats', type='json', auth="user")
+    @http.route('/web/export/formats', type='jsonrpc', auth='user', readonly=True)
     def formats(self):
         return super().formats() + [
             {'tag': 'xml', 'label': 'XML'},

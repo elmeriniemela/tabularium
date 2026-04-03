@@ -2,6 +2,7 @@
 
 import base64
 
+from odoo.exceptions import AccessError
 from odoo.tests import TransactionCase, tagged
 
 
@@ -21,13 +22,13 @@ class TestDocumentDirectory(TransactionCase):
             'name': 'Documents User',
             'login': 'documents_user',
             'email': 'documents_user@example.com',
-            'groups_id': [(6, 0, [documents_group.id])],
+            'group_ids': [(6, 0, [documents_group.id])],
         })
         cls.plain_user = Users.create({
             'name': 'Plain User',
             'login': 'plain_user',
             'email': 'plain_user@example.com',
-            'groups_id': [(6, 0, [internal_group.id])],
+            'group_ids': [(6, 0, [internal_group.id])],
         })
 
     def test_attachment_and_chatter_integration(self):
@@ -69,7 +70,7 @@ class TestDocumentDirectory(TransactionCase):
         directory.with_user(self.documents_user).unlink()
         self.assertFalse(directory.exists())
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(AccessError):
             self.Directory.with_user(self.plain_user).create({'name': 'Denied'})
 
     def test_data_files_loaded(self):

@@ -70,7 +70,5 @@ class CloudServerModule(models.Model):
     )
 
 
-    _sql_constraints = [
-        ('uniq_mod', 'UNIQUE(server_id, module_id)', 'The server already has this module!'),
-    ]
+    _uniq_mod = models.Constraint('UNIQUE(server_id, module_id)', 'The server already has this module!')
 

@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
+from typing import Sequence
+
 from odoo import api, models, fields, _
-from odoo.osv import expression
 from odoo.exceptions import ValidationError
+from odoo.orm.types import DomainType
 from odoo.tools import float_is_zero
 import traceback
 from dateutil.relativedelta import relativedelta
@@ -55,7 +57,7 @@ class InvestmentPosition(models.Model):
 
     asset_id = fields.Many2one(
         comodel_name='investment.asset', string='Ticker',
-        auto_join=True, index=True, ondelete='restrict', required=True)
+        index=True, ondelete='restrict', required=True)
 
     name = fields.Char(required=True)
 
@@ -530,23 +532,44 @@ class InvestmentPosition(models.Model):
             position_id.plan_total_cash_flow = sum(Transaction.search([('prediction', '=', True), ('position_id', '=', position_id.id)]).mapped('cash_flow'))
 
     @api.model
-    def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
-        """
-            Override read_group to calculate percentages properly.
-        """
-        res = super().read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
+    def _read_group(
+        self,
+        domain: DomainType,
+        groupby: Sequence[str] = (),
+        aggregates: Sequence[str] = (),
+        having: DomainType = (),
+        offset: int = 0,
+        limit: int | None = None,
+        order: str | None = None,
+    ) -> list[tuple]:
+        profit_percent_indexes = [
+            index
+            for index, aggregate in enumerate(aggregates)
+            if aggregate.startswith('profit_percent:')
+        ]
+        if not profit_percent_indexes:
+            return super()._read_group(domain, groupby, aggregates, having, offset, limit, order)
 
-        if 'profit_percent' in fields:
-            for line in res:
-                domain = line.get('__domain') or []
-                positions = self.search(line['__domain'])
-                total_profits = 0.0
-                total_investment = 0.0
-                for position in positions:
-                    total_profits += position.profit
-                    total_investment += position.investment
-                line['profit_percent'] = total_profits / total_investment if total_investment else 0.0
-        return res
+        computed_aggregates = list(aggregates)
+        if 'profit:sum' not in computed_aggregates:
+            computed_aggregates.append('profit:sum')
+        if 'investment:sum' not in computed_aggregates:
+            computed_aggregates.append('investment:sum')
+
+        rows = super()._read_group(domain, groupby, computed_aggregates, having, offset, limit, order)
+        profit_sum_index = len(groupby) + computed_aggregates.index('profit:sum')
+        investment_sum_index = len(groupby) + computed_aggregates.index('investment:sum')
+        row_trim_index = len(groupby) + len(aggregates)
+        rows_with_ratio = []
+        for row in rows:
+            row_values = list(row)
+            total_profit = row_values[profit_sum_index]
+            total_investment = row_values[investment_sum_index]
+            ratio = total_profit / total_investment if total_investment else 0.0
+            for aggregate_index in profit_percent_indexes:
+                row_values[len(groupby) + aggregate_index] = ratio
+            rows_with_ratio.append(tuple(row_values[:row_trim_index]))
+        return rows_with_ratio
 
     @api.depends('currency_id', 'company_id')
     def _compute_is_company_currency(self):

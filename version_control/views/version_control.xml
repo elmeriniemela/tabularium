@@ -16,35 +16,33 @@
         <field name="model">version.control</field>
         <field name="arch" type="xml">
             <form>
-                <sheet>
-                    <div class="oe_title">
-                        <h1>
-                            <field name="name"/>
-                        </h1>
-                    </div>
-                    <notebook>
-                        <page string="Diff">
-                            <field name="diff" widget="diff" options="{'maxLength': 2000000}"/>
-                        </page>
-                        <page string="Before">
-                            <field name="old_value_text"/>
-                        </page>
-                        <page string="After">
-                            <field name="new_value_text"/>
-                        </page>
-                        <page string="Details">
+                <div class="oe_title">
+                    <h1>
+                        <field name="name"/>
+                    </h1>
+                </div>
+                <notebook>
+                    <page string="Diff">
+                        <field name="diff" widget="diff" options="{'maxLength': 2000000}"/>
+                    </page>
+                    <page string="Before">
+                        <field name="old_value_text"/>
+                    </page>
+                    <page string="After">
+                        <field name="new_value_text"/>
+                    </page>
+                    <page string="Details">
+                        <group>
                             <group>
-                                <group>
-                                    <field name="reference" widget="reference" string="Record"/>
-                                    <field name="field_id"/>
-                                    <field name="version_hash_before"/>
-                                    <field name="version_hash_after"/>
-                                </group>
-                                <group></group>
+                                <field name="reference" widget="reference" string="Record"/>
+                                <field name="field_id"/>
+                                <field name="version_hash_before"/>
+                                <field name="version_hash_after"/>
                             </group>
-                        </page>
-                    </notebook>
-                </sheet>
+                            <group></group>
+                        </group>
+                    </page>
+                </notebook>
             </form>
         </field>
     </record>

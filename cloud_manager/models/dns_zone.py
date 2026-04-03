@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+from collections.abc import MutableSet
 from odoo import models, api, fields, _
 
 _logger = logging.getLogger(__name__)
@@ -37,11 +38,8 @@ class DnsZone(models.Model):
         search='_search_ns_endpoint_id',
     )
 
-    _sql_constraints = [
-        ('uniq_name', 'UNIQUE(name)', 'The zone name must be unique!'),
-        ('uniq_identifier', 'UNIQUE(identifier)', 'The zone identifier must be unique!'),
-    ]
-
+    _uniq_name = models.Constraint('UNIQUE(name)', 'The zone name must be unique!')
+    _uniq_identifier = models.Constraint('UNIQUE(identifier)', 'The zone identifier must be unique!')
 
     def _get_ns_endpoint(self):
         return self.env['api.endpoint'].search([
@@ -55,12 +53,12 @@ class DnsZone(models.Model):
             zone.ns_endpoint_id = ns_endpoint
 
     def _search_ns_endpoint_id(self, operator, value):
-        if isinstance(value, int):
+        if isinstance(value, (int, list, set, MutableSet)):
             leaf = ('id', operator, value)
         elif isinstance(value, str):
             leaf = ('name', operator, value)
         else:
-            raise RuntimeError("Invalid type: %s", type(value))
+            raise RuntimeError("Invalid type (%s): %s" % (type(value), value))
 
         ns_endpoint = self._get_ns_endpoint().filtered_domain([leaf])
         if ns_endpoint:

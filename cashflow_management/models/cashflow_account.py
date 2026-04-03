@@ -21,7 +21,5 @@ class CashflowCategory(models.Model):
         readonly=True,
     )
 
-    _sql_constraints = [
-        ('unique_name', 'unique(name)', 'This account already exists!'),
-    ]
+    _unique_name = models.Constraint('unique(name)', 'This account already exists!')
 

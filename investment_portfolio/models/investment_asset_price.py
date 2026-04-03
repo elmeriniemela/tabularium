@@ -57,9 +57,7 @@ class InvestmentAssetPrice(models.Model):
 
     )
 
-    _sql_constraints = [
-        ('unique_price', 'unique(asset_id, time)', 'Price for this time is already configured!'),
-    ]
+    _unique_price = models.Constraint('unique(asset_id, time)', 'Price for this time is already configured!')
 
 
     def action_view_assets(self):

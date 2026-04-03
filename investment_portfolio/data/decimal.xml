@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<odoo noupdate="True">
-    <record forcecreate="True" id="decimal_quantity" model="decimal.precision">
-        <field name="name">Investment Asset quantity</field>
-        <field name="digits">8</field>
-    </record>
+<odoo>
+    <data noupdate="1">
+        <record forcecreate="True" id="decimal_quantity" model="decimal.precision">
+            <field name="name">Investment Asset quantity</field>
+            <field name="digits">8</field>
+        </record>
 
-    <record forcecreate="True" id="decimal_interest" model="decimal.precision">
-        <field name="name">Investment Asset Interest</field>
-        <field name="digits">6</field>
-    </record>
+        <record forcecreate="True" id="decimal_interest" model="decimal.precision">
+            <field name="name">Investment Asset Interest</field>
+            <field name="digits">6</field>
+        </record>
+    </data>
 </odoo>

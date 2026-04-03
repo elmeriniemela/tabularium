@@ -80,17 +80,16 @@ class TestPlanTimeseries(InvestmentTestCommon):
 
         result = self.env['investment.timeseries'].web_read_group(
             domain=[('position_id', '=', pos.id)],
-            fields=['position_id'],
             groupby=['date:month'],
+            aggregates=['position_id:count'],
         )
         groups = result.get('groups', [])
         self.assertEqual(len(groups), 1)
         group_date = groups[0].get('date:month')
+        if isinstance(group_date, tuple):
+            group_date = group_date[0]
         if isinstance(group_date, str):
-            try:
-                group_date = date.fromisoformat(group_date)
-            except ValueError:
-                group_date = datetime.strptime(group_date, "%B %Y").date()
+            group_date = date.fromisoformat(group_date)
         self.assertEqual(group_date.month, 1)
 
     def test_generate_plan_acquire_creates_predictions(self):

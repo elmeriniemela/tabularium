@@ -61,7 +61,7 @@
                 <filter string="Realized" name="realized" domain="[('prediction', '=', False)]"/>
                 <filter string="Prediction" name="prediction" domain="[('prediction', '=', True)]"/>
                 <separator/>
-                <group expand="1" string="Group by">
+                <group>
                     <filter string="Time" name="group_time" context="{'group_by': 'time:week'}"/>
                     <filter string="Asset" name="group_asset_id" context="{'group_by': 'asset_id'}"/>
                 </group>

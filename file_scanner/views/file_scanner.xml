@@ -53,7 +53,7 @@
                 <field name="path"/>
                 <field name="ctime"/>
                 <filter name="date" string="date" date="date"/>
-                <group expand="1" string="Group by">
+                <group>
                     <filter string="Date" name="group_date" context="{'group_by': 'date:year'}"/>
                 </group>
             </search>

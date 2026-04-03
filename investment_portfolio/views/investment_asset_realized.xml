@@ -72,7 +72,7 @@
                 <filter string="Not Simulated" name="not_simulated" domain="[('simulated', '=', False)]"/>
                 <filter string="Simulated" name="simulated" domain="[('simulated', '=', True)]"/>
                 <separator/>
-                <group expand="1" string="Group by">
+                <group>
                     <filter string="Realized Date" name="group_realized_date" context="{'group_by': 'realized_date:year'}"/>
                     <filter string="Category" name="group_category_id" context="{'group_by': 'category_id'}"/>
                     <filter string="Portfolio" name="group_portfolio_id" context="{'group_by': 'portfolio_id'}"/>

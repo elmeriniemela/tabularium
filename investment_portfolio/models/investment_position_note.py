@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from odoo import api, models, fields, _
-from odoo.osv import expression
 import logging
 
 _logger = logging.getLogger(__name__)
@@ -57,6 +56,5 @@ class InvestmentPositionNote(models.Model):
         action['domain'] = [('id', 'in', ctx.pop('domain_ids'))]
         action['context'] = ctx
         return action
-
 
 

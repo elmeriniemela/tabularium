@@ -3,7 +3,7 @@
 
 from odoo import api, fields, models, _
 from odoo.tools import html2plaintext
-from odoo.addons.web_editor.tools import handle_history_divergence
+from odoo.addons.html_editor.tools import handle_history_divergence
 
 class Stage(models.Model):
     _name = "note.stage"
@@ -22,9 +22,7 @@ class Tag(models.Model):
     name = fields.Char('Tag Name', required=True, translate=True)
     color = fields.Integer('Color Index')
 
-    _sql_constraints = [
-        ('name_uniq', 'unique (name)', "Tag name already exists !"),
-    ]
+    _name_uniq = models.Constraint('unique (name)', "Tag name already exists !")
 
 
 class Note(models.Model):

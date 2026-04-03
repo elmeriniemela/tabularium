@@ -53,7 +53,7 @@
             <search>
                 <field name="module_id"/>
                 <field name="server_id"/>
-                <group expand="1" string="Group by">
+                <group>
                     <filter string="Server" name="group_server_id" context="{'group_by': 'server_id'}"/>
                 </group>
             </search>

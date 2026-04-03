@@ -436,8 +436,8 @@ class TestFunctionalIntegration(InvestmentTestCommon):
 
         negative_portfolio = move._search_portfolio_ids('not in', [self.portfolio.id])
         negative_position = move._search_position_ids('!=', self.position.id)
-        self.assertEqual(negative_portfolio[0], '!')
-        self.assertEqual(negative_position[0], '!')
+        self.assertIn('!', str(negative_portfolio))
+        self.assertIn('!', str(negative_position))
 
     def test_transaction_misc_functional_paths(self):
         tx_new = self.env['investment.position.transaction'].new({
@@ -605,14 +605,13 @@ class TestFunctionalIntegration(InvestmentTestCommon):
         pos.action_show_price_change('daily_price_id')
         pos.action_show_profit_change('daily_timeseries_id')
 
-        grouped = self.env['investment.position'].read_group(
+        grouped = self.env['investment.position']._read_group(
             domain=[('id', 'in', (self.position + pos).ids)],
-            fields=['profit:sum', 'investment:sum', 'profit_percent'],
             groupby=['portfolio_id'],
-            lazy=False,
+            aggregates=['profit:sum', 'investment:sum', 'profit_percent:avg'],
         )
         self.assertTrue(grouped)
-        self.assertIn('profit_percent', grouped[0])
+        self.assertEqual(len(grouped[0]), 4)
 
         pos._compute_chart_one_month()
         self.assertIn('data', pos.chart_one_month)

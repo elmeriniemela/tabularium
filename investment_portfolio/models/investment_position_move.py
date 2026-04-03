@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import api, models, fields, _
-from odoo.osv import expression
+from odoo.fields import Domain
 import logging
 
 _logger = logging.getLogger(__name__)
@@ -70,9 +70,7 @@ class InvestmentPositionMove(models.Model):
         tracking=False,
     )
 
-    _sql_constraints = [
-        ('unique_name', 'unique(name, company_id)', 'A move with this name already exists!'),
-    ]
+    _unique_name = models.Constraint('unique(name, company_id)', 'A move with this name already exists!')
 
     def _compute_portfolio_ids(self):
         for record in self:
@@ -84,17 +82,14 @@ class InvestmentPositionMove(models.Model):
             # portfolios is not set
             return [('transaction_ids', operator, value)]
 
-        domain = []
-        if operator in expression.NEGATIVE_TERM_OPERATORS:
+        domain = Domain('transaction_ids.portfolio_id', operator, value)
+        if operator in Domain.NEGATIVE_OPERATORS:
             # Normal negative term operators do not work intuitively through One2many lists.
             # We need to negate outside of the leaf using '!', to have behaviour which makes sense to a user.
             # portfolios does not contain X
             # portfolios is not equal to X
-            # We need to actually do the
-            operator = expression.TERM_OPERATORS_NEGATION[operator]
-            domain.append('!')
+            domain = ~Domain('transaction_ids.portfolio_id', Domain.NEGATIVE_OPERATORS[operator], value)
 
-        domain.append(('transaction_ids.portfolio_id', operator, value))
         _logger.debug(domain)
         return domain
 
@@ -108,17 +103,14 @@ class InvestmentPositionMove(models.Model):
             # Positions is not set
             return [('transaction_ids', operator, value)]
 
-        domain = []
-        if operator in expression.NEGATIVE_TERM_OPERATORS:
+        domain = Domain('transaction_ids.position_id', operator, value)
+        if operator in Domain.NEGATIVE_OPERATORS:
             # Normal negative term operators do not work intuitively through One2many lists.
             # We need to negate outside of the leaf using '!', to have behaviour which makes sense to a user.
             # Positions does not contain X
             # Positions is not equal to X
-            # We need to actually do the
-            operator = expression.TERM_OPERATORS_NEGATION[operator]
-            domain.append('!')
+            domain = ~Domain('transaction_ids.position_id', Domain.NEGATIVE_OPERATORS[operator], value)
 
-        domain.append(('transaction_ids.position_id', operator, value))
         _logger.debug(domain)
         return domain
 
@@ -155,5 +147,4 @@ class InvestmentPositionMove(models.Model):
             tx = move.transaction_ids
             tx._compute_profit() # for some reason, we need to call it here when zeroing transaction values from move form.
             move.profit = sum(tx.mapped('profit'))
-
 

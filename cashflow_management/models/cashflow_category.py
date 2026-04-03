@@ -20,9 +20,7 @@ class CashflowCategory(models.Model):
         store=True,
     )
 
-    _sql_constraints = [
-        ('unique_name', 'unique(name)', 'This category already exists!'),
-    ]
+    _unique_name = models.Constraint('unique(name)', 'This category already exists!')
 
     @api.depends('entry_ids')
     def _compute_entry_count(self):

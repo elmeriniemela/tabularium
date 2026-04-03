@@ -41,9 +41,7 @@ class TogglTask(models.Model):
         store=True,
     )
 
-    _sql_constraints = [
-        ('task_id_uniq', 'unique(task_id)', 'The task_id must be unique!'),
-    ]
+    _task_id_uniq = models.Constraint('unique(task_id)', 'The task_id must be unique!')
 
     @api.depends('entry_ids', 'entry_ids.date_start')
     def _compute_last_entry(self):
@@ -171,11 +169,9 @@ class TogglEntry(models.Model):
     def task_id_regex(self):
         return r'\[(\d+)\]'
 
-    _sql_constraints = [
-        ('export_id_uniq', 'unique(export_id)', 'The export_id must be unique!'),
-        ('export_id_non_zero', 'CHECK(export_id <> 0)', 'The export_id can not be zero!'),
-        ('toggl_id_uniq', 'unique(toggl_id)', 'The toggl_id must be unique!'),
-    ]
+    _export_id_uniq = models.Constraint('unique(export_id)', 'The export_id must be unique!')
+    _export_id_non_zero = models.Constraint('CHECK(export_id <> 0)', 'The export_id can not be zero!')
+    _toggl_id_uniq = models.Constraint('unique(toggl_id)', 'The toggl_id must be unique!')
 
     def _inverse_export_id(self):
         for record in self:

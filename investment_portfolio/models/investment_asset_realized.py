@@ -127,6 +127,4 @@ class InvestmentAssetRealized(models.Model):
             'buy_fee': formatLang(self.env, sum(self.mapped('buy_fee')), digits=2),
         }
 
-    _sql_constraints = [
-        ('unique_realized', 'UNIQUE(sell_batch_id, buy_batch_id)', 'A realization for this aquisition/sell link already exists!'),
-    ]
+    _unique_realized = models.Constraint('UNIQUE(sell_batch_id, buy_batch_id)', 'A realization for this aquisition/sell link already exists!')

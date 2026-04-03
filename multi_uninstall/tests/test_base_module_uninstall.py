@@ -18,7 +18,7 @@ class TestBaseModuleUninstall(TransactionCase):
 
     def test_action_next_returns_followup_wizard_action(self):
         wizard = self.env["base.module.uninstall"].create(
-            {"module_id": self.multi_uninstall_module.id}
+            {"module_ids": self.multi_uninstall_module.ids}
         )
 
         action = wizard.with_context(
@@ -40,7 +40,7 @@ class TestBaseModuleUninstall(TransactionCase):
 
     def test_action_next_returns_none_when_no_modules_left(self):
         wizard = self.env["base.module.uninstall"].create(
-            {"module_id": self.multi_uninstall_module.id}
+            {"module_ids": self.multi_uninstall_module.ids}
         )
 
         action = wizard.with_context(
@@ -51,7 +51,7 @@ class TestBaseModuleUninstall(TransactionCase):
 
     def test_action_uninstall_raises_when_module_operations_are_blocked(self):
         wizard = self.env["base.module.uninstall"].create(
-            {"module_id": self.multi_uninstall_module.id}
+            {"module_ids": self.multi_uninstall_module.ids}
         )
 
         with self.assertRaises(UserError):

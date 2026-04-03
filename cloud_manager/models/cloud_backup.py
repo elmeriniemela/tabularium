@@ -40,9 +40,7 @@ class CloudBackup(models.Model):
         store=True,
     )
 
-    _sql_constraints = [
-        ('uniq_name', 'UNIQUE(instance_id, name)', 'Backup name should be unique within an instance!'),
-    ]
+    _uniq_name = models.Constraint('UNIQUE(instance_id, name)', 'Backup name should be unique within an instance!')
 
     @api.depends('name', 'instance_id.name')
     def _compute_display_name(self):

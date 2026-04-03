@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+    <record id="res_groups_privilege_cash_flow" model="res.groups.privilege">
+        <field name="name">Cash Flow</field>
+    </record>
+
     <record id="group_cash_flow_user" model="res.groups">
         <field name="name">User</field>
-        <field name="category_id" ref="base.module_category_cash_flow"/>
+        <field name="privilege_id" ref="res_groups_privilege_cash_flow"/>
         <field name="implied_ids" eval="[(6, 0, [ref('base.group_user')])]"/>
         <field name="comment">User.</field>
     </record>
@@ -11,9 +15,9 @@
     <record id="group_cash_flow_admin" model="res.groups">
         <field name="name">Administrator</field>
         <field name="comment">Administrator.</field>
-        <field name="category_id" ref="base.module_category_cash_flow"/>
+        <field name="privilege_id" ref="res_groups_privilege_cash_flow"/>
         <field name="implied_ids" eval="[(4, ref('group_cash_flow_user'))]"/>
-        <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+        <field name="user_ids" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
     </record>
 
 

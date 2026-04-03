@@ -6,7 +6,7 @@ from odoo import fields
 from odoo.exceptions import UserError, ValidationError
 from odoo.tests import TransactionCase, tagged
 from odoo.tests.common import mute_logger
-from odoo.tools.safe_eval import safe_eval
+from odoo.addons.api_endpoint.models.api_endpoint import safe_eval
 
 
 CLOUD_ENDPOINT_PRODUCER = """
@@ -359,7 +359,7 @@ class TestCloudManagerIntegration(TransactionCase):
         instance.is_self = True
         instance.action_restart()
         last_msg = endpoint.msg_ids.sorted('id')[-1]
-        variables = safe_eval(last_msg.variables, endpoint._get_globals(), nocopy=True)
+        variables = safe_eval(last_msg.variables, endpoint._get_globals())
         self.assertEqual(variables['method'], 'self_upgrade')
         self.assertTrue(variables['commit_before'])
 

@@ -55,7 +55,7 @@
             <search>
                 <field name="name"/>
                 <field name="endpoint_id"/>
-                <group expand="1" string="Group by">
+                <group>
                     <filter string="Create Date" name="group_create_date" context="{'group_by': 'create_date:year'}"/>
                 </group>
             </search>

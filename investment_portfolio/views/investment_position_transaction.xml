@@ -181,7 +181,7 @@
                 <filter string="8 Years" name="8_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-8*365)).strftime('%Y-%m-%d')),('time','&lt;',(context_today() + relativedelta(days=8*365)).strftime('%Y-%m-%d'))]" />
                 <filter string="9 Years" name="9_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-9*365)).strftime('%Y-%m-%d')),('time','&lt;',(context_today() + relativedelta(days=9*365)).strftime('%Y-%m-%d'))]" />
                 <filter string="10 Years" name="10_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-10*365)).strftime('%Y-%m-%d')),('time','&lt;',(context_today() + relativedelta(days=10*365)).strftime('%Y-%m-%d'))]" />
-                <group expand="1" string="Group by">
+                <group>
                     <filter string="Date" name="group_month" context="{'group_by': 'time:month'}" invisible="not context.get('search_default_group_month')"/>
                     <filter string="Date" name="group_year" context="{'group_by': 'time:year'}" invisible="not context.get('search_default_group_year')"/>
                     <filter string="Portfolio" name="group_portfolio_id" context="{'group_by': 'portfolio_id'}"/>

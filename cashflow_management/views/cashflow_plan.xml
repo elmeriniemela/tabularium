@@ -58,7 +58,7 @@
                 <field name="name"/>
                 <field name="create_date"/>
                 <filter name="create_date_filter" date="create_date"/>
-                <group expand="1" string="Group by">
+                <group>
                     <filter string="Creation Date" name="group_create_date" context="{'group_by': 'create_date:month'}"/>
                 </group>
             </search>

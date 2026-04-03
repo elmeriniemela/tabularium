@@ -222,7 +222,7 @@
                 <filter string="Liquid" name="liquid" domain="[('liquid', '=', True)]"/>
                 <filter string="Illiquid" name="illiquid" domain="[('liquid', '=', False)]"/>
                 <separator/>
-                <group expand="1" string="Group by">
+                <group>
                     <filter string="Portfolio" name="group_portfolio_id" context="{'group_by': 'portfolio_id'}"/>
                     <filter string="Category" name="group_category_id" context="{'group_by': 'category_id'}"/>
                     <filter string="Name" name="group_name" context="{'group_by': 'name'}"/>

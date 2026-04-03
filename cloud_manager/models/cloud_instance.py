@@ -120,13 +120,11 @@ class CloudInstance(models.Model):
         required=True,
     )
 
-    _sql_constraints = [
-        ('uniq_uid', 'UNIQUE(uid)', 'The instance uid must be unique!'),
-        ('even_http_port', 'CHECK(http_port % 2 = 0)', 'The HTTP port must be even!'),
-        ('odd_gevent_port', 'CHECK(gevent_port % 2 = 1)', 'The Gevent port must be odd!'),
-        ('uniq_http_port', 'UNIQUE(server_id, http_port)', 'The HTTP port must be unique within the same server!'),
-        ('uniq_gevent_port', 'UNIQUE(server_id, gevent_port)', 'The Gevent port must be unique within the same server!'),
-    ]
+    _uniq_uid = models.Constraint('UNIQUE(uid)', 'The instance uid must be unique!')
+    _even_http_port = models.Constraint('CHECK(http_port % 2 = 0)', 'The HTTP port must be even!')
+    _odd_gevent_port = models.Constraint('CHECK(gevent_port % 2 = 1)', 'The Gevent port must be odd!')
+    _uniq_http_port = models.Constraint('UNIQUE(server_id, http_port)', 'The HTTP port must be unique within the same server!')
+    _uniq_gevent_port = models.Constraint('UNIQUE(server_id, gevent_port)', 'The Gevent port must be unique within the same server!')
 
     @api.depends('server_id', 'config')
     def _compute_module_ids(self):

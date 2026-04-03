@@ -128,7 +128,7 @@
                 <field name="category_id"/>
                 <field name="company_ids"/>
                 <separator/>
-                <group expand="1" string="Group by">
+                <group>
                     <filter string="Category" name="group_category_id" context="{'group_by': 'category_id'}"/>
                     <filter string="Ticker" name="group_ticker" context="{'group_by': 'ticker'}"/>
                 </group>

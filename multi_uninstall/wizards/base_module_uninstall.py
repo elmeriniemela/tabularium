@@ -10,7 +10,7 @@ class BaseModuleUninstall(models.TransientModel):
 
     def action_next(self):
         context = self.env.context.copy()
-        active = self.env['ir.module.module'].browse(context.get('active_ids') or []).filtered(lambda m: m.state in ('installed', 'to upgrade') and m!=self.module_id).ids
+        active = self.env['ir.module.module'].browse(context.get('active_ids') or []).filtered(lambda m: m.state in ('installed', 'to upgrade') and m!=self.module_ids).ids
         if active:
             context['active_ids'] = active
             context['active_id'] = active[0]

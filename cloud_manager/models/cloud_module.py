@@ -22,6 +22,4 @@ class CloudModule(models.Model):
         tracking=True,
     )
 
-    _sql_constraints = [
-        ('uniq_name', 'UNIQUE(name)', 'Module name should be unique!'),
-    ]
+    _uniq_name = models.Constraint('UNIQUE(name)', 'Module name should be unique!')

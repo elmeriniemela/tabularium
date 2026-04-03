@@ -64,7 +64,7 @@
                 <separator/>
                 <filter name="date_filter" date="time"/>
                 <separator/>
-                <group expand="1" string="Group by">
+                <group>
                     <filter string="Date" name="group_month" context="{'group_by': 'time:month'}" invisible="not context.get('search_default_group_month')"/>
                 </group>
             </search>

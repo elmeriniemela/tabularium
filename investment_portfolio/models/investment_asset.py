@@ -120,13 +120,12 @@ class InvestmentAsset(models.Model):
     position_count = fields.Integer(compute='_compute_position_count')
 
     def _compute_position_count(self):
-        res = self.env['investment.position'].sudo().read_group(
+        res = self.env['investment.position'].sudo()._read_group(
             domain=[('asset_id', 'in', self.ids)],
-            fields=['asset_id'],
             groupby=['asset_id'],
-            lazy=False,
+            aggregates=['__count'],
         )
-        counts = {(r['asset_id'][0]): r['__count'] for r in res}
+        counts = {asset.id: count for asset, count in res}
         for record in self:
             record.position_count = counts.get(record.id, 0)
 
@@ -404,5 +403,4 @@ class InvestmentAsset(models.Model):
                     'currency_id': currency_id.id,
                     'inverse_company_rate': price,
                 })
-
 

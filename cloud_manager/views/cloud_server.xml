@@ -74,7 +74,7 @@
                 <field name="endpoint_id"/>
                 <field name="branch"/>
                 <field name="commit"/>
-                <group expand="1" string="Group by">
+                <group>
                     <filter string="Endpoint" name="group_endpoint_id" context="{'group_by': 'endpoint_id'}"/>
                 </group>
             </search>

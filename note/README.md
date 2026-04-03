@@ -32,7 +32,7 @@ Everyone has their own way to organize activities. Odoo Notes' smart kanban appr
 
 ### A Creative Person
 
-A creative person will organize notes based on idea's maturity level: Draft Ideas ** Mature Ideas ** Specified **To Do
+A creative person will organize notes based on idea maturity level: Draft Ideas | Mature Ideas | Specified | To Do
 
 ### A Frequent Traveler
 
@@ -55,4 +55,3 @@ Collaborative Meeting Minutes
 ### Real-time sharing and editing of notes
 
 The real time collaborative writings on notes makes it the perfect tool to collaborate on meeting minutes. Attendees will be able to contribute to the minutes, attach important documents or discuss on the related thread.
-

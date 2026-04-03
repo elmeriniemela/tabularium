@@ -5,12 +5,14 @@
         <field name="model">res.users</field>
         <field name="inherit_id" ref="base.view_users_form_simple_modif"/>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='email']" position="after">
-                <field name="toggl_api_token"/>
-                <field name="toggl_export_url"/>
-                <field name="toggl_export_dbname"/>
-                <field name="toggl_export_uid"/>
-                <field name="toggl_export_pwd"/>
+            <xpath expr="//group[@name='other_preferences']" position="after">
+                <group name="toggl" string="Toggl">
+                    <field name="toggl_api_token" string="API Token"/>
+                    <field name="toggl_export_url" string="Export URL"/>
+                    <field name="toggl_export_dbname" string="Export DB"/>
+                    <field name="toggl_export_uid" string="Export UID"/>
+                    <field name="toggl_export_pwd" string="Export PW"/>
+                </group>
             </xpath>
         </field>
     </record>

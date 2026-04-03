@@ -2,7 +2,7 @@
 
 import logging
 import base64
-from odoo.tools.safe_eval import safe_eval
+from odoo.addons.api_endpoint.models.api_endpoint import safe_eval
 from odoo import models, tools, fields, api, _
 
 _logger = logging.getLogger(__name__)
@@ -94,11 +94,11 @@ class ApiMessage(models.Model):
         # READ-ONLY, should be OK not to ROLLBACK
         literal_globals = msg.endpoint_id._get_globals()
 
-        context = safe_eval(msg.context, literal_globals, nocopy=True)
+        context = safe_eval(msg.context, literal_globals)
         context['bin_size'] = False
         msg = msg.with_context(context)
 
-        variables = safe_eval(msg.variables, literal_globals, nocopy=True)
+        variables = safe_eval(msg.variables, literal_globals)
         globals_dict = msg.endpoint_id._get_globals()
         globals_dict.update(variables)
         obj = msg.endpoint_id.bytes_to_obj(base64.b64decode(msg.content), msg.endpoint_id.file_format)

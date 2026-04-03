@@ -51,3 +51,15 @@
 * pip install git+https://github.com/OCA/openupgradelib.git@master#egg=openupgradelib
 * odoo --update all --stop-after-init --load=base,web,openupgrade_framework --logfile=../tabularium/migrate.log
 * update ir_act_window set view_mode=REPLACE(view_mode, 'tree', 'list') where view_mode ilike '%tree%';
+
+
+#### Migration from 18.0 to 19.0
+
+* https://oca.github.io/OpenUpgrade/040_run_migration.html
+* git clone -b 19.0 git@github.com:OCA/OpenUpgrade.git
+* cd OpenUpgrade # this adds openupgrade_framework and openupgrade_scripts available in addons path
+* export OPENUPGRADE_TARGET_VERSION=19.0
+* activate odoo19 own.conf
+* pip install git+https://github.com/OCA/openupgradelib.git@master#egg=openupgradelib
+* odoo --update all --stop-after-init --upgrade-path=$PWD/openupgrade_scripts/scripts --addons-path=$PWD --load=base,web,openupgrade_framework --logfile=../tabularium/migrate.log
+* odoo -u all

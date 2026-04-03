@@ -295,9 +295,7 @@ class BitcoinWalletKey(models.Model):
 
     sequence = fields.Integer()
 
-    _sql_constraints = [
-        ('wallet_key_uniq', 'unique(wallet_id, key_id)', 'The wallet already has this key!'),
-    ]
+    _wallet_key_uniq = models.Constraint('unique(wallet_id, key_id)', 'The wallet already has this key!')
 
 
 class BitcoinWalletAddress(models.Model):
@@ -346,9 +344,7 @@ class BitcoinWalletAddress(models.Model):
     )
 
 
-    _sql_constraints = [
-        ('wallet_address_uniq', 'unique(wallet_id, address)', 'The wallet already has this address!'),
-    ]
+    _wallet_address_uniq = models.Constraint('unique(wallet_id, address)', 'The wallet already has this address!')
 
 class BitcoinTx(models.Model):
     _inherit = 'bitcoin.tx'
@@ -413,7 +409,5 @@ class BitcoinWalletHistory(models.Model):
                 record.other_wallet_ids -= record.wallet_id # remove change address wallet
 
 
-    _sql_constraints = [
-        ('wallet_transaction_uniq', 'unique(wallet_id, transaction_id)', 'You should net out the balance change of one transaction instead of creating multiple lines per transaction!'),
-    ]
+    _wallet_transaction_uniq = models.Constraint('unique(wallet_id, transaction_id)', 'You should net out the balance change of one transaction instead of creating multiple lines per transaction!')
 

@@ -89,7 +89,7 @@
                 <filter string="Last Month" name="last_month" domain="[('date', '&gt;=', (context_today() + relativedelta(months=-1)).strftime('%Y-%m-01')), ('date','&lt;',time.strftime('%Y-%m-01'))]"/>
                 <filter string="This Month" name="this_month" domain="[('date','&gt;=',time.strftime('%Y-%m-01'))]"/>
                 <separator />
-                <group expand="1" string="Group by">
+                <group>
                     <filter string="Account" name="group_account" context="{'group_by': 'account_id'}"/>
                     <filter string="Category" name="group_category" context="{'group_by': 'category_id'}"/>
                     <filter string="Parser" name="group_parser" context="{'group_by': 'parser_id'}"/>

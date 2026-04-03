@@ -206,7 +206,7 @@
                 <separator/>
                 <filter string="Price Changed" name="price_changed" domain="[('price_changed', '=', True)]"/>
                 <separator/>
-                <group expand="1" string="Group by">
+                <group>
                     <filter string="Date" name="group_date" context="{'group_by': 'date:day'}"/>
                     <filter string="Task" name="group_task_id" context="{'group_by': 'task_id'}"/>
                 </group>

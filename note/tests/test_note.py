@@ -12,7 +12,7 @@ class TestNote(TransactionCaseWithUserDemo):
         group_erp = self.env.ref('base.group_erp_manager')
 
         demo_user.write({
-            'groups_id': [(4, group_erp.id)],
+            'group_ids': [(4, group_erp.id)],
         })
 
         # must not fail

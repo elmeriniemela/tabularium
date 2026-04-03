@@ -112,7 +112,7 @@
         <field name="arch" type="xml">
             <search>
                 <field name="name"/>
-                <group expand="1" string="Group by">
+                <group>
                     <filter string="Used in" name="group_usage_field_id" context="{'group_by': 'usage_field_id'}"/>
                     <filter string="Create Date" name="group_create_date" context="{'group_by': 'create_date:year'}"/>
                 </group>

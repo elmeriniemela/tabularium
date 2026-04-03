@@ -4,7 +4,7 @@ import datetime
 
 from odoo import api, models, fields, _
 from odoo.tools import float_is_zero, date_utils
-from odoo.osv import expression
+from odoo.fields import Domain
 import logging
 from dateutil.relativedelta import relativedelta
 
@@ -99,9 +99,7 @@ class InvestmentTimeseries(models.Model):
         index=True,
     )
 
-    _sql_constraints = [
-        ('date_timeseries_unique', 'unique(date, position_id)', 'This timeseries already exists!'),
-    ]
+    _date_timeseries_unique = models.Constraint('unique(date, position_id)', 'This timeseries already exists!')
 
     @api.depends('date')
     def _compute_granularity(self):
@@ -119,17 +117,30 @@ class InvestmentTimeseries(models.Model):
 
 
     @api.model
-    def web_read_group(self, domain, fields, groupby, limit=None, offset=0, orderby=False, lazy=True):
+    def web_read_group(
+        self,
+        domain,
+        groupby,
+        aggregates=(),
+        limit=None,
+        offset=0,
+        order=None,
+        *,
+        auto_unfold=False,
+        opening_info=None,
+        unfold_read_specification=None,
+        unfold_read_default_limit=80,
+        groupby_read_specification=None,
+    ):
         """
         Returns the result of a read_group and the total number of groups matching the search domain.
 
         :param domain: search domain
-        :param fields: list of fields to read (see ``fields``` param of ``read_group``)
         :param groupby: list of fields to group on (see ``groupby``` param of ``read_group``)
-        :param limit: see ``limit`` param of ``read_group``
-        :param offset: see ``offset`` param of ``read_group``
-        :param orderby: see ``orderby`` param of ``read_group``
-        :param lazy: see ``lazy`` param of ``read_group``
+        :param aggregates: list of aggregates to compute
+        :param limit: see ``limit`` param of ``formatted_read_group``
+        :param offset: see ``offset`` param of ``formatted_read_group``
+        :param order: see ``order`` param of ``formatted_read_group``
         :return: {
             'groups': array of read groups
             'length': total number of groups
@@ -147,11 +158,23 @@ class InvestmentTimeseries(models.Model):
                 match = 'date:'
                 if group.startswith(match):
                     add_domain = map_group[group[len(match):]]
-                    domain = expression.AND([domain, add_domain])
+                    domain = Domain.AND([domain, add_domain])
                     _logger.info("Additional domain: %s", add_domain)
                     break
 
-        return super().web_read_group(domain, fields, groupby, limit=limit, offset=offset, orderby=orderby, lazy=lazy)
+        return super().web_read_group(
+            domain,
+            groupby,
+            aggregates=aggregates,
+            limit=limit,
+            offset=offset,
+            order=order,
+            auto_unfold=auto_unfold,
+            opening_info=opening_info,
+            unfold_read_specification=unfold_read_specification,
+            unfold_read_default_limit=unfold_read_default_limit,
+            groupby_read_specification=groupby_read_specification,
+        )
 
 
     def refresh_price(self):
@@ -193,5 +216,3 @@ class InvestmentTimeseries(models.Model):
             vals = {k: v for k, v in vals if k in record._fields}
             assert vals, "Filtering with record._fields failed."
             record.update(vals)
-
-

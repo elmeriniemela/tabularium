@@ -5,6 +5,7 @@
     'website': "https://eniemela.fi",
     'license': 'LGPL-3',
     'category': 'Investment Portfolio',
+    'description': 'Investment portfolio management for tracking assets and positions.',
     'version': '2.8.28',
     'depends': [
         'mail',

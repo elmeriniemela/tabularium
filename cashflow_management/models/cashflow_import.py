@@ -106,7 +106,6 @@ class CashflowImport(models.TransientModel):
             're': re,
             'add_entry': add_entry,
         }
-        safe_eval(self.parser_id.code, globals_dict=globals_dict, mode="exec", nocopy=True)
-
+        safe_eval(self.parser_id.code, globals_dict, mode="exec")
 
 

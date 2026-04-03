@@ -42,7 +42,7 @@ class MailTrackingValues(models.Model):
             if tracking.field_id.version_control:
                 version = self.env['version.control'].browse(vals['id']).exists()
                 if version:
-                    vals['oldValue']['value'] = version.version_hash_before
-                    vals['newValue']['value'] = version.version_hash_after
+                    vals['oldValue'] = version.version_hash_before
+                    vals['newValue'] = version.version_hash_after
 
         return formatted

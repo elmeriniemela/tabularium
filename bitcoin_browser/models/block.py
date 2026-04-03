@@ -49,20 +49,17 @@ class BitcoinBlock(models.Model):
         help="Bitcoin wallet software gives the impression that satoshis are sent from and to wallets, but bitcoins really move from transaction to transaction. Each transaction spends the satoshis previously received in one or more earlier transactions, so the input of one transaction is the output of a previous transaction. A single transaction can create multiple outputs, as would be the case when sending to multiple addresses, but each output of a particular transaction can only be used as an input once in the block chain. Any subsequent reference is a forbidden double spend—an attempt to spend the same satoshis twice."
     )
 
-    _sql_constraints = [
-        ('uniq', 'unique(hash)', 'The block hash should be unique!')
-    ]
+    _uniq_hash = models.Constraint('UNIQUE(hash)', 'The block hash should be unique!')
 
 
     @api.depends('tx_ids')
     def _compute_computed_n_tx(self):
-        res = self.env['bitcoin.tx'].read_group(
+        res = self.env['bitcoin.tx']._read_group(
             domain=[('block_id', 'in', self.ids)],
-            fields=['block_id'],
             groupby=['block_id'],
-            lazy=False,
+            aggregates=['__count'],
         )
-        counts = {(r['block_id'][0]): r['__count'] for r in res}
+        counts = {block.id: count for block, count in res if block}
         for record in self:
             record.computed_n_tx = counts.get(record.id, 0)
             record.all_tx_fetched = counts.get(record.id) == record.n_tx
@@ -139,7 +136,8 @@ class BitcoinBlock(models.Model):
                 record.env.cr.commit()
 
     @api.model
-    @api.returns('self')
+    @api.private
+    @api.readonly
     def search_fetch(self, domain, field_names, offset=0, limit=None, order=None):
         res = super().search_fetch(domain, field_names, offset=offset, limit=limit, order=order)
         if not self.env.context.get('disable_auto_populate') and not res and len(domain) == 1:
@@ -161,5 +159,3 @@ class BitcoinBlock(models.Model):
             else:
                 filtered_vals_list.append(vals)
         return super().create(filtered_vals_list) + existing
-
-

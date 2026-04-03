@@ -156,7 +156,7 @@
                 <filter string="Skip Validation" name="skip_validation" domain="[('skip_validation', '=', True)]"/>
                 <separator/>
 
-                <group expand="1" string="Group by">
+                <group>
                     <filter string="Name" name="group_name" context="{'group_by': 'name'}"/>
                     <filter string="Purpose" name="group_purpose" context="{'group_by': 'purpose_id'}"/>
                     <filter string="State" name="group_state" context="{'group_by': 'state'}"/>

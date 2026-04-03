@@ -64,9 +64,7 @@ class DnsZoneRecord(models.Model):
         tracking=True,
     )
 
-    _sql_constraints = [
-        ('uniq_identifier', 'UNIQUE(identifier)', 'The zone record identifier must be unique!'),
-    ]
+    _uniq_identifier = models.Constraint('UNIQUE(identifier)', 'The zone record identifier must be unique!')
 
     @api.model
     def upsert(self, vals):

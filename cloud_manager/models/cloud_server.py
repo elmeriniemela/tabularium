@@ -112,9 +112,7 @@ class CloudServer(models.Model):
     )
 
 
-    _sql_constraints = [
-        ('uniq_name', 'UNIQUE(name)', 'Server name should be unique.'),
-    ]
+    _uniq_name = models.Constraint('UNIQUE(name)', 'Server name should be unique.')
 
     @api.depends('diff_ids')
     def _compute_diff_count(self):

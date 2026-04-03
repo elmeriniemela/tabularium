@@ -36,9 +36,7 @@ class CashflowEntry(models.Model):
         store=True,
     )
 
-    _sql_constraints = [
-        ('zero_amount', 'CHECK(amount != 0)', 'Amount can not be zero!'),
-    ]
+    _zero_amount = models.Constraint('CHECK(amount != 0)', 'Amount can not be zero!')
 
     @api.depends('amount')
     def _compute_entry_type(self):

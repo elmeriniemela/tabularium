@@ -50,7 +50,7 @@
                 <field name="trigger"/>
                 <field name="instance_id"/>
                 <filter name="filter_timestamp" date="timestamp"/>
-                <group expand="1" string="Group by">
+                <group>
                     <filter string="Instance" name="group_instance_id" context="{'group_by': 'instance_id'}"/>
                     <filter string="Trigger" name="group_trigger" context="{'group_by': 'trigger'}"/>
                     <filter string="Timestamp" name="group_timestamp" context="{'group_by': 'timestamp:day'}"/>

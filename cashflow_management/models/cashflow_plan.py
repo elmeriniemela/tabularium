@@ -45,9 +45,7 @@ class CashflowEntry(models.Model):
 
     balance = fields.Monetary(compute='_compute_balance', currency_field='company_currency_id')
 
-    _sql_constraints = [
-        ('zero_amount', 'CHECK(amount != 0)', 'Amount can not be zero!'),
-    ]
+    _zero_amount = models.Constraint('CHECK(amount != 0)', 'Amount can not be zero!')
 
     def _compute_balance(self):
         for plan in self.plan_id:

@@ -173,12 +173,12 @@ class TestVersionControl(TransactionCase):
         html_version = self.env['version.control'].browse(html_tracking.id)
 
         self.assertEqual(
-            html_formatted[0]['oldValue']['value'],
+            html_formatted[0]['oldValue'],
             html_version.version_hash_before,
         )
         self.assertEqual(
-            html_formatted[0]['newValue']['value'],
+            html_formatted[0]['newValue'],
             html_version.version_hash_after,
         )
-        self.assertEqual(plain_formatted[0]['oldValue']['value'], 'subject before')
-        self.assertEqual(plain_formatted[0]['newValue']['value'], 'subject after')
+        self.assertEqual(plain_formatted[0]['oldValue'], 'subject before')
+        self.assertEqual(plain_formatted[0]['newValue'], 'subject after')
