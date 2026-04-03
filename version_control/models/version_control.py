@@ -3,10 +3,7 @@
 import logging
 import difflib
 import hashlib
-try:
-    from markdownify import markdownify as md
-except Exception:
-    md = lambda x: x
+from markdownify import markdownify as md
 
 from odoo import models, tools, fields, api, _
 
