@@ -329,6 +329,7 @@ class ApiEndpoint(models.Model):
         ]
     )
 
+    allow_backoff = fields.Boolean(tracking=True)
     backoff = fields.Integer(tracking=True)
     to_skip = fields.Integer(tracking=True)
 
@@ -609,11 +610,12 @@ class ApiEndpoint(models.Model):
         if self.state == 'active':
             self.state = 'error'
 
-        if not self.backoff:
-            self.backoff = 1
-        else:
-            self.backoff *= 2
-        self.to_skip = self.backoff
+        if self.allow_backoff:
+            if not self.backoff:
+                self.backoff = 1
+            else:
+                self.backoff *= 2
+            self.to_skip = self.backoff
 
 
     def _mark_active(self):

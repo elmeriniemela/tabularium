@@ -63,7 +63,7 @@ class CloudBackup(models.Model):
             if 'OpenUpgrade' not in dst_instance.module_ids.mapped('name'):
                 # Check if the instance has OpenUpgrade module installed
                 raise exceptions.UserError(_("You can only use OCA Migrate method with OpenUpgrade installed."))
-            if not (dst_instance.server_id.branch > self.instance_id.server_id.branch):
+            if not (float(dst_instance.server_id.branch) > float(self.instance_id.server_id.branch)):
                 raise exceptions.UserError(_("Destination server should have higher branch than src: %s is not greater than %s.") %
                                            (dst_instance.server_id.branch, self.instance_id.server_id.branch))
         resp = dst_instance._irpc(method=method, args=(self.instance_id.uid, dst_instance.uid, self.trigger, self.name))

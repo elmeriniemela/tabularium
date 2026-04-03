@@ -82,6 +82,7 @@
                             <field name="response_format"/>
                             <field name="ttl"/>
                             <field name="auto_code" widget="boolean_toggle"/>
+                            <field name="allow_backoff" widget="boolean_toggle"/>
                             <field name="backoff" invisible="not backoff"/>
                             <field name="to_skip" invisible="not backoff"/>
                         </group>
