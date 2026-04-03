@@ -29,6 +29,7 @@ class InvestmentExchange(models.Model):
     next_close = fields.Datetime(compute='_compute_open_close')
     next_open = fields.Datetime(compute='_compute_open_close')
     is_open = fields.Boolean(compute='_compute_open_close')
+    is_recently_open = fields.Boolean(compute='_compute_open_close')
 
 
     tz = fields.Selection(_tz_get, string="Timezone", default=lambda self: self.env.context.get('tz'))
@@ -63,12 +64,13 @@ class InvestmentExchange(models.Model):
             tz = pytz.timezone(ex.tz)
             now_utc = fields.Datetime.now()
             now_local = pytz.UTC.localize(now_utc).astimezone(tz)
+            schedule_now_local = now_local
             if not ex.weekend_trading:
-                while now_local.isoweekday() in [6,7]:
-                    now_local += datetime.timedelta(days=1)
+                while schedule_now_local.isoweekday() in [6,7]:
+                    schedule_now_local += datetime.timedelta(days=1)
 
-            next_close = localize(tz, now_local, ex.closing_time)
-            while next_close <= now_local:
+            next_close = localize(tz, schedule_now_local, ex.closing_time)
+            while next_close <= schedule_now_local:
                 new = localize(tz, next_close + datetime.timedelta(days=1), ex.closing_time)
                 assert new > next_close
                 next_close = new
@@ -86,7 +88,13 @@ class InvestmentExchange(models.Model):
             ex.next_close = utclize(localize(tz, next_open, min(closing_times)))
 
             ex.is_open = (ex.next_open <= now_utc and ex.next_close >= now_utc)
+            recent_close_local = localize(tz, now_local, ex.closing_time)
+            if recent_close_local > now_local:
+                recent_close_local -= datetime.timedelta(days=1)
+            while not ex.weekend_trading and recent_close_local.isoweekday() in [6,7]:
+                recent_close_local -= datetime.timedelta(days=1)
 
-
+            seconds_since_close = (now_utc - utclize(recent_close_local)).total_seconds()
+            ex.is_recently_open = ex.is_open or 0 <= seconds_since_close <= 30 * 60
 
 

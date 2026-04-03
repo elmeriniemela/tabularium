@@ -343,7 +343,7 @@ class InvestmentAsset(models.Model):
         if force_fetch:
             _logger.info("Force fetch enabled.")
         for asset in self.sudo():
-            if force_fetch or not asset.exchange_id or asset.exchange_id.is_open:
+            if force_fetch or not asset.exchange_id or asset.exchange_id.is_recently_open:
                 per_integration[asset.endpoint_id] = per_integration.get(asset.endpoint_id, Asset) + asset
             else:
                 _logger.info("Skip integration on %s as %s is closed.", asset.ticker, asset.exchange_id.name)

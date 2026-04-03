@@ -7,6 +7,7 @@
                 <field name="sequence" widget="handle"/>
                 <field name="name" optional="show"/>
                 <field name="is_open"/>
+                <field name="is_recently_open"/>
                 <field name="opening_time" options="{'type': 'time'}" widget="float_time"/>
                 <field name="closing_time" options="{'type': 'time'}" widget="float_time"/>
                 <field name="tz"/>
@@ -44,6 +45,7 @@
                             <field name="tz"/>
                             <field name="weekend_trading"/>
                             <field name="is_open"/>
+                            <field name="is_recently_open"/>
                         </group>
 
                     </group>
