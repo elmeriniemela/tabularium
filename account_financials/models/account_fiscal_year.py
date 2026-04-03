@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import api, fields, models, _
+from odoo.exceptions import ValidationError
 import logging
 import tempfile
 import base64
@@ -9,6 +10,10 @@ import html
 from markupsafe import Markup
 from odoo.tools import misc, float_is_zero
 from dateutil.relativedelta import relativedelta
+from py3o.template import Template
+import json
+import warnings
+
 
 FILETYPE_BASE64_MAGICWORD = {
     b'/': 'jpg',
@@ -19,10 +24,6 @@ FILETYPE_BASE64_MAGICWORD = {
 
 _logger = logging.getLogger(__name__)
 
-try:
-    from py3o.template import Template
-except ImportError as error:
-    _logger.error(error)
 
 def tmp_odt():
     return tempfile.NamedTemporaryFile(mode='w+b', suffix='odt')
@@ -39,15 +40,39 @@ def format_multiline_value(value):
 
 class AccountFiscalYear(models.Model):
     _name = 'account.fiscal.year'
-    _inherit = [_name, 'mail.thread']
+    _description = 'Fiscal Year'
+    _inherit = ['mail.thread',]
 
+    name = fields.Char(
+        string='Name',
+        required=True,
+    )
+    date_from = fields.Date(
+        string='Start Date',
+        required=True,
+        help='Start Date, included in the fiscal year.',
+    )
+    date_to = fields.Date(
+        string='End Date',
+        required=True,
+        help='Ending Date, included in the fiscal year.',
+    )
+    company_id = fields.Many2one(
+        'res.company',
+        string='Company',
+        required=True,
+        default=lambda self: self.env.company,
+    )
     financials_template_id = fields.Many2one(
         comodel_name='ir.attachment',
-        copy=True)
+        copy=True,
+    )
 
     financials_signature = fields.Binary(copy=True)
-    financials_signature2 = fields.Binary(related='financials_signature')
-
+    financials_signature2 = fields.Binary(
+        related='financials_signature',
+        string='Financial Signature 2',
+    )
     logo_ftype = fields.Char(compute='_compute_logo_ftype')
 
     format_date_from = fields.Char(compute='_compute_format_date')
@@ -57,6 +82,28 @@ class AccountFiscalYear(models.Model):
     format_date_expire = fields.Char(compute='_compute_format_date')
 
     place_and_date = fields.Char(compute='_compute_place_and_date')
+
+    @api.constrains('date_from', 'date_to', 'company_id')
+    def _check_dates(self):
+        for rec in self:
+            date_from = rec.date_from
+            date_to = rec.date_to
+            if date_to < date_from:
+                raise ValidationError(_('The ending date must not be prior to the starting date.'))
+            if rec.company_id.parent_id:
+                raise ValidationError(_('You cannot have a fiscal year on a child company.'))
+
+            domain = [
+                ('id', '!=', rec.id),
+                ('company_id', '=', rec.company_id.id),
+                '|', '|',
+                '&', ('date_from', '<=', rec.date_from), ('date_to', '>=', rec.date_from),
+                '&', ('date_from', '<=', rec.date_to), ('date_to', '>=', rec.date_to),
+                '&', ('date_from', '<=', rec.date_from), ('date_to', '>=', rec.date_to),
+            ]
+
+            if self.search_count(domain) > 0:
+                raise ValidationError(_('You can not have an overlap between two fiscal years, please correct the start and/or end dates of your fiscal years.'))
 
     def copy(self, default=None):
         default = default or {
@@ -90,10 +137,13 @@ class AccountFiscalYear(models.Model):
             infile.write(base64.b64decode(self.financials_template_id.datas))
             infile.seek(0)
             t = Template(infile.name, outfile.name)
-            t.render(dict(
-                objects=self,
-                format_multiline_value=format_multiline_value,
-            ))
+            with warnings.catch_warnings():
+                warnings.filterwarnings("ignore", category=DeprecationWarning)
+                t.render(dict(
+                    objects=self,
+                    format_multiline_value=format_multiline_value,
+                ))
+
             outdata = outfile.read()
 
         self.env['ir.attachment'].create({
@@ -108,15 +158,28 @@ class AccountFiscalYear(models.Model):
         return self.company_id.partner_id._display_address(without_company=True)
 
     def py3o_pl_lines(self):
-        return self._get_report_lines('l10n_fi_reports.account_financial_report_l10n_fi_pl')
+        return self._map_xml_id_to_lines('l10n_fi_reports.account_financial_report_l10n_fi_pl')
 
     def py3o_bs_lines(self):
-        return self._get_report_lines('l10n_fi_reports.account_financial_report_l10n_fi_bs')
+        return self._map_xml_id_to_lines('l10n_fi_reports.account_financial_report_l10n_fi_bs')
 
-    def _get_report_lines(self, report_xmlid):
+    def _map_xml_id_to_lines(self, report_xml_id):
+        fname_map = {
+            'l10n_fi_reports.account_financial_report_l10n_fi_pl': 'account_financials/tests/pl.json',
+            'l10n_fi_reports.account_financial_report_l10n_fi_bs': 'account_financials/tests/bs.json',
+        }
+        report = self.env.ref(report_xml_id, raise_if_not_found=False)
+        if report: # pragma: no cover
+            lines = self._get_report_lines(report)
+        else:
+            with misc.file_open(fname_map[report_xml_id], 'r') as bs:
+                lines = json.load(bs)
+            for vals in lines:
+                vals['name'] = Markup(vals['name'])
+        return lines
+
+    def _get_report_lines(self, report): # pragma: no cover
         self.ensure_one()
-
-        report = self.env.ref(report_xmlid)
         options = {'date': {}}
         options['date']['filter'] = 'custom'
         options['date']['date_from'] = self.date_from

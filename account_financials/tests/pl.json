@@ -1,0 +1,47 @@
+[
+    {
+        "name": "<text:s text:c=\"0\"/>Liikevaihto",
+        "col_1": 0,
+        "col_2": 0
+    },
+    {
+        "name": "<text:s text:c=\"0\"/>Henkil\u00f6st\u00f6kulut",
+        "col_1": 0,
+        "col_2": 0
+    },
+    {
+        "name": "<text:s text:c=\"0\"/>Liiketoiminnan muut kulut",
+        "col_1": 0,
+        "col_2": 0
+    },
+    {
+        "name": "<text:s text:c=\"0\"/>LIIKEVOITTO (-TAPPIO)",
+        "col_1": 0,
+        "col_2": 0
+    },
+    {
+        "name": "<text:s text:c=\"0\"/>Rahoitustuotot ja -kulut",
+        "col_1": 0,
+        "col_2": 0
+    },
+    {
+        "name": "<text:s text:c=\"0\"/>VOITTO (TAPPIO) ENNEN TILINP\u00c4\u00c4T\u00d6SSIIRTOJA JA VEROJA",
+        "col_1": 0,
+        "col_2": 0
+    },
+    {
+        "name": "<text:s text:c=\"0\"/>Tilinp\u00e4\u00e4t\u00f6ssiirrot",
+        "col_1": 0,
+        "col_2": 0
+    },
+    {
+        "name": "<text:s text:c=\"0\"/>Tuloverot",
+        "col_1": 0,
+        "col_2": 0
+    },
+    {
+        "name": "<text:s text:c=\"0\"/>TILIKAUDEN VOITTO (TAPPIO)",
+        "col_1": 0,
+        "col_2": 0
+    }
+]

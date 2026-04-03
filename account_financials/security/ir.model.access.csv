@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+account_financials.access_account_fiscal_year,access_account_fiscal_year,account_financials.model_account_fiscal_year,base.group_system,1,1,1,1

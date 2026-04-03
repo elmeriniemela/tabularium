@@ -1,3 +1,4 @@
+account_financials
 api_endpoint
 bitcoin_browser
 bitcoin_treasury

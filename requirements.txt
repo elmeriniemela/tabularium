@@ -12,3 +12,6 @@ numpy-financial
 yfinance
 markdownify
 btclib
+py3o.template
+py3o.formats
+packaging

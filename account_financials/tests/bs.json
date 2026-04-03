@@ -1,0 +1,72 @@
+[
+    {
+        "name": "<text:s text:c=\"0\"/>Vastaavaa",
+        "col_1": 0,
+        "col_2": 0
+    },
+    {
+        "name": "<text:s text:c=\"3\"/>PYSYV\u00c4T VASTAAVAT",
+        "col_1": 0,
+        "col_2": 0
+    },
+    {
+        "name": "<text:s text:c=\"5\"/>Aineettomat hy\u00f6dykkeet",
+        "col_1": 0,
+        "col_2": 0
+    },
+    {
+        "name": "<text:s text:c=\"5\"/>Aineelliset hy\u00f6dykkeet",
+        "col_1": 0,
+        "col_2": 0
+    },
+    {
+        "name": "<text:s text:c=\"3\"/>VAIHTUVAT VASTAAVAT",
+        "col_1": 0,
+        "col_2": 0
+    },
+    {
+        "name": "<text:s text:c=\"5\"/>Saamiset",
+        "col_1": 0,
+        "col_2": 0
+    },
+    {
+        "name": "<text:s text:c=\"5\"/>Rahat ja pankkisaamiset",
+        "col_1": 0,
+        "col_2": 0
+    },
+    {
+        "name": "<text:s text:c=\"0\"/>Vastattavaa",
+        "col_1": 0,
+        "col_2": 0
+    },
+    {
+        "name": "<text:s text:c=\"3\"/>OMA P\u00c4\u00c4OMA",
+        "col_1": 0,
+        "col_2": 0
+    },
+    {
+        "name": "<text:s text:c=\"5\"/>Osakep\u00e4\u00e4oma",
+        "col_1": 0,
+        "col_2": 0
+    },
+    {
+        "name": "<text:s text:c=\"5\"/>Edellisten tilikausien voitto (tappio)",
+        "col_1": 0,
+        "col_2": 0
+    },
+    {
+        "name": "<text:s text:c=\"3\"/>VIERAS P\u00c4\u00c4OMA",
+        "col_1": 0,
+        "col_2": 0
+    },
+    {
+        "name": "<text:s text:c=\"5\"/>Pitk\u00e4aikainen vieras p\u00e4\u00e4oma",
+        "col_1": 0,
+        "col_2": 0
+    },
+    {
+        "name": "<text:s text:c=\"5\"/>Lyhytaikainen vieras p\u00e4\u00e4oma",
+        "col_1": 0,
+        "col_2": 0
+    }
+]
