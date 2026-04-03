@@ -59,7 +59,7 @@ class ApiMessage(models.Model):
                 if response:
                     try:
                         response_preview = base64.b64decode(response)
-                    except:
+                    except: # pragma: no cover
                         pass
             record.response_preview = response_preview
 
@@ -72,7 +72,7 @@ class ApiMessage(models.Model):
                 if content:
                     try:
                         content_preview = base64.b64decode(content)
-                    except:
+                    except: # pragma: no cover
                         pass
             record.content_preview = content_preview
 

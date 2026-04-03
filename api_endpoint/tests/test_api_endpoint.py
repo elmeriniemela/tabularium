@@ -37,7 +37,6 @@ class TestApiEndpoint(TransactionCase):
         cls._seq = 0
 
     def _new_endpoint(self, **overrides):
-        env = overrides.pop('env', self.env)
         type(self)._seq += 1
         vals = {
             'name': f'Endpoint {type(self)._seq}',
@@ -55,7 +54,7 @@ class TestApiEndpoint(TransactionCase):
             'consumer': "response = {'ok': obj['ok']}",
         }
         vals.update(overrides)
-        return env['api.endpoint'].create(vals)
+        return self.env['api.endpoint'].create(vals)
 
     def _start_server(self, server):
         thread = threading.Thread(target=server.serve_forever, kwargs={'poll_interval': 0.01}, daemon=True)
@@ -159,6 +158,7 @@ class TestApiEndpoint(TransactionCase):
 
     def test_usage_actions_message_count_and_active_flag(self):
         endpoint = self._new_endpoint()
+        self.assertFalse(endpoint._get_usage_records())
         endpoint.usage_field_id = self.usage_field
         msg = self.ApiMessage.create({
             'endpoint_id': endpoint.id,
@@ -182,6 +182,30 @@ class TestApiEndpoint(TransactionCase):
         endpoint.state = 'active'
         endpoint._compute_active()
         self.assertTrue(endpoint.active)
+
+    def test_gc_messages_unlinks_expired_messages(self):
+        endpoint = self._new_endpoint(ttl=1)
+        msg_old = self.ApiMessage.create({
+            'endpoint_id': endpoint.id,
+            'content': base64.b64encode(b'{}'),
+        })
+        msg_new = self.ApiMessage.create({
+            'endpoint_id': endpoint.id,
+            'content': base64.b64encode(b'{}'),
+        })
+
+        self.cr.execute(
+            f"UPDATE {msg_old._table} SET create_date = (now() AT TIME ZONE 'UTC') - interval '5 days' WHERE id = %s",
+            [msg_old.id],
+        )
+        self.cr.execute(
+            f"UPDATE {msg_new._table} SET create_date = (now() AT TIME ZONE 'UTC') WHERE id = %s",
+            [msg_new.id],
+        )
+        self.ApiEndpoint._gc_messages()
+
+        self.assertFalse(msg_old.exists())
+        self.assertTrue(msg_new.exists())
 
     def test_mark_error_and_mark_active(self):
         endpoint = self._new_endpoint()
@@ -218,6 +242,13 @@ class TestApiEndpoint(TransactionCase):
         endpoint_ok.action_execute()
         self.assertTrue(endpoint_ok.msg_ids)
 
+    def test_action_execute_error_path_marks_error(self):
+        endpoint = self._new_endpoint(
+            initiator=False,
+        )
+        with self.assertRaises(UserError):
+            endpoint.with_context(force_commit=True).action_execute()
+
     def test_action_test_and_serialize(self):
         endpoint = self._new_endpoint(test_example='x = 1')
         endpoint.action_test()
@@ -245,7 +276,6 @@ class TestApiEndpoint(TransactionCase):
         self.assertEqual(globals_dict['partner'], partner)
 
         endpoint._consume(globals_dict)
-        msg.invalidate_recordset(['state', 'response'])
         self.assertEqual(msg.state, 'consumed')
         self.assertTrue(msg.response)
 
@@ -256,7 +286,6 @@ class TestApiEndpoint(TransactionCase):
         ], limit=1)
         self.assertEqual(msg_to_consume.state, 'produced')
         msg_to_consume.action_consume()
-        msg_to_consume.invalidate_recordset(['state'])
         self.assertEqual(msg_to_consume.state, 'consumed')
 
     def test_produce_and_consume_error_paths(self):
@@ -288,6 +317,36 @@ class TestApiEndpoint(TransactionCase):
 
         with self.assertRaises(RuntimeError):
             endpoint_no_msg.ensure_response({})
+
+    def test_produce_error_paths_invalid_state_and_missing_obj(self):
+        endpoint_invalid_state = self._new_endpoint(
+            state='archived',
+            auto_commit=False,
+        )
+        with self.assertRaises(UserError):
+            endpoint_invalid_state.produce({})
+
+        endpoint_missing_obj = self._new_endpoint(
+            producer='value = 1',
+            auto_commit=False,
+        )
+        with self.assertRaises(RuntimeError):
+            endpoint_missing_obj.produce({})
+
+    def test_consume_error_path_marks_message_error(self):
+        endpoint = self._new_endpoint(
+            producer="obj = {'ok': True}",
+            consumer="raise UserError('consume boom')",
+            auto_consume=False,
+            auto_commit=True,
+        )
+        endpoint.produce({})
+
+        msg = endpoint.msg_ids
+        globals_dict = msg._get_msg_globals()
+        with self.assertRaises(UserError):
+            endpoint._consume(globals_dict)
+
 
     def test_conversion_helpers_and_type_assertions(self):
         endpoint = self._new_endpoint()
@@ -376,11 +435,47 @@ class TestApiEndpoint(TransactionCase):
             f"UPDATE {queue_msg._table} SET state='consumed' WHERE id=%s",
             [queue_msg.id],
         )
-        self.env.invalidate_all()
         self.assertFalse(endpoint_queue.next_from_queue())
 
         with self.assertRaises(ValidationError):
             self.ApiEndpoint.cron_run()
+
+    def test_cron_run_handles_message_error_and_success(self):
+        cron = self.env['ir.cron'].create({
+            'name': f'API Endpoint Cron {self._testMethodName}',
+            'model_id': self.env['ir.model']._get_id('api.endpoint'),
+            'state': 'code',
+            'code': 'model.cron_run()',
+            'interval_number': 1,
+            'interval_type': 'minutes',
+            'user_id': self.env.user.id,
+        })
+        endpoint = self._new_endpoint(
+            cron_id=cron.id,
+            auto_consume=False,
+            auto_commit=False,
+            initiator='x = 1',
+            consumer="response = {'ok': obj['ok']}",
+        )
+
+        msg_broken = self.ApiMessage.create({
+            'endpoint_id': endpoint.id,
+            'content': base64.b64encode(b'not-json'),
+            'variables': '{}',
+            'context': '{}',
+        })
+        endpoint.produce({})
+        msg_valid = self.ApiMessage.search(
+            [('endpoint_id', '=', endpoint.id), ('state', '=', 'produced'), ('id', '!=', msg_broken.id)],
+            limit=1,
+        )
+        self.assertTrue(msg_valid)
+
+        progress = self.env['ir.cron.progress'].create({'cron_id': cron.id})
+        self.ApiEndpoint.with_context(ir_cron_progress_id=progress.id).cron_run()
+
+        self.assertEqual(msg_broken.state, 'error')
+        self.assertEqual(msg_valid.state, 'consumed')
 
     def test_xmlrpc_success_fault_and_protocol_error(self):
         endpoint = self._new_endpoint()

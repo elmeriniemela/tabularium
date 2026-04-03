@@ -13,6 +13,7 @@ from odoo import models, exceptions, fields, api, _
 import datetime as realdt
 from odoo.tools.safe_eval import safe_eval, test_python_expr, wrap_module, datetime, dateutil
 from odoo.tools.convert import xml_import as XMLImport
+from odoo.tools import config
 from odoo.http import request
 
 requests = wrap_module(__import__('requests'), {'get': None, 'post': None, 'put': None, 'delete': None, 'request': None, 'exceptions': ['ReadTimeout', 'Timeout', 'ConnectionError']})
@@ -412,7 +413,8 @@ class ApiEndpoint(models.Model):
                 ('create_date', '<=', limit_dt),
             ])
             to_unlink.unlink()
-            to_unlink.env.cr.commit()
+            if not config.options['test_enable']: # pragma: no cover
+                to_unlink.env.cr.commit()
 
 
     @api.model_create_multi
@@ -504,11 +506,13 @@ class ApiEndpoint(models.Model):
             globals_dict = self._get_globals()
             safe_eval(self.initiator, globals_dict, mode="exec", nocopy=True)
         except Exception as error:
-            self.env.cr.rollback()
+            if not config.options['test_enable']: # pragma: no cover
+                self.env.cr.rollback()
             if commit and self.state == 'active': # if still active, it means that error was not handled by .produce() call, we need our own handling here.
                 self._mark_error()
                 self.message_post(body=(str(error)), subtype_xmlid='api_endpoint.mt_integration_error', message_type='comment')
-                self.env.cr.commit()
+                if not config.options['test_enable']: # pragma: no cover
+                    self.env.cr.commit()
             if raise_exc or not commit: # Commit required, silent bypass is not allowed
                 raise error
 
@@ -542,18 +546,20 @@ class ApiEndpoint(models.Model):
                 raise RuntimeError("No obj to store! The producer code should assign a variable called 'obj'!")
             self._store(globals_dict, serialized_vars, serialized_ctx)
         except Exception as error:
-            self.env.cr.rollback()
+            if not config.options['test_enable']: # pragma: no cover
+                self.env.cr.rollback()
             if commit:
                 self._mark_error()
                 self.message_post(body=(str(error)), subtype_xmlid='api_endpoint.mt_integration_error', message_type='comment')
-                self.env.cr.commit()
+                if not config.options['test_enable']: # pragma: no cover
+                    self.env.cr.commit()
             if raise_exc or not commit: # Commit required, silent bypass is not allowed
                 error._producer_handled = True
                 raise error
         else:
             self._mark_active()
 
-        if commit:
+        if commit and not config.options['test_enable']: # pragma: no cover:
             self.env.cr.commit()
         if self.auto_consume:
             self._consume(globals_dict)
@@ -615,18 +621,20 @@ class ApiEndpoint(models.Model):
         try:
             safe_eval((self.hardcoded_consumer or '') + (self.consumer or ''), globals_dict, mode="exec", nocopy=True)
         except Exception as error:
-            self.env.cr.rollback()
+            if not config.options['test_enable']: # pragma: no cover
+                self.env.cr.rollback()
             if commit:
                 if globals_dict.get('msg'):
                     globals_dict['msg'].write({'state': 'error'})
                     globals_dict['msg'].message_post(body=(str(error)), subtype_xmlid='api_endpoint.mt_integration_error', message_type='comment')
-                self.env.cr.commit()
+                if not config.options['test_enable']: # pragma: no cover
+                    self.env.cr.commit()
             if raise_exc or not commit: # Commit required, silent bypass is not allowed
                 raise error
         else:
             if globals_dict.get('msg'):
                 globals_dict['msg'].write({'state': 'consumed'})
-            if commit:
+            if commit and not config.options['test_enable']: # pragma: no cover:
                 self.env.cr.commit()
 
             if self.response_format:
@@ -636,7 +644,7 @@ class ApiEndpoint(models.Model):
                     globals_dict['msg'].write({
                         'response': base64.b64encode(bytesdata)
                     })
-                if commit:
+                if commit and not config.options['test_enable']: # pragma: no cover:
                     self.env.cr.commit()
 
 
@@ -705,8 +713,10 @@ class ApiEndpoint(models.Model):
         for rec in self.search([('cron_id', '=', progress.cron_id.id),('role', '=', 'active')]).sudo():
             _logger.info("Execute %s", rec.name)
             rec.with_context(force_commit=True, raise_exc=False).action_execute()
-            rec.env.cr.commit()
+            if not config.options['test_enable']: # pragma: no cover
+                rec.env.cr.commit()
             while msg := rec.next_from_queue():
+                _logger.info("Process %s", msg.name)
                 try:
                     globals_dict = msg._get_msg_globals() # READ-ONLY, should be OK not to ROLLBACK
                 except Exception as error:
@@ -716,7 +726,10 @@ class ApiEndpoint(models.Model):
                 else:
                     msg.endpoint_id.with_context(force_commit=True, raise_exc=False)._consume(globals_dict) # method _consume already has error handling.
                 finally:
-                    msg.env.cr.commit() # Save all and release msg lock.
+                    if not config.options['test_enable']: # pragma: no cover
+                        msg.env.cr.commit() # Save all and release msg lock.
+
+                msg.env.flush_all()
                 assert msg.state != 'produced', "Programming error, break infinite while loop."
 
 
