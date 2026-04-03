@@ -12,7 +12,6 @@
     'data': [
         'security/note_security.xml',
         'security/ir.model.access.csv',
-        'data/mail_activity_type_data.xml',
         'views/note_views.xml',
     ],
     'installable': True,
