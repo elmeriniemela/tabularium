@@ -61,13 +61,14 @@ class InvestmentExchange(models.Model):
 
         for ex in self:
             tz = pytz.timezone(ex.tz)
-            now = datetime.datetime.now(tz)
+            now_utc = fields.Datetime.now()
+            now_local = pytz.UTC.localize(now_utc).astimezone(tz)
             if not ex.weekend_trading:
-                while now.isoweekday() in [6,7]:
-                    now += datetime.timedelta(days=1)
+                while now_local.isoweekday() in [6,7]:
+                    now_local += datetime.timedelta(days=1)
 
-            next_close = localize(tz, now, ex.closing_time)
-            while next_close <= now:
+            next_close = localize(tz, now_local, ex.closing_time)
+            while next_close <= now_local:
                 new = localize(tz, next_close + datetime.timedelta(days=1), ex.closing_time)
                 assert new > next_close
                 next_close = new
@@ -84,8 +85,7 @@ class InvestmentExchange(models.Model):
             closing_times = [ex.closing_time] + [g.closing_time for g in gaps if g.closing_time]
             ex.next_close = utclize(localize(tz, next_open, min(closing_times)))
 
-            now = fields.Datetime.now()
-            ex.is_open = (ex.next_open <= now and ex.next_close >= now)
+            ex.is_open = (ex.next_open <= now_utc and ex.next_close >= now_utc)
 
 
 

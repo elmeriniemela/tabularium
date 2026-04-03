@@ -89,17 +89,9 @@ class TestExchange(TransactionCase):
 
     def test_weekend_skip_branch_with_patched_now(self):
         eastern = pytz.timezone('US/Eastern')
-        saturday_noon = eastern.localize(datetime(2026, 4, 4, 12, 0, 0))
-        real_datetime = datetime
-
-        class PatchedDateTime(real_datetime):
-            @classmethod
-            def now(cls, tz=None):
-                return saturday_noon if tz else saturday_noon.replace(tzinfo=None)
-
         with patch(
-            'odoo.addons.investment_portfolio.models.investment_exchange.datetime.datetime',
-            PatchedDateTime,
+            'odoo.addons.investment_portfolio.models.investment_exchange.fields.Datetime.now',
+            return_value=datetime(2026, 4, 4, 12, 0, 0),
         ):
             self.exchange._compute_open_close()
 
