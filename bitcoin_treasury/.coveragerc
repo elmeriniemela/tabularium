@@ -1,0 +1,7 @@
+[run]
+omit =
+    */bitcoin_treasury/electrum/*
+
+[report]
+omit =
+    */bitcoin_treasury/electrum/*
