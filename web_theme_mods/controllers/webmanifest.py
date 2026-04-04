@@ -6,6 +6,8 @@ class WebManifest(webmanifest.WebManifest):
 
     def _get_webmanifest(self):
         manifest = super()._get_webmanifest()
+        manifest['background_color'] = '#243742'
+        manifest['theme_color'] = '#243742'
         icon_sizes = ['192x192', '512x512']
         manifest['icons'] = [{
             'src': '/web_theme_mods/static/img/odoo-icon-%s.png' % size,

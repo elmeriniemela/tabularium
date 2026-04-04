@@ -2,7 +2,7 @@
 <odoo>
     <template id="web_layout_favicon" inherit_id="web.layout">
         <xpath expr="//link[@rel='shortcut icon']" position="attributes">
-            <attribute name="t-att-href">(request.env.ref('__import__.favicon', raise_if_not_found=False) or request.env['ir.attachment'].browse()).sudo().local_url</attribute>
+            <attribute name="t-att-href">'/web_theme_mods/static/img/odoo-icon-16x16.ico'</attribute>
         </xpath>
     </template>
 </odoo>
