@@ -15,7 +15,7 @@ class BaseModuleUninstall(models.TransientModel):
             context['active_ids'] = active
             context['active_id'] = active[0]
             context['default_show_all'] = True
-            context['default_module_id'] = active[0]
+            context['default_module_ids'] = [active[0]]
             return {
                 'name': _('Uninstall (%s left)') % len(active),
                 'view_mode': 'form',

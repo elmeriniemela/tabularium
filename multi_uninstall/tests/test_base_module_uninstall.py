@@ -35,7 +35,7 @@ class TestBaseModuleUninstall(TransactionCase):
         self.assertEqual(set(action["context"]["active_ids"]), {self.base_module.id, self.web_module.id})
         self.assertIn(action["context"]["active_id"], action["context"]["active_ids"])
         self.assertTrue(action["context"]["default_show_all"])
-        self.assertEqual(action["context"]["default_module_id"], action["context"]["active_id"])
+        self.assertEqual(action["context"]["default_module_ids"], [action["context"]["active_id"]])
         self.assertNotIn(self.multi_uninstall_module.id, action["context"]["active_ids"])
 
     def test_action_next_returns_none_when_no_modules_left(self):

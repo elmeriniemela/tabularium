@@ -17,7 +17,7 @@
         <field name="res_model">base.module.uninstall</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
-        <field name="context">{'active_ids': active_ids, 'default_module_id': active_id}</field>
+        <field name="context">{'active_ids': active_ids, 'default_module_ids': [active_id]}</field>
         <field name="binding_model_id" ref="base.model_ir_module_module"/>
         <field name="binding_view_types">list</field>
     </record>
