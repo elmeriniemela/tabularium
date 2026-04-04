@@ -1,6 +1,6 @@
 {
     'name': 'Backend Theme MODS',
-    'version': '1.0',
+    'version': '1.0.1',
     'category': 'Themes/Backend',
     'license': 'LGPL-3',
     'author': 'Elmeri Niemelä',
