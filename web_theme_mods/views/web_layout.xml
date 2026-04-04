@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="web_layout_favicon" inherit_id="web.layout">
+        <xpath expr="//link[@rel='shortcut icon']" position="attributes">
+            <attribute name="t-att-href">(request.env.ref('__import__.favicon', raise_if_not_found=False) or request.env['ir.attachment'].browse()).local_url</attribute>
+        </xpath>
+    </template>
+</odoo>
