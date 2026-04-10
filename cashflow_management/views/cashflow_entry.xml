@@ -86,8 +86,8 @@
                 <filter string="Positive amount" name="positive" domain="[('amount', '>', 0.0)]" />
                 <filter string="Negative amount" name="negative" domain="[('amount', '&lt;', 0.0)]" />
                 <separator />
-                <filter string="Last Month" name="last_month" domain="[('date', '&gt;=', (context_today() + relativedelta(months=-1)).strftime('%Y-%m-01')), ('date','&lt;',time.strftime('%Y-%m-01'))]"/>
-                <filter string="This Month" name="this_month" domain="[('date','&gt;=',time.strftime('%Y-%m-01'))]"/>
+                <filter string="Last Month" name="last_month" domain="[('date', '&gt;=', '-1m =1d'), ('date', '&lt;', '=1d')]"/>
+                <filter string="This Month" name="this_month" domain="[('date', '&gt;=', '=1d')]"/>
                 <separator />
                 <group>
                     <filter string="Account" name="group_account" context="{'group_by': 'account_id'}"/>

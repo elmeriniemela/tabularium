@@ -186,11 +186,11 @@
                 <filter string="Archived" name="not_active" domain="[('active', '=', False)]"/>
                 <separator/>
                 <filter name="date_filter" date="date"/>
-                <filter string="Today" name="not_today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
-                <filter string="Before Today" name="not_today" domain="[('date', '&lt;', context_today().strftime('%Y-%m-%d'))]"/>
-                <filter string="1 Month" name="one_month" domain="[('date', '&gt;=', (context_today() + relativedelta(months=-1)).strftime('%Y-%m-%d'))]"/>
-                <filter string="Last Month" name="last_month" domain="[('date', '&gt;=', (context_today() + relativedelta(months=-1)).strftime('%Y-%m-01'))]"/>
-                <filter string="This Month" name="this_month" domain="[('date','&gt;=',time.strftime('%Y-%m-01'))]"/>
+                <filter string="Today" name="not_today" domain="[('date', '=', 'today')]"/>
+                <filter string="Before Today" name="not_today" domain="[('date', '&lt;', 'today')]"/>
+                <filter string="1 Month" name="one_month" domain="[('date', '&gt;=', 'today -1m')]"/>
+                <filter string="Last Month" name="last_month" domain="[('date', '&gt;=', '-1m =1d')]"/>
+                <filter string="This Month" name="this_month" domain="[('date', '&gt;=', '=1d')]"/>
                 <separator/>
                 <filter string="Exported" name="exported" domain="[('export_id', '!=', False)]"/>
                 <filter string="Not Exported" name="not_exported" domain="[('export_id', '=', False)]"/>

@@ -209,6 +209,7 @@ class TestApiEndpoint(TransactionCase):
 
     def test_mark_error_and_mark_active(self):
         endpoint = self._new_endpoint()
+        endpoint.allow_backoff = True
         endpoint._mark_error()
         self.assertEqual(endpoint.state, 'error')
         self.assertEqual(endpoint.backoff, 1)

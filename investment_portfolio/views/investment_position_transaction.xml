@@ -171,7 +171,7 @@
                 <filter string="Move is set" name="move_set" domain="[('move_id', '!=', False)]" />
                 <filter string="Move is not set" name="move_not_set" domain="[('move_id', '=', False)]" />
                 <separator />
-                <filter string="1 Year" name="1_year" domain="[('time','&gt;',(context_today() + relativedelta(days=-365)).strftime('%Y-%m-%d')),('time','&lt;',(context_today() + relativedelta(days=365)).strftime('%Y-%m-%d'))]" />
+                <filter string="1 Year" name="1_year" domain="[('time', '&gt;', 'today -365d'), ('time', '&lt;', 'today +365d')]" />
                 <filter string="2 Years" name="2_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-2*365)).strftime('%Y-%m-%d')),('time','&lt;',(context_today() + relativedelta(days=2*365)).strftime('%Y-%m-%d'))]" />
                 <filter string="3 Years" name="3_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-3*365)).strftime('%Y-%m-%d')),('time','&lt;',(context_today() + relativedelta(days=3*365)).strftime('%Y-%m-%d'))]" />
                 <filter string="4 Years" name="4_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-4*365)).strftime('%Y-%m-%d')),('time','&lt;',(context_today() + relativedelta(days=4*365)).strftime('%Y-%m-%d'))]" />

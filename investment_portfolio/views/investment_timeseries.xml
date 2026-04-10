@@ -106,9 +106,9 @@
                 <filter string="Realized" name="realized" domain="[('prediction', '=', False)]"/>
                 <filter string="Prediction" name="prediction" domain="[('prediction', '=', True)]"/>
                 <separator/>
-                <filter string="Until Today" name="until_today" domain="[('date','&lt;=',context_today())]"/>
+                <filter string="Until Today" name="until_today" domain="[('date', '&lt;=', 'now')]"/>
                 <separator/>
-                <filter string="1 Year" name="1_year" domain="[('date','&gt;',(context_today() + relativedelta(days=-365)).strftime('%Y-%m-%d')),('date','&lt;',(context_today() + relativedelta(days=365)).strftime('%Y-%m-%d'))]"/>
+                <filter string="1 Year" name="1_year" domain="[('date', '&gt;', 'today -365d'), ('date', '&lt;', 'today +365d')]"/>
                 <filter string="2 Years" name="2_years" domain="[('date','&gt;',(context_today() + relativedelta(days=-2*365)).strftime('%Y-%m-%d')),('date','&lt;',(context_today() + relativedelta(days=2*365)).strftime('%Y-%m-%d'))]"/>
                 <filter string="3 Years" name="3_years" domain="[('date','&gt;',(context_today() + relativedelta(days=-3*365)).strftime('%Y-%m-%d')),('date','&lt;',(context_today() + relativedelta(days=3*365)).strftime('%Y-%m-%d'))]"/>
                 <filter string="4 Years" name="4_years" domain="[('date','&gt;',(context_today() + relativedelta(days=-4*365)).strftime('%Y-%m-%d')),('date','&lt;',(context_today() + relativedelta(days=4*365)).strftime('%Y-%m-%d'))]"/>

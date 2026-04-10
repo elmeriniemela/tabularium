@@ -60,7 +60,7 @@ class FlightLog(portal.CustomerPortal):
 
         return request.render('flight_log_portal.flight_log_portal_template', values)
 
-    @http.route(['/flight/log/<int:log_id>/accept'], type='json', auth="public", website=True)
+    @http.route(['/flight/log/<int:log_id>/accept'], type='jsonrpc', auth="public", website=True)
     def flight_log_accept(self, log_id, access_token=None, name=None, signature=None):
         # get from query string if not on json param
         access_token = access_token or request.httprequest.args.get('access_token')
