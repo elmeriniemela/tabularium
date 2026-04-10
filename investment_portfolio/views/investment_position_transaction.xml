@@ -16,6 +16,7 @@
                 <field name="exchange_rate" optional="show"/>
                 <field name="currency_id" optional="show"/>
                 <field name="currency_rate_id" optional="hide"/>
+                <field name="import_id" optional="hide"/>
                 <field name="fee" sum="Total Fee" readonly="True" optional="show"/>
                 <field name="profit" decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0" optional="show"  digits="[2,2]"/>
                 <field name="liquid" optional="hide"/>
@@ -48,6 +49,7 @@
                         <group>
                             <field name="position_id"/>
                             <field name="move_id"/>
+                            <field name="import_id"/>
                             <field name="time"/>
                             <field name="quantity"/>
                             <field name="payment"/>

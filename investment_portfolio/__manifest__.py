@@ -6,7 +6,7 @@
     'license': 'LGPL-3',
     'category': 'Investment Portfolio',
     'description': 'Investment portfolio management for tracking assets and positions.',
-    'version': '2.8.28',
+    'version': '2.8.29',
     'depends': [
         'mail',
         'timeago_widget',
@@ -38,6 +38,7 @@
         'views/investment_position_move.xml',
         'views/investment_position_note.xml',
         'views/investment_position_tag.xml',
+        'views/investment_transaction_import.xml',
         'views/investment_position_transaction.xml',
         'views/investment_position.xml',
         'views/investment_asset.xml',

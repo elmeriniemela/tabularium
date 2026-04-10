@@ -7,6 +7,7 @@ from . import investment_asset_realized
 from . import investment_position_move
 from . import investment_position_note
 from . import investment_position_tag
+from . import investment_transaction_import
 from . import investment_position_transaction
 from . import investment_asset
 from . import investment_position

@@ -32,6 +32,13 @@ class InvestmentPositionTransaction(models.Model):
         tracking=True,
     )
 
+    import_id = fields.Many2one(
+        comodel_name='investment.transaction.import',
+        ondelete='restrict',
+        index=True,
+        tracking=True,
+    )
+
     external_ref = fields.Char(
         index=True,
         tracking=True,
