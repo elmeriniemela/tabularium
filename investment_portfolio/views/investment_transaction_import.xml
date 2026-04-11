@@ -5,8 +5,12 @@
         <field name="arch" type="xml">
             <list>
                 <field name="name"/>
+                <field name="source"/>
                 <field name="company_id" optional="hide"/>
-                <field name="transaction_ids" optional="show" widget="many2many_tags"/>
+                <field name="portfolio_id"/>
+                <field name="time_cutoff"/>
+                <field name="validate_balances" widget="boolean_toggle"/>
+                <field name="transaction_ids" optional="show"/>
             </list>
         </field>
     </record>
@@ -16,11 +20,22 @@
         <field name="model">investment.transaction.import</field>
         <field name="arch" type="xml">
             <form>
+                <header>
+                    <button name="action_import" type="object" string="Import" icon="fa-cogs"/>
+                </header>
                 <sheet>
                     <group>
-                        <field name="name" invisible="True"/>
-                        <field name="file" filename="name"/>
-                        <field name="company_id"/>
+                        <group>
+                            <field name="name" invisible="True"/>
+                            <field name="file" filename="name"/>
+                            <field name="time_cutoff"/>
+                            <field name="validate_balances" widget="boolean_toggle"/>
+                        </group>
+                        <group>
+                            <field name="source"/>
+                            <field name="portfolio_id"/>
+                            <field name="company_id"/>
+                        </group>
                     </group>
                     <field name="transaction_ids"/>
                 </sheet>
@@ -35,7 +50,9 @@
         <field name="arch" type="xml">
             <search>
                 <field name="name"/>
+                <field name="portfolio_id"/>
                 <field name="company_id"/>
+                <field name="time_cutoff"/>
             </search>
         </field>
     </record>
