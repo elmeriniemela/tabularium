@@ -125,6 +125,7 @@ class InvestmentTransactionImport(models.Model):
             for vals in rec.vals_list:
                 vals['import_id'] = rec.id
                 xmlid = vals['external_ref']
+                _logger.info("Process %s", vals)
                 module = '__import__'
                 tx = self.env.ref(f"{module}.{xmlid}", raise_if_not_found=False)
                 if tx:

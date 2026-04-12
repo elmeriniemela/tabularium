@@ -65,6 +65,6 @@
         <field name="model_id" ref="model_investment_transaction_import"/>
         <field name="binding_model_id" ref="model_investment_transaction_import"/>
         <field name="state">code</field>
-        <field name="code">records.sorted('name').action_import()</field>
+        <field name="code">action = records.sorted('name').action_import()</field>
     </record>
 </odoo>

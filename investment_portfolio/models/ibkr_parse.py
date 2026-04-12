@@ -4,9 +4,8 @@ import csv
 import re
 from collections import defaultdict
 import dataclasses
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from decimal import Decimal, InvalidOperation
-from pathlib import Path
 from typing import Optional
 from zoneinfo import ZoneInfo
 import hashlib
@@ -30,13 +29,12 @@ def fmt_decimal(value: Decimal) -> str:
     return text
 
 
-def normalize_time(value: str, source_timezone: Optional[ZoneInfo] = None) -> datetime:
+def normalize_time(value: str, source_timezone: Optional[ZoneInfo]) -> datetime:
     normalized = value.replace(",", "", 1).strip()
     if re.match(r"^\d{4}-\d{2}-\d{2}$", normalized):
         normalized = f"{normalized} 12:00:00"
     result = datetime.strptime(normalized, "%Y-%m-%d %H:%M:%S")
-    if source_timezone is not None:
-        result = result.replace(tzinfo=source_timezone).astimezone(ZoneInfo("Europe/Helsinki")).replace(tzinfo=None)
+    result = result.replace(tzinfo=source_timezone).astimezone(ZoneInfo("Europe/Helsinki")) # TODO: Fix the ID scheme so that we can change this to UTC without creating new records
     return result
 
 
@@ -58,7 +56,7 @@ class LedgerRow:
     _export_fields = (
         ('external_ref',        lambda row: row.id),
         ('ticker',              lambda row: row.ticker),
-        ('time',                lambda row: row.time.strftime("%Y-%m-%d %H:%M:%S")),
+        ('time',                lambda row: row.time.astimezone(timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%d %H:%M:%S")),
         ('quantity',            lambda row: fmt_decimal(row.quantity)),
         ('exchange_rate',       lambda row: fmt_decimal(row.price)),
         ('payment_currency',    lambda row: fmt_decimal(row.payment_currency)),
@@ -322,7 +320,6 @@ class IBKRParser:
                     asset_category = row[2].strip()
                     currency = row[3].strip().upper()
                     symbol = row[4].strip()
-                    raw_time = normalize_time(row[5])
                     time = normalize_time(row[5], source_timezone)
                     transfer_type = row[6].strip()
                     direction = row[7].strip()
