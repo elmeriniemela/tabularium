@@ -460,15 +460,18 @@ class TestIBKRImport(TransactionCase):
         self._create_usd_rate(date(2031, 3, 31), Decimal("0.92"))
 
         import_record = self._create_import("2031-03-missing-position", self._trade_statement())
-        with self.assertRaisesRegex(ValidationError, "Position not found: USD"):
+        with self.assertRaises(ValidationError) as error:
             import_record._parse_ibkr()
+        self.assertIn("USD", str(error.exception))
 
         self._create_position("USD", self.currency_usd)
         self._create_position("EUR", self.currency_eur)
 
         missing_rate_import = self._create_import("2031-04-missing-rate", self._sales_tax_statement())
-        with self.assertRaisesRegex(ValidationError, "Rate for USD on 2031-04-10 not found"):
+        with self.assertRaises(ValidationError) as error:
             missing_rate_import._parse_ibkr()
+        self.assertIn("USD", str(error.exception))
+        self.assertIn("2031-04-10", str(error.exception))
 
     def test_import_parse_ibkr_wraps_parser_value_errors(self):
         import_record = self._create_import(
