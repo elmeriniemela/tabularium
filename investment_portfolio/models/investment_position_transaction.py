@@ -82,6 +82,9 @@ class InvestmentPositionTransaction(models.Model):
         index=True,
         tracking=True,
     )
+    bypass_lock = fields.Boolean(
+        tracking=True,
+    )
     is_locked = fields.Boolean(compute='_compute_is_locked')
 
     profit = fields.Monetary(compute='_compute_profit', currency_field='company_currency_id')
@@ -286,10 +289,10 @@ class InvestmentPositionTransaction(models.Model):
         self._check_lock_time()
         return super().unlink()
 
-    @api.depends('company_id.investment_lock_time', 'time')
+    @api.depends('company_id.investment_lock_time', 'time', 'bypass_lock')
     def _compute_is_locked(self):
         for record in self:
-            record.is_locked = bool(record.company_id.investment_lock_time and record.time < record.company_id.investment_lock_time)
+            record.is_locked = not record.bypass_lock and bool(record.company_id.investment_lock_time and record.time < record.company_id.investment_lock_time)
 
 
     @api.depends('usage')

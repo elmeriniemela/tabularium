@@ -68,6 +68,7 @@
                             <field name="fee_currency" readonly="1"/>
                             <field name="fee" readonly="1"/>
                             <field name="profit" decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0"/>
+                            <field name="bypass_lock" widget="boolean_toggle"/>
                             <field name="is_locked"/>
                             <field name="usage" groups="base.group_no_one"/>
                             <field name="description"/>
