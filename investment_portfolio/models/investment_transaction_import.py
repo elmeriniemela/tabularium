@@ -46,11 +46,6 @@ class InvestmentTransactionImport(models.Model):
         tracking=True,
     )
 
-    time_cutoff = fields.Datetime(
-        required=True,
-        tracking=True,
-    )
-
     validate_balances = fields.Boolean(
         tracking=True,
         default=True,
@@ -83,7 +78,7 @@ class InvestmentTransactionImport(models.Model):
                         ('company_id', '=', self.company_id.id),
                         ('portfolio_id', '=', self.portfolio_id.id),
                         ('usage', '=', 'record'),
-                        ('time', '<', self.time_cutoff),
+                        ('import_id.name', '<', self.name),
                     ],
                     groupby=['position_id'],
                     aggregates=['quantity:sum'],
@@ -99,7 +94,8 @@ class InvestmentTransactionImport(models.Model):
         try:
             rows = parser.extract_ledger_rows(buf)
         except ValueError as err:
-            raise ValidationError(err.args)
+            msg = f"{self.name}: {err.args[0]}"
+            raise ValidationError(msg)
 
         vals_list = []
         for vals in rows:

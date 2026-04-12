@@ -8,7 +8,6 @@
                 <field name="source"/>
                 <field name="company_id" optional="hide"/>
                 <field name="portfolio_id"/>
-                <field name="time_cutoff"/>
                 <field name="validate_balances" widget="boolean_toggle"/>
                 <field name="transaction_ids" optional="show"/>
             </list>
@@ -28,7 +27,6 @@
                         <group>
                             <field name="name" invisible="True"/>
                             <field name="file" filename="name"/>
-                            <field name="time_cutoff"/>
                             <field name="validate_balances" widget="boolean_toggle"/>
                         </group>
                         <group>
@@ -52,7 +50,6 @@
                 <field name="name"/>
                 <field name="portfolio_id"/>
                 <field name="company_id"/>
-                <field name="time_cutoff"/>
             </search>
         </field>
     </record>
@@ -61,5 +58,13 @@
         <field name="name">Transaction Imports</field>
         <field name="res_model">investment.transaction.import</field>
         <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_investment_transaction_multi_import" model="ir.actions.server">
+        <field name="name">Import transactions</field>
+        <field name="model_id" ref="model_investment_transaction_import"/>
+        <field name="binding_model_id" ref="model_investment_transaction_import"/>
+        <field name="state">code</field>
+        <field name="code">records.sorted('name').action_import()</field>
     </record>
 </odoo>

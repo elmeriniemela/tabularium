@@ -380,8 +380,11 @@ class IBKRParser:
                         "Forex balance precision alignment to statement quantity",
                     ))
                     continue
+
+                max_time = max(r.time for r in rows)
+                min_time = min(r.time for r in rows)
                 errors.append(
-                    f"Unexplained balance difference for {ticker}: {fmt_decimal(diff)}. File: {ending_balances[ticker]}. System: {current_balances.get(ticker, zero)}"
+                    f"Unexplained balance difference for {ticker}: {fmt_decimal(diff)}. File: {ending_balances[ticker]}. System: {current_balances.get(ticker, zero)}. Max time: {max_time}. Min time: {min_time}."
                 )
 
             if errors:
