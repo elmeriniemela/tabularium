@@ -20,7 +20,7 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <button name="action_import" type="object" string="Import" icon="fa-cogs"/>
+                    <button name="action_import" type="object" string="Import" icon="fa-file-excel-o"/>
                 </header>
                 <sheet>
                     <group>
