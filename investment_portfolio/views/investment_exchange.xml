@@ -34,7 +34,7 @@
                             <label for="opening_time" string="Open"/>
                             <div class="o_row">
                                 <field name="opening_time" options="{'type': 'time'}" widget="float_time"/>
-                                <i class="fa fa-long-arrow-right mx-1" aria-label="Arrow icon" title="Arrow"/>
+                                <i class="fa fa-long-arrow-right mx-1" title="Arrow"/>
                                 <field name="closing_time" options="{'type': 'time'}" widget="float_time"/>
                             </div>
                             <field name="next_open"/>
