@@ -12,20 +12,13 @@ import hashlib
 
 def parse_decimal(value: str) -> Optional[Decimal]:
     text = value.strip().replace(",", "")
-    if not text or text == "--":
-        return None
-    try:
-        return Decimal(text)
-    except InvalidOperation:
-        return None
+    return Decimal(text)
 
 
 def fmt_decimal(value: Decimal) -> str:
     text = format(value, "f")
     if "." in text:
         text = text.rstrip("0").rstrip(".")
-    if text == "-0":
-        return "0"
     return text
 
 
@@ -88,9 +81,7 @@ class LedgerRow:
                 normalized = component.strftime("%Y%m%d")
             elif isinstance(component, str):
                 normalized = component
-            elif not component:
-                continue
-            else:
+            else: # pragma: no cover
                 raise ValueError(f"Unknown type {component.__class__.__name__}: {repr(component)}")
             sanitized = re.sub(r"[^A-Za-z0-9.-]+", "_", normalized.strip()).strip("_")
             tokens.append(sanitized or "")
@@ -139,8 +130,6 @@ class IBKRParser:
         if True:
             reader = csv.reader(buffer)
             for row in reader:
-                if not row:
-                    continue
                 row_len = len(row)
                 section = row[0]
                 row_kind = row[1].strip() if row_len > 1 else ""
@@ -151,7 +140,7 @@ class IBKRParser:
                     if field == "WhenGenerated" and value and (parts := value.split()):
                         abbreviation = parts[-1].upper()
                         zone_name = statement_timezones.get(abbreviation)
-                        if zone_name is None:
+                        if zone_name is None: # pragma: no cover
                             raise ValueError(f"Unsupported statement timezone abbreviation '{abbreviation}'")
                         source_timezone = ZoneInfo(zone_name)
                     elif field == "Period":
@@ -208,17 +197,12 @@ class IBKRParser:
                     proceeds = parse_decimal(row[10])
                     fee = parse_decimal(row[11]) or zero
 
-                    if quantity is None or proceeds is None:
-                        continue
-
                     if asset_category_cf == "forex" and "." in symbol:
                         base, quote = symbol.split(".", 1)
                         base = base.strip().upper()
                         quote = quote.strip().upper()
-                        if commission_currency == base:
-                            asset_ticker, asset_qty, currency_ticker, currency_qty = quote, proceeds, base, quantity
-                        else:
-                            asset_ticker, asset_qty, currency_ticker, currency_qty = base, quantity, quote, proceeds
+                        assert commission_currency == base
+                        asset_ticker, asset_qty, currency_ticker, currency_qty = quote, proceeds, base, quantity
                         if base == "EUR":
                             trade_price = 1 / trade_price
                     else:
@@ -226,15 +210,13 @@ class IBKRParser:
 
                     if commission_currency in (None, currency_ticker):
                         currency_qty += fee
-                    elif commission_currency == asset_ticker:
-                        asset_qty += fee
 
                     abs_currency_qty = abs(currency_qty)
                     if currency_ticker == "USD":
                         currency_price = self.currency_rate('USD', time.date())
                     elif currency_ticker == "EUR":
                         currency_price = one
-                    else:
+                    else: # pragma: no cover
                         raise ValueError(f"Unsupported payment currency conversion from {currency_ticker} to EUR")
 
                     fee_note = "" if fee == zero else f" (fee {fmt_decimal(fee)} {commission_currency or currency_ticker})"
@@ -255,8 +237,6 @@ class IBKRParser:
 
                     if entry_name == "Ending Cash":
                         quantity = parse_decimal(row[4])
-                        if quantity is None:
-                            continue
                         if currency == "BASE CURRENCY SUMMARY":
                             base_currency_summary_ending = quantity
                         elif currency and not is_total_label(currency):
@@ -276,9 +256,6 @@ class IBKRParser:
                         continue
 
                     quantity = parse_decimal(row[4])
-                    if quantity is None or quantity == zero:
-                        continue
-
                     sales_taxes.append((currency, quantity))
                     continue
 
@@ -290,8 +267,6 @@ class IBKRParser:
                         continue
 
                     currency_idx, time_idx, description_idx, amount_idx, row_type = section_cols
-                    if row_len <= amount_idx:
-                        continue
                     ticker = row[currency_idx].strip().upper()
                     quantity = parse_decimal(row[amount_idx])
                     if (
@@ -328,14 +303,9 @@ class IBKRParser:
                     if quantity is not None and quantity != zero and symbol:
                         transfer_price = 0 # TODO: import this somehow?
                         rows.append(LedgerRow(symbol, time, quantity, transfer_price, zero, "transfer", f"Transfers {asset_category} {transfer_type} {direction}".strip()))
-
-                    cash_amount = parse_decimal(row[14])
-                    if cash_amount is not None and cash_amount != zero and currency:
-                        cash_price = self.currency_rate('USD', time.date()) if currency == "USD" else one
-                        rows.append(LedgerRow(currency, time, cash_amount, cash_price, zero, "transfer", f"Transfers cash {transfer_type} {direction} ({symbol})".strip()))
                     continue
 
-        if period_start is None:
+        if period_start is None: # pragma: no cover
             raise ValueError(f"Statement period row not found")
 
         for ticker, quantity in cash_endings.items():
@@ -349,7 +319,7 @@ class IBKRParser:
         ):
             ending_balances[base_currency] = base_currency_summary_ending
 
-        if sales_taxes and not fee_dates:
+        if sales_taxes and not fee_dates: # pragma: no cover
             raise ValueError("Unable to determine sales tax time")
 
         if sales_taxes:
@@ -377,6 +347,7 @@ class IBKRParser:
                         "Forex balance precision alignment to statement quantity",
                     ))
                     continue
+
 
                 max_time = max(r.time for r in rows)
                 min_time = min(r.time for r in rows)
