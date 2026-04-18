@@ -59,11 +59,12 @@ class InvestmentAssetRealized(models.Model):
 
     @api.depends('sell_batch_id.usage', 'buy_batch_id.usage')
     def _compute_simulated(self):
-        for r in self: r.simulated = any(u == 'realized' for u in [r.sell_batch_id.usage, r.buy_batch_id.usage])
+        for r in self.exists(): # for some reason this is needed ot otherwise we sometimes get 'Record does not exist or has been deleted.'
+            r.simulated = any(u == 'realized' for u in [r.sell_batch_id.usage, r.buy_batch_id.usage])
 
     def _compute_profit(self):
         # env['investment.asset.realized'].search([])._compute_profit()
-        for record in self:
+        for record in self.exists(): # for some reason this is needed ot otherwise we sometimes get 'Record does not exist or has been deleted.'
             sell_portion = (record.quantity / abs(record.sell_batch_id.quantity_adjusted))
             sell_time = fields.Datetime.context_timestamp(
                 record.with_context(tz=record.company_id.partner_id.tz),
@@ -92,12 +93,12 @@ class InvestmentAssetRealized(models.Model):
 
     @api.depends('company_id.investment_lock_time', 'buy_batch_id.time', 'sell_batch_id.time')
     def _compute_is_locked(self):
-        for record in self:
+        for record in self.exists(): # for some reason this is needed ot otherwise we sometimes get 'Record does not exist or has been deleted.'
             realized_time = max([record.buy_batch_id.time, record.sell_batch_id.time])
             record.is_locked = bool(record.company_id.investment_lock_time and realized_time < record.company_id.investment_lock_time)
 
     def _check_lock_time(self):
-        for record in self:
+        for record in self.exists(): # for some reason this is needed ot otherwise we sometimes get 'Record does not exist or has been deleted.'
             if record.is_locked:
                 realized_time = max([record.buy_batch_id.time, record.sell_batch_id.time])
                 raise ValidationError(_("You cannot modify realized entries (%s UTC) before the company lock time (%s UTC).") % (realized_time, record.company_id.investment_lock_time))
