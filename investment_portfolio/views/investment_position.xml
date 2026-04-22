@@ -208,6 +208,8 @@
                 <field name="portfolio_id"/>
                 <field name="asset_id"/>
                 <separator/>
+                <filter name="all" string="All" domain="['|', ('active', '=', False), ('active', '=', True)]"/>
+                <separator/>
                 <filter string="Long" name="long" domain="[('quantity', '&gt;', 0.0)]"/>
                 <filter string="Short" name="short" domain="[('quantity', '&lt;', 0.0)]"/>
                 <filter string="Closed" name="closed" domain="[('quantity', '=', 0.0)]"/>

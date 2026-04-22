@@ -89,6 +89,8 @@
                 <filter string="Last Month" name="last_month" domain="[('date', '&gt;=', '-1m =1d'), ('date', '&lt;', '=1d')]"/>
                 <filter string="This Month" name="this_month" domain="[('date', '&gt;=', '=1d')]"/>
                 <separator />
+                <filter name="all" string="All" domain="['|', ('active', '=', False), ('active', '=', True)]"/>
+                <separator />
                 <group>
                     <filter string="Account" name="group_account" context="{'group_by': 'account_id'}"/>
                     <filter string="Category" name="group_category" context="{'group_by': 'category_id'}"/>

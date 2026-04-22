@@ -184,6 +184,7 @@
                 <separator/>
                 <filter string="Active" name="active" domain="[('active', '=', True)]"/>
                 <filter string="Archived" name="not_active" domain="[('active', '=', False)]"/>
+                <filter name="all" string="All" domain="['|', ('active', '=', False), ('active', '=', True)]"/>
                 <separator/>
                 <filter name="date_filter" date="date"/>
                 <filter string="Today" name="not_today" domain="[('date', '=', 'today')]"/>

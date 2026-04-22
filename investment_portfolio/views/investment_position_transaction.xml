@@ -153,6 +153,8 @@
                 <field name="category_id"/>
                 <field name="external_ref"/>
                 <separator/>
+                <filter name="all" string="All" domain="['|', ('active', '=', False), ('active', '=', True)]"/>
+                <separator/>
                 <filter name="date_filter" date="time"/>
                 <separator/>
                 <filter string="Long" name="long" domain="[('quantity', '>', 0.0)]"/>
