@@ -15,7 +15,7 @@ export const chartView = {
     Renderer: ChartRenderer,
     Model: ChartModel,
     ArchParser: ChartArchParser,
-    searchMenuTypes: ["filter", "favorite"],
+    searchMenuTypes: ["filter", "groupBy", "favorite"],
 
     props: (genericProps, view) => {
         let modelParams;

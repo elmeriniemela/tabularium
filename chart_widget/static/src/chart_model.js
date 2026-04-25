@@ -1,6 +1,14 @@
 /** @odoo-module **/
 
 import { Model } from "@web/model/model";
+import { getGroupBy } from "@web/search/utils/group_by";
+
+const TYPE_MAP = {
+    line: "Line",
+    area: "Area",
+    histogram: "Histogram",
+    baseline: "Baseline",
+};
 
 export class ChartModel extends Model {
     setup(params) {
@@ -9,6 +17,12 @@ export class ChartModel extends Model {
     }
 
     async load(searchParams) {
+        const groupBy = this._getGroupBy(searchParams);
+        if (groupBy.length) {
+            this.data = await this._loadGroupedSeriesData(searchParams, groupBy);
+            return;
+        }
+
         const { resModel, timeField, seriesFields } = this.metaData;
         const domain = searchParams.domain || [];
 
@@ -35,6 +49,114 @@ export class ChartModel extends Model {
         );
 
         this.data = this._buildSeriesData(records);
+    }
+
+    _getGroupBy(searchParams) {
+        const groupBy = (searchParams.groupBy || []).map((item) =>
+            typeof item === "string" ? getGroupBy(item, this.metaData.fields) : item
+        );
+        if (!groupBy.length) {
+            return [];
+        }
+
+        const timeGroupBy = groupBy.find((item) => item.fieldName === this.metaData.timeField);
+        if (!timeGroupBy) {
+            throw new Error(
+                `Chart view requires grouping by '${this.metaData.timeField}' when group by filters are active.`
+            );
+        }
+
+        return [timeGroupBy, ...groupBy.filter((item) => item.fieldName !== this.metaData.timeField)];
+    }
+
+    async _loadGroupedSeriesData(searchParams, groupBy) {
+        if (this.metaData.seriesFields.some((seriesField) => seriesField.type === "candlestick")) {
+            throw new Error("Grouped candlestick charts are not supported.");
+        }
+
+        const measures = this.metaData.seriesFields.map((seriesField) =>
+            this._getAggregateSpecification(seriesField.fieldName)
+        );
+        const groups = await this.orm.formattedReadGroup(
+            this.metaData.resModel,
+            searchParams.domain || [],
+            groupBy.map((item) => item.spec),
+            measures,
+            { context: { fill_temporal: true, ...(searchParams.context || {}) } }
+        );
+
+        return this._buildGroupedSeriesData(groups, groupBy);
+    }
+
+    _getAggregateSpecification(fieldName) {
+        const field = this.metaData.fields[fieldName];
+        if (!field.aggregator) {
+            throw new Error(
+                `No aggregate function has been provided for the series field '${fieldName}'.`
+            );
+        }
+        return `${fieldName}:${field.aggregator}`;
+    }
+
+    _buildGroupedSeriesData(groups, groupBy) {
+        const { fields, timeField, seriesFields } = this.metaData;
+        const timeGroupBy = groupBy[0];
+        const seriesByKey = new Map();
+
+        for (const group of groups) {
+            const time = this._getGroupedTimeValue(group[timeGroupBy.spec], fields[timeField]?.type);
+            if (!time) {
+                continue;
+            }
+
+            const groupValues = groupBy.slice(1).map((item) => group[item.spec]);
+            const groupLabel = groupBy
+                .slice(1)
+                .map((item) => this._getGroupLabel(group[item.spec], fields[item.fieldName]))
+                .filter((label) => label)
+                .join(" / ");
+
+            for (const seriesField of seriesFields) {
+                const seriesKey = JSON.stringify([seriesField.fieldName, ...groupValues]);
+                if (!seriesByKey.has(seriesKey)) {
+                    const title = groupLabel
+                        ? `${seriesField.string} / ${groupLabel}`
+                        : seriesField.string;
+                    seriesByKey.set(seriesKey, {
+                        type: this._getSeriesType(seriesField.type),
+                        data: [],
+                        title,
+                    });
+                }
+
+                const aggregateSpecification = this._getAggregateSpecification(seriesField.fieldName);
+                seriesByKey.get(seriesKey).data.push({
+                    time,
+                    value: group[aggregateSpecification] ?? 0,
+                });
+            }
+        }
+
+        return { series: [...seriesByKey.values()] };
+    }
+
+    _getGroupedTimeValue(value, fieldType) {
+        const rawValue = Array.isArray(value) ? value[0] : value;
+        return this._toTimestamp(rawValue, fieldType === "datetime");
+    }
+
+    _getGroupLabel(value) {
+        if (value === false || value === null || value === undefined) {
+            return "";
+        }
+        if (Array.isArray(value)) {
+            return value[1];
+        }
+        return `${value}`;
+    }
+
+    _getSeriesType(type) {
+        return TYPE_MAP[type] || "Line";
     }
 
     _buildSeriesData(records) {
@@ -64,25 +186,19 @@ export class ChartModel extends Model {
             if (sf.type === "candlestick") {
                 const data = validRecords.map((r) => ({
                     time: this._toTimestamp(r[timeField], isDatetime),
-                    open: r[sf.ohlcFields.open] || 0,
-                    high: r[sf.ohlcFields.high] || 0,
-                    low: r[sf.ohlcFields.low] || 0,
-                    close: r[sf.ohlcFields.close] || 0,
+                    open: r[sf.ohlcFields.open] ?? 0,
+                    high: r[sf.ohlcFields.high] ?? 0,
+                    low: r[sf.ohlcFields.low] ?? 0,
+                    close: r[sf.ohlcFields.close] ?? 0,
                 }));
                 series.push({ type: "Candlestick", data, title: sf.string });
             } else {
-                const typeMap = {
-                    line: "Line",
-                    area: "Area",
-                    histogram: "Histogram",
-                    baseline: "Baseline",
-                };
                 const data = validRecords.map((r) => ({
                     time: this._toTimestamp(r[timeField], isDatetime),
-                    value: r[sf.fieldName] || 0,
+                    value: r[sf.fieldName] ?? 0,
                 }));
                 series.push({
-                    type: typeMap[sf.type] || "Line",
+                    type: this._getSeriesType(sf.type),
                     data,
                     title: sf.string,
                 });

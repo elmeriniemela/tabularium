@@ -11,13 +11,14 @@ import {
     toggleSearchBarMenu,
 } from "@web/../tests/web_test_helpers";
 import { ChartArchParser } from "@chart_widget/chart_arch_parser";
+import { ChartModel } from "@chart_widget/chart_model";
 
 class TimeSeries extends models.Model {
     _name = "time.series";
 
     date = fields.Date({ string: "Date" });
-    close_price = fields.Float({ string: "Close Price" });
-    volume = fields.Float({ string: "Volume" });
+    close_price = fields.Float({ string: "Close Price", aggregator: "sum" });
+    volume = fields.Float({ string: "Volume", aggregator: "sum" });
     open_price = fields.Float({ string: "Open" });
     high_price = fields.Float({ string: "High" });
     low_price = fields.Float({ string: "Low" });
@@ -176,6 +177,102 @@ describe("chart view", () => {
         await toggleSearchBarMenu();
         await toggleMenuItem("High Volume");
         expect(searchReadCount).toBeGreaterThan(initialCount);
+    });
+
+    test("activates default time group by filters", async () => {
+        onRpc("formatted_read_group", ({ kwargs }) => {
+            expect.step("formatted_read_group");
+            expect(kwargs.groupby).toEqual(["date:day"]);
+            expect(kwargs.aggregates).toEqual(["close_price:sum"]);
+            return [];
+        });
+        onRpc("search_read", () => {
+            expect.step("search_read");
+            return [];
+        });
+
+        await mountView({
+            type: "chart",
+            resModel: "time.series",
+            arch: `
+                <chart string="Grouped Chart">
+                    <field name="date" type="time"/>
+                    <field name="close_price" type="line" string="Close"/>
+                </chart>
+            `,
+            searchViewArch: `
+                <search>
+                    <group>
+                        <filter name="group_day" string="Date" context="{'group_by': 'date:day'}"/>
+                    </group>
+                </search>
+            `,
+            context: {
+                search_default_group_day: 1,
+            },
+        });
+
+        expect.verifySteps(["formatted_read_group"]);
+    });
+
+    test("aggregates series by the active time group", async () => {
+        const model = Object.create(ChartModel.prototype);
+        model.metaData = {
+            fields: {
+                date: { type: "date" },
+                close_price: { type: "float", aggregator: "sum" },
+            },
+            resModel: "time.series",
+            timeField: "date",
+            seriesFields: [
+                {
+                    fieldName: "close_price",
+                    type: "line",
+                    string: "Close",
+                },
+            ],
+        };
+        model.orm = {
+            formattedReadGroup: async (resModel, domain, groupBy, aggregates) => {
+                expect(resModel).toBe("time.series");
+                expect(domain).toEqual([]);
+                expect.step("formatted_read_group");
+                expect(groupBy).toEqual(["date:day"]);
+                expect(aggregates).toEqual(["close_price:sum"]);
+                return [
+                    {
+                        "__count": 2,
+                        "__extra_domain": [["date", "=", "2024-01-01"]],
+                        "date:day": ["2024-01-01", "01 Jan 2024"],
+                        "close_price:sum": 210,
+                    },
+                    {
+                        "__count": 1,
+                        "__extra_domain": [["date", "=", "2024-01-02"]],
+                        "date:day": ["2024-01-02", "02 Jan 2024"],
+                        "close_price:sum": 110,
+                    },
+                ];
+            },
+            searchRead: async () => {
+                expect.step("search_read");
+                return [];
+            },
+        };
+
+        await model.load({
+            context: {},
+            domain: [],
+            groupBy: ["date:day"],
+        });
+
+        expect.verifySteps(["formatted_read_group"]);
+        expect(model.data.series).toHaveLength(1);
+        expect(model.data.series[0].type).toBe("Line");
+        expect(model.data.series[0].data).toEqual([
+            { time: "2024-01-01", value: 210 },
+            { time: "2024-01-02", value: 110 },
+        ]);
     });
 
     test("no data displays helper", async () => {
