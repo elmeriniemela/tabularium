@@ -1,6 +1,8 @@
 # Chart Widget
 
-Adds a `chart` view type to Odoo using the [lightweight-charts](https://github.com/nickolay-nickolay/nickolay-nickolay) library (v5.1.0). Supports line, area, histogram, baseline, and candlestick series.
+Adds a `chart` view type to Odoo using the [lightweight-charts](https://github.com/tradingview/lightweight-charts) library (v5.1.0). Supports line, area, histogram, baseline, and candlestick series.
+
+Library documentation: https://tradingview.github.io/lightweight-charts/
 
 ## Overview
 
