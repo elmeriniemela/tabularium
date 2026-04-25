@@ -16,14 +16,26 @@ class InvestmentTimeseries(models.Model):
     _description = 'Investment Time Series'
     _rec_name = 'position_id'
 
-    position = fields.Monetary(compute='_compute_timeseries_aggregate', store=True, currency_field='company_currency_id')
+    position = fields.Monetary(
+        string='Closing position',
+        compute='_compute_timeseries_aggregate',
+        store=True,
+        currency_field='company_currency_id',
+    )
+    profit = fields.Monetary(
+        string='Closing profit',
+        compute='_compute_timeseries_aggregate',
+        store=True,
+        currency_field='company_currency_id',
+        aggregator='sum'
+    )
     quantity = fields.Float(compute='_compute_timeseries_aggregate', store=True, digits='Investment Asset quantity')
 
     last_price_own_currency = fields.Monetary(compute='_compute_timeseries_aggregate', store=True, currency_field='company_currency_id')
-    profit = fields.Monetary(compute='_compute_timeseries_aggregate', store=True, currency_field='company_currency_id', aggregator='sum')
     profit_percent = fields.Float(compute='_compute_timeseries_aggregate', store=True, aggregator='avg')
     transaction_ids = fields.Many2many(comodel_name='investment.position.transaction', compute='_compute_timeseries_aggregate', store=True)
     price_id = fields.Many2one(
+        string='Closing price',
         comodel_name='investment.asset.price',
         store=True,
         required=True,
