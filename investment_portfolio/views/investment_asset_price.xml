@@ -83,9 +83,9 @@
         <field name="name">investment.asset.price.chart</field>
         <field name="model">investment.asset.price</field>
         <field name="arch" type="xml">
-            <chart type="line">
+            <chart>
                 <field name="time" type="time"/>
-                <field name="price" type="line"/>
+                <field name="price" type="candlestick"/>
             </chart>
         </field>
     </record>

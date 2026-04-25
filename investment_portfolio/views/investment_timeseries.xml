@@ -45,9 +45,9 @@
         <field name="model">investment.timeseries</field>
         <field name="priority" eval="2"/>
         <field name="arch" type="xml">
-            <chart type="bar">
+            <chart>
                 <field name="date" type="time"/>
-                <field name="position" type="line" string="Position"/>
+                <field name="position" type="candlestick"/>
             </chart>
         </field>
     </record>
