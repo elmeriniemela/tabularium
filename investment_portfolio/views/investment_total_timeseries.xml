@@ -61,6 +61,17 @@
                 <separator/>
                 <filter string="Until Today" name="until_today" domain="[('time', '&lt;=', 'now')]"/>
                 <separator/>
+                <filter string="1 Year" name="1_year" domain="[('time', '&gt;', 'today -365d'), ('time', '&lt;', 'today +365d')]"/>
+                <filter string="2 Years" name="2_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-2*365)).strftime('%Y-%m-%d')),('time','&lt;',(context_today() + relativedelta(days=2*365)).strftime('%Y-%m-%d'))]"/>
+                <filter string="3 Years" name="3_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-3*365)).strftime('%Y-%m-%d')),('time','&lt;',(context_today() + relativedelta(days=3*365)).strftime('%Y-%m-%d'))]"/>
+                <filter string="4 Years" name="4_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-4*365)).strftime('%Y-%m-%d')),('time','&lt;',(context_today() + relativedelta(days=4*365)).strftime('%Y-%m-%d'))]"/>
+                <filter string="5 Years" name="5_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-5*365)).strftime('%Y-%m-%d')),('time','&lt;',(context_today() + relativedelta(days=5*365)).strftime('%Y-%m-%d'))]"/>
+                <filter string="6 Years" name="6_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-6*365)).strftime('%Y-%m-%d')),('time','&lt;',(context_today() + relativedelta(days=6*365)).strftime('%Y-%m-%d'))]"/>
+                <filter string="7 Years" name="7_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-7*365)).strftime('%Y-%m-%d')),('time','&lt;',(context_today() + relativedelta(days=7*365)).strftime('%Y-%m-%d'))]"/>
+                <filter string="8 Years" name="8_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-8*365)).strftime('%Y-%m-%d')),('time','&lt;',(context_today() + relativedelta(days=8*365)).strftime('%Y-%m-%d'))]"/>
+                <filter string="9 Years" name="9_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-9*365)).strftime('%Y-%m-%d')),('time','&lt;',(context_today() + relativedelta(days=9*365)).strftime('%Y-%m-%d'))]"/>
+                <filter string="10 Years" name="10_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-10*365)).strftime('%Y-%m-%d')),('time','&lt;',(context_today() + relativedelta(days=10*365)).strftime('%Y-%m-%d'))]"/>
+                <separator/>
                 <group>
                     <filter string="Time" name="group_day" context="{'group_by': 'time:day'}" invisible="not context.get('search_default_group_day')"/>
                     <filter string="Time" name="group_week" context="{'group_by': 'time:week'}" invisible="not context.get('search_default_group_week')"/>

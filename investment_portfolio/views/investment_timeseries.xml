@@ -65,15 +65,24 @@
                             <field name="granularity"/>
                             <field name="is_sunday"/>
                             <field name="price_id"/>
+                            <field name="open_price_id"/>
+                            <field name="high_price_id"/>
+                            <field name="low_price_id"/>
                             <field name="company_currency_id"/>
                             <field name="position"/>
+                            <field name="open_position"/>
+                            <field name="high_position"/>
+                            <field name="low_position"/>
                         </group>
                         <group>
                             <field name="category_id"/>
                             <field name="quantity"/>
                             <field name="last_price_own_currency"/>
-                            <field name="profit" decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0"/>
                             <field name="profit_percent" widget="percentage" decoration-danger="profit_percent &lt; 0" decoration-success="profit_percent &gt; 0"/>
+                            <field name="profit" decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0"/>
+                            <field name="open_profit" decoration-danger="open_profit &lt; 0" decoration-success="open_profit &gt; 0"/>
+                            <field name="high_profit" decoration-danger="high_profit &lt; 0" decoration-success="high_profit &gt; 0"/>
+                            <field name="low_profit" decoration-danger="low_profit &lt; 0" decoration-success="low_profit &gt; 0"/>
                             <field name="prediction"/>
                         </group>
                     </group>

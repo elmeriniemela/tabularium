@@ -17,7 +17,7 @@ from . import investment_exchange_gap
 from . import investment_portfolio
 from . import investment_milestone
 from . import investment_period
-from . import investment_total_timeseries
 from . import investment_timeseries
+from . import investment_total_timeseries
 from . import res_currency
 from . import res_company

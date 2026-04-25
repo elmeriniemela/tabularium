@@ -7,6 +7,7 @@ from odoo.tools import float_is_zero, date_utils
 from odoo.fields import Domain
 import logging
 from dateutil.relativedelta import relativedelta
+from collections import defaultdict
 
 
 _logger = logging.getLogger(__name__)
@@ -54,6 +55,82 @@ class InvestmentTimeseries(models.Model):
         aggregator='sum'
     )
 
+    open_price_id = fields.Many2one(
+        string='Opening price',
+        comodel_name='investment.asset.price',
+        store=True,
+        required=True,
+        ondelete='cascade',
+        index=True,
+    )
+
+    open_position = fields.Monetary(
+        string='Opening position',
+        compute='_compute_timeseries_aggregate',
+        store=True,
+        currency_field='company_currency_id',
+        aggregator='avg',
+    )
+
+    open_profit = fields.Monetary(
+        string='Opening profit',
+        compute='_compute_timeseries_aggregate',
+        store=True,
+        currency_field='company_currency_id',
+        aggregator='avg',
+    )
+
+    high_price_id = fields.Many2one(
+        string='High price',
+        comodel_name='investment.asset.price',
+        store=True,
+        required=True,
+        ondelete='cascade',
+        index=True,
+    )
+
+    high_position = fields.Monetary(
+        string='High position',
+        compute='_compute_timeseries_aggregate',
+        store=True,
+        currency_field='company_currency_id',
+        aggregator='avg',
+    )
+
+    high_profit = fields.Monetary(
+        string='High profit',
+        compute='_compute_timeseries_aggregate',
+        store=True,
+        currency_field='company_currency_id',
+        aggregator='avg',
+    )
+
+
+    low_price_id = fields.Many2one(
+        string='Low price',
+        comodel_name='investment.asset.price',
+        store=True,
+        required=True,
+        ondelete='cascade',
+        index=True,
+    )
+
+    low_position = fields.Monetary(
+        string='Low position',
+        compute='_compute_timeseries_aggregate',
+        store=True,
+        currency_field='company_currency_id',
+        aggregator='avg',
+    )
+
+    low_profit = fields.Monetary(
+        string='Low profit',
+        compute='_compute_timeseries_aggregate',
+        store=True,
+        currency_field='company_currency_id',
+        aggregator='avg',
+    )
+
     quantity = fields.Float(
         compute='_compute_timeseries_aggregate',
         store=True,
@@ -81,6 +158,9 @@ class InvestmentTimeseries(models.Model):
     prediction = fields.Boolean(
         string="Future Price",
         related='price_id.prediction',
+        store=True,
+        readonly=True,
+        index=True,
     )
 
     interpolated = fields.Boolean(
@@ -94,6 +174,9 @@ class InvestmentTimeseries(models.Model):
 
     company_id = fields.Many2one(
         related='position_id.company_id',
+        store=True,
+        readonly=True,
+        index=True,
     )
 
     category_id = fields.Many2one(
@@ -136,6 +219,17 @@ class InvestmentTimeseries(models.Model):
     )
 
     _date_timeseries_unique = models.Constraint('unique(date, position_id)', 'This timeseries already exists!')
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            missing_ohlc = {'open_price_id', 'high_price_id', 'low_price_id'} - vals.keys()
+            if missing_ohlc:
+                price_id = vals['price_id']
+                vals.setdefault('open_price_id', price_id)
+                vals.setdefault('high_price_id', price_id)
+                vals.setdefault('low_price_id', price_id)
+        return super().create(vals_list)
 
     @api.depends('date')
     def _compute_granularity(self):
@@ -234,21 +328,65 @@ class InvestmentTimeseries(models.Model):
         for trans in transactions:
             trans_map[trans.position_id] = trans_map.get(trans.position_id, Transaction) + trans
 
+
+        Price = self.env['investment.asset.price']
+        p_groups = Price.sudo()._read_group(
+            domain=[('asset_id', 'in', self.mapped('position_id.asset_id').ids), ('prediction', '=', False)],
+            groupby=['asset_id', 'time:day'],
+            aggregates=[
+                'id:recordset',
+            ],
+        )
+
+        pdict = defaultdict(lambda: Price.browse())
+        for asset, time, pids in p_groups:
+            pdict[(asset.id, time.date())] = pids
+
         for record in self:
             if not record.position_id:
                 continue
 
+            def set_ohlc_values(prefix, price_id):
+                vals = record.position_id._get_position(
+                    record.convert_currency(price_id),
+                    record.transaction_ids,
+                )
+                record[f'{prefix}_price_id'] = price_id
+                record[f'{prefix}_position'] = vals['position']
+                record[f'{prefix}_profit'] = vals['profit']
+
             time_cutoff = datetime.datetime(record.date.year, record.date.month, record.date.day, 23, 59, 0)
             record.transaction_ids = trans_map.get(record.position_id, Transaction).filtered(lambda t: t.time <= time_cutoff) # latest but before date
 
-            record.last_price_own_currency = record.price_id.currency_id._convert(
-                from_amount=record.price_id.price,
-                to_currency=record.company_currency_id,
-                company=record.company_id,
-                date=record.price_id.time or fields.Datetime.now(),
-            )
+            record.last_price_own_currency = record.convert_currency(record.price_id)
 
             vals = record.position_id._get_position(record.last_price_own_currency, record.transaction_ids).items()
             vals = {k: v for k, v in vals if k in record._fields}
             assert vals, "Filtering with record._fields failed."
             record.update(vals)
+
+            day_prices = pdict[(record.position_id.asset_id.id, record.date)]
+            set_ohlc_values(
+                'open',
+                min(day_prices, key=lambda price: (price.time, price.id), default=record.price_id),
+            )
+            set_ohlc_values(
+                'high',
+                min(day_prices, key=lambda price: (-price.price, price.time, price.id), default=record.price_id),
+            )
+            set_ohlc_values(
+                'low',
+                min(day_prices, key=lambda price: (price.price, price.time, price.id), default=record.price_id),
+            )
+
+
+
+
+    def convert_currency(self, price_id):
+        self.ensure_one()
+        return self.position_id.asset_id.currency_id._convert(
+            from_amount=price_id.price,
+            to_currency=self.company_currency_id,
+            company=self.company_id,
+            date=self.date,
+        )
