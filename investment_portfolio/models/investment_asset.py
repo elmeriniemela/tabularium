@@ -138,26 +138,26 @@ class InvestmentAsset(models.Model):
         ]).unlink()
 
 
-    def price_at_date(self, date):
+    def closing_price_utc(self, date):
         self.ensure_one()
         time_cutoff = datetime.datetime(date.year, date.month, date.day, 0, 0, 0) # This has to be the end of day.
         err_msg = "No price for %s at %s." % (self.ticker, time_cutoff)
-        at_price_id = self.env['investment.asset.price'].search([
+        closing_price_id = self.env['investment.asset.price'].search([
                 ('time', '<=', date_utils.end_of(time_cutoff, "day")),
                 ('time', '>=', date_utils.start_of(time_cutoff, "day")),
                 ('asset_id', '=', self.id),
                 ('prediction', '=', date > fields.Date.today()),
             ], limit=1, order='time desc') # latest = closing price for the day
 
-        if not at_price_id:
+        if not closing_price_id:
             # This time allow predictions.
-            at_price_id = self.env['investment.asset.price'].search([
+            closing_price_id = self.env['investment.asset.price'].search([
                 ('time', '<=', date_utils.end_of(time_cutoff, "day")),
                 ('time', '>=', date_utils.start_of(time_cutoff, "day")),
                 ('asset_id', '=', self.id),
             ], limit=1, order='time desc') # latest = closing price for the day
 
-        if not at_price_id:
+        if not closing_price_id:
             after_price_id = self.env['investment.asset.price'].search([
                     ('time', '>', time_cutoff),
                     ('asset_id', '=', self.id),
@@ -169,7 +169,7 @@ class InvestmentAsset(models.Model):
             if before_price_id and after_price_id:
                 slope = (after_price_id.price - before_price_id.price) / (after_price_id.time - before_price_id.time).days
                 interpolated_price = before_price_id.price + slope*(time_cutoff-before_price_id.time).days
-                at_price_id = self.env['investment.asset.price'].create({
+                closing_price_id = self.env['investment.asset.price'].create({
                     'time': time_cutoff,
                     'asset_id': self.id,
                     'prediction': after_price_id.prediction or before_price_id.prediction,
@@ -179,7 +179,7 @@ class InvestmentAsset(models.Model):
             elif before_price_id:
                 days = (date - before_price_id.time.date()).days
                 predicted_price = before_price_id.price * (1+self.expected_yearly_appreciation)**(days/365)
-                at_price_id = self.env['investment.asset.price'].create({
+                closing_price_id = self.env['investment.asset.price'].create({
                     'time': time_cutoff,
                     'asset_id': self.id,
                     'prediction': True,
@@ -189,7 +189,7 @@ class InvestmentAsset(models.Model):
             # elif after_price_id:
             #     days = (date - after_price_id.time.date()).days
             #     predicted_price = after_price_id.price * (1+self.expected_yearly_appreciation)**(days/365)
-            #     at_price_id = self.env['investment.asset.price'].create({
+            #     closing_price_id = self.env['investment.asset.price'].create({
             #         'time': time_cutoff,
             #         'asset_id': self.id,
             #         'prediction': True,
@@ -199,8 +199,8 @@ class InvestmentAsset(models.Model):
             else:
                 raise RuntimeError(err_msg)
 
-        assert at_price_id, err_msg
-        return at_price_id
+        assert closing_price_id, err_msg
+        return closing_price_id
 
 
     @api.depends('split_ids', 'last_price_id', 'plausible_ath_drawdown')

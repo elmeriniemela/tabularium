@@ -12,14 +12,14 @@ class TestAsset(InvestmentTestCommon):
     def test_price_at_date_exact(self):
         """Exact date match returns correct price"""
         date = self.price_mid.time.date()
-        result = self.asset.price_at_date(date)
+        result = self.asset.closing_price_utc(date)
         self.assertAlmostEqual(result.price, 95.0, places=2)
 
     def test_price_at_date_interpolation(self):
         """Linear interpolation between two known prices"""
         # Midpoint between price_old (90 @ -60d) and price_mid (95 @ -30d)
         mid_date = (self.price_old.time + timedelta(days=15)).date()
-        result = self.asset.price_at_date(mid_date)
+        result = self.asset.closing_price_utc(mid_date)
         # Linear interpolation: 90 + (95-90)*(15/30) = 92.5
         self.assertAlmostEqual(result.price, 92.5, places=0)
 
@@ -27,7 +27,7 @@ class TestAsset(InvestmentTestCommon):
         """Forward prediction using expected_yearly_appreciation"""
         # Price beyond last known price should use appreciation
         future_date = (datetime.now() + timedelta(days=365)).date()
-        result = self.asset.price_at_date(future_date)
+        result = self.asset.closing_price_utc(future_date)
         # predicted = 100 * (1 + 0.10)^(days/365) ~ 110
         self.assertGreater(result.price, 100.0)
         self.assertTrue(result.prediction)
@@ -40,7 +40,7 @@ class TestAsset(InvestmentTestCommon):
             'currency_id': self.currency_eur.id,
         })
         with self.assertRaises(RuntimeError):
-            empty_asset.price_at_date(datetime.now().date())
+            empty_asset.closing_price_utc(datetime.now().date())
 
     def test_price_upsert_create(self):
         """Creates new price record"""

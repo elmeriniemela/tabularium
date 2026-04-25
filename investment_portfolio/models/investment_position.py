@@ -356,7 +356,7 @@ class InvestmentPosition(models.Model):
                     ('asset_id', '=', position.asset_id.id),
                 ], limit=1, order='time desc') # just use latest instead of making predictions for assets without recent price updates.
             else:
-                price_id = position.asset_id.price_at_date(date)
+                price_id = position.asset_id.closing_price_utc(date)
             return price_id
 
         for position_id in self:

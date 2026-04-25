@@ -136,7 +136,7 @@ class TestAssetAdvanced(InvestmentTestCommon):
     def test_prediction_price_specific_value(self):
         """Prediction: price * (1 + appreciation)^(days/365)"""
         future_date = (datetime.now() + timedelta(days=365)).date()
-        result = self.asset.price_at_date(future_date)
+        result = self.asset.closing_price_utc(future_date)
         # 100 * (1 + 0.10)^(365/365) = 110.0
         self.assertAlmostEqual(result.price, 110.0, places=0)
         self.assertTrue(result.prediction)
@@ -145,7 +145,7 @@ class TestAssetAdvanced(InvestmentTestCommon):
         """Linear interpolation at quarter point between two prices"""
         # price_old: 90 @ -60d, price_mid: 95 @ -30d
         quarter_date = (self.price_old.time + timedelta(days=7.5)).date()
-        result = self.asset.price_at_date(quarter_date)
+        result = self.asset.closing_price_utc(quarter_date)
         # 90 + (95-90)*(7.5/30) = 90 + 1.25 = 91.25
         self.assertAlmostEqual(result.price, 91.25, places=0)
 
