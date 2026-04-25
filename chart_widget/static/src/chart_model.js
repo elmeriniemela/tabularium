@@ -8,6 +8,7 @@ const TYPE_MAP = {
     area: "Area",
     histogram: "Histogram",
     baseline: "Baseline",
+    candlestick: "Candlestick",
 };
 
 export class ChartModel extends Model {
@@ -17,7 +18,7 @@ export class ChartModel extends Model {
     }
 
     async load(searchParams) {
-        const groupBy = this._getGroupBy(searchParams);
+        const groupBy = this._getEffectiveGroupBy(searchParams);
         if (groupBy.length) {
             this.data = await this._loadGroupedSeriesData(searchParams, groupBy);
             return;
@@ -28,16 +29,8 @@ export class ChartModel extends Model {
 
         const fieldNames = [timeField];
         for (const sf of seriesFields) {
-            if (sf.type === "candlestick") {
-                for (const f of Object.values(sf.ohlcFields)) {
-                    if (!fieldNames.includes(f)) {
-                        fieldNames.push(f);
-                    }
-                }
-            } else {
-                if (!fieldNames.includes(sf.fieldName)) {
-                    fieldNames.push(sf.fieldName);
-                }
+            if (!fieldNames.includes(sf.fieldName)) {
+                fieldNames.push(sf.fieldName);
             }
         }
 
@@ -49,6 +42,14 @@ export class ChartModel extends Model {
         );
 
         this.data = this._buildSeriesData(records);
+    }
+
+    _getEffectiveGroupBy(searchParams) {
+        const groupBy = this._getGroupBy(searchParams);
+        if (groupBy.length || !this._hasCandlestickSeries()) {
+            return groupBy;
+        }
+        return [getGroupBy(`${this.metaData.timeField}:day`, this.metaData.fields)];
     }
 
     _getGroupBy(searchParams) {
@@ -69,14 +70,19 @@ export class ChartModel extends Model {
         return [timeGroupBy, ...groupBy.filter((item) => item.fieldName !== this.metaData.timeField)];
     }
 
-    async _loadGroupedSeriesData(searchParams, groupBy) {
-        if (this.metaData.seriesFields.some((seriesField) => seriesField.type === "candlestick")) {
-            throw new Error("Grouped candlestick charts are not supported.");
-        }
+    _hasCandlestickSeries() {
+        return this.metaData.seriesFields.some((seriesField) => seriesField.type === "candlestick");
+    }
 
-        const measures = this.metaData.seriesFields.map((seriesField) =>
-            this._getAggregateSpecification(seriesField.fieldName)
-        );
+    async _loadGroupedSeriesData(searchParams, groupBy) {
+        const measures = [];
+        for (const seriesField of this.metaData.seriesFields) {
+            for (const measure of this._getGroupedMeasureSpecifications(seriesField)) {
+                if (!measures.includes(measure)) {
+                    measures.push(measure);
+                }
+            }
+        }
         const groups = await this.orm.formattedReadGroup(
             this.metaData.resModel,
             searchParams.domain || [],
@@ -86,6 +92,19 @@ export class ChartModel extends Model {
         );
 
         return this._buildGroupedSeriesData(groups, groupBy);
+    }
+
+    _getGroupedMeasureSpecifications(seriesField) {
+        if (seriesField.type !== "candlestick") {
+            return [this._getAggregateSpecification(seriesField.fieldName)];
+        }
+        return [
+            `${this.metaData.timeField}:array_agg`,
+            "id:array_agg",
+            `${seriesField.fieldName}:array_agg`,
+            `${seriesField.fieldName}:max`,
+            `${seriesField.fieldName}:min`,
+        ];
     }
 
     _getAggregateSpecification(fieldName) {
@@ -101,6 +120,7 @@ export class ChartModel extends Model {
     _buildGroupedSeriesData(groups, groupBy) {
         const { fields, timeField, seriesFields } = this.metaData;
         const timeGroupBy = groupBy[0];
+        const isDatetime = fields[timeField]?.type === "datetime";
         const seriesByKey = new Map();
 
         for (const group of groups) {
@@ -129,15 +149,58 @@ export class ChartModel extends Model {
                     });
                 }
 
-                const aggregateSpecification = this._getAggregateSpecification(seriesField.fieldName);
-                seriesByKey.get(seriesKey).data.push({
-                    time,
-                    value: group[aggregateSpecification] ?? 0,
-                });
+                const point =
+                    seriesField.type === "candlestick"
+                        ? this._getGroupedCandlestickPoint(group, seriesField, time, isDatetime)
+                        : {
+                              time,
+                              value:
+                                  group[this._getAggregateSpecification(seriesField.fieldName)] ?? 0,
+                          };
+                if (point) {
+                    seriesByKey.get(seriesKey).data.push(point);
+                }
             }
         }
 
         return { series: [...seriesByKey.values()] };
+    }
+
+    _getGroupedCandlestickPoint(group, seriesField, time, isDatetime) {
+        const timeValues = group[`${this.metaData.timeField}:array_agg`] || [];
+        const recordIds = group["id:array_agg"] || [];
+        const values = group[`${seriesField.fieldName}:array_agg`] || [];
+
+        if (timeValues.length !== values.length || recordIds.length !== values.length) {
+            throw new Error(`Invalid candlestick group data for '${seriesField.fieldName}'.`);
+        }
+        if (!values.length) {
+            return null;
+        }
+
+        const orderedValues = values
+            .map((value, index) => ({
+                id: recordIds[index],
+                time: this._toTimestamp(timeValues[index], isDatetime),
+                value: value ?? 0,
+            }))
+            .sort((left, right) => {
+                if (left.time < right.time) {
+                    return -1;
+                }
+                if (left.time > right.time) {
+                    return 1;
+                }
+                return left.id - right.id;
+            });
+
+        return {
+            time,
+            open: orderedValues[0].value,
+            high: group[`${seriesField.fieldName}:max`] ?? orderedValues[0].value,
+            low: group[`${seriesField.fieldName}:min`] ?? orderedValues[0].value,
+            close: orderedValues[orderedValues.length - 1].value,
+        };
     }
 
     _getGroupedTimeValue(value, fieldType) {
@@ -183,26 +246,15 @@ export class ChartModel extends Model {
         const series = [];
 
         for (const sf of seriesFields) {
-            if (sf.type === "candlestick") {
-                const data = validRecords.map((r) => ({
-                    time: this._toTimestamp(r[timeField], isDatetime),
-                    open: r[sf.ohlcFields.open] ?? 0,
-                    high: r[sf.ohlcFields.high] ?? 0,
-                    low: r[sf.ohlcFields.low] ?? 0,
-                    close: r[sf.ohlcFields.close] ?? 0,
-                }));
-                series.push({ type: "Candlestick", data, title: sf.string });
-            } else {
-                const data = validRecords.map((r) => ({
-                    time: this._toTimestamp(r[timeField], isDatetime),
-                    value: r[sf.fieldName] ?? 0,
-                }));
-                series.push({
-                    type: this._getSeriesType(sf.type),
-                    data,
-                    title: sf.string,
-                });
-            }
+            const data = validRecords.map((r) => ({
+                time: this._toTimestamp(r[timeField], isDatetime),
+                value: r[sf.fieldName] ?? 0,
+            }));
+            series.push({
+                type: this._getSeriesType(sf.type),
+                data,
+                title: sf.string,
+            });
         }
 
         return { series };

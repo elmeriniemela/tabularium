@@ -3,7 +3,6 @@
 import { visitXML } from "@web/core/utils/xml";
 
 const SERIES_TYPES = ["line", "area", "histogram", "baseline", "candlestick"];
-const OHLC_TYPES = ["open", "high", "low", "close"];
 
 export class ChartArchParser {
     parse(arch, fields = {}) {
@@ -12,8 +11,6 @@ export class ChartArchParser {
             seriesFields: [],
             title: "",
         };
-
-        const ohlcFields = {};
 
         visitXML(arch, (node) => {
             switch (node.tagName) {
@@ -30,8 +27,6 @@ export class ChartArchParser {
 
                     if (type === "time") {
                         archInfo.timeField = fieldName;
-                    } else if (OHLC_TYPES.includes(type)) {
-                        ohlcFields[type] = fieldName;
                     } else if (SERIES_TYPES.includes(type)) {
                         const string = node.getAttribute("string");
                         archInfo.seriesFields.push({
@@ -44,14 +39,6 @@ export class ChartArchParser {
                 }
             }
         });
-
-        if (Object.keys(ohlcFields).length > 0) {
-            archInfo.seriesFields.push({
-                type: "candlestick",
-                ohlcFields,
-                string: "OHLC",
-            });
-        }
 
         return archInfo;
     }

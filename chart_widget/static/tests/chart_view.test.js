@@ -17,39 +17,51 @@ class TimeSeries extends models.Model {
     _name = "time.series";
 
     date = fields.Date({ string: "Date" });
+    moment = fields.Datetime({ string: "Moment" });
+    price = fields.Float({ string: "Price" });
     close_price = fields.Float({ string: "Close Price", aggregator: "sum" });
     volume = fields.Float({ string: "Volume", aggregator: "sum" });
-    open_price = fields.Float({ string: "Open" });
-    high_price = fields.Float({ string: "High" });
-    low_price = fields.Float({ string: "Low" });
 
     _records = [
         {
             id: 1,
             date: "2024-01-01",
+            moment: "2024-01-01 09:00:00",
+            price: 95,
             close_price: 100,
             volume: 5000,
-            open_price: 95,
-            high_price: 105,
-            low_price: 90,
         },
         {
             id: 2,
-            date: "2024-01-02",
+            date: "2024-01-01",
+            moment: "2024-01-01 11:00:00",
+            price: 105,
             close_price: 110,
             volume: 6000,
-            open_price: 100,
-            high_price: 115,
-            low_price: 98,
         },
         {
             id: 3,
-            date: "2024-01-03",
+            date: "2024-01-01",
+            moment: "2024-01-01 10:00:00",
+            price: 90,
             close_price: 105,
             volume: 4500,
-            open_price: 110,
-            high_price: 112,
-            low_price: 102,
+        },
+        {
+            id: 4,
+            date: "2024-01-02",
+            moment: "2024-01-02 09:00:00",
+            price: 110,
+            close_price: 115,
+            volume: 5500,
+        },
+        {
+            id: 5,
+            date: "2024-01-03",
+            moment: "2024-01-02 15:00:00",
+            price: 100,
+            close_price: 120,
+            volume: 6500,
         },
     ];
 
@@ -102,31 +114,36 @@ describe("chart view", () => {
     });
 
     test("render with candlestick series", async () => {
-        const rpcFields = [];
-        onRpc("search_read", ({ kwargs }) => {
-            rpcFields.push(...kwargs.fields);
+        onRpc("formatted_read_group", ({ kwargs }) => {
+            expect.step("formatted_read_group");
+            expect(kwargs.groupby).toEqual(["moment:day"]);
+            expect(kwargs.aggregates).toEqual([
+                "moment:array_agg",
+                "id:array_agg",
+                "price:array_agg",
+                "price:max",
+                "price:min",
+            ]);
+            return [];
+        });
+        onRpc("search_read", () => {
+            expect.step("search_read");
+            return [];
         });
 
         await mountView({
             type: "chart",
             resModel: "time.series",
             arch: `
-                <chart string="OHLC Chart">
-                    <field name="date" type="time"/>
-                    <field name="open_price" type="open"/>
-                    <field name="high_price" type="high"/>
-                    <field name="low_price" type="low"/>
-                    <field name="close_price" type="close"/>
+                <chart string="Candlestick Chart">
+                    <field name="moment" type="time"/>
+                    <field name="price" type="candlestick"/>
                 </chart>
             `,
         });
 
         expect(".o_chart_canvas_container").toHaveCount(1);
-        expect(rpcFields).toInclude("date");
-        expect(rpcFields).toInclude("open_price");
-        expect(rpcFields).toInclude("high_price");
-        expect(rpcFields).toInclude("low_price");
-        expect(rpcFields).toInclude("close_price");
+        expect.verifySteps(["formatted_read_group"]);
     });
 
     test("render with histogram series", async () => {
@@ -275,6 +292,99 @@ describe("chart view", () => {
         ]);
     });
 
+    test("aggregates candlestick series from grouped values", async () => {
+        const model = Object.create(ChartModel.prototype);
+        model.metaData = {
+            fields: {
+                moment: { type: "datetime" },
+                price: { type: "float", aggregator: "sum" },
+            },
+            resModel: "time.series",
+            timeField: "moment",
+            seriesFields: [
+                {
+                    fieldName: "price",
+                    type: "candlestick",
+                    string: "Price",
+                },
+            ],
+        };
+        model.orm = {
+            formattedReadGroup: async (resModel, domain, groupBy, aggregates) => {
+                expect(resModel).toBe("time.series");
+                expect(domain).toEqual([]);
+                expect.step("formatted_read_group");
+                expect(groupBy).toEqual(["moment:day"]);
+                expect(aggregates).toEqual([
+                    "moment:array_agg",
+                    "id:array_agg",
+                    "price:array_agg",
+                    "price:max",
+                    "price:min",
+                ]);
+                return [
+                    {
+                        "__count": 3,
+                        "__extra_domain": [["moment", ">=", "2024-01-01 00:00:00"]],
+                        "moment:day": ["2024-01-01", "01 Jan 2024"],
+                        "moment:array_agg": [
+                            "2024-01-01 11:00:00",
+                            "2024-01-01 09:00:00",
+                            "2024-01-01 10:00:00",
+                        ],
+                        "id:array_agg": [1, 2, 3],
+                        "price:array_agg": [105, 95, 90],
+                        "price:max": 105,
+                        "price:min": 90,
+                    },
+                    {
+                        "__count": 2,
+                        "__extra_domain": [["moment", ">=", "2024-01-02 00:00:00"]],
+                        "moment:day": ["2024-01-02", "02 Jan 2024"],
+                        "moment:array_agg": [
+                            "2024-01-02 09:00:00",
+                            "2024-01-02 15:00:00",
+                        ],
+                        "id:array_agg": [4, 5],
+                        "price:array_agg": [110, 100],
+                        "price:max": 110,
+                        "price:min": 100,
+                    },
+                ];
+            },
+            searchRead: async () => {
+                expect.step("search_read");
+                return [];
+            },
+        };
+
+        await model.load({
+            context: {},
+            domain: [],
+            groupBy: [],
+        });
+
+        expect.verifySteps(["formatted_read_group"]);
+        expect(model.data.series).toHaveLength(1);
+        expect(model.data.series[0].type).toBe("Candlestick");
+        expect(model.data.series[0].data).toEqual([
+            {
+                time: Math.floor(new Date("2024-01-01").getTime() / 1000),
+                open: 95,
+                high: 105,
+                low: 90,
+                close: 105,
+            },
+            {
+                time: Math.floor(new Date("2024-01-02").getTime() / 1000),
+                open: 110,
+                high: 110,
+                low: 100,
+                close: 100,
+            },
+        ]);
+    });
+
     test("no data displays helper", async () => {
         TimeSeries._records = [];
 
@@ -310,26 +420,20 @@ describe("chart arch parser", () => {
         expect(result.seriesFields[1].string).toBe("Volume");
     });
 
-    test("arch parser combines OHLC into candlestick", async () => {
+    test("arch parser reads candlestick fields", async () => {
         const parser = new ChartArchParser();
         const arch = `
             <chart string="Candlestick">
-                <field name="date" type="time"/>
-                <field name="open_price" type="open"/>
-                <field name="high_price" type="high"/>
-                <field name="low_price" type="low"/>
-                <field name="close_price" type="close"/>
+                <field name="moment" type="time"/>
+                <field name="price" type="candlestick" string="Price"/>
             </chart>
         `;
         const result = parser.parse(arch);
 
-        expect(result.timeField).toBe("date");
+        expect(result.timeField).toBe("moment");
         expect(result.seriesFields).toHaveLength(1);
         expect(result.seriesFields[0].type).toBe("candlestick");
-        expect(result.seriesFields[0].ohlcFields.open).toBe("open_price");
-        expect(result.seriesFields[0].ohlcFields.high).toBe("high_price");
-        expect(result.seriesFields[0].ohlcFields.low).toBe("low_price");
-        expect(result.seriesFields[0].ohlcFields.close).toBe("close_price");
-        expect(result.seriesFields[0].string).toBe("OHLC");
+        expect(result.seriesFields[0].fieldName).toBe("price");
+        expect(result.seriesFields[0].string).toBe("Price");
     });
 });

@@ -43,19 +43,23 @@ Define a chart view in XML:
 </chart>
 ```
 
-### Candlestick (OHLC)
-
-Use `open`, `high`, `low`, `close` field types. They are combined into a single candlestick series automatically.
+### Candlestick
 
 ```xml
 <chart string="OHLC">
-    <field name="date" type="time"/>
-    <field name="open_price" type="open"/>
-    <field name="high_price" type="high"/>
-    <field name="low_price" type="low"/>
-    <field name="close_price" type="close"/>
+    <field name="moment" type="time"/>
+    <field name="price" type="candlestick"/>
 </chart>
 ```
+
+Candlestick series are built from the active time group. For each group:
+
+- open = first value in the group
+- high = maximum value in the group
+- low = minimum value in the group
+- close = last value in the group
+
+If no time group is active, the chart groups by day automatically.
 
 ### Multiple series
 
@@ -76,10 +80,7 @@ Use `open`, `high`, `low`, `close` field types. They are combined into a single 
 | `area` | Area (filled line) series |
 | `histogram` | Bar/histogram series |
 | `baseline` | Baseline series (colored above/below a base value) |
-| `open` | Open price for candlestick |
-| `high` | High price for candlestick |
-| `low` | Low price for candlestick |
-| `close` | Close price for candlestick |
+| `candlestick` | OHLC candlestick series built from grouped values |
 
 The `string` attribute on `<field>` sets the series label. The `string` attribute on `<chart>` sets the view title.
 
