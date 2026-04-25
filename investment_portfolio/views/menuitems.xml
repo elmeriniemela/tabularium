@@ -25,7 +25,8 @@
             <menuitem id="menu_timeseries_profits_per_asset" action="action_profits_per_asset" sequence="30"/>
             <menuitem id="menu_timeseries_positions_per_asset" action="action_positions_per_asset" sequence="40"/>
             <menuitem id="menu_timeseries_prediction_growth" action="action_prediction_growth" sequence="50"/>
-            <menuitem id="menu_periods" action="action_periods" sequence="60"/>
+            <menuitem id="menu_total_positions" action="action_total_positions" sequence="60"/>
+            <menuitem id="menu_periods" action="action_periods" sequence="80"/>
         </menuitem>
 
         <menuitem name="Configuration" id="configuration_menu" sequence="50">

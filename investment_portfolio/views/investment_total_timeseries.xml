@@ -1,0 +1,87 @@
+<odoo>
+    <record id="total_timeseries_tree" model="ir.ui.view">
+        <field name="name">investment.total.timeseries.list</field>
+        <field name="model">investment.total.timeseries</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="time" optional="show"/>
+                <field name="position" optional="show" sum="Total Position"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="total_timeseries_position" model="ir.ui.view">
+        <field name="name">investment.total.timeseries.graph</field>
+        <field name="model">investment.total.timeseries</field>
+        <field name="priority" eval="1"/>
+        <field name="arch" type="xml">
+            <graph type="bar">
+                <field name="position" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="total_timeseries_position_chart" model="ir.ui.view">
+        <field name="name">investment.total.timeseries.chart</field>
+        <field name="model">investment.total.timeseries</field>
+        <field name="priority" eval="2"/>
+        <field name="arch" type="xml">
+            <chart>
+                <field name="time" type="time"/>
+                <field name="position" type="candlestick"/>
+            </chart>
+        </field>
+    </record>
+
+    <record id="total_timeseries_form" model="ir.ui.view">
+        <field name="name">investment.total.timeseries.form</field>
+        <field name="model">investment.total.timeseries</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="time"/>
+                            <field name="position"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="total_timeseries_search" model="ir.ui.view">
+        <field name="name">investment.total.timeseries.search</field>
+        <field name="model">investment.total.timeseries</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="time"/>
+                <separator/>
+                <filter name="time_filter" date="time"/>
+                <separator/>
+                <filter string="Until Today" name="until_today" domain="[('time', '&lt;=', 'now')]"/>
+                <separator/>
+                <group>
+                    <filter string="Time" name="group_day" context="{'group_by': 'time:day'}" invisible="not context.get('search_default_group_day')"/>
+                    <filter string="Time" name="group_week" context="{'group_by': 'time:week'}" invisible="not context.get('search_default_group_week')"/>
+                    <filter string="Time" name="group_year" context="{'group_by': 'time:year'}" invisible="not context.get('search_default_group_year')"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_total_positions" model="ir.actions.act_window">
+        <field name="name">Total positions</field>
+        <field name="res_model">investment.total.timeseries</field>
+        <field name="view_mode">chart,list,form,pivot</field>
+        <field name="domain" eval="False"/>
+        <field name="context">{'search_default_group_week': 1, 'search_default_1_year': 1, 'search_default_until_today': 1}</field>
+        <field
+            name="view_ids"
+            eval="[
+                (5, 0, 0),
+                (0, 0, {'view_mode': 'chart', 'view_id': ref('total_timeseries_position_chart')}),
+            ]"
+        />
+    </record>
+</odoo>

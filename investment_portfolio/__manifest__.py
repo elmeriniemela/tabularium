@@ -25,6 +25,7 @@
         'data/endpoints.xml',
         'data/export.xml',
         'views/investment_timeseries.xml',
+        'views/investment_total_timeseries.xml',
         'views/investment_portfolio.xml',
         'views/investment_category.xml',
         'views/investment_exchange_gap.xml',
