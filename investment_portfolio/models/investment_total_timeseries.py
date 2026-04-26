@@ -10,6 +10,10 @@ class InvestmentTotalTimeseries(models.Model):
     _rec_name = 'time'
     _order = 'time desc, id desc'
 
+    company_id = fields.Many2one(
+        comodel_name='res.company',
+        readonly=True,
+    )
     time = fields.Datetime(readonly=True)
     position = fields.Float(
         readonly=True,
@@ -24,53 +28,54 @@ class InvestmentTotalTimeseries(models.Model):
             CREATE OR REPLACE VIEW {self._table} AS (
                 WITH daily_totals AS (
                     SELECT
+                        ts.company_id,
                         ts.date,
                         SUM(ts.open_position) AS open_position,
                         SUM(ts.high_position) AS high_position,
                         SUM(ts.low_position) AS low_position,
                         SUM(ts.position) AS close_position
                     FROM investment_timeseries ts
-                    WHERE ts.company_id = 1
-                    AND ts.liquid = TRUE
+                    WHERE ts.liquid = TRUE
                     AND ts.prediction IS NOT TRUE
-                    GROUP BY ts.date
+                    GROUP BY ts.company_id, ts.date
+                ),
+                ohlc_lines AS (
+                    SELECT
+                        dt.company_id,
+                        dt.open_position AS position,
+                        dt.date::timestamp AS time
+                    FROM daily_totals dt
+
+                    UNION ALL
+
+                    SELECT
+                        dt.company_id,
+                        dt.high_position AS position,
+                        dt.date::timestamp + INTERVAL '1 second' AS time
+                    FROM daily_totals dt
+
+                    UNION ALL
+
+                    SELECT
+                        dt.company_id,
+                        dt.low_position AS position,
+                        dt.date::timestamp + INTERVAL '2 second' AS time
+                    FROM daily_totals dt
+
+                    UNION ALL
+
+                    SELECT
+                        dt.company_id,
+                        dt.close_position AS position,
+                        dt.date::timestamp + INTERVAL '3 second' AS time
+                    FROM daily_totals dt
                 )
-                (
+
                 SELECT
-                    CAST(TO_CHAR(dt.date, 'YYYYMMDD') AS INTEGER) * 10 + 1 AS id,
-                    dt.open_position AS position,
-                    dt.date::timestamp AS time
-                FROM daily_totals dt
-                )
-
-                UNION ALL
-
-                (
-                SELECT
-                    CAST(TO_CHAR(dt.date, 'YYYYMMDD') AS INTEGER) * 10 + 2 AS id,
-                    dt.high_position AS position,
-                    dt.date::timestamp + INTERVAL '1 second' AS time
-                FROM daily_totals dt
-                )
-
-                UNION ALL
-
-                (
-                SELECT
-                    CAST(TO_CHAR(dt.date, 'YYYYMMDD') AS INTEGER) * 10 + 3 AS id,
-                    dt.low_position AS position,
-                    dt.date::timestamp + INTERVAL '2 second' AS time
-                FROM daily_totals dt
-                )
-
-                UNION ALL
-
-                (
-                SELECT
-                    CAST(TO_CHAR(dt.date, 'YYYYMMDD') AS INTEGER) * 10 + 4 AS id,
-                    dt.close_position AS position,
-                    dt.date::timestamp + INTERVAL '3 second' AS time
-                FROM daily_totals dt
-                )
+                    ROW_NUMBER() OVER (ORDER BY ol.company_id, ol.time)::integer AS id,
+                    ol.company_id,
+                    ol.position,
+                    ol.time
+                FROM ohlc_lines ol
             )
         """)

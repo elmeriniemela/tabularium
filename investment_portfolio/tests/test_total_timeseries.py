@@ -19,7 +19,7 @@ class TestTotalTimeseries(InvestmentTestCommon):
         ]
 
     def _create_source_series(self, day, rows, *, company=None, liquid=True, prediction=False):
-        company = company or self.env['res.company'].browse(1)
+        company = company or self.company
         category = self.category
         if not liquid:
             category = self.env['investment.category'].create({
@@ -38,34 +38,52 @@ class TestTotalTimeseries(InvestmentTestCommon):
                 'portfolio_id': self.portfolio.id,
                 'company_id': company.id,
             })
-            price = self.env['investment.asset.price'].create({
+            self.env['investment.position.transaction'].create({
+                'position_id': position.id,
+                'quantity': 1.0,
+                'exchange_rate': 1.0,
+                'payment': 1.0,
+                'time': datetime(day.year, day.month, day.day, 18, 0, 0) - timedelta(days=1),
+            })
+            self.env['investment.asset.price'].create({
+                'asset_id': asset.id,
+                'time': datetime(day.year, day.month, day.day, 10, 0, 0),
+                'price': open_position,
+            })
+            self.env['investment.asset.price'].create({
+                'asset_id': asset.id,
+                'time': datetime(day.year, day.month, day.day, 12, 0, 0),
+                'price': high_position,
+            })
+            self.env['investment.asset.price'].create({
+                'asset_id': asset.id,
+                'time': datetime(day.year, day.month, day.day, 15, 0, 0),
+                'price': low_position,
+            })
+            close_price = self.env['investment.asset.price'].create({
                 'asset_id': asset.id,
                 'time': datetime(day.year, day.month, day.day, 18, 0, 0),
-                'price': 1.0,
+                'price': close_position,
                 'prediction': prediction,
             })
             series = self.env['investment.timeseries'].create({
                 'position_id': position.id,
                 'date': day.date(),
-                'price_id': price.id,
+                'price_id': close_price.id,
             })
-            self.env.cr.execute("""
-                UPDATE investment_timeseries
-                SET
-                    open_position = %s,
-                    high_position = %s,
-                    low_position = %s,
-                    position = %s
-                WHERE id = %s
-            """, [open_position, high_position, low_position, close_position, series.id])
+            series._compute_timeseries_aggregate()
 
-    def _get_day_lines(self, day):
+    def _get_day_lines(self, day, *, company=None, model=None):
         start = datetime(day.year, day.month, day.day, 0, 0, 0)
         stop = start + timedelta(days=1)
-        return self.env['investment.total.timeseries'].search([
+        domain = [
             ('time', '>=', start),
             ('time', '<', stop),
-        ], order='time asc, id asc')
+        ]
+        if company:
+            domain.append(('company_id', '=', company.id))
+        model = model or self.env['investment.total.timeseries'].sudo()
+        return model.search(domain, order='time asc, id asc')
 
     def test_total_timeseries_returns_daily_ohlc(self):
         day = datetime(2024, 6, 10, 0, 0, 0)
@@ -139,10 +157,53 @@ class TestTotalTimeseries(InvestmentTestCommon):
             (900.0, 950.0, 850.0, 925.0),
         ], prediction=True)
 
-        lines = self._get_day_lines(day)
+        lines = self._get_day_lines(day, company=self.company)
         self.assertEqual([
             (self._expected_times(day)[0], 100.0),
             (self._expected_times(day)[1], 110.0),
             (self._expected_times(day)[2], 90.0),
             (self._expected_times(day)[3], 105.0),
         ], [(line.time, line.position) for line in lines])
+        self.assertEqual(self.company, lines.company_id)
+
+        other_lines = self._get_day_lines(day, company=other_company)
+        self.assertEqual([
+            (self._expected_times(day)[0], 500.0),
+            (self._expected_times(day)[1], 550.0),
+            (self._expected_times(day)[2], 450.0),
+            (self._expected_times(day)[3], 525.0),
+        ], [(line.time, line.position) for line in other_lines])
+        self.assertEqual(other_company, other_lines.company_id)
+
+    def test_total_timeseries_record_rule_filters_companies(self):
+        day = datetime(2024, 6, 15, 0, 0, 0)
+        other_company = self.env['res.company'].create({'name': 'Hidden Company'})
+        group_user = self.env.ref('investment_portfolio.group_investment_user')
+
+        self._create_source_series(day, [
+            (10.0, 12.0, 8.0, 11.0),
+        ], company=self.company)
+        self._create_source_series(day, [
+            (20.0, 24.0, 16.0, 22.0),
+        ], company=other_company)
+
+        user = self.env['res.users'].with_context(no_reset_password=True).create({
+            'name': 'Total Timeseries User',
+            'login': 'total-timeseries-user',
+            'email': 'total-timeseries-user@example.com',
+            'company_id': self.company.id,
+            'company_ids': [(6, 0, self.company.ids)],
+            'group_ids': [(6, 0, [group_user.id])],
+        })
+        total_timeseries_model = self.env['investment.total.timeseries'].with_user(user).with_company(
+            self.company,
+        ).with_context(allowed_company_ids=self.company.ids)
+
+        lines = self._get_day_lines(day, model=total_timeseries_model)
+        self.assertEqual([
+            (self.company, self._expected_times(day)[0], 10.0),
+            (self.company, self._expected_times(day)[1], 12.0),
+            (self.company, self._expected_times(day)[2], 8.0),
+            (self.company, self._expected_times(day)[3], 11.0),
+        ], [(line.company_id, line.time, line.position) for line in lines])
+        self.assertFalse(self._get_day_lines(day, company=other_company, model=total_timeseries_model))

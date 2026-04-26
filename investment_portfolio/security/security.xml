@@ -120,7 +120,7 @@
         <field name="perm_create" eval="False"/>
         <field name="perm_write" eval="False"/>
         <field name="perm_unlink" eval="False"/>
-        <field name="domain_force">[('id', '!=', 0)]</field>
+        <field name="domain_force">['|',('company_id','=',False),('company_id', 'in', company_ids)]</field>
         <field name="groups" eval="[Command.link(ref('group_investment_user'))]"/>
     </record>
 
