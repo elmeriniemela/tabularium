@@ -12,6 +12,7 @@ import {
 } from "@web/../tests/web_test_helpers";
 import { ChartArchParser } from "@chart_widget/chart_arch_parser";
 import { ChartModel } from "@chart_widget/chart_model";
+import { ChartRenderer } from "@chart_widget/chart_renderer";
 
 class TimeSeries extends models.Model {
     _name = "time.series";
@@ -402,6 +403,68 @@ describe("chart view", () => {
         });
 
         expect(".o_view_nocontent").toHaveCount(1);
+    });
+
+    test("renderer formats y-axis values with comma separators", () => {
+        const originalLightweightCharts = window.LightweightCharts;
+        const createChartCalls = [];
+
+        window.LightweightCharts = {
+            LineSeries: "line-series",
+            createChart(container, options) {
+                createChartCalls.push({ container, options });
+                return {
+                    addSeries(definition, seriesOptions) {
+                        expect(definition).toBe("line-series");
+                        expect(seriesOptions).toEqual({ title: "Close" });
+                        return {
+                            setData(data) {
+                                expect(data).toEqual([
+                                    { time: "2024-01-01", value: 1234567.8912 },
+                                ]);
+                            },
+                        };
+                    },
+                    remove() {},
+                    timeScale() {
+                        return {
+                            fitContent() {
+                                expect.step("fit_content");
+                            },
+                        };
+                    },
+                };
+            },
+        };
+
+        try {
+            ChartRenderer.prototype._renderChart.call({
+                chart: null,
+                containerRef: { el: {} },
+                props: {
+                    model: {
+                        data: {
+                            series: [
+                                {
+                                    data: [{ time: "2024-01-01", value: 1234567.8912 }],
+                                    title: "Close",
+                                    type: "Line",
+                                },
+                            ],
+                        },
+                    },
+                },
+                _destroyChart: ChartRenderer.prototype._destroyChart,
+            });
+        } finally {
+            window.LightweightCharts = originalLightweightCharts;
+        }
+
+        expect(createChartCalls).toHaveLength(1);
+        expect(createChartCalls[0].options.localization.priceFormatter(1234567.8912)).toBe(
+            "1,234,567.89"
+        );
+        expect.verifySteps(["fit_content"]);
     });
 });
 

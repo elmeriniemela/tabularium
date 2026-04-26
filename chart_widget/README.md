@@ -4,6 +4,14 @@ Adds a `chart` view type to Odoo using the [lightweight-charts](https://github.c
 
 Library documentation: https://tradingview.github.io/lightweight-charts/
 
+## Updating the library:
+* Download the latest source code zip from https://github.com/tradingview/lightweight-charts/releases
+* `unzip lightweight-charts-5.1.0.zip`
+* `cd lightweight-charts-5.1.0`
+* `npm install`
+* `npm run build:prod`
+* `cp dist/lightweight-charts.standalone.production.js ../static/src/lib/lightweight-charts.js`
+
 ## Overview
 
 The module registers `chart` as a new view type alongside list, form, kanban, etc. Chart views are defined with arch XML and integrate with Odoo's search filters and favorites.

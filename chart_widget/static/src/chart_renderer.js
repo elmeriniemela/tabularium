@@ -3,6 +3,15 @@
 import { loadBundle } from "@web/core/assets";
 import { Component, onWillStart, useEffect, useRef, onWillUnmount } from "@odoo/owl";
 
+const PRICE_AXIS_NUMBER_FORMAT = new Intl.NumberFormat("en-US", {
+    useGrouping: true,
+    maximumFractionDigits: 2,
+});
+
+export function formatPriceAxisValue(price) {
+    return PRICE_AXIS_NUMBER_FORMAT.format(price);
+}
+
 export class ChartRenderer extends Component {
     static template = "chart_widget.ChartRenderer";
     static props = {
@@ -57,6 +66,9 @@ export class ChartRenderer extends Component {
 
         this.chart = LWC.createChart(container, {
             autoSize: true,
+            localization: {
+                priceFormatter: formatPriceAxisValue,
+            },
         });
 
         for (const seriesConfig of data.series) {
