@@ -26,6 +26,8 @@ class TestTotalTimeseries(InvestmentTestCommon):
                 'name': f'Illiquid {day:%Y%m%d}',
                 'liquid': False,
             })
+
+        all_series = self.env['investment.timeseries'].browse()
         for index, (open_position, high_position, low_position, close_position) in enumerate(rows, start=1):
             asset = self.env['investment.asset'].create({
                 'ticker': f'TOTAL-SQL-{day:%Y%m%d}-{index}-{company.id}-{int(liquid)}-{int(prediction)}',
@@ -66,12 +68,14 @@ class TestTotalTimeseries(InvestmentTestCommon):
                 'price': close_position,
                 'prediction': prediction,
             })
-            series = self.env['investment.timeseries'].create({
+            all_series += all_series.create({
                 'position_id': position.id,
                 'date': day.date(),
                 'price_id': close_price.id,
             })
-            series._compute_timeseries_aggregate()
+
+        all_series._compute_timeseries_aggregate()
+        return all_series
 
     def _get_day_lines(self, day, *, company=None, model=None):
         self.env['investment.timeseries'].flush_model([
@@ -158,7 +162,7 @@ class TestTotalTimeseries(InvestmentTestCommon):
         self._create_source_series(day, [
             (100.0, 110.0, 90.0, 105.0),
         ])
-        self._create_source_series(day, [
+        other_serie = self._create_source_series(day, [
             (500.0, 550.0, 450.0, 525.0),
         ], company=other_company)
         self._create_source_series(day, [
@@ -185,6 +189,13 @@ class TestTotalTimeseries(InvestmentTestCommon):
             (self._expected_times(day)[3], 525.0),
         ], [(line.time, line.position) for line in other_lines])
         self.assertEqual(other_company, other_lines.company_id)
+
+        self.assertEqual(
+            self.env['investment.timeseries'].sudo().search(
+                other_lines.action_view_timeseries()['domain']
+            ),
+            other_serie,
+        )
 
     def test_total_timeseries_record_rule_filters_companies(self):
         day = datetime(2024, 6, 15, 0, 0, 0)
