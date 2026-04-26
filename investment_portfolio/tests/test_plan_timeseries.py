@@ -83,9 +83,9 @@ class TestPlanTimeseries(InvestmentTestCommon):
             groupby=['date:month'],
             aggregates=['position_id:count'],
         )
-        groups = result.get('groups', [])
+        groups = result
         self.assertEqual(len(groups), 1)
-        group_date = groups[0].get('date:month')
+        group_date = groups[0]['date:month']
         if isinstance(group_date, tuple):
             group_date = group_date[0]
         if isinstance(group_date, str):

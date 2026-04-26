@@ -13,9 +13,9 @@ class TestTotalTimeseries(InvestmentTestCommon):
     def _expected_times(self, day):
         return [
             datetime(day.year, day.month, day.day, 0, 0, 0),
-            datetime(day.year, day.month, day.day, 0, 0, 1),
-            datetime(day.year, day.month, day.day, 0, 0, 2),
-            datetime(day.year, day.month, day.day, 0, 0, 3),
+            datetime(day.year, day.month, day.day, 0, 1, 0),
+            datetime(day.year, day.month, day.day, 0, 2, 0),
+            datetime(day.year, day.month, day.day, 0, 3, 0),
         ]
 
     def _create_source_series(self, day, rows, *, company=None, liquid=True, prediction=False):
