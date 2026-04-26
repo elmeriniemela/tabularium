@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoo import fields, models, tools
+from odoo import fields, models, tools, _
 
 
 class InvestmentTotalTimeseries(models.Model):
@@ -29,14 +29,24 @@ class InvestmentTotalTimeseries(models.Model):
     )
 
     ts_list = fields.Json()
-    ts_ids = fields.Many2many(
+    timeseries_ids = fields.Many2many(
         comodel_name='investment.timeseries',
-        compute='_compute_ts_ids',
+        compute='_compute_timeseries_ids',
     )
 
-    def _compute_ts_ids(self):
+    def action_view_timeseries(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Investment Timeseries'),
+            'res_model': 'investment.timeseries',
+            'view_mode': 'list',
+            'views': [[False, 'list'], [False, 'form']],
+            'domain': [('id', 'in', self.mapped('timeseries_ids').ids)],
+        }
+
+    def _compute_timeseries_ids(self):
         for record in self:
-            record.ts_ids = record.ts_list
+            record.timeseries_ids = record.ts_list
 
     def init(self):
         tools.drop_view_if_exists(self.env.cr, self._table)

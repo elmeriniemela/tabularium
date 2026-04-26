@@ -47,7 +47,7 @@
                             <field name="tstype"/>
                         </group>
                     </group>
-                    <field name="ts_ids"/>
+                    <field name="timeseries_ids"/>
                 </sheet>
             </form>
         </field>
@@ -96,4 +96,14 @@
             ]"
         />
     </record>
+
+    <record id="action_totals_view_timeseries" model="ir.actions.server">
+        <field name="name">Show timeseries</field>
+        <field name="model_id" ref="model_investment_total_timeseries"/>
+        <field name="binding_model_id" ref="model_investment_total_timeseries"/>
+        <field name="group_ids" eval="[(4, ref('group_investment_user'))]"/>
+        <field name="state">code</field>
+        <field name="code">action = records.action_view_timeseries()</field>
+    </record>
+
 </odoo>
