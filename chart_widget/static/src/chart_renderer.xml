@@ -2,8 +2,8 @@
 <templates xml:space="preserve">
 
     <t t-name="chart_widget.ChartRenderer">
-        <div class="o_chart_renderer o_renderer h-100 d-flex flex-column overflow-hidden border-top">
-            <div class="o_chart_canvas_container flex-grow-1 position-relative overflow-hidden p-3" t-ref="container"/>
+        <div class="o_chart_renderer o_renderer h-100 d-flex flex-column border-top">
+            <div class="o_chart_canvas_container flex-grow-1 position-relative" t-ref="container"/>
         </div>
     </t>
 
