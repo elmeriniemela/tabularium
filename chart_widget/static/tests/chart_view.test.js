@@ -11,6 +11,7 @@ import {
     toggleSearchBarMenu,
 } from "@web/../tests/web_test_helpers";
 import { ChartArchParser } from "@chart_widget/chart_arch_parser";
+import { ChartController } from "@chart_widget/chart_controller";
 import { ChartModel } from "@chart_widget/chart_model";
 import { ChartRenderer } from "@chart_widget/chart_renderer";
 
@@ -296,8 +297,16 @@ describe("chart view", () => {
         expect(model.data.series).toHaveLength(1);
         expect(model.data.series[0].type).toBe("Line");
         expect(model.data.series[0].data).toEqual([
-            { time: "2024-01-01", value: 210 },
-            { time: "2024-01-02", value: 110 },
+            {
+                customValues: { domain: [["date", "=", "2024-01-01"]] },
+                time: "2024-01-01",
+                value: 210,
+            },
+            {
+                customValues: { domain: [["date", "=", "2024-01-02"]] },
+                time: "2024-01-02",
+                value: 110,
+            },
         ]);
     });
 
@@ -378,6 +387,7 @@ describe("chart view", () => {
         expect(model.data.series[0].type).toBe("Candlestick");
         expect(model.data.series[0].data).toEqual([
             {
+                customValues: { domain: [["moment", ">=", "2024-01-01 00:00:00"]] },
                 time: Math.floor(new Date("2024-01-01").getTime() / 1000),
                 open: 95,
                 high: 105,
@@ -385,6 +395,7 @@ describe("chart view", () => {
                 close: 105,
             },
             {
+                customValues: { domain: [["moment", ">=", "2024-01-02 00:00:00"]] },
                 time: Math.floor(new Date("2024-01-02").getTime() / 1000),
                 open: 110,
                 high: 110,
@@ -425,6 +436,7 @@ describe("chart view", () => {
                             },
                         };
                     },
+                    subscribeClick() {},
                     remove() {},
                     timeScale() {
                         return {
@@ -454,6 +466,7 @@ describe("chart view", () => {
                         },
                     },
                 },
+                onChartClick() {},
                 _destroyChart: ChartRenderer.prototype._destroyChart,
             });
         } finally {
@@ -465,6 +478,155 @@ describe("chart view", () => {
             "1,234,567.89"
         );
         expect.verifySteps(["fit_content"]);
+    });
+
+    test("renderer forwards clicked point domain without hovered series", () => {
+        const originalLightweightCharts = window.LightweightCharts;
+        const clickedDomains = [];
+        let clickHandler;
+
+        window.LightweightCharts = {
+            CandlestickSeries: "candlestick-series",
+            createChart() {
+                return {
+                    addSeries(definition) {
+                        expect(definition).toBe("candlestick-series");
+                        return {
+                            setData(data) {
+                                expect(data).toEqual([
+                                    {
+                                        customValues: { domain: [["id", "in", [1, 2, 3]]] },
+                                        time: "2024-01-01",
+                                        open: 95,
+                                        high: 105,
+                                        low: 90,
+                                        close: 105,
+                                    },
+                                ]);
+                            },
+                        };
+                    },
+                    subscribeClick(handler) {
+                        clickHandler = handler;
+                    },
+                    unsubscribeClick() {},
+                    remove() {},
+                    timeScale() {
+                        return {
+                            fitContent() {},
+                        };
+                    },
+                };
+            },
+        };
+
+        const renderer = {
+            chart: null,
+            containerRef: { el: {} },
+            props: {
+                model: {
+                    data: {
+                        series: [
+                            {
+                                data: [
+                                    {
+                                        customValues: { domain: [["id", "in", [1, 2, 3]]] },
+                                        time: "2024-01-01",
+                                        open: 95,
+                                        high: 105,
+                                        low: 90,
+                                        close: 105,
+                                    },
+                                ],
+                                type: "Candlestick",
+                            },
+                        ],
+                    },
+                },
+                onPointClick(domain) {
+                    clickedDomains.push(domain);
+                },
+            },
+            _destroyChart: ChartRenderer.prototype._destroyChart,
+        };
+        renderer.onChartClick = ChartRenderer.prototype._onChartClick.bind(renderer);
+
+        try {
+            ChartRenderer.prototype._renderChart.call(renderer);
+            clickHandler({
+                seriesData: new Map([
+                    [
+                        {},
+                        {
+                            customValues: { domain: [["id", "in", [1, 2, 3]]] },
+                        },
+                    ],
+                ]),
+            });
+        } finally {
+            window.LightweightCharts = originalLightweightCharts;
+        }
+
+        expect(clickedDomains).toEqual([[["id", "in", [1, 2, 3]]]]);
+    });
+
+    test("controller opens clicked domain in list view", () => {
+        const actions = [];
+
+        ChartController.prototype.openDomain.call(
+            {
+                actionService: {
+                    doAction(action, options) {
+                        actions.push({ action, options });
+                    },
+                },
+                env: {
+                    config: {
+                        views: [
+                            [11, "list"],
+                            [12, "form"],
+                            [13, "search"],
+                        ],
+                    },
+                },
+                model: {
+                    metaData: {
+                        resModel: "time.series",
+                        title: "Candlestick Chart",
+                    },
+                    searchParams: {
+                        context: {
+                            group_by: ["moment:day"],
+                            lang: "fi_FI",
+                            search_default_group_day: 1,
+                        },
+                    },
+                },
+                props: {
+                    context: {},
+                },
+            },
+            [["id", "in", [1, 2, 3]]]
+        );
+
+        expect(actions).toEqual([
+            {
+                action: {
+                    context: { lang: "fi_FI" },
+                    domain: [["id", "in", [1, 2, 3]]],
+                    name: "Candlestick Chart",
+                    res_model: "time.series",
+                    search_view_id: [13, "search"],
+                    target: "current",
+                    type: "ir.actions.act_window",
+                    views: [
+                        [11, "list"],
+                        [12, "form"],
+                    ],
+                },
+                options: { viewType: "list" },
+            },
+        ]);
     });
 });
 

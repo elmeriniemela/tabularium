@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { useService } from "@web/core/utils/hooks";
 import { Layout } from "@web/search/layout";
 import { useModelWithSampleData } from "@web/model/model";
 import { standardViewProps } from "@web/views/standard_view_props";
@@ -22,6 +23,7 @@ export class ChartController extends Component {
 
     setup() {
         this.model = useModelWithSampleData(this.props.Model, this.props.modelParams);
+        this.actionService = useService("action");
 
         useSetupAction({
             rootRef: useRef("root"),
@@ -30,5 +32,36 @@ export class ChartController extends Component {
             },
         });
         this.searchBarToggler = useSearchBarToggler();
+    }
+
+    openDomain(domain) {
+        const context = { ...(this.model.searchParams?.context || this.props.context || {}) };
+        for (const key of Object.keys(context)) {
+            if (key === "group_by" || key.startsWith("search_default_")) {
+                delete context[key];
+            }
+        }
+
+        const viewIds = {};
+        for (const [viewId, viewType] of this.env.config.views || []) {
+            viewIds[viewType] = viewId;
+        }
+
+        this.actionService.doAction(
+            {
+                context,
+                domain,
+                name: this.model.metaData.title,
+                res_model: this.model.metaData.resModel,
+                search_view_id: this.env.config.views?.find((view) => view[1] === "search"),
+                target: "current",
+                type: "ir.actions.act_window",
+                views: [
+                    [viewIds.list || false, "list"],
+                    [viewIds.form || false, "form"],
+                ],
+            },
+            { viewType: "list" }
+        );
     }
 }

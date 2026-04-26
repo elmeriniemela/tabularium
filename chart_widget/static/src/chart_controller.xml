@@ -17,7 +17,7 @@
                     <t t-if="!model.hasData() or model.useSampleModel and props.info.noContentHelp" t-call="web.ActionHelper">
                         <t t-set="noContentHelp" t-value="props.info.noContentHelp"/>
                     </t>
-                    <t t-component="props.Renderer" model="model" />
+                    <t t-component="props.Renderer" model="model" onPointClick.bind="openDomain" />
                 </t>
             </Layout>
         </div>

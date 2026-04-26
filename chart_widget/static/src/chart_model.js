@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { Domain } from "@web/core/domain";
 import { Model } from "@web/model/model";
 import { getGroupBy } from "@web/search/utils/group_by";
 
@@ -15,9 +16,11 @@ export class ChartModel extends Model {
     setup(params) {
         this.metaData = params;
         this.data = null;
+        this.searchParams = null;
     }
 
     async load(searchParams) {
+        this.searchParams = searchParams;
         const groupBy = this._getEffectiveGroupBy(searchParams);
         if (groupBy.length) {
             this.data = await this._loadGroupedSeriesData(searchParams, groupBy);
@@ -128,6 +131,7 @@ export class ChartModel extends Model {
             if (!time) {
                 continue;
             }
+            const domain = this._getGroupedDomain(group);
 
             const groupValues = groupBy.slice(1).map((item) => group[item.spec]);
             const groupLabel = groupBy
@@ -151,8 +155,15 @@ export class ChartModel extends Model {
 
                 const point =
                     seriesField.type === "candlestick"
-                        ? this._getGroupedCandlestickPoint(group, seriesField, time, isDatetime)
+                        ? this._getGroupedCandlestickPoint(
+                              group,
+                              seriesField,
+                              time,
+                              isDatetime,
+                              domain
+                          )
                         : {
+                              customValues: { domain },
                               time,
                               value:
                                   group[this._getAggregateSpecification(seriesField.fieldName)] ?? 0,
@@ -166,7 +177,7 @@ export class ChartModel extends Model {
         return { series: [...seriesByKey.values()] };
     }
 
-    _getGroupedCandlestickPoint(group, seriesField, time, isDatetime) {
+    _getGroupedCandlestickPoint(group, seriesField, time, isDatetime, domain) {
         const timeValues = group[`${this.metaData.timeField}:array_agg`] || [];
         const recordIds = group["id:array_agg"] || [];
         const values = group[`${seriesField.fieldName}:array_agg`] || [];
@@ -195,12 +206,20 @@ export class ChartModel extends Model {
             });
 
         return {
+            customValues: { domain },
             time,
             open: orderedValues[0].value,
             high: group[`${seriesField.fieldName}:max`] ?? orderedValues[0].value,
             low: group[`${seriesField.fieldName}:min`] ?? orderedValues[0].value,
             close: orderedValues[orderedValues.length - 1].value,
         };
+    }
+
+    _getGroupedDomain(group) {
+        if (group.__domain) {
+            return group.__domain;
+        }
+        return Domain.and([this.searchParams?.domain || [], group.__extra_domain || []]).toList();
     }
 
     _getGroupedTimeValue(value, fieldType) {

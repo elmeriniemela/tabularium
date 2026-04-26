@@ -16,11 +16,13 @@ export class ChartRenderer extends Component {
     static template = "chart_widget.ChartRenderer";
     static props = {
         model: Object,
+        onPointClick: { type: Function, optional: true },
     };
 
     setup() {
         this.containerRef = useRef("container");
         this.chart = null;
+        this.onChartClick = this._onChartClick.bind(this);
 
         onWillStart(async () => {
             await loadBundle("chart_widget.lightweight_charts");
@@ -41,6 +43,7 @@ export class ChartRenderer extends Component {
 
     _destroyChart() {
         if (this.chart) {
+            this.chart.unsubscribeClick?.(this.onChartClick);
             this.chart.remove();
             this.chart = null;
         }
@@ -82,6 +85,17 @@ export class ChartRenderer extends Component {
             series.setData(seriesConfig.data);
         }
 
+        this.chart.subscribeClick(this.onChartClick);
         this.chart.timeScale().fitContent();
+    }
+
+    _onChartClick(param) {
+        const point =
+            (param.hoveredSeries && param.seriesData.get(param.hoveredSeries)) ||
+            [...param.seriesData.values()].find((item) => item?.customValues?.domain !== undefined);
+        const domain = point?.customValues?.domain;
+        if (domain !== undefined) {
+            this.props.onPointClick?.(domain);
+        }
     }
 }
