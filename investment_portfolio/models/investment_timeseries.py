@@ -247,21 +247,7 @@ class InvestmentTimeseries(models.Model):
 
 
     @api.model
-    def web_read_group(
-        self,
-        domain,
-        groupby,
-        aggregates=(),
-        limit=None,
-        offset=0,
-        order=None,
-        *,
-        auto_unfold=False,
-        opening_info=None,
-        unfold_read_specification=None,
-        unfold_read_default_limit=80,
-        groupby_read_specification=None,
-    ):
+    def formatted_read_group(self, domain, groupby=(), aggregates=(), having=(), offset=0, limit=None, order=None) -> list[dict]:
         """
         Returns the result of a read_group and the total number of groups matching the search domain.
 
@@ -292,19 +278,7 @@ class InvestmentTimeseries(models.Model):
                     _logger.info("Additional domain: %s", add_domain)
                     break
 
-        return super().web_read_group(
-            domain,
-            groupby,
-            aggregates=aggregates,
-            limit=limit,
-            offset=offset,
-            order=order,
-            auto_unfold=auto_unfold,
-            opening_info=opening_info,
-            unfold_read_specification=unfold_read_specification,
-            unfold_read_default_limit=unfold_read_default_limit,
-            groupby_read_specification=groupby_read_specification,
-        )
+        return super().formatted_read_group(domain, groupby, aggregates, having, offset, limit, order)
 
 
     def refresh_price(self):

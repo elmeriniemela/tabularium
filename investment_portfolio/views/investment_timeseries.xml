@@ -147,36 +147,6 @@
         <field name="code">records._compute_timeseries_aggregate()</field>
     </record>
 
-    <record id="action_profits" model="ir.actions.act_window">
-        <field name="name">Profits</field>
-        <field name="res_model">investment.timeseries</field>
-        <field name="view_mode">graph,list,form,pivot</field>
-        <field name="domain" eval="False"/>
-        <field name="context">{'search_default_group_day': 1, 'search_default_liquid': 1, 'search_default_1_year': 1, 'search_default_until_today': 1}</field>
-        <field
-            name="view_ids"
-            eval="[
-                (5, 0, 0),
-            ]"
-        />
-    </record>
-
-    <record id="action_positions" model="ir.actions.act_window">
-        <field name="name">Positions</field>
-        <field name="res_model">investment.timeseries</field>
-        <field name="view_mode">graph,chart,list,form,pivot</field>
-        <field name="domain" eval="False"/>
-        <field name="context">{'search_default_group_day': 1, 'search_default_liquid': 1, 'search_default_1_year': 1, 'search_default_until_today': 1}</field>
-        <field
-            name="view_ids"
-            eval="[
-                (5, 0, 0),
-                (0, 0, {'view_mode': 'graph', 'view_id': ref('timeseries_position')}),
-            ]"
-        />
-    </record>
-
-
     <record id="action_profits_per_asset" model="ir.actions.act_window">
         <field name="name">Profits per asset</field>
         <field name="res_model">investment.timeseries</field>

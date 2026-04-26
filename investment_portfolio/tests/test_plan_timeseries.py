@@ -49,8 +49,8 @@ class TestPlanTimeseries(InvestmentTestCommon):
         self.assertAlmostEqual(ts.position, 1000.0, places=2)
         self.assertAlmostEqual(ts.profit, 0.0, places=2)
 
-    def test_timeseries_web_read_group_filters_granularity(self):
-        """web_read_group adds a granularity filter based on date group."""
+    def test_timeseries_formatted_read_group_filters_granularity(self):
+        """formatted_read_group adds a granularity filter based on date group."""
         pos = self.env['investment.position'].create({
             'name': 'Timeseries Group',
             'asset_id': self.asset.id,
@@ -78,7 +78,7 @@ class TestPlanTimeseries(InvestmentTestCommon):
             'price_id': daily_price.id,
         })
 
-        result = self.env['investment.timeseries'].web_read_group(
+        result = self.env['investment.timeseries'].formatted_read_group(
             domain=[('position_id', '=', pos.id)],
             groupby=['date:month'],
             aggregates=['position_id:count'],

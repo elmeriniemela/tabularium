@@ -35,6 +35,18 @@
         </field>
     </record>
 
+    <record id="total_timeseries_profit_chart" model="ir.ui.view">
+        <field name="name">investment.total.timeseries.chart</field>
+        <field name="model">investment.total.timeseries</field>
+        <field name="priority" eval="2"/>
+        <field name="arch" type="xml">
+            <chart>
+                <field name="time" type="time"/>
+                <field name="profit" type="candlestick"/>
+            </chart>
+        </field>
+    </record>
+
     <record id="total_timeseries_form" model="ir.ui.view">
         <field name="name">investment.total.timeseries.form</field>
         <field name="model">investment.total.timeseries</field>
@@ -84,8 +96,8 @@
         </field>
     </record>
 
-    <record id="action_total_positions" model="ir.actions.act_window">
-        <field name="name">Total positions</field>
+    <record id="action_positions" model="ir.actions.act_window">
+        <field name="name">Positions</field>
         <field name="res_model">investment.total.timeseries</field>
         <field name="view_mode">chart,list,form,pivot</field>
         <field name="domain" eval="False"/>
@@ -95,6 +107,21 @@
             eval="[
                 (5, 0, 0),
                 (0, 0, {'view_mode': 'chart', 'view_id': ref('total_timeseries_position_chart')}),
+            ]"
+        />
+    </record>
+
+    <record id="action_profits" model="ir.actions.act_window">
+        <field name="name">Profits</field>
+        <field name="res_model">investment.total.timeseries</field>
+        <field name="view_mode">chart,list,form,pivot</field>
+        <field name="domain" eval="False"/>
+        <field name="context">{'search_default_1_year': 1, 'search_default_until_today': 1}</field>
+        <field
+            name="view_ids"
+            eval="[
+                (5, 0, 0),
+                (0, 0, {'view_mode': 'chart', 'view_id': ref('total_timeseries_profit_chart')}),
             ]"
         />
     </record>
