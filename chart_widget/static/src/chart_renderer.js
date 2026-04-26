@@ -69,6 +69,9 @@ export class ChartRenderer extends Component {
 
         this.chart = LWC.createChart(container, {
             autoSize: true,
+            layout: {
+                attributionLogo: false,
+            },
             localization: {
                 priceFormatter: formatPriceAxisValue,
             },

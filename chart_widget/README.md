@@ -6,11 +6,11 @@ Library documentation: https://tradingview.github.io/lightweight-charts/
 
 ## Updating the library:
 * Download the latest source code zip from https://github.com/tradingview/lightweight-charts/releases
-* `unzip lightweight-charts-5.1.0.zip`
-* `cd lightweight-charts-5.1.0`
+* `unzip lightweight-charts-5.1.0.zip -d dist`
+* `cd dist/lightweight-charts-5.1.0`
 * `npm install`
 * `npm run build:prod`
-* `cp dist/lightweight-charts.standalone.production.js ../static/src/lib/lightweight-charts.js`
+* `cp dist/lightweight-charts.standalone.production.js ../../static/src/lib/lightweight-charts.js`
 
 ## Overview
 
