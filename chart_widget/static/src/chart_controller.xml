@@ -2,8 +2,8 @@
 <templates xml:space="preserve">
 
     <t t-name="chart_widget.ChartView">
-        <div t-att-class="props.className" t-ref="root">
-            <Layout className="model.useSampleModel ? 'o_view_sample_data' : ''" display="props.display">
+        <div t-attf-class="{{ props.className }} d-flex flex-column h-100 overflow-hidden" t-ref="root">
+            <Layout className="(model.useSampleModel ? 'o_view_sample_data ' : '') + 'h-100 overflow-hidden'" display="props.display">
                 <t t-set-slot="control-panel-additional-actions">
                     <CogMenu/>
                 </t>
