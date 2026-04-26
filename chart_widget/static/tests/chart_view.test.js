@@ -7,11 +7,13 @@ import {
     models,
     mountView,
     onRpc,
+    patchWithCleanup,
     toggleMenuItem,
     toggleSearchBarMenu,
 } from "@web/../tests/web_test_helpers";
 import { ChartArchParser } from "@chart_widget/chart_arch_parser";
 import { ChartModel } from "@chart_widget/chart_model";
+import { ChartRenderer, shouldHidePriceDecimals } from "@chart_widget/chart_renderer";
 
 class TimeSeries extends models.Model {
     _name = "time.series";
@@ -402,6 +404,107 @@ describe("chart view", () => {
         });
 
         expect(".o_view_nocontent").toHaveCount(1);
+    });
+});
+
+describe("chart renderer", () => {
+    test("detects when the visible price range should hide decimals", async () => {
+        expect(shouldHidePriceDecimals(null)).toBe(false);
+        expect(shouldHidePriceDecimals({ from: 0, to: 1000 })).toBe(false);
+        expect(shouldHidePriceDecimals({ from: -500, to: 501 })).toBe(true);
+    });
+
+    test("toggles series precision from the visible price range", async () => {
+        const defaultPriceFormat = {
+            type: "price",
+            precision: 2,
+            minMove: 0.01,
+        };
+        const appliedOptions = [];
+        let visibleRange = { from: 0, to: 1500 };
+        let visibleRangeChangeHandler = null;
+
+        const fakeSeries = {
+            applyOptions: (options) => appliedOptions.push(options),
+            options: () => ({ priceFormat: defaultPriceFormat }),
+            priceScale: () => ({
+                getVisibleRange: () => visibleRange,
+            }),
+            setData: () => undefined,
+        };
+        const fakeTimeScale = {
+            fitContent: () => expect.step("fit_content"),
+            subscribeVisibleLogicalRangeChange: (handler) => {
+                visibleRangeChangeHandler = handler;
+            },
+            unsubscribeVisibleLogicalRangeChange: (handler) => {
+                expect.step("unsubscribe_visible_range");
+                expect(handler).toBe(visibleRangeChangeHandler);
+            },
+        };
+        const fakeChart = {
+            addSeries: () => fakeSeries,
+            remove: () => expect.step("remove_chart"),
+            timeScale: () => fakeTimeScale,
+        };
+
+        patchWithCleanup(window, {
+            LightweightCharts: {
+                LineSeries: {},
+                createChart: () => fakeChart,
+            },
+        });
+
+        const renderer = Object.create(ChartRenderer.prototype);
+        renderer.chart = null;
+        renderer.containerRef = { el: document.createElement("div") };
+        renderer.props = {
+            model: {
+                data: {
+                    series: [
+                        {
+                            type: "Line",
+                            title: "Close",
+                            data: [
+                                { time: "2024-01-01", value: 1000.25 },
+                                { time: "2024-01-02", value: 2000.5 },
+                            ],
+                        },
+                    ],
+                },
+            },
+        };
+        renderer.renderedSeries = [];
+        renderer.visibleLogicalRangeChangeHandler = null;
+
+        ChartRenderer.prototype._renderChart.call(renderer);
+
+        expect(appliedOptions).toEqual([
+            {
+                priceFormat: {
+                    type: "price",
+                    precision: 0,
+                    minMove: 1,
+                },
+            },
+        ]);
+
+        visibleRange = { from: 0, to: 1000 };
+        visibleRangeChangeHandler();
+
+        expect(appliedOptions).toEqual([
+            {
+                priceFormat: {
+                    type: "price",
+                    precision: 0,
+                    minMove: 1,
+                },
+            },
+            { priceFormat: defaultPriceFormat },
+        ]);
+
+        ChartRenderer.prototype._destroyChart.call(renderer);
+        expect.verifySteps(["fit_content", "unsubscribe_visible_range", "remove_chart"]);
     });
 });
 
