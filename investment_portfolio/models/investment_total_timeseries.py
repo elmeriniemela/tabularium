@@ -28,6 +28,11 @@ class InvestmentTotalTimeseries(models.Model):
         aggregator='avg',
     )
 
+    profit = fields.Float(
+        readonly=True,
+        aggregator='avg',
+    )
+
     ts_list = fields.Json()
     timeseries_ids = fields.Many2many(
         comodel_name='investment.timeseries',
@@ -59,6 +64,10 @@ class InvestmentTotalTimeseries(models.Model):
                         ts.company_id,
                         ts.date,
                         array_agg(ts.id) AS ts_list,
+                        SUM(ts.open_profit) AS open_profit,
+                        SUM(ts.high_profit) AS high_profit,
+                        SUM(ts.low_profit) AS low_profit,
+                        SUM(ts.profit) AS close_profit,
                         SUM(ts.open_position) AS open_position,
                         SUM(ts.high_position) AS high_position,
                         SUM(ts.low_position) AS low_position,
@@ -71,6 +80,7 @@ class InvestmentTotalTimeseries(models.Model):
                 ohlc_lines AS (
                     SELECT
                         dt.company_id,
+                        dt.open_profit AS profit,
                         dt.open_position AS position,
                         'open' AS tstype,
                         dt.ts_list,
@@ -81,6 +91,7 @@ class InvestmentTotalTimeseries(models.Model):
 
                     SELECT
                         dt.company_id,
+                        dt.high_profit AS profit,
                         dt.high_position AS position,
                         'high' AS tstype,
                         dt.ts_list,
@@ -91,6 +102,7 @@ class InvestmentTotalTimeseries(models.Model):
 
                     SELECT
                         dt.company_id,
+                        dt.low_profit AS profit,
                         dt.low_position AS position,
                         'low' AS tstype,
                         dt.ts_list,
@@ -101,6 +113,7 @@ class InvestmentTotalTimeseries(models.Model):
 
                     SELECT
                         dt.company_id,
+                        dt.close_profit AS profit,
                         dt.close_position AS position,
                         'close' AS tstype,
                         dt.ts_list,
@@ -111,6 +124,7 @@ class InvestmentTotalTimeseries(models.Model):
                 SELECT
                     ROW_NUMBER() OVER (ORDER BY ol.company_id, ol.time)::integer AS id,
                     ol.company_id,
+                    ol.profit,
                     ol.position,
                     ol.tstype,
                     ol.ts_list,
