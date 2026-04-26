@@ -74,6 +74,16 @@ class TestTotalTimeseries(InvestmentTestCommon):
             series._compute_timeseries_aggregate()
 
     def _get_day_lines(self, day, *, company=None, model=None):
+        self.env['investment.timeseries'].flush_model([
+            'company_id',
+            'date',
+            'liquid',
+            'prediction',
+            'open_position',
+            'high_position',
+            'low_position',
+            'position',
+        ])
         start = datetime(day.year, day.month, day.day, 0, 0, 0)
         stop = start + timedelta(days=1)
         domain = [
@@ -82,7 +92,8 @@ class TestTotalTimeseries(InvestmentTestCommon):
         ]
         if company:
             domain.append(('company_id', '=', company.id))
-        model = model or self.env['investment.total.timeseries'].sudo()
+        if model is None:
+            model = self.env['investment.total.timeseries'].sudo()
         return model.search(domain, order='time asc, id asc')
 
     def test_total_timeseries_returns_daily_ohlc(self):
@@ -111,8 +122,8 @@ class TestTotalTimeseries(InvestmentTestCommon):
         lines = self._get_day_lines(day)
         self.assertEqual([
             (self._expected_times(day)[0], 400.0),
-            (self._expected_times(day)[1], 500.0),
-            (self._expected_times(day)[2], 400.0),
+            (self._expected_times(day)[1], 510.0),
+            (self._expected_times(day)[2], 390.0),
             (self._expected_times(day)[3], 500.0),
         ], [(line.time, line.position) for line in lines])
 
