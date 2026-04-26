@@ -28,6 +28,16 @@ class InvestmentTotalTimeseries(models.Model):
         aggregator='avg',
     )
 
+    ts_list = fields.Json()
+    ts_ids = fields.Many2many(
+        comodel_name='investment.timeseries',
+        compute='_compute_ts_ids',
+    )
+
+    def _compute_ts_ids(self):
+        for record in self:
+            record.ts_ids = record.ts_list
+
     def init(self):
         tools.drop_view_if_exists(self.env.cr, self._table)
         # Portfolio OHLC rows are daily aggregates, so the view assigns
@@ -38,6 +48,7 @@ class InvestmentTotalTimeseries(models.Model):
                     SELECT
                         ts.company_id,
                         ts.date,
+                        array_agg(ts.id) AS ts_list,
                         SUM(ts.open_position) AS open_position,
                         SUM(ts.high_position) AS high_position,
                         SUM(ts.low_position) AS low_position,
@@ -52,6 +63,7 @@ class InvestmentTotalTimeseries(models.Model):
                         dt.company_id,
                         dt.open_position AS position,
                         'open' AS tstype,
+                        dt.ts_list,
                         dt.date::timestamp AS time
                     FROM daily_totals dt
 
@@ -61,6 +73,7 @@ class InvestmentTotalTimeseries(models.Model):
                         dt.company_id,
                         dt.high_position AS position,
                         'high' AS tstype,
+                        dt.ts_list,
                         dt.date::timestamp + INTERVAL '1 minute' AS time
                     FROM daily_totals dt
 
@@ -70,6 +83,7 @@ class InvestmentTotalTimeseries(models.Model):
                         dt.company_id,
                         dt.low_position AS position,
                         'low' AS tstype,
+                        dt.ts_list,
                         dt.date::timestamp + INTERVAL '2 minute' AS time
                     FROM daily_totals dt
 
@@ -79,6 +93,7 @@ class InvestmentTotalTimeseries(models.Model):
                         dt.company_id,
                         dt.close_position AS position,
                         'close' AS tstype,
+                        dt.ts_list,
                         dt.date::timestamp + INTERVAL '3 minute' AS time
                     FROM daily_totals dt
                 )
@@ -88,6 +103,7 @@ class InvestmentTotalTimeseries(models.Model):
                     ol.company_id,
                     ol.position,
                     ol.tstype,
+                    ol.ts_list,
                     ol.time
                 FROM ohlc_lines ol
             )

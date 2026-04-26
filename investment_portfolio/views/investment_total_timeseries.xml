@@ -47,6 +47,7 @@
                             <field name="tstype"/>
                         </group>
                     </group>
+                    <field name="ts_ids"/>
                 </sheet>
             </form>
         </field>

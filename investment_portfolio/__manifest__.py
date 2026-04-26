@@ -6,7 +6,7 @@
     'license': 'LGPL-3',
     'category': 'Investment Portfolio',
     'description': 'Investment portfolio management for tracking assets and positions.',
-    'version': '2.8.30',
+    'version': '2.8.31',
     'depends': [
         'mail',
         'timeago_widget',
