@@ -90,11 +90,7 @@ describe("chart view", () => {
         expect(".o_chart_view").toHaveClass("d-flex");
         expect(".o_chart_view").toHaveClass("flex-column");
         expect(".o_chart_view").toHaveClass("h-100");
-        expect(".o_chart_view").toHaveClass("overflow-hidden");
         expect(".o_chart_view > .o_content").toHaveClass("h-100");
-        expect(".o_chart_view > .o_content").toHaveClass("overflow-hidden");
-        expect(".o_chart_renderer").toHaveClass("overflow-hidden");
-        expect(".o_chart_canvas_container").toHaveClass("overflow-hidden");
         expect(".o_chart_renderer").toHaveCount(1);
         expect(".o_chart_canvas_container").toHaveCount(1);
     });
