@@ -5,6 +5,7 @@
         <field name="arch" type="xml">
             <list>
                 <field name="time" optional="show"/>
+                <field name="tstype" optional="show"/>
                 <field name="position" optional="show" sum="Total Position"/>
             </list>
         </field>
@@ -43,6 +44,7 @@
                         <group>
                             <field name="time"/>
                             <field name="position"/>
+                            <field name="tstype"/>
                         </group>
                     </group>
                 </sheet>
@@ -73,9 +75,7 @@
                 <filter string="10 Years" name="10_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-10*365)).strftime('%Y-%m-%d')),('time','&lt;',(context_today() + relativedelta(days=10*365)).strftime('%Y-%m-%d'))]"/>
                 <separator/>
                 <group>
-                    <filter string="Time" name="group_day" context="{'group_by': 'time:day'}" invisible="not context.get('search_default_group_day')"/>
-                    <filter string="Time" name="group_week" context="{'group_by': 'time:week'}" invisible="not context.get('search_default_group_week')"/>
-                    <filter string="Time" name="group_year" context="{'group_by': 'time:year'}" invisible="not context.get('search_default_group_year')"/>
+                    <filter string="Time" name="group_day" context="{'group_by': 'time:day'}"/>
                 </group>
             </search>
         </field>
@@ -86,7 +86,7 @@
         <field name="res_model">investment.total.timeseries</field>
         <field name="view_mode">chart,list,form,pivot</field>
         <field name="domain" eval="False"/>
-        <field name="context">{'search_default_group_week': 1, 'search_default_1_year': 1, 'search_default_until_today': 1}</field>
+        <field name="context">{'search_default_1_year': 1, 'search_default_until_today': 1}</field>
         <field
             name="view_ids"
             eval="[

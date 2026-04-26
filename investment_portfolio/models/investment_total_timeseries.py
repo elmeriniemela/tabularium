@@ -15,6 +15,14 @@ class InvestmentTotalTimeseries(models.Model):
         readonly=True,
     )
     time = fields.Datetime(readonly=True)
+    tstype = fields.Selection(
+        selection=[
+            ('open', 'Open'),
+            ('high', 'High'),
+            ('low', 'Low'),
+            ('close', 'Close'),
+        ]
+    )
     position = fields.Float(
         readonly=True,
         aggregator='avg',
@@ -43,6 +51,7 @@ class InvestmentTotalTimeseries(models.Model):
                     SELECT
                         dt.company_id,
                         dt.open_position AS position,
+                        'open' AS tstype,
                         dt.date::timestamp AS time
                     FROM daily_totals dt
 
@@ -51,7 +60,8 @@ class InvestmentTotalTimeseries(models.Model):
                     SELECT
                         dt.company_id,
                         dt.high_position AS position,
-                        dt.date::timestamp + INTERVAL '1 second' AS time
+                        'high' AS tstype,
+                        dt.date::timestamp + INTERVAL '1 minute' AS time
                     FROM daily_totals dt
 
                     UNION ALL
@@ -59,7 +69,8 @@ class InvestmentTotalTimeseries(models.Model):
                     SELECT
                         dt.company_id,
                         dt.low_position AS position,
-                        dt.date::timestamp + INTERVAL '2 second' AS time
+                        'low' AS tstype,
+                        dt.date::timestamp + INTERVAL '2 minute' AS time
                     FROM daily_totals dt
 
                     UNION ALL
@@ -67,7 +78,8 @@ class InvestmentTotalTimeseries(models.Model):
                     SELECT
                         dt.company_id,
                         dt.close_position AS position,
-                        dt.date::timestamp + INTERVAL '3 second' AS time
+                        'close' AS tstype,
+                        dt.date::timestamp + INTERVAL '3 minute' AS time
                     FROM daily_totals dt
                 )
 
@@ -75,6 +87,7 @@ class InvestmentTotalTimeseries(models.Model):
                     ROW_NUMBER() OVER (ORDER BY ol.company_id, ol.time)::integer AS id,
                     ol.company_id,
                     ol.position,
+                    ol.tstype,
                     ol.time
                 FROM ohlc_lines ol
             )
