@@ -7,9 +7,6 @@ from odoo.tools import float_is_zero, date_utils
 from odoo.fields import Domain
 import logging
 from dateutil.relativedelta import relativedelta
-from collections import defaultdict
-
-
 _logger = logging.getLogger(__name__)
 
 class InvestmentTimeseries(models.Model):
@@ -290,6 +287,60 @@ class InvestmentTimeseries(models.Model):
                     ('asset_id', '=', serie.position_id.asset_id.id),
                 ], limit=1, order='time desc') # update the latest price when not doing predictions.
 
+    @api.model
+    def _get_daily_price_extremes(self, asset_ids):
+        Price = self.env['investment.asset.price']
+        if not asset_ids:
+            return {}, {}
+
+        self.env.cr.execute(
+            """
+            WITH ranked_prices AS (
+                SELECT
+                    id,
+                    asset_id,
+                    DATE(time) AS day,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY asset_id, DATE(time)
+                        ORDER BY time ASC, id ASC
+                    ) AS open_rank,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY asset_id, DATE(time)
+                        ORDER BY price DESC, time ASC, id ASC
+                    ) AS high_rank,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY asset_id, DATE(time)
+                        ORDER BY price ASC, time ASC, id ASC
+                    ) AS low_rank
+                FROM investment_asset_price
+                WHERE asset_id IN %s
+                  AND prediction IS NOT TRUE
+            )
+            SELECT
+                asset_id,
+                day,
+                MAX(CASE WHEN open_rank = 1 THEN id END) AS open_price_id,
+                MAX(CASE WHEN high_rank = 1 THEN id END) AS high_price_id,
+                MAX(CASE WHEN low_rank = 1 THEN id END) AS low_price_id
+            FROM ranked_prices
+            GROUP BY asset_id, day
+            """,
+            (tuple(asset_ids),),
+        )
+
+        day_prices = {}
+        price_ids = set()
+        for asset_id, day, open_price_id, high_price_id, low_price_id in self.env.cr.fetchall():
+            if isinstance(day, datetime.datetime):
+                day = day.date()
+            day_prices[(asset_id, day)] = (open_price_id, high_price_id, low_price_id)
+            price_ids.add(open_price_id)
+            price_ids.add(high_price_id)
+            price_ids.add(low_price_id)
+
+        prices = {price.id: price for price in Price.browse(list(price_ids))}
+        return day_prices, prices
+
     @api.depends('position_id', 'date')
     def _compute_timeseries_aggregate(self):
         _logger.info(f"Compute time series aggregate on {self.mapped('position_id.name')} for {len(self)} records.")
@@ -302,19 +353,7 @@ class InvestmentTimeseries(models.Model):
         for trans in transactions:
             trans_map[trans.position_id] = trans_map.get(trans.position_id, Transaction) + trans
 
-
-        Price = self.env['investment.asset.price']
-        p_groups = Price.sudo()._read_group(
-            domain=[('asset_id', 'in', self.mapped('position_id.asset_id').ids), ('prediction', '=', False)],
-            groupby=['asset_id', 'time:day'],
-            aggregates=[
-                'id:recordset',
-            ],
-        )
-
-        pdict = defaultdict(lambda: Price.browse())
-        for asset, time, pids in p_groups:
-            pdict[(asset.id, time.date())] = pids
+        day_prices, price_map = self._get_daily_price_extremes(self.mapped('position_id.asset_id').ids)
 
         for record in self:
             if not record.position_id:
@@ -339,18 +378,27 @@ class InvestmentTimeseries(models.Model):
             assert vals, "Filtering with record._fields failed."
             record.update(vals)
 
-            day_prices = pdict[(record.position_id.asset_id.id, record.date)]
+            ohlc_ids = day_prices.get((record.position_id.asset_id.id, record.date))
+            if ohlc_ids:
+                open_price_id, high_price_id, low_price_id = (
+                    price_map[ohlc_ids[0]],
+                    price_map[ohlc_ids[1]],
+                    price_map[ohlc_ids[2]],
+                )
+            else:
+                open_price_id = high_price_id = low_price_id = record.price_id
+
             set_ohlc_values(
                 'open',
-                min(day_prices, key=lambda price: (price.time, price.id), default=record.price_id),
+                open_price_id,
             )
             set_ohlc_values(
                 'high',
-                min(day_prices, key=lambda price: (-price.price, price.time, price.id), default=record.price_id),
+                high_price_id,
             )
             set_ohlc_values(
                 'low',
-                min(day_prices, key=lambda price: (price.price, price.time, price.id), default=record.price_id),
+                low_price_id,
             )
 
 

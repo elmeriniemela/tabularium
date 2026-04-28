@@ -368,16 +368,22 @@ class InvestmentPosition(models.Model):
             position_id.generate_plan()
 
         today = datetime.date.today()
+        yesterday = today - relativedelta(days=1)
 
         precision = self.env['decimal.precision'].precision_get('Investment Asset quantity')
         predict_years = int(self.env['ir.config_parameter'].sudo().get_param('investment_portfolio.predict_years', '25'))
 
         Timeseries = self.env['investment.timeseries']
 
-        existing = {(t.position_id.id, t.date): t for t in Timeseries.search([])}
-        recompute = Timeseries.browse()
-
         for position_id in self:
+            existing = {
+                serie.date: serie
+                for serie in Timeseries.search_fetch(
+                    domain=[('position_id', '=', position_id.id)],
+                    field_names=['date', 'price_id'],
+                )
+            }
+            recompute = Timeseries.browse()
             first_tx = self.env['investment.position.transaction'].search([('position_id', '=', position_id.id)], order='time asc', limit=1)
             first_pr = self.env['investment.asset.price'].search([('asset_id', '=', position_id.asset_id.id)], order='time asc', limit=1)
             if not first_tx:
@@ -402,14 +408,14 @@ class InvestmentPosition(models.Model):
                 if prediction and float_is_zero(position_id.quantity, precision_digits=precision):
                     break
 
-                serie = existing.get((position_id.id, date), None)
+                serie = existing.get(date, None)
                 if not serie:
                     serie = Timeseries.create({
                         'position_id': position_id.id,
                         'date': date,
                         'price_id': serie_price(position_id, date, prediction).id,
                     })
-                    existing[(position_id.id, date)] = serie
+                    existing[date] = serie
                     recompute += serie
                 elif prediction:
                     recompute += serie
@@ -425,22 +431,19 @@ class InvestmentPosition(models.Model):
                     date += datetime.timedelta(days=1)
 
 
-            yesterday = datetime.date.today() - relativedelta(days=1)
-            yestkey = (position_id.id, yesterday)
-            if start_date <= yesterday and yestkey in existing:
-                recompute += existing[yestkey]
+            if start_date <= yesterday and yesterday in existing:
+                recompute += existing[yesterday]
 
-            todaykey = (position_id.id, today)
-            if not todaykey in existing:
+            if today not in existing:
                 serie = Timeseries.create({
                     'position_id': position_id.id,
                     'date': today,
                     'price_id': serie_price(position_id, today, False).id,
                 })
-                existing[todaykey] = serie
+                existing[today] = serie
                 recompute += serie
 
-        recompute.exists()._compute_timeseries_aggregate()
+            recompute.exists()._compute_timeseries_aggregate()
 
     def generate_plan(self):
         Transaction = self.env['investment.position.transaction']
