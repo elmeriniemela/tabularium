@@ -388,20 +388,9 @@ class InvestmentTimeseries(models.Model):
             else:
                 open_price_id = high_price_id = low_price_id = record.price_id
 
-            set_ohlc_values(
-                'open',
-                open_price_id,
-            )
-            set_ohlc_values(
-                'high',
-                high_price_id,
-            )
-            set_ohlc_values(
-                'low',
-                low_price_id,
-            )
-
-
+            set_ohlc_values('open', open_price_id)
+            set_ohlc_values('high', high_price_id)
+            set_ohlc_values('low', low_price_id)
 
 
     def convert_currency(self, price_id):
