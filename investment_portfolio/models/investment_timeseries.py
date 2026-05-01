@@ -295,44 +295,61 @@ class InvestmentTimeseries(models.Model):
 
         self.env.cr.execute(
             """
-            WITH ranked_prices AS (
+            WITH filtered AS NOT MATERIALIZED (
                 SELECT
                     id,
                     asset_id,
-                    DATE(time) AS day,
-                    ROW_NUMBER() OVER (
-                        PARTITION BY asset_id, DATE(time)
-                        ORDER BY time ASC, id ASC
-                    ) AS open_rank,
-                    ROW_NUMBER() OVER (
-                        PARTITION BY asset_id, DATE(time)
-                        ORDER BY price DESC, time ASC, id ASC
-                    ) AS high_rank,
-                    ROW_NUMBER() OVER (
-                        PARTITION BY asset_id, DATE(time)
-                        ORDER BY price ASC, time ASC, id ASC
-                    ) AS low_rank
+                    "time"::date AS day,
+                    "time",
+                    price
                 FROM investment_asset_price
-                WHERE asset_id IN %s
-                  AND prediction IS NOT TRUE
+                WHERE asset_id = ANY (%s::int[])
+                AND prediction IS NOT TRUE
+            ),
+
+            open_rows AS (
+                SELECT DISTINCT ON (asset_id, day)
+                    asset_id,
+                    day,
+                    id AS open_price_id
+                FROM filtered
+                ORDER BY asset_id, day, "time" ASC, id ASC
+            ),
+
+            high_rows AS (
+                SELECT DISTINCT ON (asset_id, day)
+                    asset_id,
+                    day,
+                    id AS high_price_id
+                FROM filtered
+                ORDER BY asset_id, day, price DESC, "time" ASC, id ASC
+            ),
+
+            low_rows AS (
+                SELECT DISTINCT ON (asset_id, day)
+                    asset_id,
+                    day,
+                    id AS low_price_id
+                FROM filtered
+                ORDER BY asset_id, day, price ASC, "time" ASC, id ASC
             )
+
             SELECT
-                asset_id,
-                day,
-                MAX(CASE WHEN open_rank = 1 THEN id END) AS open_price_id,
-                MAX(CASE WHEN high_rank = 1 THEN id END) AS high_price_id,
-                MAX(CASE WHEN low_rank = 1 THEN id END) AS low_price_id
-            FROM ranked_prices
-            GROUP BY asset_id, day
+                o.asset_id,
+                o.day,
+                o.open_price_id,
+                h.high_price_id,
+                l.low_price_id
+            FROM open_rows o
+            JOIN high_rows h USING (asset_id, day)
+            JOIN low_rows l USING (asset_id, day)
             """,
-            (tuple(asset_ids),),
+            (asset_ids,),
         )
 
         day_prices = {}
         price_ids = set()
         for asset_id, day, open_price_id, high_price_id, low_price_id in self.env.cr.fetchall():
-            if isinstance(day, datetime.datetime):
-                day = day.date()
             day_prices[(asset_id, day)] = (open_price_id, high_price_id, low_price_id)
             price_ids.add(open_price_id)
             price_ids.add(high_price_id)
