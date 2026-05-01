@@ -157,8 +157,9 @@ class InvestmentPeriod(models.Model):
         records = self
         _logger.info(f"Compute period for: {records}")
         Serie = self.env['investment.timeseries'].browse().sudo()
+        pending = []
+        future_ends = Serie
         for record in records.sudo():
-            decimal_places = record.company_id.currency_id.decimal_places
             start_date = record.start_date - relativedelta(days=1)
             is_future = record.end_date >= today
             end_date = today if is_future else record.end_date
@@ -193,9 +194,16 @@ class InvestmentPeriod(models.Model):
             )
 
             if is_future:
-                all_ends.refresh_price()
-                all_ends._compute_timeseries_aggregate()
+                future_ends += all_ends
 
+            pending.append((record, start_date, is_future, posdomain, all_starts, all_ends))
+
+        if future_ends: # call these heavy functions for all required records at once outside of the main loop.
+            future_ends.refresh_price()
+            future_ends._compute_timeseries_aggregate()
+
+        for record, start_date, is_future, posdomain, all_starts, all_ends in pending:
+            decimal_places = record.company_id.currency_id.decimal_places
             starts_map = {s.position_id: s for s in all_starts} # date_timeseries_unique
             ends_map = {s.position_id: s for s in all_ends} # date_timeseries_unique
 
@@ -280,4 +288,3 @@ class InvestmentPeriod(models.Model):
 
             record.position_ids = seen
             record.count_positions = len(seen)
-
