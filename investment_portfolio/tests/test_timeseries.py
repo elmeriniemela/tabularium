@@ -158,11 +158,12 @@ class TestTimeseries(InvestmentTestCommon):
 
         ts = self.env['investment.timeseries'].create({
             'position_id': position.id,
-            'price_id': close_price.id,
+            'price_id': open_price.id,
             'date': day,
         })
         ts._compute_timeseries_aggregate()
 
+        self.assertEqual(ts.price_id, close_price)
         self.assertEqual(ts.open_price_id, open_price)
         self.assertEqual(ts.high_price_id, high_price)
         self.assertEqual(ts.low_price_id, low_price)
@@ -197,6 +198,11 @@ class TestTimeseries(InvestmentTestCommon):
             'time': datetime(2024, 6, 10, 14, 0, 0),
             'price': 90.0,
         })
+        day1_close = self.env['investment.asset.price'].create({
+            'asset_id': asset.id,
+            'time': datetime(2024, 6, 10, 18, 0, 0),
+            'price': 120.0,
+        })
         day2_open = self.env['investment.asset.price'].create({
             'asset_id': asset.id,
             'time': datetime(2024, 6, 11, 10, 0, 0),
@@ -212,6 +218,11 @@ class TestTimeseries(InvestmentTestCommon):
             'time': datetime(2024, 6, 11, 14, 0, 0),
             'price': 180.0,
         })
+        day2_close = self.env['investment.asset.price'].create({
+            'asset_id': asset.id,
+            'time': datetime(2024, 6, 11, 18, 0, 0),
+            'price': 210.0,
+        })
 
         Timeseries = self.env['investment.timeseries']
         all_day_prices, all_price_map = Timeseries._get_daily_price_extremes([asset.id])
@@ -219,22 +230,24 @@ class TestTimeseries(InvestmentTestCommon):
 
         self.assertEqual(
             all_day_prices[(asset.id, day1)],
-            (day1_open.id, day1_high.id, day1_low.id),
+            (day1_open.id, day1_high.id, day1_low.id, day1_close.id),
         )
         self.assertEqual(
             all_day_prices[(asset.id, day2)],
-            (day2_open.id, day2_high.id, day2_low.id),
+            (day2_open.id, day2_high.id, day2_low.id, day2_close.id),
         )
         self.assertEqual(
             filtered_day_prices,
-            {(asset.id, day1): (day1_open.id, day1_high.id, day1_low.id)},
+            {(asset.id, day1): (day1_open.id, day1_high.id, day1_low.id, day1_close.id)},
         )
         self.assertEqual(filtered_price_map[day1_open.id], day1_open)
         self.assertEqual(filtered_price_map[day1_high.id], day1_high)
         self.assertEqual(filtered_price_map[day1_low.id], day1_low)
+        self.assertEqual(filtered_price_map[day1_close.id], day1_close)
         self.assertNotIn(day2_open.id, filtered_price_map)
         self.assertNotIn(day2_high.id, filtered_price_map)
         self.assertNotIn(day2_low.id, filtered_price_map)
+        self.assertNotIn(day2_close.id, filtered_price_map)
         self.assertEqual(all_price_map[day2_open.id], day2_open)
 
     def test_get_daily_price_extremes_dates_threshold(self):

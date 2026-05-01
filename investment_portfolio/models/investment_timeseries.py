@@ -277,16 +277,6 @@ class InvestmentTimeseries(models.Model):
 
         return super().formatted_read_group(domain, groupby, aggregates, having, offset, limit, order)
 
-
-    def refresh_price(self):
-        today = datetime.date.today()
-        for serie in self:
-            if serie.date == today:
-                serie.price_id = self.env['investment.asset.price'].search([
-                    ('prediction', '=', False),
-                    ('asset_id', '=', serie.position_id.asset_id.id),
-                ], limit=1, order='time desc') # update the latest price when not doing predictions.
-
     def _get_daily_price_extremes_dates(self):
         dates = sorted({record.date for record in self if record.position_id})
         return dates if len(dates) < 10 else None
@@ -344,6 +334,15 @@ class InvestmentTimeseries(models.Model):
                     id AS low_price_id
                 FROM filtered
                 ORDER BY asset_id, day, price ASC, "time" ASC, id ASC
+            ),
+
+            close_rows AS (
+                SELECT DISTINCT ON (asset_id, day)
+                    asset_id,
+                    day,
+                    id AS close_price_id
+                FROM filtered
+                ORDER BY asset_id, day, "time" DESC, id DESC
             )
 
             SELECT
@@ -351,20 +350,23 @@ class InvestmentTimeseries(models.Model):
                 o.day,
                 o.open_price_id,
                 h.high_price_id,
-                l.low_price_id
+                l.low_price_id,
+                c.close_price_id
             FROM open_rows o
             JOIN high_rows h USING (asset_id, day)
             JOIN low_rows l USING (asset_id, day)
+            JOIN close_rows c USING (asset_id, day)
         """
         self.env.cr.execute(query, tuple(params))
 
         day_prices = {}
         price_ids = set()
-        for asset_id, day, open_price_id, high_price_id, low_price_id in self.env.cr.fetchall():
-            day_prices[(asset_id, day)] = (open_price_id, high_price_id, low_price_id)
+        for asset_id, day, open_price_id, high_price_id, low_price_id, close_price_id in self.env.cr.fetchall():
+            day_prices[(asset_id, day)] = (open_price_id, high_price_id, low_price_id, close_price_id)
             price_ids.add(open_price_id)
             price_ids.add(high_price_id)
             price_ids.add(low_price_id)
+            price_ids.add(close_price_id)
 
         prices = {price.id: price for price in Price.browse(list(price_ids))}
         return day_prices, prices
@@ -402,22 +404,28 @@ class InvestmentTimeseries(models.Model):
             time_cutoff = datetime.datetime(record.date.year, record.date.month, record.date.day, 23, 59, 0)
             record.transaction_ids = trans_map.get(record.position_id, Transaction).filtered(lambda t: t.time <= time_cutoff) # latest but before date
 
-            record.last_price_own_currency = record.convert_currency(record.price_id)
+            ohlc_ids = day_prices.get((record.position_id.asset_id.id, record.date))
+            if ohlc_ids:
+                open_price_id, high_price_id, low_price_id, close_price_id = (
+                    price_map[ohlc_ids[0]],
+                    price_map[ohlc_ids[1]],
+                    price_map[ohlc_ids[2]],
+                    price_map[ohlc_ids[3]],
+                )
+            else:
+                close_price_id = record.price_id
+                open_price_id = high_price_id = low_price_id = close_price_id
+
+            if record.price_id.prediction:
+                close_price_id = record.price_id
+
+            record.price_id = close_price_id
+            record.last_price_own_currency = record.convert_currency(close_price_id)
 
             vals = record.position_id._get_position(record.last_price_own_currency, record.transaction_ids).items()
             vals = {k: v for k, v in vals if k in record._fields}
             assert vals, "Filtering with record._fields failed."
             record.update(vals)
-
-            ohlc_ids = day_prices.get((record.position_id.asset_id.id, record.date))
-            if ohlc_ids:
-                open_price_id, high_price_id, low_price_id = (
-                    price_map[ohlc_ids[0]],
-                    price_map[ohlc_ids[1]],
-                    price_map[ohlc_ids[2]],
-                )
-            else:
-                open_price_id = high_price_id = low_price_id = record.price_id
 
             set_ohlc_values('open', open_price_id)
             set_ohlc_values('high', high_price_id)

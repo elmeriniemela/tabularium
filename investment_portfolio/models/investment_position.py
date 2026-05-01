@@ -262,7 +262,6 @@ class InvestmentPosition(models.Model):
         for rec in self:
             all_lasts += profits.get((rec.id, rec.last_price_id.date), Serie.browse())
 
-        all_lasts.refresh_price()
         all_lasts._compute_timeseries_aggregate()
 
         for rec in self:
@@ -417,10 +416,7 @@ class InvestmentPosition(models.Model):
                     })
                     existing[date] = serie
                     recompute += serie
-                elif prediction:
-                    recompute += serie
-                elif (date == today):
-                    serie.refresh_price()
+                elif prediction or date == today:
                     recompute += serie
 
                 if date == today:

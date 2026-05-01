@@ -199,7 +199,6 @@ class InvestmentPeriod(models.Model):
             pending.append((record, start_date, is_future, posdomain, all_starts, all_ends))
 
         if future_ends: # call these heavy functions for all required records at once outside of the main loop.
-            future_ends.refresh_price()
             future_ends._compute_timeseries_aggregate()
 
         for record, start_date, is_future, posdomain, all_starts, all_ends in pending:
