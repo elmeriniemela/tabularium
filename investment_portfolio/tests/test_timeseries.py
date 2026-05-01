@@ -173,6 +173,112 @@ class TestTimeseries(InvestmentTestCommon):
         self.assertAlmostEqual(ts.low_position, 360.0)
         self.assertAlmostEqual(ts.low_profit, -20.0)
 
+    def test_get_daily_price_extremes_filters_optional_dates(self):
+        day1 = date(2024, 6, 10)
+        day2 = date(2024, 6, 11)
+        asset = self.env['investment.asset'].create({
+            'ticker': 'TS-DATE-FILTER',
+            'category_id': self.category.id,
+            'currency_id': self.currency_eur.id,
+        })
+
+        day1_open = self.env['investment.asset.price'].create({
+            'asset_id': asset.id,
+            'time': datetime(2024, 6, 10, 10, 0, 0),
+            'price': 100.0,
+        })
+        day1_high = self.env['investment.asset.price'].create({
+            'asset_id': asset.id,
+            'time': datetime(2024, 6, 10, 12, 0, 0),
+            'price': 150.0,
+        })
+        day1_low = self.env['investment.asset.price'].create({
+            'asset_id': asset.id,
+            'time': datetime(2024, 6, 10, 14, 0, 0),
+            'price': 90.0,
+        })
+        day2_open = self.env['investment.asset.price'].create({
+            'asset_id': asset.id,
+            'time': datetime(2024, 6, 11, 10, 0, 0),
+            'price': 200.0,
+        })
+        day2_high = self.env['investment.asset.price'].create({
+            'asset_id': asset.id,
+            'time': datetime(2024, 6, 11, 12, 0, 0),
+            'price': 220.0,
+        })
+        day2_low = self.env['investment.asset.price'].create({
+            'asset_id': asset.id,
+            'time': datetime(2024, 6, 11, 14, 0, 0),
+            'price': 180.0,
+        })
+
+        Timeseries = self.env['investment.timeseries']
+        all_day_prices, all_price_map = Timeseries._get_daily_price_extremes([asset.id])
+        filtered_day_prices, filtered_price_map = Timeseries._get_daily_price_extremes([asset.id], [day1])
+
+        self.assertEqual(
+            all_day_prices[(asset.id, day1)],
+            (day1_open.id, day1_high.id, day1_low.id),
+        )
+        self.assertEqual(
+            all_day_prices[(asset.id, day2)],
+            (day2_open.id, day2_high.id, day2_low.id),
+        )
+        self.assertEqual(
+            filtered_day_prices,
+            {(asset.id, day1): (day1_open.id, day1_high.id, day1_low.id)},
+        )
+        self.assertEqual(filtered_price_map[day1_open.id], day1_open)
+        self.assertEqual(filtered_price_map[day1_high.id], day1_high)
+        self.assertEqual(filtered_price_map[day1_low.id], day1_low)
+        self.assertNotIn(day2_open.id, filtered_price_map)
+        self.assertNotIn(day2_high.id, filtered_price_map)
+        self.assertNotIn(day2_low.id, filtered_price_map)
+        self.assertEqual(all_price_map[day2_open.id], day2_open)
+
+    def test_get_daily_price_extremes_dates_threshold(self):
+        base_day = date(2024, 7, 1)
+        asset = self.env['investment.asset'].create({
+            'ticker': 'TS-DATE-THRESHOLD',
+            'category_id': self.category.id,
+            'currency_id': self.currency_eur.id,
+        })
+        position = self.env['investment.position'].create({
+            'name': 'Date Threshold Position',
+            'asset_id': asset.id,
+            'portfolio_id': self.portfolio.id,
+            'company_id': self.company.id,
+        })
+        price = self.env['investment.asset.price'].create({
+            'asset_id': asset.id,
+            'time': datetime(2024, 7, 1, 18, 0, 0),
+            'price': 100.0,
+        })
+        Timeseries = self.env['investment.timeseries']
+
+        few_dates = Timeseries.browse()
+        for offset in range(9):
+            few_dates += Timeseries.new({
+                'position_id': position.id,
+                'price_id': price.id,
+                'date': base_day + timedelta(days=offset),
+            })
+
+        many_dates = Timeseries.browse()
+        for offset in range(10):
+            many_dates += Timeseries.new({
+                'position_id': position.id,
+                'price_id': price.id,
+                'date': base_day + timedelta(days=offset),
+            })
+
+        self.assertEqual(
+            few_dates._get_daily_price_extremes_dates(),
+            [base_day + timedelta(days=offset) for offset in range(9)],
+        )
+        self.assertIsNone(many_dates._get_daily_price_extremes_dates())
+
     def test_timeseries_open_high_low_fall_back_to_closing_price(self):
         day = date(2024, 6, 11)
         asset = self.env['investment.asset'].create({

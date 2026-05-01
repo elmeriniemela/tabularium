@@ -287,14 +287,18 @@ class InvestmentTimeseries(models.Model):
                     ('asset_id', '=', serie.position_id.asset_id.id),
                 ], limit=1, order='time desc') # update the latest price when not doing predictions.
 
+    def _get_daily_price_extremes_dates(self):
+        dates = sorted({record.date for record in self if record.position_id})
+        return dates if len(dates) < 10 else None
+
     @api.model
-    def _get_daily_price_extremes(self, asset_ids):
+    def _get_daily_price_extremes(self, asset_ids, dates=None):
         Price = self.env['investment.asset.price']
         if not asset_ids:
             return {}, {}
 
-        self.env.cr.execute(
-            """
+        _logger.info("_get_daily_price_extremes(%s, %s)", asset_ids, dates)
+        query = """
             WITH filtered AS NOT MATERIALIZED (
                 SELECT
                     id,
@@ -305,6 +309,14 @@ class InvestmentTimeseries(models.Model):
                 FROM investment_asset_price
                 WHERE asset_id = ANY (%s::int[])
                 AND prediction IS NOT TRUE
+        """
+        params = [asset_ids]
+        if dates is not None:
+            query += """
+                AND "time"::date = ANY (%s::date[])
+            """
+            params.append(dates)
+        query += """
             ),
 
             open_rows AS (
@@ -343,9 +355,8 @@ class InvestmentTimeseries(models.Model):
             FROM open_rows o
             JOIN high_rows h USING (asset_id, day)
             JOIN low_rows l USING (asset_id, day)
-            """,
-            (asset_ids,),
-        )
+        """
+        self.env.cr.execute(query, tuple(params))
 
         day_prices = {}
         price_ids = set()
@@ -370,7 +381,10 @@ class InvestmentTimeseries(models.Model):
         for trans in transactions:
             trans_map[trans.position_id] = trans_map.get(trans.position_id, Transaction) + trans
 
-        day_prices, price_map = self._get_daily_price_extremes(self.mapped('position_id.asset_id').ids)
+        day_prices, price_map = self._get_daily_price_extremes(
+            self.mapped('position_id.asset_id').ids,
+            self._get_daily_price_extremes_dates(),
+        )
 
         for record in self:
             if not record.position_id:
