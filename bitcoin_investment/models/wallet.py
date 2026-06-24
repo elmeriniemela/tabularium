@@ -11,6 +11,10 @@ class BitcoinWallet(models.Model):
         index=True,
     )
 
+    position_sync_limit = fields.Integer(
+        default=100,
+        help="Only sync the latest X amount of transactions into position."
+    )
 
     def show_investment_transactions(self):
         return {
@@ -32,7 +36,7 @@ class BitcoinWallet(models.Model):
             if not wallet.position_id:
                 continue
 
-            for hist in wallet.history_ids:
+            for hist in wallet.history_ids[:wallet.position_sync_limit]:
                 if hist.position_transaction_id:
                     continue
 

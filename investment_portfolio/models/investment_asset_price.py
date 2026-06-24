@@ -60,9 +60,9 @@ class InvestmentAssetPrice(models.Model):
     _unique_price = models.Constraint('unique(asset_id, time)', 'Price for this time is already configured!')
 
     # For _get_daily_price_extremes
-    _price_open_day_idx = models.Index( '(asset_id, ("time"::date),            "time" ASC, id ASC ) WHERE prediction IS NOT TRUE')
-    _price_high_day_idx = models.Index( '(asset_id, ("time"::date), price DESC,"time" ASC, id ASC ) WHERE prediction IS NOT TRUE')
-    _price_low_day_idx = models.Index(  '(asset_id, ("time"::date), price ASC, "time" ASC, id ASC ) WHERE prediction IS NOT TRUE')
+    _price_open_day_idx  = models.Index('(asset_id, ("time"::date),            "time" ASC, id ASC ) WHERE prediction IS NOT TRUE')
+    _price_high_day_idx  = models.Index('(asset_id, ("time"::date), price DESC,"time" ASC, id ASC ) WHERE prediction IS NOT TRUE')
+    _price_low_day_idx   = models.Index('(asset_id, ("time"::date), price ASC, "time" ASC, id ASC ) WHERE prediction IS NOT TRUE')
     _price_close_day_idx = models.Index('(asset_id, ("time"::date),            "time" DESC,id DESC) WHERE prediction IS NOT TRUE')
 
 

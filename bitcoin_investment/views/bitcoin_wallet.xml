@@ -15,6 +15,7 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='balance']" position="after">
                 <field name="position_id" optional="hide"/>
+                <field name="position_sync_limit" invisible="not position_id"/>
             </xpath>
         </field>
     </record>
