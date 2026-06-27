@@ -27,6 +27,7 @@ from odoo.tools.safe_eval import (
 from odoo.tools.convert import xml_import as XMLImport
 from odoo.tools import config
 from odoo.http import request
+import werkzeug
 
 requests = wrap_module(__import__('requests'), {'get': None, 'post': None, 'put': None, 'delete': None, 'request': None, 'exceptions': ['ReadTimeout', 'Timeout', 'ConnectionError']})
 io = wrap_module(__import__('io'), ['StringIO', 'BytesIO'])
@@ -637,6 +638,11 @@ class ApiEndpoint(models.Model):
         for key, val in d.items():
             if isinstance(val, models.AbstractModel):
                 d[key] = EvalModel(val)
+            elif isinstance(val, werkzeug.datastructures.FileStorage):
+                d[key] = {
+                    'filename': val.filename,
+                    'data': val.read(),
+                }
 
         serialized_dict = str(d)
         assert isinstance(safe_eval(serialized_dict, globals_dict), dict), "Ensure that the dict can be evaluated from message queue."
