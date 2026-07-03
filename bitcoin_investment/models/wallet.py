@@ -13,7 +13,8 @@ class BitcoinWallet(models.Model):
 
     position_sync_limit = fields.Integer(
         default=100,
-        help="Only sync the latest X amount of transactions into position."
+        required=True,
+        help="Only sync the latest X amount of transactions into position.",
     )
 
     def show_investment_transactions(self):

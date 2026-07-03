@@ -4,6 +4,7 @@
     <menuitem id="cloud_server_menu" action="cloud_server_action" parent="cloud_base_menu" sequence="30"/>
     <menuitem id="cloud_instance_menu" action="cloud_instance_action" parent="cloud_base_menu" sequence="40"/>
     <menuitem id="cloud_backup_menu" action="cloud_backup_action" parent="cloud_base_menu" sequence="50"/>
+    <menuitem id="cloud_backup_source_menu" action="cloud_backup_source_action" parent="cloud_base_menu" sequence="55"/>
     <menuitem id="cloud_module_menu" action="cloud_module_action" parent="cloud_base_menu" sequence="60"/>
     <menuitem id="cloud_server_module_menu" action="cloud_server_module_action" parent="cloud_base_menu" sequence="70"/>
     <menuitem id="dns_zone_menu" action="dns_zone_action" parent="cloud_base_menu" sequence="80"/>

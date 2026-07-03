@@ -33,6 +33,7 @@ elif method == 'backup':
         'fname': 'backup-latest.zip',
         'timestamp': datetime.datetime.now(),
         'trigger': 'manual',
+        'source': 'default',
     }]}
 elif method == 'reset':
     obj = True
@@ -73,6 +74,7 @@ elif method == 'status':
                 'fname': 'status-backup.zip',
                 'timestamp': '2024-01-02 03:04:05',
                 'trigger': 'auto',
+                'source': 'default',
             }],
         }],
         'modules': [{
@@ -322,15 +324,18 @@ class TestCloudManagerIntegration(TransactionCase):
             'fname': 'very-old.zip',
             'timestamp': fields.Datetime.now() - timedelta(days=3),
             'trigger': 'manual',
+            'source': 'default',
         }])
         self.assertTrue(instance.latest_backup_missing)
         instance.parse_backups([{
             'fname': 'fresh.zip',
             'timestamp': fields.Datetime.now(),
             'trigger': 'manual',
+            'source': 'default',
         }])
         self.assertFalse(instance.latest_backup_missing)
         self.assertEqual(instance.backup_ids.mapped('name'), ['fresh.zip'])
+        self.assertEqual(instance.backup_ids.source_ids.mapped('name'), ['default'])
 
         instance.action_remove()
         self.assertEqual(instance.state, 'removed')

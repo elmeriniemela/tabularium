@@ -35,6 +35,13 @@ class CloudBackup(models.Model):
         ondelete='cascade',
     )
 
+    source_ids = fields.Many2many(
+        comodel_name='cloud.backup.source',
+        relation='cloud_backup_source_rel',
+        column1='backup_id',
+        column2='source_id',
+    )
+
     display_name = fields.Char(
         compute="_compute_display_name",
         store=True,

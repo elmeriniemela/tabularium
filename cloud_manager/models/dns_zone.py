@@ -53,7 +53,9 @@ class DnsZone(models.Model):
             zone.ns_endpoint_id = ns_endpoint
 
     def _search_ns_endpoint_id(self, operator, value):
-        if isinstance(value, (int, list, set, MutableSet)):
+        if isinstance(value, int):
+            leaf = ('id', operator, value)
+        elif operator in ('in', 'not in') and isinstance(value, (list, set, MutableSet)):
             leaf = ('id', operator, value)
         elif isinstance(value, str):
             leaf = ('name', operator, value)
@@ -98,4 +100,3 @@ class DnsZone(models.Model):
                     'sequence': i,
                 })
             (zone.record_ids - existing).unlink()
-

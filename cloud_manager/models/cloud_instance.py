@@ -320,19 +320,24 @@ class CloudInstance(models.Model):
             self.latest_backup_missing = True
             return
 
-        existing = {b.name: b for b in self.backup_ids}
+        Source = self.env['cloud.backup.source']
+        existing_backups = {b.name: b for b in self.backup_ids}
+        existing_sources = {b.name: b for b in Source.search([])}
         found = self.env['cloud.backup']
-
+        found_sources = set()
         for backupfile in backup_list:
             fname = backupfile['fname']
-            backup = existing.get(fname) or found.create({
+            backup = existing_backups.get(fname) or found.create({
                 'name': fname,
                 'instance_id': self.id,
                 'timestamp': backupfile['timestamp'],
                 'trigger': backupfile['trigger'],
             })
-            existing[fname] = backup
+            source = existing_sources.get(backupfile['source']) or Source.create({'name': backupfile['source']})
+            backup.source_ids += source
+            existing_backups[fname] = backup
             found += backup
+            found_sources.add(source.id)
 
         now = fields.Datetime.now()
         check_time = now - relativedelta(hours=36)
@@ -342,4 +347,4 @@ class CloudInstance(models.Model):
             self.latest_backup_missing = False
 
 
-        (self.backup_ids - found).unlink()
+        (self.backup_ids.filtered(lambda b: set(b.source_ids.ids) & found_sources) - found).unlink()
