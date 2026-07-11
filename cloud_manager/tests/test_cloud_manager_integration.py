@@ -95,22 +95,22 @@ elif method == 'status':
                 'usage_percent': 18.4,
             },
             'memory': {
-                'total_bytes': 16777216000,
-                'available_bytes': 9123456789,
-                'used_bytes': 7653759211,
+                'total_gb': 15.62,
+                'available_gb': 8.5,
+                'used_gb': 7.13,
                 'usage_percent': 45.6,
             },
             'disks': [{
                 'mount': '/',
-                'total_bytes': 105553116266,
-                'used_bytes': 58720256000,
-                'free_bytes': 46832860266,
+                'total_gb': 98.3,
+                'used_gb': 54.69,
+                'free_gb': 43.62,
                 'usage_percent': 55.6,
             }, {
                 'mount': '/data',
-                'total_bytes': 211106232532,
-                'used_bytes': 105553116266,
-                'free_bytes': 105553116266,
+                'total_gb': 196.61,
+                'used_gb': 98.3,
+                'free_gb': 98.3,
                 'usage_percent': 50.0,
             }],
         },
@@ -473,10 +473,11 @@ class TestCloudManagerIntegration(TransactionCase):
         self.assertTrue(server.module_ids.filtered(lambda m: m.name == 'new_module'))
         self.assertFalse(old_module.active)
         self.assertEqual(server.cpu_usage_percent, 18.4)
-        self.assertEqual(server.memory_total_bytes, 16777216000)
-        self.assertEqual(server.memory_available_bytes, 9123456789)
-        self.assertEqual(server.memory_used_bytes, 7653759211)
+        self.assertEqual(server.memory_total_gb, 15.62)
+        self.assertEqual(server.memory_available_gb, 8.5)
+        self.assertEqual(server.memory_used_gb, 7.13)
         self.assertEqual(server.memory_usage_percent, 45.6)
+        self.assertEqual(root_disk.total_gb, 98.3)
         self.assertAlmostEqual(root_disk.used_gb, 54.69)
         self.assertAlmostEqual(root_disk.free_gb, 43.62)
         self.assertTrue(server.disk_ids.filtered(lambda d: d.mount == '/data'))

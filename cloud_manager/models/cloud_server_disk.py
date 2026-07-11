@@ -3,9 +3,6 @@
 from odoo import models, fields
 
 
-GB_DIGITS = (16, 2)
-
-
 class CloudServerDisk(models.Model):
     _name = 'cloud.server.disk'
     _description = 'Cloud Server Disk'
@@ -27,19 +24,19 @@ class CloudServerDisk(models.Model):
 
     total_gb = fields.Float(
         string="Total GB",
-        digits=GB_DIGITS,
+        digits=(16, 2),
         readonly=True,
     )
 
     used_gb = fields.Float(
         string="Used GB",
-        digits=GB_DIGITS,
+        digits=(16, 2),
         readonly=True,
     )
 
     free_gb = fields.Float(
         string="Free GB",
-        digits=GB_DIGITS,
+        digits=(16, 2),
         readonly=True,
     )
 

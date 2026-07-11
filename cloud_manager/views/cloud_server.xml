@@ -57,9 +57,9 @@
                             <field name="memory_usage_percent"/>
                         </group>
                         <group>
-                            <field name="memory_total_bytes"/>
-                            <field name="memory_available_bytes"/>
-                            <field name="memory_used_bytes"/>
+                            <field name="memory_total_gb"/>
+                            <field name="memory_available_gb"/>
+                            <field name="memory_used_gb"/>
                         </group>
                     </group>
                     <label for="disk_ids"/>

@@ -7,8 +7,6 @@ import pytz
 from odoo import models, api, fields, exceptions, _
 
 _logger = logging.getLogger(__name__)
-BYTE_DIGITS = (20, 0)
-BYTES_PER_GB = 1024 ** 3
 
 def ptime(iso_str):
     return dateutil.parser.parse(iso_str).astimezone(pytz.utc).replace(tzinfo=None)
@@ -118,18 +116,21 @@ class CloudServer(models.Model):
         readonly=True,
     )
 
-    memory_total_bytes = fields.Float(
-        digits=BYTE_DIGITS,
+    memory_total_gb = fields.Float(
+        string="Memory Total GB",
+        digits=(16, 2),
         readonly=True,
     )
 
-    memory_available_bytes = fields.Float(
-        digits=BYTE_DIGITS,
+    memory_available_gb = fields.Float(
+        string="Memory Available GB",
+        digits=(16, 2),
         readonly=True,
     )
 
-    memory_used_bytes = fields.Float(
-        digits=BYTE_DIGITS,
+    memory_used_gb = fields.Float(
+        string="Memory Used GB",
+        digits=(16, 2),
         readonly=True,
     )
 
@@ -273,28 +274,28 @@ class CloudServer(models.Model):
             "usage_percent": 18.4
         },
         "memory": {
-            "total_bytes": 16777216000,
-            "available_bytes": 9123456789,
-            "used_bytes": 7653759211,
+            "total_gb": 15.62,
+            "available_gb": 8.5,
+            "used_gb": 7.13,
             "usage_percent": 45.6
         },
         "disks": [
             {
                 "mount": "/",
-                "total_bytes": 105553116266,
-                "used_bytes": 58720256000,
-                "free_bytes": 46832860266,
+                "total_gb": 98.3,
+                "used_gb": 54.69,
+                "free_gb": 43.62,
                 "usage_percent": 55.6
-            },
-        ],
+            }
+        ]
         """
         self.ensure_one()
         memory = hw_dict['memory']
         self.write({
             'cpu_usage_percent': hw_dict['cpu']['usage_percent'],
-            'memory_total_bytes': memory['total_bytes'],
-            'memory_available_bytes': memory['available_bytes'],
-            'memory_used_bytes': memory['used_bytes'],
+            'memory_total_gb': memory['total_gb'],
+            'memory_available_gb': memory['available_gb'],
+            'memory_used_gb': memory['used_gb'],
             'memory_usage_percent': memory['usage_percent'],
         })
 
@@ -307,9 +308,9 @@ class CloudServer(models.Model):
             vals = {
                 'server_id': self.id,
                 'mount': mount,
-                'total_gb': disk['total_bytes'] / BYTES_PER_GB,
-                'used_gb': disk['used_bytes'] / BYTES_PER_GB,
-                'free_gb': disk['free_bytes'] / BYTES_PER_GB,
+                'total_gb': disk['total_gb'],
+                'used_gb': disk['used_gb'],
+                'free_gb': disk['free_gb'],
                 'usage_percent': disk['usage_percent'],
             }
 
