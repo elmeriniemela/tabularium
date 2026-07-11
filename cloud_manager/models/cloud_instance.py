@@ -350,10 +350,15 @@ class CloudInstance(models.Model):
                 'timestamp': backupfile['timestamp'],
                 'trigger': backupfile['trigger'],
             })
-            source = existing_sources.get(backupfile['source']) or Source.create({'name': backupfile['source']})
-            backup.source_ids += source
             existing_backups[fname] = backup
             found += backup
+
+
+            srcname = backupfile['source']
+            if srcname not in existing_sources:
+                existing_sources[srcname] = Source.create({'name': backupfile['source']})
+            source = existing_sources[srcname]
+            backup.source_ids += source
             found_sources.add(source.id)
 
         now = fields.Datetime.now()

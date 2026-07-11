@@ -18,3 +18,5 @@ class CloudBackupSource(models.Model):
         column1='source_id',
         column2='backup_id',
     )
+
+    _uniq_name = models.Constraint('UNIQUE(name)', 'The source name should be unique!')
