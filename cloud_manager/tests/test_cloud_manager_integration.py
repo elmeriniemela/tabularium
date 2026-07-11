@@ -90,6 +90,30 @@ elif method == 'status':
             'url': 'https://example.invalid/custom_a',
             'branch': 'main',
         }],
+        'hardware': {
+            'cpu': {
+                'usage_percent': 18.4,
+            },
+            'memory': {
+                'total_bytes': 16777216000,
+                'available_bytes': 9123456789,
+                'used_bytes': 7653759211,
+                'usage_percent': 45.6,
+            },
+            'disks': [{
+                'mount': '/',
+                'total_bytes': 105553116266,
+                'used_bytes': 58720256000,
+                'free_bytes': 46832860266,
+                'usage_percent': 55.6,
+            }, {
+                'mount': '/data',
+                'total_bytes': 211106232532,
+                'used_bytes': 105553116266,
+                'free_bytes': 105553116266,
+                'usage_percent': 50.0,
+            }],
+        },
     }
 else:
     obj = {
@@ -399,6 +423,22 @@ class TestCloudManagerIntegration(TransactionCase):
             gevent_port=55001,
             state='created',
         )
+        root_disk = self.env['cloud.server.disk'].create({
+            'server_id': server.id,
+            'mount': '/',
+            'total_gb': 1,
+            'used_gb': 1,
+            'free_gb': 0,
+            'usage_percent': 100.0,
+        })
+        stale_disk = self.env['cloud.server.disk'].create({
+            'server_id': server.id,
+            'mount': '/old',
+            'total_gb': 1,
+            'used_gb': 0,
+            'free_gb': 1,
+            'usage_percent': 0.0,
+        })
 
         status_obj = endpoint.produce({'method': 'status', 'args': tuple(), 'commit_before': False})['obj']
         status_obj['instances'].append({
@@ -432,6 +472,15 @@ class TestCloudManagerIntegration(TransactionCase):
         self.assertTrue(module_custom.active)
         self.assertTrue(server.module_ids.filtered(lambda m: m.name == 'new_module'))
         self.assertFalse(old_module.active)
+        self.assertEqual(server.cpu_usage_percent, 18.4)
+        self.assertEqual(server.memory_total_bytes, 16777216000)
+        self.assertEqual(server.memory_available_bytes, 9123456789)
+        self.assertEqual(server.memory_used_bytes, 7653759211)
+        self.assertEqual(server.memory_usage_percent, 45.6)
+        self.assertAlmostEqual(root_disk.used_gb, 54.69)
+        self.assertAlmostEqual(root_disk.free_gb, 43.62)
+        self.assertTrue(server.disk_ids.filtered(lambda d: d.mount == '/data'))
+        self.assertFalse(stale_disk.exists())
 
         with self.assertRaises(AssertionError):
             server.parse_instances({

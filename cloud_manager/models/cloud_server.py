@@ -7,6 +7,8 @@ import pytz
 from odoo import models, api, fields, exceptions, _
 
 _logger = logging.getLogger(__name__)
+BYTE_DIGITS = (20, 0)
+BYTES_PER_GB = 1024 ** 3
 
 def ptime(iso_str):
     return dateutil.parser.parse(iso_str).astimezone(pytz.utc).replace(tzinfo=None)
@@ -111,6 +113,38 @@ class CloudServer(models.Model):
         readonly=True,
     )
 
+    cpu_usage_percent = fields.Float(
+        string="CPU Usage (%)",
+        readonly=True,
+    )
+
+    memory_total_bytes = fields.Float(
+        digits=BYTE_DIGITS,
+        readonly=True,
+    )
+
+    memory_available_bytes = fields.Float(
+        digits=BYTE_DIGITS,
+        readonly=True,
+    )
+
+    memory_used_bytes = fields.Float(
+        digits=BYTE_DIGITS,
+        readonly=True,
+    )
+
+    memory_usage_percent = fields.Float(
+        string="Memory Usage (%)",
+        readonly=True,
+    )
+
+    disk_ids = fields.One2many(
+        string="Disks",
+        comodel_name='cloud.server.disk',
+        inverse_name='server_id',
+        readonly=True,
+    )
+
 
     _uniq_name = models.Constraint('UNIQUE(name)', 'Server name should be unique.')
 
@@ -159,6 +193,7 @@ class CloudServer(models.Model):
         self.commit_date = ptime(obj['agent']['commit_date'])
         self.parse_instances(obj)
         self.parse_modules(obj)
+        self.parse_hardware(obj['hardware'])
 
     def parse_instances(self, obj):
         def docker_vals(container):
@@ -232,3 +267,57 @@ class CloudServer(models.Model):
 
 
 
+    def parse_hardware(self, hw_dict):
+        """
+        "cpu": {
+            "usage_percent": 18.4
+        },
+        "memory": {
+            "total_bytes": 16777216000,
+            "available_bytes": 9123456789,
+            "used_bytes": 7653759211,
+            "usage_percent": 45.6
+        },
+        "disks": [
+            {
+                "mount": "/",
+                "total_bytes": 105553116266,
+                "used_bytes": 58720256000,
+                "free_bytes": 46832860266,
+                "usage_percent": 55.6
+            },
+        ],
+        """
+        self.ensure_one()
+        memory = hw_dict['memory']
+        self.write({
+            'cpu_usage_percent': hw_dict['cpu']['usage_percent'],
+            'memory_total_bytes': memory['total_bytes'],
+            'memory_available_bytes': memory['available_bytes'],
+            'memory_used_bytes': memory['used_bytes'],
+            'memory_usage_percent': memory['usage_percent'],
+        })
+
+        all_disks = self.disk_ids
+        existing_disks = {disk.mount: disk for disk in all_disks}
+
+        found_disks = all_disks.browse()
+        for disk in hw_dict['disks']:
+            mount = disk['mount']
+            vals = {
+                'server_id': self.id,
+                'mount': mount,
+                'total_gb': disk['total_bytes'] / BYTES_PER_GB,
+                'used_gb': disk['used_bytes'] / BYTES_PER_GB,
+                'free_gb': disk['free_bytes'] / BYTES_PER_GB,
+                'usage_percent': disk['usage_percent'],
+            }
+
+            disk_record = existing_disks.get(mount) or all_disks.browse()
+            if disk_record:
+                disk_record.write(vals)
+            else:
+                disk_record = disk_record.create(vals)
+            found_disks += disk_record
+
+        (all_disks - found_disks).unlink()

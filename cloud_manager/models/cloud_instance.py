@@ -88,6 +88,7 @@ class CloudInstance(models.Model):
         tracking=True,
         index=True,
         ondelete='restrict',
+        domain=[('branch', '!=', False)],
     )
 
     cname = fields.Char(related="server_id.cname")
@@ -315,6 +316,22 @@ class CloudInstance(models.Model):
 
 
     def parse_backups(self, backup_list):
+        """
+        [
+            {
+                "fname": "2026-07-10T01-02-03.pgc",
+                "timestamp": "2026-07-10 01:02:03",
+                "trigger": "manual",
+                "source": "web-01"
+            },
+            {
+                "fname": "2026-07-11T12-30-00.pgc",
+                "timestamp": "2026-07-11 12:30:00",
+                "trigger": "manual",
+                "source": "web-01"
+            }
+        ]
+        """
         self.ensure_one()
         if not backup_list:
             self.latest_backup_missing = True
@@ -348,3 +365,4 @@ class CloudInstance(models.Model):
 
 
         (self.backup_ids.filtered(lambda b: set(b.source_ids.ids) & found_sources) - found).unlink()
+

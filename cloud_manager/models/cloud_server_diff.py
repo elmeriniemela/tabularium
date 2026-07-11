@@ -27,6 +27,7 @@ class CloudServerDiff(models.Model):
         required=True,
         index=True,
         ondelete='cascade',
+        domain=[('branch', '!=', False)],
     )
 
     module_id = fields.Many2one(

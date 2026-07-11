@@ -6,11 +6,13 @@
             <list>
                 <field name="name" optional="show"/>
                 <field name="endpoint_id" optional="hide"/>
-                <field name="ipv4_address"/>
-                <field name="ipv6_address"/>
-                <field name="restarted"/>
+                <field name="ipv4_address" optional="show"/>
+                <field name="ipv6_address" optional="show"/>
                 <field name="branch" optional="show"/>
-                <field name="commit" optional="show"/>
+                <field name="commit" optional="hide"/>
+                <field name="cpu_usage_percent" optional="hide"/>
+                <field name="memory_usage_percent" optional="hide"/>
+                <field name="restarted" optional="hide"/>
             </list>
         </field>
     </record>
@@ -20,13 +22,13 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <button string="Diff" type="action" name="%(cloud_server_diff_form_action)d" context="{'default_server_id': id, 'search_default_server_id': id}"/>
-                    <button name="action_restart_instances" type="object" string="Apply Needed Restarts"/>
-                    <button name="action_agent_restart" type="object" string="Restart Agent"/>
+                    <button string="Diff" type="action" name="%(cloud_server_diff_form_action)d" context="{'default_server_id': id, 'search_default_server_id': id}" invisible="not branch"/>
+                    <button name="action_restart_instances" type="object" string="Apply Needed Restarts" invisible="not branch"/>
+                    <button name="action_agent_restart" type="object" string="Restart Agent" invisible="not branch"/>
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
-                        <button class="oe_stat_button" type="action" name="%(cloud_server_diff_action)d" context="{'default_server_id': id, 'search_default_server_id': id}" icon="fa-cogs">
+                        <button invisible="not diff_count" class="oe_stat_button" type="action" name="%(cloud_server_diff_action)d" context="{'default_server_id': id, 'search_default_server_id': id}" icon="fa-cogs">
                             <field string="Diffs" name="diff_count" widget="statinfo" options="{'label': 'Diffs'}"/>
                         </button>
                     </div>
@@ -43,18 +45,39 @@
                             <field name="ipv6_address"/>
                         </group>
                         <group>
-                            <field name="restarted"/>
                             <field name="branch"/>
-                            <field name="commit"/>
-                            <field name="commit_date"/>
+                            <field name="commit" invisible="not branch"/>
+                            <field name="commit_date" invisible="not branch"/>
+                            <field name="restarted" invisible="not branch"/>
                         </group>
                     </group>
-                    <label for="module_ids"/>
-                    <field name="module_ids"/>
-                    <label for="instance_ids"/>
-                    <field name="instance_ids"/>
-                    <button name="action_ping_ssl_renewal" type="object" string="Ping SSL renewal"/>
-                    <group>
+                    <group string="Hardware">
+                        <group>
+                            <field name="cpu_usage_percent"/>
+                            <field name="memory_usage_percent"/>
+                        </group>
+                        <group>
+                            <field name="memory_total_bytes"/>
+                            <field name="memory_available_bytes"/>
+                            <field name="memory_used_bytes"/>
+                        </group>
+                    </group>
+                    <label for="disk_ids"/>
+                    <field name="disk_ids">
+                        <list create="0" delete="0">
+                            <field name="mount"/>
+                            <field name="total_gb"/>
+                            <field name="used_gb"/>
+                            <field name="free_gb"/>
+                            <field name="usage_percent"/>
+                        </list>
+                    </field>
+                    <label for="module_ids" invisible="not branch"/>
+                    <field name="module_ids" invisible="not branch"/>
+                    <label for="instance_ids" invisible="not branch"/>
+                    <field name="instance_ids" invisible="not branch"/>
+                    <button name="action_ping_ssl_renewal" type="object" string="Ping SSL renewal" invisible="not branch"/>
+                    <group invisible="not branch">
                         <field name="ssl_renewal_ping_now"/>
                         <field name="ssl_renewal_pinged"/>
                         <field name="ssl_renewal_response"/>

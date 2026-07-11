@@ -30,6 +30,7 @@ class CloudServerModule(models.Model):
         index=True,
         ondelete='cascade',
         tracking=True,
+        domain=[('branch', '!=', False)],
     )
 
     name = fields.Char(related='module_id.name')
