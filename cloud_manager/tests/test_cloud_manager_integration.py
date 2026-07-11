@@ -60,6 +60,7 @@ elif method == 'agent_pull':
     obj = 'agent-pulled'
 elif method == 'status':
     obj = {
+        'timestamp': '2026-07-11 11:00:00',
         'agent': {
             'commit': 'agent-commit',
             'commit_date': '2024-01-02T03:04:05+00:00',
@@ -574,6 +575,71 @@ class TestCloudManagerIntegration(TransactionCase):
         payload['hardware']['cpu']['usage_percent'] = 99.9
         monitoring.produce({'data': json.dumps(payload)})
         self.assertEqual(server.cpu_usage_percent, 18.4)
+
+    def test_cloud_server_hardware_warning_activity(self):
+        endpoint = self._new_endpoint(
+            'Cloud Endpoint',
+            CLOUD_ENDPOINT_PRODUCER,
+            usage_field=self._server_usage_field(),
+        )
+        server = self._new_server(endpoint=endpoint)
+
+        def hardware(cpu_usage, memory_usage, disk_usage):
+            return {
+                'cpu': {
+                    'usage_percent': cpu_usage,
+                },
+                'memory': {
+                    'total_gb': 15.62,
+                    'available_gb': 8.5,
+                    'used_gb': 7.13,
+                    'usage_percent': memory_usage,
+                },
+                'disks': [{
+                    'mount': '/',
+                    'total_gb': 98.3,
+                    'used_gb': 54.69,
+                    'free_gb': 43.62,
+                    'usage_percent': disk_usage,
+                }],
+            }
+
+        server.parse_hardware(hardware(18.4, 45.6, 55.6))
+        self.assertFalse(server._get_hardware_warning())
+        self.assertFalse(server.hardware_warning)
+
+        server.parse_hardware(hardware(91.0, 45.6, 55.6))
+        self.assertTrue(server._get_hardware_warning())
+        self.assertTrue(server.hardware_warning)
+
+        warning_type = self.env.ref('mail.mail_activity_data_warning')
+        warning_activities = server.activity_ids.filtered(
+            lambda activity: activity.activity_type_id == warning_type and activity.user_id == server.create_uid
+        )
+        self.assertEqual(len(warning_activities), 1)
+
+        server.parse_hardware(hardware(45.6, 91.0, 55.6))
+        self.assertTrue(server._get_hardware_warning())
+        server.parse_hardware(hardware(45.6, 45.6, 91.0))
+        self.assertTrue(server._get_hardware_warning())
+        server.parse_hardware(hardware(92.0, 45.6, 55.6))
+        warning_activities = server.activity_ids.filtered(
+            lambda activity: activity.activity_type_id == warning_type and activity.user_id == server.create_uid
+        )
+        self.assertEqual(len(warning_activities), 1)
+
+        self.env['ir.config_parameter'].sudo().set_param('cloud_manager.hardware_warning_threshold_percent', '95')
+        self.assertFalse(server._get_hardware_warning())
+
+        server.status_updated = fields.Datetime.now() - timedelta(days=4)
+        self.assertTrue(server._get_hardware_warning())
+        self.env['ir.config_parameter'].sudo().set_param('cloud_manager.hardware_warning_stale_days', '5')
+        self.assertFalse(server._get_hardware_warning())
+        self.env['ir.config_parameter'].sudo().set_param('cloud_manager.hardware_warning_stale_days', '3')
+        server.status_updated = fields.Datetime.now()
+        server.parse_hardware(hardware(18.4, 45.6, 55.6))
+        self.assertTrue(server.status_updated)
+        self.assertFalse(server._get_hardware_warning())
 
     def test_cloud_server_diff_fetch_and_update(self):
         endpoint = self._new_endpoint(

@@ -148,6 +148,7 @@ if kwargs['url'] == '/zones':
         <field name="consumer">
 server = self.env['cloud.server'].search([('cname', '=', obj['host_id'])], limit=1)
 if server:
+    server.write({'status_updated': obj['timestamp']})
     server.parse_hardware(obj['hardware'])
     for instuid, backups in obj.get('backups', {}).items():
         inst = self.env['cloud.instance'].search([('uid', '=', instuid)], limit=1)

@@ -3,13 +3,14 @@
     <record id="cloud_server_list" model="ir.ui.view">
         <field name="model">cloud.server</field>
         <field name="arch" type="xml">
-            <list>
+            <list decoration-danger="hardware_warning">
                 <field name="name" optional="show"/>
                 <field name="endpoint_id" optional="hide"/>
                 <field name="ipv4_address" optional="show"/>
                 <field name="ipv6_address" optional="show"/>
                 <field name="branch" optional="show"/>
                 <field name="commit" optional="hide"/>
+                <field name="hardware_warning" optional="hide"/>
                 <field name="cpu_usage_percent" optional="hide"/>
                 <field name="memory_usage_percent" optional="hide"/>
                 <field name="restarted" optional="hide"/>
@@ -52,7 +53,11 @@
                         </group>
                     </group>
                     <group string="Hardware">
+                        <div class="alert alert-danger" role="alert" invisible="not hardware_warning">
+                            <field name="hardware_warning" nolabel="1"/>
+                        </div>
                         <group>
+                            <field name="status_updated"/>
                             <field name="cpu_usage_percent"/>
                             <field name="memory_usage_percent"/>
                         </group>

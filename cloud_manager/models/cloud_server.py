@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import logging
+from datetime import timedelta
+
 import dateutil.parser
 import pytz
 
@@ -15,7 +17,7 @@ def ptime(iso_str):
 class CloudServer(models.Model):
     _name = 'cloud.server'
     _description = 'Cloud Server'
-    _inherit = ['mail.thread']
+    _inherit = ['mail.thread', 'mail.activity.mixin']
 
     name = fields.Char(
         required=True,
@@ -146,6 +148,15 @@ class CloudServer(models.Model):
         readonly=True,
     )
 
+    status_updated = fields.Datetime(
+        readonly=True,
+    )
+
+    hardware_warning = fields.Text(
+        string="Hardware Warning",
+        compute='_compute_hardware_warning',
+    )
+
 
     _uniq_name = models.Constraint('UNIQUE(name)', 'Server name should be unique.')
 
@@ -161,6 +172,11 @@ class CloudServer(models.Model):
                 record.ssl_renewal_ping_now = True
             else:
                 record.ssl_renewal_ping_now = (fields.Datetime.now() - record.ssl_renewal_pinged).days > 5
+
+    @api.depends('cpu_usage_percent', 'memory_usage_percent', 'disk_ids.usage_percent', 'status_updated')
+    def _compute_hardware_warning(self):
+        for record in self:
+            record.hardware_warning = record._get_hardware_warning()
 
 
     def action_ping_ssl_renewal(self):
@@ -190,6 +206,7 @@ class CloudServer(models.Model):
 
     def parse_status(self, obj):
         self.ensure_one()
+        self.status_updated = obj['timestamp']
         self.commit = obj['agent']['commit']
         self.commit_date = ptime(obj['agent']['commit_date'])
         self.parse_instances(obj)
@@ -267,6 +284,47 @@ class CloudServer(models.Model):
         (all_modules - found_mods).active = False
 
 
+    def _get_hardware_warning(self):
+        self.ensure_one()
+        threshold = float(self.env['ir.config_parameter'].sudo().get_param('cloud_manager.hardware_warning_threshold_percent', 90))
+        stale_days = int(self.env['ir.config_parameter'].sudo().get_param('cloud_manager.hardware_warning_stale_days', 3))
+        metrics = []
+        warnings = []
+
+        if self.cpu_usage_percent > threshold:
+            metrics.append(_("CPU %(usage).1f%%", usage=self.cpu_usage_percent))
+        if self.memory_usage_percent > threshold:
+            metrics.append(_("Memory %(usage).1f%%", usage=self.memory_usage_percent))
+        for disk in self.disk_ids:
+            if disk.usage_percent > threshold:
+                metrics.append(_("Disk %(mount)s %(usage).1f%%", mount=disk.mount, usage=disk.usage_percent))
+        if self.status_updated and fields.Datetime.now() - self.status_updated > timedelta(days=stale_days):
+            warnings.append(_("Hardware status has not been updated for more than %(days)s days.", days=stale_days))
+
+        if metrics:
+            warnings.append(_(
+                "Hardware usage is above %(threshold).1f%%: %(metrics)s",
+                threshold=threshold,
+                metrics=", ".join(metrics),
+            ))
+        if not warnings:
+            return False
+
+        return "\n".join(warnings)
+
+    def _ensure_hardware_warning_activity(self, warning):
+        self.ensure_one()
+        activity_type = self.env.ref('mail.mail_activity_data_warning')
+        existing_activity = self.activity_ids.filtered(
+            lambda activity: activity.activity_type_id == activity_type and activity.user_id == self.create_uid
+        )
+        if not existing_activity:
+            self.activity_schedule(
+                'mail.mail_activity_data_warning',
+                note=warning,
+                user_id=self.create_uid.id,
+            )
+
 
     def parse_hardware(self, hw_dict):
         """
@@ -322,3 +380,9 @@ class CloudServer(models.Model):
             found_disks += disk_record
 
         (all_disks - found_disks).unlink()
+
+        self.env.flush_all()
+        self.invalidate_recordset(['disk_ids'])
+        warning = self._get_hardware_warning()
+        if warning:
+            self._ensure_hardware_warning_activity(warning)
