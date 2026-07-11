@@ -1,9 +1,11 @@
 <?xml version='1.0' encoding='utf-8'?>
 <odoo noupdate="1">
     <record id="cloud_manager.endpoint_cloud_v16" model="api.endpoint">
-        <field name="name">Odoo V16 Cloud</field>
-        <field name="location">agent16.eniemela.fi:9000</field>
+        <field name="id" eval="34"/>
+        <field name="name">Odoo V19 Cloud</field>
+        <field name="location">agent19.eniemela.fi:9000</field>
         <field name="usage_field_id" ref="cloud_manager.field_cloud_server__endpoint_id"/>
+        <field name="user_id" ref="base.user_root"/>
         <field name="direction">outbound</field>
         <field name="role">active</field>
         <field name="comm_method">xmlrpc</field>
@@ -32,10 +34,14 @@ if method == 'status':
 
   </field>
     </record>
+
+
     <record id="cloud_manager.endpoint_agent_callback" model="api.endpoint">
+        <field name="id" eval="19"/>
         <field name="name">Cloud Agent Callback</field>
         <field name="location">agent-callback</field>
         <field name="usage_field_id" eval="False"/>
+        <field name="user_id" ref="base.user_root"/>
         <field name="direction">inbound</field>
         <field name="role">passive</field>
         <field name="comm_method">http</field>
@@ -72,11 +78,13 @@ response = {'status': status}
 </field>
     </record>
 
+
     <record id="cloud_manager.endpoint_cloudflare_dns" model="api.endpoint">
         <field name="id" eval="4"/>
         <field name="name">Cloudflare</field>
         <field name="location">https://api.cloudflare.com/client/v4</field>
         <field name="usage_field_id" ref="cloud_manager.field_dns_zone__ns_endpoint_id"/>
+        <field name="user_id" ref="base.user_root"/>
         <field name="direction">inbound</field>
         <field name="role">active</field>
         <field name="comm_method">http</field>
@@ -84,7 +92,8 @@ response = {'status': status}
         <field name="file_format">json</field>
         <field name="response_format" eval="False"/>
         <field name="auto_code" eval="False"/>
-        <field name="documentation" type="html"><html>
+        <field name="documentation" type="html">
+            <html>
                 <body>
                     <p>By default, this integration will fetch the DNS Zones from Cloudflare (by pressing the "Run" button).</p>
                     <p>Different API calls can be made using the following 'variables'</p>
@@ -102,6 +111,7 @@ response = {'status': status}
 if not 'headers' in kwargs:
   kwargs['headers'] = {}
 
+kwargs['timeout'] = 30
 kwargs['url'] = self.location + kwargs['url']
 kwargs['headers']['Authorization'] = 'Bearer %s' % self.authorization
 kwargs['headers']['Content-Type'] = 'application/json'
@@ -115,5 +125,35 @@ if kwargs['url'] == '/zones':
       'name': vals['name'],
       'identifier': vals['id'],
     })</field>
+    </record>
+
+    <record id="cloud_manager.api_endpoint_passive_monitoring" model="api.endpoint">
+        <field name="id" eval="36"/>
+        <field name="name">passive system monitoring</field>
+        <field name="location">system-monitor</field>
+        <field name="usage_field_id" ref="cloud_manager.field_cloud_server__endpoint_id"/>
+        <field name="user_id" ref="base.user_admin"/>
+        <field name="direction">inbound</field>
+        <field name="role">passive</field>
+        <field name="comm_method">http</field>
+        <field name="http_method" eval="False"/>
+        <field name="file_format">json</field>
+        <field name="response_format">json</field>
+        <field name="auto_code" eval="False"/>
+        <field name="documentation" eval="False"/>
+        <field name="test_example" eval="False"/>
+        <field name="xslt" eval="False"/>
+        <field name="initiator">self.produce(variables={})</field>
+        <field name="producer">obj = json.loads(data)</field>
+        <field name="consumer">
+server = self.env['cloud.server'].search([('cname', '=', obj['host_id'])], limit=1)
+if server:
+    server.parse_hardware(obj['hardware'])
+    for instuid, backups in obj['backups']:
+        inst = server.instance_ids.filtered(lambda i: i.uid == instuid)
+        if inst:
+            inst.parse_backups(backups)
+response = {'status': 'OK'}
+        </field>
     </record>
 </odoo>

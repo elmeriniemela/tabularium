@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import json
 from datetime import timedelta
 
 from odoo import fields
@@ -529,6 +530,50 @@ class TestCloudManagerIntegration(TransactionCase):
         self.assertEqual(rpc_obj['method'], 'echo')
         self.assertEqual(rpc_obj['args'], tuple())
         self.assertFalse(rpc_obj['commit_before'])
+
+    def test_passive_monitoring_endpoint_parse_hardware(self):
+        endpoint = self._new_endpoint(
+            'Cloud Endpoint',
+            CLOUD_ENDPOINT_PRODUCER,
+            usage_field=self._server_usage_field(),
+        )
+        monitoring = self.env.ref('cloud_manager.api_endpoint_passive_monitoring')
+        monitoring.auto_commit = False
+
+        server = self._new_server(endpoint=endpoint, cname='web-01')
+        payload = {
+            'host_id': 'web-01',
+            'timestamp': '2026-07-11 11:00:00',
+            'hardware': {
+                'cpu': {
+                    'usage_percent': 18.4,
+                },
+                'memory': {
+                    'total_gb': 15.62,
+                    'available_gb': 8.5,
+                    'used_gb': 7.13,
+                    'usage_percent': 45.6,
+                },
+                'disks': [{
+                    'mount': '/',
+                    'total_gb': 98.3,
+                    'used_gb': 54.69,
+                    'free_gb': 43.62,
+                    'usage_percent': 55.6,
+                }],
+            },
+        }
+
+        globals_dict = monitoring.produce({'data': json.dumps(payload)})
+        self.assertEqual(globals_dict['response'], {'status': 'OK'})
+        self.assertEqual(server.cpu_usage_percent, 18.4)
+        self.assertEqual(server.memory_total_gb, 15.62)
+        self.assertEqual(server.disk_ids.mapped('mount'), ['/'])
+
+        payload['host_id'] = 'missing.example.com'
+        payload['hardware']['cpu']['usage_percent'] = 99.9
+        monitoring.produce({'data': json.dumps(payload)})
+        self.assertEqual(server.cpu_usage_percent, 18.4)
 
     def test_cloud_server_diff_fetch_and_update(self):
         endpoint = self._new_endpoint(
