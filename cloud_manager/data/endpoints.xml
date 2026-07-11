@@ -149,7 +149,7 @@ if kwargs['url'] == '/zones':
 server = self.env['cloud.server'].search([('cname', '=', obj['host_id'])], limit=1)
 if server:
     server.parse_hardware(obj['hardware'])
-    for instuid, backups in obj['backups'].items():
+    for instuid, backups in obj.get('backups', {}).items():
         inst = self.env['cloud.instance'].search([('uid', '=', instuid)], limit=1)
         if inst:
             inst.parse_backups(backups)
