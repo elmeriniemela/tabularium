@@ -8,6 +8,7 @@
                 <field name="trigger" optional="show"/>
                 <field name="timestamp" optional="show"/>
                 <field name="instance_id" optional="hide"/>
+                <field name="source_ids" widget="many2many_tags" optional="show"/>
                 <button name="action_restore" type="object" string="Restore"/>
             </list>
         </field>
@@ -29,6 +30,7 @@
                     <group>
                         <group>
                             <field name="instance_id"/>
+                            <field name="source_ids" widget="many2many_tags"/>
                         </group>
                         <group>
                             <field name="trigger"/>

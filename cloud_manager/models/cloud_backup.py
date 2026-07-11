@@ -36,6 +36,7 @@ class CloudBackup(models.Model):
     )
 
     source_ids = fields.Many2many(
+        string='Sources',
         comodel_name='cloud.backup.source',
         relation='cloud_backup_source_rel',
         column1='backup_id',
