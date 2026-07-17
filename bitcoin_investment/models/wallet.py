@@ -37,7 +37,7 @@ class BitcoinWallet(models.Model):
             if not wallet.position_id:
                 continue
 
-            for hist in wallet.history_ids[:wallet.position_sync_limit]:
+            for hist in wallet.history_ids.sorted()[:wallet.position_sync_limit]:
                 if hist.position_transaction_id:
                     continue
 
