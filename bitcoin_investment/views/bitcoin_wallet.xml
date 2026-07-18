@@ -17,6 +17,9 @@
                 <field name="position_id" optional="hide"/>
                 <field name="position_sync_limit" invisible="not position_id"/>
             </xpath>
+            <xpath expr="//field[@name='history_ids']/list/field[@name='transaction_id']" position="after">
+                <field name="position_transaction_id" optional="hide"/>
+            </xpath>
         </field>
     </record>
 
