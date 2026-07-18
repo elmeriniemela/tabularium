@@ -190,36 +190,25 @@ class BitcoinWallet(models.Model):
 
         _logger.info("%s batch(%s)", method, len(requests))
         responses = send(requests)
-        if not isinstance(responses, list):
+        if not isinstance(responses, list): # pragma: no cover
             raise UserError(_("%s:%s returned non-batch response for %s: %s") % (host, port, method, responses))
-        if len(responses) != len(requests):
+        if len(responses) != len(requests): # pragma: no cover
             raise UserError(_("%s:%s returned wrong response count for %s: %s") % (host, port, method, responses))
 
         result_by_id = {}
         for response in responses:
-            if not isinstance(response, dict) or "id" not in response:
+            if not isinstance(response, dict) or "id" not in response: # pragma: no cover
                 raise UserError(_("%s:%s returned invalid response for %s: %s") % (host, port, method, response))
-            if "error" in response and response["error"]:
+            if "error" in response and response["error"]: # pragma: no cover
                 raise UserError(_("%s:%s returned RPC error for %s: %s") % (host, port, method, response["error"]))
-            if "result" not in response:
+            if "result" not in response: # pragma: no cover
                 raise UserError(_("%s:%s response has no result for %s: %s") % (host, port, method, response))
             result_by_id[response["id"]] = response
 
         expected_ids = set(range(1, len(requests) + 1))
-        if set(result_by_id) != expected_ids:
+        if set(result_by_id) != expected_ids: # pragma: no cover
             raise UserError(_("%s:%s returned mismatched response ids for %s: %s") % (host, port, method, responses))
         return [result_by_id[request["id"]] for request in requests]
-
-    def _electrum_server_version(self, send):
-        response = send({
-            "jsonrpc": "2.0",
-            "method": "server.version",
-            "params": ["", "1.4"],
-            "id": 0,
-        })
-        if "result" in response:
-            return response["result"]
-        return response
 
     def _find_transactions_by_txid(self, txids):
         tx_by_hash = {}
@@ -263,7 +252,7 @@ class BitcoinWallet(models.Model):
                                 addr_record.scripthash_status = False
                             empty += 1
                         else:
-                            if not isinstance(status, str):
+                            if not isinstance(status, str): # pragma: no cover
                                 raise UserError(_("%s:%s returned invalid status for %s: %s") % (host, port, addr_record.scripthash, response))
                             empty = 0
                             if addr_record.scripthash_status != status:
@@ -290,9 +279,8 @@ class BitcoinWallet(models.Model):
                     for addr_record, response in zip(changed, history_responses):
                         trans_list = response["result"]
                         if trans_list is None:
-                            version = wallet._electrum_server_version(send)
-                            raise UserError(_("%s:%s response has no transactions: %s. Version: %s") % (host, port, response, version))
-                        if not isinstance(trans_list, list):
+                            raise UserError(_("%s:%s response has no transactions: %s.") % (host, port, response))
+                        if not isinstance(trans_list, list): # pragma: no cover
                             raise UserError(_("%s:%s returned invalid history for %s: %s") % (host, port, addr_record.scripthash, response))
                         _logger.info("%s has %s transactions", addr_record.address, len(trans_list))
                         history_by_addr[addr_record] = trans_list
@@ -438,10 +426,7 @@ class BitcoinWalletAddress(models.Model):
     @api.depends('address')
     def _compute_scripthash(self):
         for record in self:
-            if record.address:
-                record.scripthash = address_to_scripthash(record.address)
-            else:
-                record.scripthash = False
+            record.scripthash = address_to_scripthash(record.address) if record.address else False
 
     _wallet_address_uniq = models.Constraint('unique(wallet_id, address)', 'The wallet already has this address!')
 

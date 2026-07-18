@@ -275,11 +275,18 @@ class TestBitcoinWalletIntegration(TransactionCase):
 
         receiving_0 = self._address(wallet, 0, 0)
         old_address = receiving_0.address
+        stale_tx = self.Tx.create({"txid": "3" * 64})
+        receiving_0.write({
+            "transaction_ids": [Command.set(stale_tx.ids)],
+            "scripthash_status": "stale-status",
+        })
 
         key.write({"witness_type": "legacy"})
         wallet.refresh_addresses()
-        receiving_0.invalidate_recordset(["address"])
+        receiving_0.invalidate_recordset(["address", "transaction_ids", "scripthash_status"])
         self.assertNotEqual(receiving_0.address, old_address)
+        self.assertFalse(receiving_0.transaction_ids)
+        self.assertFalse(receiving_0.scripthash_status)
         self.assertEqual(len(wallet.address_ids), 4)
 
         key.write({"witness_type": "segwit", "multisig": True})
@@ -401,6 +408,32 @@ class TestBitcoinWalletIntegration(TransactionCase):
             [req for req in server.requests if req["method"] == "blockchain.scripthash.get_history"]
         )
 
+    def test_refresh_transactions_empty_status_clears_address_state(self):
+        key = self._new_key()
+        wallet = self._new_wallet([key], address_amount=1, gap_limit=1)
+        wallet.refresh_addresses()
+        receiving_0 = self._address(wallet, 0, 0)
+        stale_tx = self.Tx.create({"txid": "9" * 64})
+        receiving_0.write({
+            "transaction_ids": [Command.set(stale_tx.ids)],
+            "scripthash_status": "stale-status",
+        })
+
+        def dispatch(request):
+            if request["method"] == "blockchain.scripthash.subscribe":
+                return {"id": request["id"], "result": None}
+            raise AssertionError("Unexpected method %s" % request["method"]) # pragma: no cover
+
+        server, port = self._start_electrum_server(dispatch)
+        self._set_electrumx(port)
+        wallet.with_context(disable_auto_populate=True).refresh_transactions()
+
+        self.assertFalse(receiving_0.transaction_ids)
+        self.assertFalse(receiving_0.scripthash_status)
+        self.assertFalse(
+            [req for req in server.requests if req["method"] == "blockchain.scripthash.get_history"]
+        )
+
     def test_refresh_transactions_missing_tx_raises(self):
         key = self._new_key()
         wallet = self._new_wallet([key], address_amount=2, gap_limit=1)
@@ -437,15 +470,12 @@ class TestBitcoinWalletIntegration(TransactionCase):
                 return {"id": request["id"], "result": None}
             if request["method"] == "blockchain.scripthash.get_history":
                 return {"id": request["id"], "result": None}
-            if request["method"] == "server.version":
-                return {"id": request["id"], "result": "test/1.4"}
             raise AssertionError("Unexpected method %s" % request["method"]) # pragma: no cover
 
         server, port = self._start_electrum_server(dispatch)
         self._set_electrumx(port)
         with self.assertRaises(UserError):
             wallet.with_context(disable_auto_populate=True).refresh_transactions()
-        self.assertIn("server.version", [req["method"] for req in server.requests])
 
     def test_refresh_transactions_ran_out_of_addresses_raises(self):
         key = self._new_key()
