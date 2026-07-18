@@ -6,6 +6,7 @@ import logging
 from dateutil.relativedelta import relativedelta
 
 from odoo import api, tools, exceptions, fields, models, Command, _
+from odoo.orm.domains import DomainCondition
 
 
 _logger = logging.getLogger(__name__)
@@ -140,8 +141,13 @@ class BitcoinBlock(models.Model):
     @api.readonly
     def search_fetch(self, domain, field_names, offset=0, limit=None, order=None):
         res = super().search_fetch(domain, field_names, offset=offset, limit=limit, order=order)
-        if not self.env.context.get('disable_auto_populate') and not res and len(domain) == 1:
-            field, operator, value = domain[0]
+        condition = None
+        if isinstance(domain, DomainCondition):
+            condition = (domain.field_expr, domain.operator, domain.value)
+        elif isinstance(domain, list) and len(domain) == 1:
+            condition = domain[0]
+        if not self.env.context.get('disable_auto_populate') and not res and condition is not None:
+            field, operator, value = condition
             if field == 'hash' and operator == '=':
                 res = self.create({'hash': value})
                 res.with_context(force_tx=True).refresh()

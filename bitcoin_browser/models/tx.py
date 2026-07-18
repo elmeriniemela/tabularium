@@ -5,6 +5,7 @@ import logging
 import tinyrpc
 
 from odoo import api, exceptions, fields, models, Command, _
+from odoo.orm.domains import DomainCondition
 _logger = logging.getLogger(__name__)
 
 
@@ -59,8 +60,13 @@ class BitcoinTx(models.Model):
     @api.readonly
     def search_fetch(self, domain, field_names, offset=0, limit=None, order=None):
         res = super().search_fetch(domain, field_names, offset=offset, limit=limit, order=order)
-        if not self.env.context.get('disable_auto_populate') and len(domain) == 1:
-            field, operator, value = domain[0]
+        condition = None
+        if isinstance(domain, DomainCondition):
+            condition = (domain.field_expr, domain.operator, domain.value)
+        elif isinstance(domain, list) and len(domain) == 1:
+            condition = domain[0]
+        if not self.env.context.get('disable_auto_populate') and condition is not None:
+            field, operator, value = condition
             if field == 'txid' and operator == '=':
                 if not res:
                     res = self.create({'txid': value})

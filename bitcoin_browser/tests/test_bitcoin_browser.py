@@ -8,6 +8,7 @@ from tinyrpc.protocols.jsonrpc import JSONRPCError, JSONRPCErrorResponse
 
 from odoo import Command
 from odoo.exceptions import UserError
+from odoo.orm.domains import DomainCondition
 from odoo.tests import TransactionCase, tagged
 
 from odoo.addons.bitcoin_browser.models import generic as generic_model
@@ -201,6 +202,8 @@ class TestBitcoinBrowser(TransactionCase):
 
             existing_search = self.Block.search_fetch([('hash', '=', block.hash)], ['hash'])
             self.assertEqual(existing_search, block)
+            domain_search = self.Block.search_fetch(DomainCondition('hash', '=', block.hash), ['hash'])
+            self.assertEqual(domain_search, block)
 
             genesis = self.Block.create({'hash': 'block-genesis'})
             vals = genesis.fetchblock(tx=False)
@@ -210,6 +213,18 @@ class TestBitcoinBrowser(TransactionCase):
         with self._patch_proxy(FakeProxy(fail_getblock=True)):
             with self.assertRaises(UserError):
                 existing.fetchblock(tx=True)
+
+    def test_block_web_read_tx_ids(self):
+        block = self.Block.create({'hash': 'block-web-read'})
+        tx = self.Tx.create({'txid': 'tx-web-read', 'block_id': block.id})
+        self.env.invalidate_all()
+
+        [values] = self.Block.browse(block.id).web_read({
+            'hash': {},
+            'tx_ids': {'fields': {'txid': {}}},
+        })
+
+        self.assertEqual(values['tx_ids'][0]['id'], tx.id)
 
     def test_block_refresh_and_cron_fetch(self):
         now = _now()
