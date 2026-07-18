@@ -19,7 +19,10 @@ class _ElectrumRPCHandler(socketserver.StreamRequestHandler):
             if not line:
                 break
             request = json.loads(line.decode('utf-8'))
-            response = self.server.dispatch(request)
+            if isinstance(request, list):
+                response = [self.server.dispatch(item) for item in request]
+            else:
+                response = self.server.dispatch(request)
             self.wfile.write(json.dumps(response).encode('utf-8') + b'\n')
             self.wfile.flush()
 
@@ -270,7 +273,9 @@ class TestBitcoinInvestmentIntegration(TransactionCase):
         )
 
         def dispatch(request):
-            return {'id': request['id'], 'result': []}
+            if request['method'] == 'blockchain.scripthash.subscribe':
+                return {'id': request['id'], 'result': None}
+            raise AssertionError('Unexpected method %s' % request['method']) # pragma: no cover
 
         _, port = self._start_electrum_server(dispatch)
         self._set_electrumx(port)
