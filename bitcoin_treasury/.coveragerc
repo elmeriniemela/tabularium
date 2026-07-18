@@ -1,7 +1,9 @@
 [run]
 omit =
     */bitcoin_treasury/electrum/*
+    profile_wallet.py
 
 [report]
 omit =
     */bitcoin_treasury/electrum/*
+    profile_wallet.py

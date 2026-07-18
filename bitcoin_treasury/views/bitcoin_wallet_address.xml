@@ -8,6 +8,8 @@
                 <field name="index"/>
                 <field name="atype"/>
                 <field name="address"/>
+                <field name="scripthash" optional="hide"/>
+                <field name="scripthash_status" optional="hide"/>
                 <field name="balance"/>
                 <field name="transaction_ids"/>
                 <field name="write_date" optional="hide"/>
@@ -25,6 +27,8 @@
                         <group>
                             <field name="wallet_id"/>
                             <field name="address"/>
+                            <field name="scripthash"/>
+                            <field name="scripthash_status"/>
                             <field name="balance"/>
                         </group>
                         <group>

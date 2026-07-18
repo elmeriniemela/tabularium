@@ -161,7 +161,12 @@ class BitcoinWallet(models.Model):
 
 
                     if subkey_path in existing:
-                        existing[subkey_path].address = addr_str
+                        if existing[subkey_path].address != addr_str:
+                            existing[subkey_path].write({
+                                'address': addr_str,
+                                'scripthash_status': False,
+                                'transaction_ids': [Command.clear()],
+                            })
                     else:
                         existing[subkey_path] = self.env['bitcoin.wallet.address'].create({
                             'address': addr_str,
@@ -169,6 +174,63 @@ class BitcoinWallet(models.Model):
                             'atype': str(atype),
                             'wallet_id': wallet.id
                         })
+
+    def _electrum_batch(self, send, host, port, method, params_list):
+        requests = [
+            {
+                "jsonrpc": "2.0",
+                "id": request_id,
+                "method": method,
+                "params": params,
+            }
+            for request_id, params in enumerate(params_list, 1)
+        ]
+        if not requests:
+            return []
+
+        _logger.info("%s batch(%s)", method, len(requests))
+        responses = send(requests)
+        if not isinstance(responses, list):
+            raise UserError(_("%s:%s returned non-batch response for %s: %s") % (host, port, method, responses))
+        if len(responses) != len(requests):
+            raise UserError(_("%s:%s returned wrong response count for %s: %s") % (host, port, method, responses))
+
+        result_by_id = {}
+        for response in responses:
+            if not isinstance(response, dict) or "id" not in response:
+                raise UserError(_("%s:%s returned invalid response for %s: %s") % (host, port, method, response))
+            if "error" in response and response["error"]:
+                raise UserError(_("%s:%s returned RPC error for %s: %s") % (host, port, method, response["error"]))
+            if "result" not in response:
+                raise UserError(_("%s:%s response has no result for %s: %s") % (host, port, method, response))
+            result_by_id[response["id"]] = response
+
+        expected_ids = set(range(1, len(requests) + 1))
+        if set(result_by_id) != expected_ids:
+            raise UserError(_("%s:%s returned mismatched response ids for %s: %s") % (host, port, method, responses))
+        return [result_by_id[request["id"]] for request in requests]
+
+    def _electrum_server_version(self, send):
+        response = send({
+            "jsonrpc": "2.0",
+            "method": "server.version",
+            "params": ["", "1.4"],
+            "id": 0,
+        })
+        if "result" in response:
+            return response["result"]
+        return response
+
+    def _find_transactions_by_txid(self, txids):
+        tx_by_hash = {}
+        Tx = self.env['bitcoin.tx']
+        for tx_hash in txids:
+            _logger.info("TX search(%s)", tx_hash)
+            tx = Tx.search([('txid', '=', tx_hash)])
+            if not tx:
+                raise UserError(_("Bitcoin TX '%s' not found") % tx_hash)
+            tx_by_hash[tx_hash] = tx
+        return tx_by_hash
 
     def refresh_transactions(self):
         get_param = self.env['ir.config_parameter'].sudo().get_param
@@ -179,49 +241,33 @@ class BitcoinWallet(models.Model):
         with electumx_jsonrpc(host, port, use_ssl) as send:
             for wallet in self:
                 per_type = {}
-                addr_to_rec = {}
                 for addr_record in wallet.address_ids:
-                    per_type.setdefault(addr_record.atype, []).append(addr_record.address)
-                    addr_to_rec[addr_record.address] = addr_record
-                    if addr_record.transaction_ids:
-                        addr_record.transaction_ids = False # clean up old links.
+                    per_type.setdefault(addr_record.atype, []).append(addr_record)
 
-                for atype, addr_list in per_type.items():
+                for atype, addr_records in per_type.items():
+                    subscribe_responses = wallet._electrum_batch(
+                        send,
+                        host,
+                        port,
+                        "blockchain.scripthash.subscribe",
+                        [[addr_record.scripthash] for addr_record in addr_records],
+                    )
                     empty = 0
-                    for address in addr_list:
-                        sh = address_to_scripthash(address)
-                        # _logger.info("blockchain.scripthash.subscribe(%s)", sh)
-                        # tx_json = send({
-                        #     "method": "blockchain.scripthash.subscribe",
-                        #     "params": [sh],
-                        #     "id": 0
-                        # })
-                        _logger.info("blockchain.scripthash.get_history(%s)", sh)
-                        tx_json = send({
-                            "method": "blockchain.scripthash.get_history",
-                            "params": [sh],
-                            "id": 0
-                        })
-                        trans_list = tx_json.get('result')
-                        if trans_list is None:
-                            version = send({
-                                "method": "server.version",
-                                "params": ["", "1.4"],
-                                "id": 0
-                            })
-                            raise UserError(_("%s:%s response has no transactions: %s. Version: %s") % (host, port, tx_json, version))
-                        _logger.info("%s has %s transactions", address, len(trans_list))
-                        if tx_json['result']:
-                            empty = 0
-                            for vals in tx_json['result']:
-                                tx_hash = vals['tx_hash']
-                                _logger.info("TX search(%s)", tx_hash)
-                                tx = self.env['bitcoin.tx'].search([('txid', '=', tx_hash)])
-                                if not tx:
-                                    raise UserError(_("Bitcoin TX '%s' not found") % tx_hash)
-                                addr_to_rec[address].transaction_ids |= tx
+                    changed = {}
+                    for addr_record, response in zip(addr_records, subscribe_responses):
+                        status = response["result"]
+                        if status is None:
+                            if addr_record.transaction_ids:
+                                addr_record.transaction_ids = [Command.clear()]
+                            if addr_record.scripthash_status:
+                                addr_record.scripthash_status = False
+                            empty += 1
                         else:
-                            empty +=1
+                            if not isinstance(status, str):
+                                raise UserError(_("%s:%s returned invalid status for %s: %s") % (host, port, addr_record.scripthash, response))
+                            empty = 0
+                            if addr_record.scripthash_status != status:
+                                changed[addr_record] = status
 
                         if empty >= wallet.gap_limit:
                             _logger.info("Stop checking after %s empty addresses of type %s.", empty, atype)
@@ -230,6 +276,43 @@ class BitcoinWallet(models.Model):
                         if not empty:
                             raise UserError(_("Ran out of addresses! Please icrease address amount."))
 
+
+                    history_responses = wallet._electrum_batch(
+                        send,
+                        host,
+                        port,
+                        "blockchain.scripthash.get_history",
+                        [[addr_record.scripthash] for addr_record in changed],
+                    )
+                    history_by_addr = {}
+                    tx_hashes = []
+                    known_tx_hashes = set()
+                    for addr_record, response in zip(changed, history_responses):
+                        trans_list = response["result"]
+                        if trans_list is None:
+                            version = wallet._electrum_server_version(send)
+                            raise UserError(_("%s:%s response has no transactions: %s. Version: %s") % (host, port, response, version))
+                        if not isinstance(trans_list, list):
+                            raise UserError(_("%s:%s returned invalid history for %s: %s") % (host, port, addr_record.scripthash, response))
+                        _logger.info("%s has %s transactions", addr_record.address, len(trans_list))
+                        history_by_addr[addr_record] = trans_list
+                        for vals in trans_list:
+                            tx_hash = vals['tx_hash']
+                            if tx_hash not in known_tx_hashes:
+                                known_tx_hashes.add(tx_hash)
+                                tx_hashes.append(tx_hash)
+
+                    tx_by_hash = wallet._find_transactions_by_txid(tx_hashes)
+                    for addr_record, trans_list in history_by_addr.items():
+                        tx_ids = []
+                        for vals in trans_list:
+                            tx = tx_by_hash[vals['tx_hash']]
+                            if tx.id not in tx_ids:
+                                tx_ids.append(tx.id)
+                        addr_record.write({
+                            'transaction_ids': [Command.set(tx_ids)],
+                            'scripthash_status': changed[addr_record],
+                        })
 
                 _logger.info("Wallet %s done.", wallet.name)
 
@@ -343,6 +426,22 @@ class BitcoinWalletAddress(models.Model):
         readonly=True,
     )
 
+    scripthash = fields.Char(
+        compute='_compute_scripthash',
+        store=True,
+        readonly=True,
+        index=True,
+    )
+
+    scripthash_status = fields.Char(readonly=True)
+
+    @api.depends('address')
+    def _compute_scripthash(self):
+        for record in self:
+            if record.address:
+                record.scripthash = address_to_scripthash(record.address)
+            else:
+                record.scripthash = False
 
     _wallet_address_uniq = models.Constraint('unique(wallet_id, address)', 'The wallet already has this address!')
 
@@ -410,4 +509,3 @@ class BitcoinWalletHistory(models.Model):
 
 
     _wallet_transaction_uniq = models.Constraint('unique(wallet_id, transaction_id)', 'You should net out the balance change of one transaction instead of creating multiple lines per transaction!')
-

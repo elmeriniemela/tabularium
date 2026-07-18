@@ -77,8 +77,13 @@ class _ElectrumRPCHandler(socketserver.StreamRequestHandler):
             if not line:
                 break
             request = json.loads(line.decode("utf-8"))
-            self.server.requests.append(request)
-            response = self.server.dispatch(request)
+            self.server.raw_requests.append(request)
+            if isinstance(request, list):
+                self.server.requests.extend(request)
+                response = [self.server.dispatch(item) for item in request]
+            else:
+                self.server.requests.append(request)
+                response = self.server.dispatch(request)
             self.wfile.write(json.dumps(response).encode("utf-8") + b"\n")
             self.wfile.flush()
 
@@ -89,6 +94,7 @@ class _ElectrumRPCServer(socketserver.ThreadingTCPServer):
     def __init__(self, host_port, dispatch):
         self.dispatch = dispatch
         self.requests = []
+        self.raw_requests = []
         super().__init__(host_port, _ElectrumRPCHandler)
 
 
@@ -302,7 +308,9 @@ class TestBitcoinWalletIntegration(TransactionCase):
         wallet = self._new_wallet([key], address_amount=1, gap_limit=1)
 
         def dispatch(request):
-            return {"id": request["id"], "result": []}
+            if request["method"] == "blockchain.scripthash.subscribe":
+                return {"id": request["id"], "result": None}
+            raise AssertionError("Unexpected method %s" % request["method"]) # pragma: no cover
 
         _, port = self._start_electrum_server(dispatch)
         self._set_electrumx(port)
@@ -323,38 +331,92 @@ class TestBitcoinWalletIntegration(TransactionCase):
         tx_new = self.Tx.create({"txid": "2" * 64})
         receiving_0.transaction_ids = [Command.set(tx_old.ids)]
 
+        receiving_0_scripthash = address_to_scripthash(receiving_0.address)
         history_map = {
-            address_to_scripthash(receiving_0.address): [{"tx_hash": tx_new.txid}],
-            address_to_scripthash(receiving_1.address): [],
+            receiving_0_scripthash: [{"tx_hash": tx_new.txid}],
+        }
+        status_map = {
+            receiving_0_scripthash: "status-new",
+            address_to_scripthash(receiving_1.address): None,
         }
 
         def dispatch(request):
             sh = request["params"][0]
-            return {"id": request["id"], "result": history_map.get(sh, [])}
+            if request["method"] == "blockchain.scripthash.subscribe":
+                if sh in status_map:
+                    return {"id": request["id"], "result": status_map[sh]}
+                return {"id": request["id"], "result": None}
+            if request["method"] == "blockchain.scripthash.get_history":
+                return {"id": request["id"], "result": history_map[sh]}
+            raise AssertionError("Unexpected method %s" % request["method"]) # pragma: no cover
 
         server, port = self._start_electrum_server(dispatch)
         self._set_electrumx(port)
         wallet.with_context(disable_auto_populate=True).refresh_transactions()
 
         self.assertEqual(receiving_0.transaction_ids.ids, tx_new.ids)
+        self.assertEqual(receiving_0.scripthash_status, "status-new")
         self.assertNotIn(tx_old, receiving_0.transaction_ids)
-        self.assertGreaterEqual(
-            len([req for req in server.requests if req["method"] == "blockchain.scripthash.get_history"]),
-            3,
+        subscribe_requests = [
+            req for req in server.requests if req["method"] == "blockchain.scripthash.subscribe"
+        ]
+        history_requests = [
+            req for req in server.requests if req["method"] == "blockchain.scripthash.get_history"
+        ]
+        self.assertEqual(len(subscribe_requests), 6)
+        self.assertEqual(len(history_requests), 1)
+        self.assertTrue(all(req["method"] == "blockchain.scripthash.subscribe" for req in server.raw_requests[0]))
+        self.assertTrue(all(req["method"] == "blockchain.scripthash.get_history" for req in server.raw_requests[1]))
+
+    def test_refresh_transactions_unchanged_status_skips_history(self):
+        key = self._new_key()
+        wallet = self._new_wallet([key], address_amount=2, gap_limit=1)
+        wallet.refresh_addresses()
+        receiving_0 = self._address(wallet, 0, 0)
+        tx = self.Tx.create({"txid": "8" * 64})
+        receiving_0.write({
+            "transaction_ids": [Command.set(tx.ids)],
+            "scripthash_status": "same-status",
+        })
+
+        status_map = {
+            address_to_scripthash(receiving_0.address): "same-status",
+        }
+
+        def dispatch(request):
+            if request["method"] == "blockchain.scripthash.subscribe":
+                sh = request["params"][0]
+                if sh in status_map:
+                    return {"id": request["id"], "result": status_map[sh]}
+                return {"id": request["id"], "result": None}
+            raise AssertionError("Unexpected method %s" % request["method"]) # pragma: no cover
+
+        server, port = self._start_electrum_server(dispatch)
+        self._set_electrumx(port)
+        wallet.with_context(disable_auto_populate=True).refresh_transactions()
+
+        self.assertEqual(receiving_0.transaction_ids.ids, tx.ids)
+        self.assertEqual(receiving_0.scripthash_status, "same-status")
+        self.assertFalse(
+            [req for req in server.requests if req["method"] == "blockchain.scripthash.get_history"]
         )
 
     def test_refresh_transactions_missing_tx_raises(self):
         key = self._new_key()
-        wallet = self._new_wallet([key], address_amount=1, gap_limit=1)
+        wallet = self._new_wallet([key], address_amount=2, gap_limit=1)
         wallet.refresh_addresses()
         receiving_0 = self._address(wallet, 0, 0)
         missing_txid = "a" * 64
 
         def dispatch(request):
-            sh = request["params"][0]
-            if sh == address_to_scripthash(receiving_0.address):
+            if request["method"] == "blockchain.scripthash.subscribe":
+                sh = request["params"][0]
+                if sh == address_to_scripthash(receiving_0.address):
+                    return {"id": request["id"], "result": "missing-status"}
+                return {"id": request["id"], "result": None}
+            if request["method"] == "blockchain.scripthash.get_history":
                 return {"id": request["id"], "result": [{"tx_hash": missing_txid}]}
-            return {"id": request["id"], "result": []} # pragma: no cover
+            raise AssertionError("Unexpected method %s" % request["method"]) # pragma: no cover
 
         _, port = self._start_electrum_server(dispatch)
         self._set_electrumx(port)
@@ -363,16 +425,18 @@ class TestBitcoinWalletIntegration(TransactionCase):
 
     def test_refresh_transactions_none_result_raises(self):
         key = self._new_key()
-        wallet = self._new_wallet([key], address_amount=1, gap_limit=1)
+        wallet = self._new_wallet([key], address_amount=2, gap_limit=1)
         wallet.refresh_addresses()
         receiving_0 = self._address(wallet, 0, 0)
 
         def dispatch(request):
-            if request["method"] == "blockchain.scripthash.get_history":
+            if request["method"] == "blockchain.scripthash.subscribe":
                 sh = request["params"][0]
                 if sh == address_to_scripthash(receiving_0.address):
-                    return {"id": request["id"], "result": None}
-                return {"id": request["id"], "result": []} # pragma: no cover
+                    return {"id": request["id"], "result": "bad-history-status"}
+                return {"id": request["id"], "result": None}
+            if request["method"] == "blockchain.scripthash.get_history":
+                return {"id": request["id"], "result": None}
             if request["method"] == "server.version":
                 return {"id": request["id"], "result": "test/1.4"}
             raise AssertionError("Unexpected method %s" % request["method"]) # pragma: no cover
@@ -388,14 +452,13 @@ class TestBitcoinWalletIntegration(TransactionCase):
         wallet = self._new_wallet([key], address_amount=1, gap_limit=5)
         wallet.refresh_addresses()
         receiving_0 = self._address(wallet, 0, 0)
-        tx = self.Tx.create({"txid": "3" * 64})
 
         def dispatch(request):
-            if request["method"] == "blockchain.scripthash.get_history":
+            if request["method"] == "blockchain.scripthash.subscribe":
                 sh = request["params"][0]
                 if sh == address_to_scripthash(receiving_0.address):
-                    return {"id": request["id"], "result": [{"tx_hash": tx.txid}]}
-                return {"id": request["id"], "result": []} # pragma: no cover
+                    return {"id": request["id"], "result": "full-window-status"}
+                return {"id": request["id"], "result": None} # pragma: no cover
             raise AssertionError("Unexpected method %s" % request["method"]) # pragma: no cover
 
         _, port = self._start_electrum_server(dispatch)

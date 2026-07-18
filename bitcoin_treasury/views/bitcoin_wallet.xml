@@ -71,6 +71,8 @@
                                     <field name="index"/>
                                     <field name="atype"/>
                                     <field name="address"/>
+                                    <field name="scripthash" optional="hide"/>
+                                    <field name="scripthash_status" optional="hide"/>
                                     <field name="balance"/>
                                     <field name="transaction_ids"/>
                                     <field name="write_date" optional="hide"/>
