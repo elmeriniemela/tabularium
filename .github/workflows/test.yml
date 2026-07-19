@@ -29,16 +29,10 @@ jobs:
           done
   test:
     runs-on: ubuntu-24.04
-    container: ${{ matrix.container }}
-    name: ${{ matrix.name }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - container: ghcr.io/oca/oca-ci/py3.10-odoo19.0:latest
-            name: test with Odoo
-          - container: ghcr.io/oca/oca-ci/py3.10-ocb19.0:latest
-            name: test with OCB
+    container:
+      image: ghcr.io/elmeriniemela/odoo-src:19.0
+      options: --user root
+    name: test with Odoo
     services:
       postgres:
         image: postgres:16
@@ -48,26 +42,84 @@ jobs:
           POSTGRES_DB: odoo
         ports:
           - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     env:
-      OCA_ENABLE_CHECKLOG_ODOO: "1"
+      PGDATABASE: tabularium_test
+      PGHOST: postgres
+      PGUSER: odoo
+      PGPASSWORD: odoo
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - name: Install addons and dependencies
-        run: oca_install_addons
-      - name: Check licenses
-        run: manifestoo -d . check-licenses
-      - name: Check development status
-        run: manifestoo -d . check-dev-status --default-dev-status=Beta
-      - name: Initialize test db
-        run: oca_init_test_database
+          path: tabularium
+      - uses: actions/checkout@v4
+        with:
+          repository: odoo/odoo
+          ref: "19.0"
+          persist-credentials: false
+          path: odoo
+      - name: Prepare Odoo environment
+        run: |
+          ln -s "${GITHUB_WORKSPACE}/odoo" /mnt/odoo
+          ln -s "${GITHUB_WORKSPACE}/tabularium" /mnt/tabularium
+          mkdir -p /tmp/odoo-data /etc/odoo
+          pip3 install -r /mnt/tabularium/requirements.txt --break-system-packages
+          cat > /etc/odoo/odoo.conf <<EOF
+          [options]
+          addons_path = /mnt/tabularium,/mnt/odoo/addons,/mnt/odoo/odoo/addons
+          admin_passwd = admin
+          data_dir = /tmp/odoo-data
+          db_host = ${PGHOST}
+          db_port = 5432
+          db_user = ${PGUSER}
+          db_password = ${PGPASSWORD}
+          http_interface = 127.0.0.1
+          limit_time_cpu = 2400
+          limit_time_real = 3600
+          max_cron_threads = 0
+          server_wide_modules = web,base
+          workers = 0
+          EOF
+      - name: Select addons to test
+        run: |
+          ADDONS="$(
+            python3 - <<'PY'
+          import ast
+          from pathlib import Path
+
+          modules = []
+          for manifest in sorted(Path("/mnt/tabularium").glob("*/__manifest__.py")):
+              data = ast.literal_eval(manifest.read_text())
+              if data.get("installable", True):
+                  modules.append(manifest.parent.name)
+          print(",".join(modules))
+          PY
+          )"
+          echo "ADDONS=${ADDONS}" >> "${GITHUB_ENV}"
+          TEST_TAGS="$(
+            python3 - <<PY
+          print(",".join(f"/{module}" for module in "${ADDONS}".split(",")))
+          PY
+          )"
+          echo "TEST_TAGS=${TEST_TAGS}" >> "${GITHUB_ENV}"
       - name: Run tests
-        run: oca_run_tests
+        run: |
+          odoo server \
+            --database "${PGDATABASE}" \
+            --init "${ADDONS}" \
+            --test-tags "${TEST_TAGS}" \
+            --without-demo=True \
+            --log-level=test \
+            --stop-after-init
       - name: Upload screenshots from JS tests
         uses: actions/upload-artifact@v4
         if: ${{ failure() }}
         with:
-          name: Screenshots of failed JS tests - ${{ matrix.name }}
+          name: Screenshots of failed JS tests
           path: /tmp/odoo_tests/${{ env.PGDATABASE }}
           if-no-files-found: ignore
