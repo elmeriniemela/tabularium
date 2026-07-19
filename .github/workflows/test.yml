@@ -67,7 +67,7 @@ jobs:
         run: |
           ln -s "${GITHUB_WORKSPACE}/odoo" /mnt/odoo
           ln -s "${GITHUB_WORKSPACE}/tabularium" /mnt/tabularium
-          mkdir -p /tmp/odoo-data /etc/odoo
+          mkdir -p /tmp/odoo-data /tmp/odoo_tests /etc/odoo
           pip3 install -r /mnt/tabularium/requirements.txt --break-system-packages
           cat > /etc/odoo/odoo.conf <<EOF
           [options]
@@ -85,6 +85,7 @@ jobs:
           server_wide_modules = web,base
           workers = 0
           EOF
+          chown -R ubuntu:ubuntu /tmp/odoo-data /tmp/odoo_tests
       - name: Select addons to test
         run: |
           ADDONS="$(
@@ -109,7 +110,7 @@ jobs:
           echo "TEST_TAGS=${TEST_TAGS}" >> "${GITHUB_ENV}"
       - name: Run tests
         run: |
-          odoo server \
+          runuser -u ubuntu -- odoo server \
             --database "${PGDATABASE}" \
             --init "${ADDONS}" \
             --test-tags "${TEST_TAGS}" \
