@@ -32,7 +32,10 @@ class TestBaseModuleUninstall(TransactionCase):
         self.assertEqual(action["res_model"], "base.module.uninstall")
         self.assertEqual(action["type"], "ir.actions.act_window")
         self.assertEqual(action["target"], "new")
-        self.assertEqual(set(action["context"]["active_ids"]), {self.base_module.id, self.web_module.id})
+        expected_modules = (self.base_module | self.web_module).filtered(
+            lambda module: module.state in ("installed", "to upgrade")
+        )
+        self.assertEqual(set(action["context"]["active_ids"]), set(expected_modules.ids))
         self.assertIn(action["context"]["active_id"], action["context"]["active_ids"])
         self.assertTrue(action["context"]["default_show_all"])
         self.assertEqual(action["context"]["default_module_ids"], [action["context"]["active_id"]])
