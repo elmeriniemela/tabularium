@@ -72,7 +72,7 @@ jobs:
           cat > /etc/odoo/odoo.conf <<EOF
           [options]
           addons_path = /mnt/tabularium,/mnt/odoo/addons,/mnt/odoo/odoo/addons
-          admin_passwd = admin
+          list_db = False
           data_dir = /tmp/odoo-data
           db_host = ${PGHOST}
           db_port = 5432
