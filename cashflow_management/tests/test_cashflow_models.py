@@ -11,9 +11,6 @@ from odoo.exceptions import ValidationError
 from odoo.tests import tagged
 from odoo.tests.common import TransactionCase, mute_logger
 
-from odoo.addons.cashflow_management.models.cashflow_import import pdftotext
-
-
 @tagged("cashflow_management", "post_install", "-at_install")
 class TestCashflowModels(TransactionCase):
     @classmethod
@@ -274,7 +271,3 @@ add_entry({
         self.assertEqual(attachment_two.res_model, "cashflow.parser")
         self.assertEqual(attachment_two.res_id, parser.id)
 
-    def test_pdftotext_handles_empty_and_non_empty_input(self):
-        self.assertEqual(pdftotext(BytesIO(b"")), b"")
-        non_empty = pdftotext(BytesIO(self._build_minimal_pdf()))
-        self.assertIsInstance(non_empty, bytes)

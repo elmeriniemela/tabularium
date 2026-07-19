@@ -27,21 +27,6 @@ for mod in pdfminer_mods:
     __import__('pdfminer.%s' % mod)
 pdfminer = wrap_module(__import__('pdfminer'), {mod: pdfminer_mods[mod] for mod in pdfminer_mods})
 
-
-
-def pdftotext(fp):
-    pdfData = fp.read()
-    tf = tempfile.NamedTemporaryFile()
-    tf.write(pdfData)
-    tf.seek(0)
-    outputTf = tempfile.NamedTemporaryFile()
-
-    if (len(pdfData) > 0) :
-        out, err = subprocess.Popen(["pdftotext", "-layout", tf.name, outputTf.name ]).communicate()
-        return outputTf.read()
-    else:
-        return b""
-
 _logger = logging.getLogger(__name__)
 
 
@@ -102,7 +87,6 @@ class CashflowImport(models.TransientModel):
             'pandas': pandas,
             '_logger': _logger,
             'pdfminer': pdfminer,
-            'pdftotext': pdftotext,
             're': re,
             'add_entry': add_entry,
         }
