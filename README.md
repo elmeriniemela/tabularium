@@ -21,7 +21,6 @@ The Tabularium was the official records office of ancient Rome and housed the of
 - `cloud_manager_website`: Simple website layer for cloud manager flows.
 - `toggl_sync`: Toggl time entry sync + export to Odoo tasks/timesheets via XML-RPC.
 - `xml_export`: Adds XML as a standard export format in Odoo list/form export flow.
-- `file_scanner`: Filesystem scan + metadata/date parsing + export pipeline for media files.
 - `document_directory`: Document folder model backed by `ir.attachment`.
 - `multi_uninstall`: Wizard for uninstalling multiple modules.
 - `version_control`: Field-level text/html change tracking with diff view based on `mail_tracking_value`.
