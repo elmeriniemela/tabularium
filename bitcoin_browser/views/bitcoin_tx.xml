@@ -19,7 +19,7 @@
         <field name="arch" type="xml">
             <form create="false" edit="false">
                 <header>
-                    <button name="refresh" type="object" string="Refresh" icon="fa-cogs"/>
+                    <button name="refresh" type="object" string="Refresh" icon="fa-cogs" context="{'force_tx_refresh': True}"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
@@ -38,19 +38,17 @@
                             <field name="weight"/>
                             <field name="locktime"/>
                             <field name="fee"/>
+                            <field name="hex"/>
                         </group>
                     </group>
-                    <notebook>
-                        <page string="Inputs">
-                            <field name="vin_ids"/>
-                        </page>
-                        <page string="Outputs">
-                            <field name="vout_ids"/>
-                        </page>
-                        <page string="Used In">
-                            <field name="spent_input_ids"/>
-                        </page>
-                    </notebook>
+                    <label for="vin_ids" string="Inputs"/>
+                    <field name="vin_ids"/>
+                    <label for="vout_ids" string="Outputs"/>
+                    <field name="vout_ids"/>
+                    <label for="debug_script" string="Debug Script"/>
+                    <field name="debug_script"/>
+                    <label for="spent_input_ids" string="Spent In"/>
+                    <field name="spent_input_ids"/>
                 </sheet>
             </form>
         </field>

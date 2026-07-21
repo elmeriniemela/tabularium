@@ -5,6 +5,7 @@
         <field name="arch" type="xml">
             <list create="false">
                 <field name="tx_id" optional="hide"/>
+                <field name="n"/>
                 <field name="sequence"/>
                 <field name="vout_tx_id"/>
                 <field name="vout"/>
@@ -24,6 +25,7 @@
                     <group>
                         <group>
                             <field name="tx_id"/>
+                            <field name="n"/>
                             <field name="sequence"/>
                             <field name="vout_tx_id"/>
                             <field name="vout"/>

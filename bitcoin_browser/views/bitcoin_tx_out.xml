@@ -9,6 +9,7 @@
                 <field name="type"/>
                 <field name="address"/>
                 <field name="asm" optional="show"/>
+                <field name="script_pub_key_hex" optional="hide"/>
                 <field name="value"/>
                 <field name="spent_input_id"/>
             </list>
@@ -28,6 +29,7 @@
                             <field name="type"/>
                             <field name="address"/>
                             <field name="asm" optional="show"/>
+                            <field name="script_pub_key_hex"/>
                             <field name="value"/>
                             <field name="spent_input_id"/>
                         </group>

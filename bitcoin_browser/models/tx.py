@@ -3,6 +3,7 @@
 import datetime
 import logging
 import tinyrpc
+import pybitcoinkernel as pbk
 
 from odoo import api, exceptions, fields, models, Command, _
 from odoo.orm.domains import DomainCondition
@@ -23,6 +24,7 @@ class BitcoinTx(models.Model):
 
     in_active_chain = fields.Boolean(default=True)
     txid = fields.Char(required=True, help="An identifier used to uniquely identify a particular transaction; specifically, the sha256d hash of the transaction.")
+    hex = fields.Text(readonly=True, help="The serialized transaction as hex.")
     hash = fields.Char(help="The transaction hash (differs from txid for witness transactions).")
     version = fields.Integer(help="If version is greater han or equal to 2, the sequence field for each input is used as specified in BIP68 and used in CHECKSEQUENCEVERIFY (BIP112).")
     size = fields.BigInteger(help="The serialized transaction size.")
@@ -51,6 +53,10 @@ class BitcoinTx(models.Model):
         inverse_name='vout_tx_id',
         readonly=True,
         help="The inputs where outputs of this transaction are spent.",
+    )
+
+    debug_script = fields.Text(
+        compute='_compute_debug_script'
     )
 
     _uniq_txid = models.Constraint('UNIQUE(txid)', 'TXID should be unique!')
@@ -106,8 +112,9 @@ class BitcoinTx(models.Model):
     def refresh(self):
         proxy = self.env['ir.config_parameter'].bitcoind_proxy()
         Block = self.env['bitcoin.block'].with_context(disable_auto_populate=False)
+        force = self.env.context.get('force_tx_refresh')
         for record in self:
-            if not record.block_id:
+            if force or not record.block_id:
                 try:
                     _logger.info(f"proxy.getrawtransaction({record.txid}, {True})")
                     rawtx = proxy.getrawtransaction(record.txid, True)
@@ -119,11 +126,14 @@ class BitcoinTx(models.Model):
                     record.block_id = Block.create({'hash': rawtx['blockhash']}).id
 
                 record.write(self.rawtx_to_vals(rawtx))
+                if force:
+                    record.vin_ids.mapped('vout_tx_id').with_context(force_tx_refresh=False).refresh()
 
     def rawtx_to_vals(self, rawtx):
         return  {
             'in_active_chain': rawtx.get('in_active_chain'),
             'txid': rawtx['txid'],
+            'hex': rawtx['hex'],
             'blocktime': datetime.datetime.fromtimestamp(rawtx['blocktime']) if 'blocktime' in rawtx else False,
             'hash': rawtx['hash'],
             'version': rawtx['version'],
@@ -134,16 +144,18 @@ class BitcoinTx(models.Model):
             'fee': rawtx.get('fee', 0.0),
             'vin_ids': [
                 Command.create({
+                    'n': n,
                     'sequence': vin['sequence'],
                     'vout_tx_id': vin.get('txid', False),
                     'vout': vin.get('vout', False),
                     'coinbase': vin.get('coinbase', False),
-                }) for vin in rawtx['vin']
+                }) for n, vin in enumerate(rawtx['vin'])
             ],
             'vout_ids': [
                 Command.create({
                     'n': vout['n'],
                     'value': vout['value'],
+                    'script_pub_key_hex': vout['scriptPubKey']['hex'],
                     'address': vout['scriptPubKey'].get('address', False),
                     'asm': vout['scriptPubKey']['asm'],
                     'type': vout['scriptPubKey']['type'],
@@ -151,14 +163,63 @@ class BitcoinTx(models.Model):
             ]
         }
 
+    @api.depends(
+        'hex',
+        'vin_ids.n',
+        'vin_ids.vout',
+        'vin_ids.coinbase',
+        'vin_ids.vout_tx_id',
+        'vin_ids.vout_tx_id.vout_ids.script_pub_key_hex',
+        'vin_ids.vout_tx_id.vout_ids.value',
+    )
+    def _compute_debug_script(self):
+        for rec in self:
+            if not rec.hex:
+                rec.debug_script = "Missing raw transaction hex."
+                continue
+            if rec.vin_ids.filtered('coinbase'):
+                rec.debug_script = "Coinbase transactions have no input scripts to verify."
+                continue
+            if not pbk.trace_available():
+                rec.debug_script = "Script tracing is unavailable; rebuild libbitcoinkernel with -DENABLE_SCRIPT_TRACE=ON."
+                continue
 
+            tx = pbk.Transaction(bytes.fromhex(rec.hex))
+            ordered_inputs = rec.vin_ids.sorted('n')
+            spent_outputs = []
+            missing_inputs = []
+            for txin in ordered_inputs:
+                spent_output = txin.spent_output_id
+                if not spent_output or not spent_output.script_pub_key_hex:
+                    missing_inputs.append(str(txin.n))
+                    continue
+                spent_outputs.append(pbk.TransactionOutput(
+                    pbk.ScriptPubkey(bytes.fromhex(spent_output.script_pub_key_hex)),
+                    int(round(spent_output.value * 100000000)),
+                ))
+
+            if missing_inputs:
+                rec.debug_script = f"Missing spent output data for input(s): {', '.join(missing_inputs)}."
+                continue
+
+            lines = []
+            traces = pbk.debug_transaction(tx, spent_outputs)
+            overall = all(t.valid for t in traces)
+
+            lines.append(f"transaction script verification: {'VALID' if overall else 'INVALID'} "
+                f"({tx.n_inputs} input(s))")
+            for i, trace in enumerate(traces):
+                lines.append('')
+                lines.append(f"########## input {i} ##########")
+                lines.append(trace.format(max_item_bytes=16))
+            rec.debug_script = '\n'.join(lines)
 
 
 class BitcoinIn(models.Model):
     _name = 'bitcoin.tx.in'
     _description = 'Bitcoin Input'
     _rec_name = 'tx_id'
-    _order = 'sequence asc'
+    _order = 'n asc'
 
     tx_id = fields.Many2one(
         comodel_name='bitcoin.tx',
@@ -169,7 +230,16 @@ class BitcoinIn(models.Model):
         help="The origin transaction whose input this is."
     )
 
-    sequence = fields.BigInteger(required=True)
+    n = fields.Integer(
+        required=True,
+        index=True,
+        help="An input list index within tx_id. This preserves VIN order from the raw transaction; sequence is Bitcoin nSequence, not an ordering key.",
+    )
+
+    sequence = fields.BigInteger(
+        required=True,
+        help="Set whether the transaction can be replaced or when it can be mined. (Locktime, Replace By Fee (RBF), Relative Locktime)"
+    )
 
     vout_tx_id = fields.Many2one(
         comodel_name='bitcoin.tx',
@@ -195,6 +265,7 @@ class BitcoinIn(models.Model):
 
     _uniq_vout = models.Constraint('UNIQUE(vout_tx_id, vout)', 'Same transaction output can not be spent twice!')
     _uniq_coinbase = models.Constraint('UNIQUE(coinbase)', 'The coinbase should be unique!')
+    _uniq_tx_input = models.Constraint('UNIQUE(tx_id, n)', 'The VIN index must be unique within a transaction')
 
     @api.depends('coinbase')
     def _compute_coinbase_ascii(self):
@@ -254,6 +325,7 @@ class BitcoinOut(models.Model):
 
     address = fields.Char()
     asm = fields.Char()
+    script_pub_key_hex = fields.Char(required=True)
     value = fields.Float(digits='Bitcoin Decimal')
 
     spent_input_id = fields.Many2one(

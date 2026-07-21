@@ -2,6 +2,7 @@
 
 import datetime
 import json
+from types import SimpleNamespace
 from unittest.mock import patch
 
 from tinyrpc.protocols.jsonrpc import JSONRPCError, JSONRPCErrorResponse
@@ -12,6 +13,7 @@ from odoo.orm.domains import DomainCondition
 from odoo.tests import TransactionCase, tagged
 
 from odoo.addons.bitcoin_browser.models import generic as generic_model
+from odoo.addons.bitcoin_browser.models import tx as tx_model
 
 
 def _now():
@@ -75,6 +77,7 @@ class TestBitcoinBrowser(TransactionCase):
         in_active_chain=True,
     ):
         script_pub_key = {
+            'hex': '76a9144bfbaf6afb76cc5771bc6404810d1cc041a6933988ac',
             'asm': 'OP_DUP OP_HASH160',
             'type': 'pubkeyhash',
         }
@@ -83,6 +86,15 @@ class TestBitcoinBrowser(TransactionCase):
         rawtx = {
             'in_active_chain': in_active_chain,
             'txid': txid,
+            'hex': (
+                '02000000013f7cebd65c27431a90bba7f796914fe8cc2ddfc3f2cbd6f7e5f2fc854534da'
+                '95000000006b483045022100de1ac3bcdfb0332207c4a91f3832bd2c2915840165f876ab'
+                '47c5f8996b971c3602201c6c053d750fadde599e6f5c4e1963df0f01fc0d97815e8157e3'
+                'd59fe09ca30d012103699b464d1d8bc9e47d4fb1cdaa89a1c5783d68363c4dbc4b524ed3'
+                'd857148617feffffff02836d3c01000000001976a914fc25d6d5c94003bf5b0c7b640a24'
+                '8e2c637fcfb088ac7ada8202000000001976a914fbed3d9b11183209a57999d54d59f67c'
+                '019e756c88ac6acb0700'
+            ),
             'hash': f'hash-{txid}',
             'version': 2,
             'size': 200,
@@ -271,6 +283,7 @@ class TestBitcoinBrowser(TransactionCase):
             {
                 'txid': 'tx-existing',
                 'vin_ids': [Command.create({
+                    'n': 0,
                     'sequence': 11,
                     'vout_tx_id': 'tx-linked',
                     'vout': 0,
@@ -286,6 +299,7 @@ class TestBitcoinBrowser(TransactionCase):
                 'weight': 360,
                 'locktime': 0,
                 'vin_ids': [Command.create({
+                    'n': 0,
                     'sequence': 1,
                     'vout_tx_id': False,
                     'vout': False,
@@ -294,6 +308,7 @@ class TestBitcoinBrowser(TransactionCase):
                 'vout_ids': [Command.create({
                     'n': 0,
                     'value': 0.5,
+                    'script_pub_key_hex': '76a9144bfbaf6afb76cc5771bc6404810d1cc041a6933988ac',
                     'address': 'addr-linked',
                     'asm': 'asm-linked',
                     'type': 'pubkeyhash',
@@ -332,6 +347,9 @@ class TestBitcoinBrowser(TransactionCase):
 
         raw_no_blocktime = self._rawtx('tx-no-blocktime', blocktime=None, fee=None, include_address=False)
         vals = self.Tx.rawtx_to_vals(raw_no_blocktime)
+        self.assertEqual(vals['hex'], raw_no_blocktime['hex'])
+        self.assertEqual(vals['vin_ids'][0][2]['n'], 0)
+        self.assertEqual(vals['vout_ids'][0][2]['script_pub_key_hex'], raw_no_blocktime['vout'][0]['scriptPubKey']['hex'])
         self.assertFalse(vals['blocktime'])
         self.assertEqual(vals['fee'], 0.0)
         self.assertFalse(vals['vout_ids'][0][2]['address'])
@@ -339,11 +357,122 @@ class TestBitcoinBrowser(TransactionCase):
         tx_with_block = self.Tx.create({'txid': 'tx-with-block', 'block_id': fetched.block_id.id})
         with self._patch_proxy(FakeProxy(fail_getraw=True)):
             tx_with_block.refresh()
+        self.assertFalse(tx_with_block.hex)
+
+        raw_with_block = self._rawtx(
+            'tx-with-block',
+            blockhash=fetched.block_id.hash,
+            blocktime=int(now.timestamp()),
+        )
+        with self._patch_proxy(FakeProxy(txs={'tx-with-block': raw_with_block})):
+            tx_with_block.with_context(force_tx_refresh=True).refresh()
+        self.assertEqual(tx_with_block.hex, raw_with_block['hex'])
+        self.assertEqual(tx_with_block.vin_ids.n, 0)
+        self.assertEqual(tx_with_block.vout_ids.script_pub_key_hex, raw_with_block['vout'][0]['scriptPubKey']['hex'])
 
         with self._patch_proxy(FakeProxy(fail_getraw=True)):
             tx_error = self.Tx.create({'txid': 'tx-error'})
             with self.assertRaises(UserError):
                 tx_error.refresh()
+
+    def test_tx_debug_script_builds_kernel_inputs_in_vin_order(self):
+        script_0 = '51'
+        script_1 = '52'
+        prev_0 = self.Tx.create({'txid': 'debug-prev-0'})
+        prev_1 = self.Tx.create({'txid': 'debug-prev-1'})
+        self.TxOut.create({
+            'tx_id': prev_0.id,
+            'n': 0,
+            'type': 'pubkey',
+            'address': 'debug-addr-0',
+            'asm': 'OP_1',
+            'script_pub_key_hex': script_0,
+            'value': 0.00000011,
+        })
+        self.TxOut.create({
+            'tx_id': prev_1.id,
+            'n': 0,
+            'type': 'pubkey',
+            'address': 'debug-addr-1',
+            'asm': 'OP_2',
+            'script_pub_key_hex': script_1,
+            'value': 0.00000022,
+        })
+        tx = self.Tx.create({
+            'txid': 'debug-spend',
+            'hex': '0a0b',
+            'vin_ids': [
+                Command.create({
+                    'n': 1,
+                    'sequence': 1,
+                    'vout_tx_id': prev_1.id,
+                    'vout': 0,
+                    'coinbase': False,
+                }),
+                Command.create({
+                    'n': 0,
+                    'sequence': 99,
+                    'vout_tx_id': prev_0.id,
+                    'vout': 0,
+                    'coinbase': False,
+                }),
+            ],
+        })
+
+        calls = {
+            'scripts': [],
+            'outputs': [],
+        }
+
+        class FakeTransaction:
+
+            def __init__(self, raw):
+                self.raw = raw
+                self.n_inputs = 2
+
+        class FakeScriptPubkey:
+
+            def __init__(self, raw):
+                self.raw = raw
+                calls['scripts'].append(raw)
+
+        class FakeTransactionOutput:
+
+            def __init__(self, script_pubkey, amount):
+                self.script_pubkey = script_pubkey
+                self.amount = amount
+                calls['outputs'].append(self)
+
+        class FakeTrace:
+            valid = True
+
+            def format(self, max_item_bytes):
+                calls['max_item_bytes'] = max_item_bytes
+                return 'trace body'
+
+        def fake_debug_transaction(transaction, spent_outputs):
+            calls['transaction'] = transaction
+            calls['spent_outputs'] = spent_outputs
+            return [FakeTrace(), FakeTrace()]
+
+        fake_pbk = SimpleNamespace(
+            trace_available=lambda: True,
+            Transaction=FakeTransaction,
+            ScriptPubkey=FakeScriptPubkey,
+            TransactionOutput=FakeTransactionOutput,
+            debug_transaction=fake_debug_transaction,
+        )
+
+        with patch.object(tx_model, 'pbk', fake_pbk):
+            tx._compute_debug_script()
+
+        self.assertEqual(calls['transaction'].raw, bytes.fromhex(tx.hex))
+        self.assertEqual(calls['scripts'], [bytes.fromhex(script_0), bytes.fromhex(script_1)])
+        self.assertEqual([output.amount for output in calls['outputs']], [11, 22])
+        self.assertEqual(calls['spent_outputs'], calls['outputs'])
+        self.assertEqual(calls['max_item_bytes'], 16)
+        self.assertIn('transaction script verification: VALID (2 input(s))', tx.debug_script)
+        self.assertIn('trace body', tx.debug_script)
 
     def test_input_output_create_and_link_compute(self):
         origin = self.Tx.create({'txid': 'origin-tx'})
@@ -355,6 +484,7 @@ class TestBitcoinBrowser(TransactionCase):
             'type': 'pubkeyhash',
             'address': 'addr-1',
             'asm': 'asm-1',
+            'script_pub_key_hex': '76a9144bfbaf6afb76cc5771bc6404810d1cc041a6933988ac',
             'value': 1.0,
         })
         output_updated = self.TxOut.create({
@@ -363,6 +493,7 @@ class TestBitcoinBrowser(TransactionCase):
             'type': 'nulldata',
             'address': 'addr-2',
             'asm': 'asm-2',
+            'script_pub_key_hex': '6a',
             'value': 2.0,
         })
         self.assertEqual(output.id, output_updated.id)
@@ -371,6 +502,7 @@ class TestBitcoinBrowser(TransactionCase):
 
         tx_input = self.TxIn.create({
             'tx_id': spender.id,
+            'n': 0,
             'sequence': 1,
             'vout_tx_id': origin.txid,
             'vout': 0,
@@ -380,6 +512,7 @@ class TestBitcoinBrowser(TransactionCase):
 
         tx_input_updated = self.TxIn.create({
             'tx_id': spender.id,
+            'n': 0,
             'sequence': 2,
             'vout_tx_id': origin.id,
             'vout': 0,
@@ -391,6 +524,7 @@ class TestBitcoinBrowser(TransactionCase):
 
         coinbase = self.TxIn.create({
             'tx_id': spender.id,
+            'n': 1,
             'sequence': 3,
             'vout_tx_id': False,
             'vout': False,
@@ -398,6 +532,7 @@ class TestBitcoinBrowser(TransactionCase):
         })
         coinbase_updated = self.TxIn.create({
             'tx_id': spender.id,
+            'n': 1,
             'sequence': 4,
             'vout_tx_id': False,
             'vout': False,
