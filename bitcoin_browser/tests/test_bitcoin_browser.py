@@ -10,7 +10,7 @@ from tinyrpc.protocols.jsonrpc import JSONRPCError, JSONRPCErrorResponse
 from odoo import Command
 from odoo.exceptions import UserError
 from odoo.orm.domains import DomainCondition
-from odoo.tests import TransactionCase, tagged
+from odoo.tests import HttpCase, TransactionCase, tagged
 
 from odoo.addons.bitcoin_browser.models import generic as generic_model
 from odoo.addons.bitcoin_browser.models import tx as tx_model
@@ -462,17 +462,17 @@ class TestBitcoinBrowser(TransactionCase):
         )
 
         with patch.object(tx_model, 'pbk', fake_pbk):
-            tx._compute_debug_script()
+            tx._compute_visualized_script()
 
         self.assertEqual(calls['transaction'].raw, bytes.fromhex(tx.hex))
         self.assertEqual(calls['scripts'], [bytes.fromhex(script_0), bytes.fromhex(script_1)])
         self.assertEqual([output.amount for output in calls['outputs']], [11, 22])
         self.assertEqual(calls['spent_outputs'], calls['outputs'])
-        self.assertIn('Transaction script verification', tx.debug_script)
-        self.assertIn('VALID', tx.debug_script)
-        self.assertIn('2 input(s)', tx.debug_script)
-        self.assertIn('Input 0', tx.debug_script)
-        self.assertIn('Input 1', tx.debug_script)
+        self.assertIn('Transaction script verification', tx.visualized_script)
+        self.assertIn('VALID', tx.visualized_script)
+        self.assertIn('2 input(s)', tx.visualized_script)
+        self.assertIn('Input 0', tx.visualized_script)
+        self.assertIn('Input 1', tx.visualized_script)
 
     def test_input_output_create_and_link_compute(self):
         origin = self.Tx.create({'txid': 'origin-tx'})
@@ -546,3 +546,18 @@ class TestBitcoinBrowser(TransactionCase):
         output._compute_spent_input_id()
         self.assertEqual(tx_input.spent_output_id, output)
         self.assertEqual(output.spent_input_id, tx_input)
+
+
+@tagged('post_install', '-at_install')
+class TestBitcoinBrowserController(HttpCase):
+
+    def test_visualized_script_route(self):
+        # A tx with a block skips the auto-refresh (no bitcoind call needed).
+        block = self.env['bitcoin.block'].create({'hash': 'ctrl-block'})
+        self.env['bitcoin.tx'].create({'txid': 'ctrl-tx', 'block_id': block.id})
+
+        response = self.url_open('/bitcoin/tx/ctrl-tx')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('text/html', response.headers['Content-Type'])
+        self.assertIn('Missing raw transaction hex.', response.text)
