@@ -561,13 +561,78 @@ class TestBitcoinBrowser(TransactionCase):
 @tagged('post_install', '-at_install')
 class TestBitcoinBrowserController(HttpCase):
 
-    def test_visualized_script_route(self):
-        # A tx with a block skips the auto-refresh (no bitcoind call needed).
-        block = self.env['bitcoin.block'].create({'hash': 'ctrl-block'})
-        self.env['bitcoin.tx'].create({'txid': 'ctrl-tx', 'block_id': block.id})
+    def _rawtx(self, txid, vin):
+        return {
+            'txid': txid,
+            'hex': '00',
+            'hash': f'hash-{txid}',
+            'version': 2,
+            'size': 1,
+            'vsize': 1,
+            'weight': 4,
+            'locktime': 0,
+            'vin': vin,
+            'vout': [{
+                'n': 0,
+                'value': 1.0,
+                'scriptPubKey': {
+                    'hex': '51',
+                    'asm': 'OP_TRUE',
+                    'type': 'nonstandard',
+                },
+            }],
+        }
 
-        response = self.url_open('/bitcoin/tx/ctrl-tx')
+    def test_visualized_script_route_renders_after_refresh(self):
+        self.env['bitcoin.tx'].create({'txid': 'ctrl-refresh'})
+        proxy = FakeProxy(txs={
+            'ctrl-refresh': self._rawtx('ctrl-refresh', [{
+                'sequence': 1,
+                'txid': 'ctrl-prev-refresh',
+                'vout': 0,
+            }]),
+            'ctrl-prev-refresh': self._rawtx('ctrl-prev-refresh', [{
+                'sequence': 1,
+                'coinbase': '6374726c2d707265762d72656672657368',
+            }]),
+        })
+
+        class FakeTransaction:
+
+            def __init__(self, raw):
+                self.raw = raw
+                self.n_inputs = 1
+
+        class FakeScriptPubkey:
+
+            def __init__(self, raw):
+                self.raw = raw
+
+        class FakeTransactionOutput:
+
+            def __init__(self, script_pubkey, amount):
+                self.script_pubkey = script_pubkey
+                self.amount = amount
+
+        class FakeTrace:
+            valid = True
+            error = SimpleNamespace(name='CACHE_REFRESH_SENTINEL')
+            executions = []
+
+        fake_pbk = SimpleNamespace(
+            trace_available=lambda: True,
+            Transaction=FakeTransaction,
+            ScriptPubkey=FakeScriptPubkey,
+            TransactionOutput=FakeTransactionOutput,
+            debug_transaction=lambda transaction, spent_outputs: [FakeTrace()],
+        )
+
+        with self._patch_proxy(proxy), patch.object(tx_model, 'pbk', fake_pbk):
+            response = self.url_open('/bitcoin/tx/ctrl-refresh')
 
         self.assertEqual(response.status_code, 200)
         self.assertIn('text/html', response.headers['Content-Type'])
-        self.assertIn('Missing raw transaction hex.', response.text)
+        self.assertIn('CACHE_REFRESH_SENTINEL', response.text)
+
+    def _patch_proxy(self, proxy):
+        return patch.object(generic_model.ConfigParam, 'bitcoind_proxy', autospec=True, return_value=proxy)

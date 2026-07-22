@@ -277,6 +277,10 @@ class BitcoinTx(models.Model):
         sanitize=False,
     )
 
+    is_visualized = fields.Boolean(
+        compute='_compute_visualized_script',
+    )
+
     _uniq_txid = models.Constraint('UNIQUE(txid)', 'TXID should be unique!')
 
     @api.model
@@ -394,15 +398,18 @@ class BitcoinTx(models.Model):
         for rec in self:
             if not rec.hex:
                 rec.visualized_script = _debug_message_box("Missing raw transaction hex.", "muted")
+                rec.is_visualized = False
                 continue
             if rec.vin_ids.filtered('coinbase'):
                 rec.visualized_script = _debug_message_box(
                     "Coinbase transactions have no input scripts to verify.", "info")
+                rec.is_visualized = False
                 continue
             if not pbk.trace_available():
                 rec.visualized_script = _debug_message_box(
                     "Script tracing is unavailable; rebuild libbitcoinkernel with "
                     "-DENABLE_SCRIPT_TRACE=ON.", "warn")
+                rec.is_visualized = False
                 continue
 
             tx = pbk.Transaction(bytes.fromhex(rec.hex))
@@ -423,10 +430,12 @@ class BitcoinTx(models.Model):
                 rec.visualized_script = _debug_message_box(
                     f"Missing spent output data for input(s): {', '.join(missing_inputs)}.",
                     "muted")
+                rec.is_visualized = False
                 continue
 
             traces = pbk.debug_transaction(tx, spent_outputs)
             rec.visualized_script = _debug_traces_to_html(traces, tx.n_inputs)
+            rec.is_visualized = True
 
 
 class BitcoinIn(models.Model):
@@ -489,6 +498,7 @@ class BitcoinIn(models.Model):
             else:
                 record.coinbase_ascii = False
 
+    @api.depends('vout_tx_id', 'vout', 'vout_tx_id.vout_ids', 'vout_tx_id.vout_ids.n')
     def _compute_spent_output_id(self):
         Output = self.env['bitcoin.tx.out']
         for record in self:
