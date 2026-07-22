@@ -178,43 +178,34 @@ class BitcoinTx(models.Model):
         'vin_ids.vout_tx_id.vout_ids.value',
     )
     def _compute_visualized_script(self):
-        qweb = self.env['ir.qweb']
+
+        def render(template, vals):
+            return self.env['ir.qweb']._render(template, vals)
+
         for rec in self:
             if not rec.hex:
-                rec.visualized_script = qweb._render('bitcoin_browser.tx_visualized_script_content', {
-                    'message': {
-                        'bg': "#f1f3f4",
-                        'border': "#9aa0a6",
-                        'fg': "#3c4043",
-                        'text': "Missing raw transaction hex.",
-                    },
+                rec.visualized_script = render('bitcoin_browser.tx_visualized_script_content', {
+                    'message_kind': 'muted',
+                    'message_text': "Missing raw transaction hex.",
                     'mode': 'message',
                 })
                 rec.is_visualized = False
                 continue
             if rec.vin_ids.filtered('coinbase'):
-                rec.visualized_script = qweb._render('bitcoin_browser.tx_visualized_script_content', {
-                    'message': {
-                        'bg': "#e8f0fe",
-                        'border': "#4285f4",
-                        'fg': "#174ea6",
-                        'text': "Coinbase transactions have no input scripts to verify.",
-                    },
+                rec.visualized_script = render('bitcoin_browser.tx_visualized_script_content', {
+                    'message_kind': 'info',
+                    'message_text': "Coinbase transactions have no input scripts to verify.",
                     'mode': 'message',
                 })
                 rec.is_visualized = False
                 continue
             if not pbk.trace_available():
-                rec.visualized_script = qweb._render('bitcoin_browser.tx_visualized_script_content', {
-                    'message': {
-                        'bg': "#fef7e0",
-                        'border': "#f9ab00",
-                        'fg': "#b06000",
-                        'text': (
-                            "Script tracing is unavailable; rebuild libbitcoinkernel with "
-                            "-DENABLE_SCRIPT_TRACE=ON."
-                        ),
-                    },
+                rec.visualized_script = render('bitcoin_browser.tx_visualized_script_content', {
+                    'message_kind': 'warn',
+                    'message_text': (
+                        "Script tracing is unavailable; rebuild libbitcoinkernel with "
+                        "-DENABLE_SCRIPT_TRACE=ON."
+                    ),
                     'mode': 'message',
                 })
                 rec.is_visualized = False
@@ -235,110 +226,24 @@ class BitcoinTx(models.Model):
                 ))
 
             if missing_inputs:
-                rec.visualized_script = qweb._render('bitcoin_browser.tx_visualized_script_content', {
-                    'message': {
-                        'bg': "#f1f3f4",
-                        'border': "#9aa0a6",
-                        'fg': "#3c4043",
-                        'text': f"Missing spent output data for input(s): {', '.join(missing_inputs)}.",
-                    },
+                rec.visualized_script = render('bitcoin_browser.tx_visualized_script_content', {
+                    'message_kind': 'muted',
+                    'message_text': f"Missing spent output data for input(s): {', '.join(missing_inputs)}.",
                     'mode': 'message',
                 })
                 rec.is_visualized = False
                 continue
 
             traces = pbk.debug_transaction(tx, spent_outputs)
-            colors = {}
-            palette = (
-                "#fde0dc", "#fce8b2", "#d7f2ba", "#c6ecec", "#d4e4fb",
-                "#e6d9f2", "#f9d5e5", "#e0f0d8", "#fdecc8", "#d9e7ff",
-                "#f0d9c0", "#d9f0ee", "#efd9f0", "#dff0d9", "#f0dfd9",
-            )
-            trace_vals = []
-            for trace_index, trace in enumerate(traces):
-                execution_vals = []
-                for execution_index, execution in enumerate(trace.executions):
-                    step_vals = []
-                    for step in execution.steps:
-                        step_stack_vals = []
-                        for item in step.stack:
-                            if item:
-                                item_hex = item.hex()
-                                if item_hex not in colors:
-                                    colors[item_hex] = palette[len(colors) % len(palette)]
-                                text = item_hex
-                                if len(item) > 16:
-                                    text = f"{item_hex[:32]}…({len(item)} bytes)"
-                                step_stack_vals.append({
-                                    'bg': colors[item_hex],
-                                    'text': text,
-                                })
-                            else:
-                                step_stack_vals.append({
-                                    'bg': "#f1f3f4",
-                                    'text': "0x",
-                                })
-                        step_vals.append({
-                            'description': pbk.opcode_description(step.opcode) or "",
-                            'executed': step.executed,
-                            'opcode_name': pbk.opcode_name(step.opcode),
-                            'opcode_pos': step.opcode_pos,
-                            'stack': step_stack_vals,
-                        })
-
-                    result = False
-                    if execution.end is not None:
-                        result_stack_vals = []
-                        for item in execution.end.stack:
-                            if item:
-                                item_hex = item.hex()
-                                if item_hex not in colors:
-                                    colors[item_hex] = palette[len(colors) % len(palette)]
-                                text = item_hex
-                                if len(item) > 16:
-                                    text = f"{item_hex[:32]}…({len(item)} bytes)"
-                                result_stack_vals.append({
-                                    'bg': colors[item_hex],
-                                    'text': text,
-                                })
-                            else:
-                                result_stack_vals.append({
-                                    'bg': "#f1f3f4",
-                                    'text': "0x",
-                                })
-                        result = {
-                            'error': execution.error.name,
-                            'stack': result_stack_vals,
-                        }
-
-                    execution_vals.append({
-                        'index': execution_index,
-                        'result': result,
-                        'role': pbk.debugger.execution_role(execution_index, execution.sig_version),
-                        'script_hex': execution.script.hex() or "(empty)",
-                        'script_length': len(execution.script),
-                        'script_type': execution.script_type,
-                        'seed': pbk.debugger.seed_note(execution_index, execution.sig_version),
-                        'sig_version': execution.sig_version.name,
-                        'steps': step_vals,
-                    })
-
-                trace_vals.append({
-                    'error': trace.error.name,
-                    'executions': execution_vals,
-                    'index': trace_index,
-                    'valid': trace.valid,
-                })
-
-            rec.visualized_script = qweb._render(
-                'bitcoin_browser.tx_visualized_script_content',
-                {
-                    'mode': 'trace',
-                    'n_inputs': tx.n_inputs,
-                    'overall': all(trace.valid for trace in traces),
-                    'traces': trace_vals,
-                },
-            )
+            rec.visualized_script = render('bitcoin_browser.tx_visualized_script_content', {
+                'execution_role': pbk.debugger.execution_role,
+                'mode': 'trace',
+                'n_inputs': tx.n_inputs,
+                'opcode_description': pbk.opcode_description,
+                'opcode_name': pbk.opcode_name,
+                'seed_note': pbk.debugger.seed_note,
+                'traces': traces,
+            })
             rec.is_visualized = True
 
 

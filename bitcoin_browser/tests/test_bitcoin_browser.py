@@ -2,6 +2,7 @@
 
 import datetime
 import json
+from types import ModuleType
 from types import SimpleNamespace
 from unittest.mock import patch
 
@@ -463,13 +464,18 @@ class TestBitcoinBrowser(TransactionCase):
             calls['spent_outputs'] = spent_outputs
             return [FakeTrace(), FakeTrace()]
 
-        fake_pbk = SimpleNamespace(
-            trace_available=lambda: True,
-            Transaction=FakeTransaction,
-            ScriptPubkey=FakeScriptPubkey,
-            TransactionOutput=FakeTransactionOutput,
-            debug_transaction=fake_debug_transaction,
+        fake_pbk = ModuleType('fake_pbk')
+        fake_pbk.debugger = SimpleNamespace(
+            execution_role=lambda idx, sig: '',
+            seed_note=lambda idx, sig: '',
         )
+        fake_pbk.opcode_description = lambda opcode: ''
+        fake_pbk.opcode_name = lambda opcode: ''
+        fake_pbk.trace_available = lambda: True
+        fake_pbk.Transaction = FakeTransaction
+        fake_pbk.ScriptPubkey = FakeScriptPubkey
+        fake_pbk.TransactionOutput = FakeTransactionOutput
+        fake_pbk.debug_transaction = fake_debug_transaction
 
         with patch.object(tx_model, 'pbk', fake_pbk):
             tx._compute_visualized_script()
@@ -573,14 +579,13 @@ class TestBitcoinBrowser(TransactionCase):
             error=SimpleNamespace(name='TRACE_FAIL'),
             executions=[execution, empty_execution],
         )
-        fake_pbk = SimpleNamespace(
-            debugger=SimpleNamespace(
-                execution_role=lambda idx, sig: f'role-{idx}-{sig.name}',
-                seed_note=lambda idx, sig: f'seed-{idx}' if idx == 0 else '',
-            ),
-            opcode_description=lambda opcode: f'description-{opcode}',
-            opcode_name=lambda opcode: f'OP_FAKE_{opcode}',
+        fake_pbk = ModuleType('fake_pbk')
+        fake_pbk.debugger = SimpleNamespace(
+            execution_role=lambda idx, sig: f'role-{idx}-{sig.name}',
+            seed_note=lambda idx, sig: f'seed-{idx}' if idx == 0 else '',
         )
+        fake_pbk.opcode_description = lambda opcode: f'description-{opcode}'
+        fake_pbk.opcode_name = lambda opcode: f'OP_FAKE_{opcode}'
         fake_pbk.trace_available = lambda: True
         fake_pbk.Transaction = lambda raw: SimpleNamespace(raw=raw, n_inputs=1)
         fake_pbk.ScriptPubkey = lambda raw: SimpleNamespace(raw=raw)
@@ -738,13 +743,18 @@ class TestBitcoinBrowserController(HttpCase):
             error = SimpleNamespace(name='CACHE_REFRESH_SENTINEL')
             executions = []
 
-        fake_pbk = SimpleNamespace(
-            trace_available=lambda: True,
-            Transaction=FakeTransaction,
-            ScriptPubkey=FakeScriptPubkey,
-            TransactionOutput=FakeTransactionOutput,
-            debug_transaction=lambda transaction, spent_outputs: [FakeTrace()],
+        fake_pbk = ModuleType('fake_pbk')
+        fake_pbk.debugger = SimpleNamespace(
+            execution_role=lambda idx, sig: '',
+            seed_note=lambda idx, sig: '',
         )
+        fake_pbk.opcode_description = lambda opcode: ''
+        fake_pbk.opcode_name = lambda opcode: ''
+        fake_pbk.trace_available = lambda: True
+        fake_pbk.Transaction = FakeTransaction
+        fake_pbk.ScriptPubkey = FakeScriptPubkey
+        fake_pbk.TransactionOutput = FakeTransactionOutput
+        fake_pbk.debug_transaction = lambda transaction, spent_outputs: [FakeTrace()]
 
         with self._patch_proxy(proxy), patch.object(tx_model, 'pbk', fake_pbk):
             response = self.url_open('/bitcoin/tx/ctrl-refresh')
