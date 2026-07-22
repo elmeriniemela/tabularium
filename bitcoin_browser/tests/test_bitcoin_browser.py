@@ -484,6 +484,97 @@ class TestBitcoinBrowser(TransactionCase):
         self.assertIn('Input 0', tx.visualized_script)
         self.assertIn('Input 1', tx.visualized_script)
 
+    def test_tx_visualized_script_guard_states(self):
+        no_hex = self.Tx.create({'txid': 'visual-no-hex'})
+        no_hex._compute_visualized_script()
+        self.assertFalse(no_hex.is_visualized)
+
+        coinbase = self.Tx.create({
+            'txid': 'visual-coinbase',
+            'hex': '00',
+            'vin_ids': [Command.create({
+                'n': 0,
+                'sequence': 1,
+                'vout_tx_id': False,
+                'vout': False,
+                'coinbase': '636f696e62617365',
+            })],
+        })
+        coinbase._compute_visualized_script()
+        self.assertFalse(coinbase.is_visualized)
+
+        unavailable = self.Tx.create({
+            'txid': 'visual-trace-unavailable',
+            'hex': '00',
+            'vin_ids': [Command.create({
+                'n': 0,
+                'sequence': 1,
+                'vout_tx_id': False,
+                'vout': False,
+                'coinbase': False,
+            })],
+        })
+        fake_pbk = SimpleNamespace(trace_available=lambda: False)
+        with patch.object(tx_model, 'pbk', fake_pbk):
+            unavailable._compute_visualized_script()
+        self.assertFalse(unavailable.is_visualized)
+
+    def test_debug_trace_html_renders_execution_details(self):
+        sig_version = SimpleNamespace(name='BASE')
+        execution = SimpleNamespace(
+            sig_version=sig_version,
+            script=b'',
+            script_type='pubkeyhash',
+            steps=[
+                SimpleNamespace(
+                    opcode=81,
+                    opcode_pos=0,
+                    executed=True,
+                    stack=[b'', b'\x01', b'\x01', b'\xaa' * 17],
+                ),
+                SimpleNamespace(
+                    opcode=82,
+                    opcode_pos=1,
+                    executed=False,
+                    stack=[],
+                ),
+            ],
+            end=SimpleNamespace(stack=[b'\x03'], error=SimpleNamespace(name='END_OK')),
+            error=SimpleNamespace(name='EXEC_OK'),
+        )
+        empty_execution = SimpleNamespace(
+            sig_version=sig_version,
+            script=b'\x51',
+            script_type=False,
+            steps=[],
+            end=None,
+            error=SimpleNamespace(name='NO_END'),
+        )
+        trace = SimpleNamespace(
+            valid=False,
+            error=SimpleNamespace(name='TRACE_FAIL'),
+            executions=[execution, empty_execution],
+        )
+        fake_pbk = SimpleNamespace(
+            debugger=SimpleNamespace(
+                execution_role=lambda idx, sig: f'role-{idx}-{sig.name}',
+                seed_note=lambda idx, sig: f'seed-{idx}' if idx == 0 else '',
+            ),
+            opcode_description=lambda opcode: f'description-{opcode}',
+            opcode_name=lambda opcode: f'OP_FAKE_{opcode}',
+        )
+
+        with patch.object(tx_model, 'pbk', fake_pbk):
+            html = str(tx_model._debug_traces_to_html([trace], 1))
+
+        self.assertIn('TRACE_FAIL', html)
+        self.assertIn('OP_FAKE_81', html)
+        self.assertIn('OP_FAKE_82', html)
+        self.assertIn('seed-0', html)
+        self.assertIn('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', html)
+        self.assertIn('(17 bytes)', html)
+        self.assertIn('opacity:.5', html)
+
     def test_input_output_create_and_link_compute(self):
         origin = self.Tx.create({'txid': 'origin-tx'})
         spender = self.Tx.create({'txid': 'spender-tx'})
