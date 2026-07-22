@@ -31,22 +31,24 @@
                         <group>
                             <field name="block_id"/>
                             <field name="blocktime"/>
-                            <field name="hash"/>
                             <field name="version"/>
                             <field name="size"/>
                             <field name="vsize"/>
                             <field name="weight"/>
                             <field name="locktime"/>
                             <field name="fee"/>
+                        </group>
+                        <group>
+                            <field name="hash"/>
                             <field name="hex"/>
                         </group>
                     </group>
+                    <label for="visualized_script" string="Script Visualized"/>
+                    <field name="visualized_script"/>
                     <label for="vin_ids" string="Inputs"/>
                     <field name="vin_ids"/>
                     <label for="vout_ids" string="Outputs"/>
                     <field name="vout_ids"/>
-                    <label for="debug_script" string="Debug Script"/>
-                    <field name="debug_script"/>
                     <label for="spent_input_ids" string="Spent In"/>
                     <field name="spent_input_ids"/>
                 </sheet>

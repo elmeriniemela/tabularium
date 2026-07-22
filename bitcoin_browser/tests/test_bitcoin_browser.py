@@ -445,10 +445,8 @@ class TestBitcoinBrowser(TransactionCase):
 
         class FakeTrace:
             valid = True
-
-            def format(self, max_item_bytes):
-                calls['max_item_bytes'] = max_item_bytes
-                return 'trace body'
+            error = SimpleNamespace(name='OK')
+            executions = []
 
         def fake_debug_transaction(transaction, spent_outputs):
             calls['transaction'] = transaction
@@ -470,9 +468,11 @@ class TestBitcoinBrowser(TransactionCase):
         self.assertEqual(calls['scripts'], [bytes.fromhex(script_0), bytes.fromhex(script_1)])
         self.assertEqual([output.amount for output in calls['outputs']], [11, 22])
         self.assertEqual(calls['spent_outputs'], calls['outputs'])
-        self.assertEqual(calls['max_item_bytes'], 16)
-        self.assertIn('transaction script verification: VALID (2 input(s))', tx.debug_script)
-        self.assertIn('trace body', tx.debug_script)
+        self.assertIn('Transaction script verification', tx.debug_script)
+        self.assertIn('VALID', tx.debug_script)
+        self.assertIn('2 input(s)', tx.debug_script)
+        self.assertIn('Input 0', tx.debug_script)
+        self.assertIn('Input 1', tx.debug_script)
 
     def test_input_output_create_and_link_compute(self):
         origin = self.Tx.create({'txid': 'origin-tx'})
