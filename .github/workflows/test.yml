@@ -15,7 +15,7 @@ jobs:
     container:
       image: ghcr.io/elmeriniemela/odoo-src:19.0
       options: --user root
-    name: test with Odoo
+    name: test with github.com/elmeriniemela/deploy-manager
     services:
       postgres:
         image: postgres:16

@@ -364,7 +364,17 @@ class TestBitcoinBrowser(TransactionCase):
             blockhash=fetched.block_id.hash,
             blocktime=int(now.timestamp()),
         )
-        with self._patch_proxy(FakeProxy(txs={'tx-with-block': raw_with_block})):
+        # A forced refresh also refreshes the inputs' source transactions, so the
+        # tx referenced by the vin ('prev-tx-with-block') must be available too.
+        raw_prev = self._rawtx(
+            'prev-tx-with-block',
+            blockhash=fetched.block_id.hash,
+            blocktime=int(now.timestamp()),
+        )
+        with self._patch_proxy(FakeProxy(txs={
+            'tx-with-block': raw_with_block,
+            'prev-tx-with-block': raw_prev,
+        })):
             tx_with_block.with_context(force_tx_refresh=True).refresh()
         self.assertEqual(tx_with_block.hex, raw_with_block['hex'])
         self.assertEqual(tx_with_block.vin_ids.n, 0)

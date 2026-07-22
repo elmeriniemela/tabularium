@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+trade_ideas.access_min_aggs,access_min_aggs,trade_ideas.model_min_aggs,base.group_user,1,0,0,0
+trade_ideas.access_day_aggs,access_day_aggs,trade_ideas.model_day_aggs,base.group_user,1,0,0,0

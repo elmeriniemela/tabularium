@@ -512,6 +512,7 @@ class TestBitcoinWalletIntegration(TransactionCase):
                 "vin_ids": [
                     Command.create(
                         {
+                            "n": 0,
                             "sequence": 1,
                             "coinbase": "1111",
                             "vout_tx_id": False,
@@ -526,6 +527,7 @@ class TestBitcoinWalletIntegration(TransactionCase):
                             "type": "pubkeyhash",
                             "address": b_recv.address,
                             "asm": "asm",
+                            "script_pub_key_hex": "00",
                             "value": 1.2,
                         }
                     )
@@ -536,7 +538,7 @@ class TestBitcoinWalletIntegration(TransactionCase):
             {
                 "txid": "5" * 64,
                 "blocktime": datetime.datetime(2024, 1, 1, 12, 0, 0),
-                "vin_ids": [Command.create({"sequence": 2, "vout_tx_id": prev.id, "vout": 0})],
+                "vin_ids": [Command.create({"n": 0, "sequence": 2, "vout_tx_id": prev.id, "vout": 0})],
                 "vout_ids": [
                     Command.create(
                         {
@@ -544,6 +546,7 @@ class TestBitcoinWalletIntegration(TransactionCase):
                             "type": "pubkeyhash",
                             "address": a_recv.address,
                             "asm": "asm",
+                            "script_pub_key_hex": "00",
                             "value": 1.0,
                         }
                     )
@@ -555,7 +558,7 @@ class TestBitcoinWalletIntegration(TransactionCase):
             {
                 "txid": "7" * 64,
                 "block_id": block.id,
-                "vin_ids": [Command.create({"sequence": 3, "vout_tx_id": tx_in.id, "vout": 0})],
+                "vin_ids": [Command.create({"n": 0, "sequence": 3, "vout_tx_id": tx_in.id, "vout": 0})],
                 "vout_ids": [
                     Command.create(
                         {
@@ -563,6 +566,7 @@ class TestBitcoinWalletIntegration(TransactionCase):
                             "type": "pubkeyhash",
                             "address": b_recv.address,
                             "asm": "asm",
+                            "script_pub_key_hex": "00",
                             "value": 0.4,
                         }
                     ),
@@ -572,6 +576,7 @@ class TestBitcoinWalletIntegration(TransactionCase):
                             "type": "pubkeyhash",
                             "address": a_change.address,
                             "asm": "asm",
+                            "script_pub_key_hex": "00",
                             "value": 0.5,
                         }
                     ),

@@ -12,6 +12,7 @@
     'installable': True,
     'application': False,
     'data': [
+        'security/ir.model.access.csv',
         'data/cron.xml'
     ],
 }
