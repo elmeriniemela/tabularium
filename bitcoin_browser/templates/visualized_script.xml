@@ -1,0 +1,109 @@
+<odoo>
+    <template id="tx_visualized_script_content" name="Bitcoin Transaction Script Visualization Content">
+        <div t-if="mode == 'message'"
+             t-attf-style="font-family:system-ui,-apple-system,sans-serif;color:{{ message['fg'] }};background:{{ message['bg'] }};border-left:4px solid {{ message['border'] }};border-radius:4px;padding:10px 14px;margin:4px 0">
+            <t t-out="message['text']"/>
+        </div>
+
+        <div t-elif="mode == 'trace'"
+             style="font-family:system-ui,-apple-system,sans-serif;color:#202124">
+            <t t-set="valid_badge_style" t-value="'background:#e6f4ea;color:#137333;border-radius:12px;padding:2px 12px;font-weight:600;font-size:12px;letter-spacing:.5px'"/>
+            <t t-set="invalid_badge_style" t-value="'background:#fce8e6;color:#c5221f;border-radius:12px;padding:2px 12px;font-weight:600;font-size:12px;letter-spacing:.5px'"/>
+            <div t-attf-style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:{{ '#e6f4ea' if overall else '#fce8e6' }};border-radius:6px;margin-bottom:12px">
+                <span style="font-weight:600;font-size:14px;color:#202124">Transaction script verification</span>
+                <span t-att-style="valid_badge_style if overall else invalid_badge_style">
+                    <t t-if="overall">&#10003; VALID</t>
+                    <t t-else="">&#10007; INVALID</t>
+                </span>
+                <span style="color:#5f6368;font-size:13px;margin-left:auto"><t t-out="n_inputs"/> input(s)</span>
+            </div>
+
+            <div t-foreach="traces" t-as="trace"
+                 style="border:1px solid #e0e0e0;border-radius:6px;overflow:hidden;margin-bottom:12px">
+                <div style="display:flex;align-items:center;gap:10px;padding:8px 14px;background:#f8f9fa;border-bottom:1px solid #e0e0e0">
+                    <span style="font-weight:600;color:#202124">Input <t t-out="trace['index']"/></span>
+                    <span t-att-style="valid_badge_style if trace['valid'] else invalid_badge_style">
+                        <t t-if="trace['valid']">&#10003; VALID</t>
+                        <t t-else="">&#10007; INVALID</t>
+                    </span>
+                    <span style="color:#5f6368;font-size:12px;margin-left:auto">error: <code><t t-out="trace['error']"/></code></span>
+                </div>
+
+                <t t-foreach="trace['executions']" t-as="execution">
+                    <div style="padding:10px 14px;border-top:1px solid #f0f0f0">
+                        <div style="font-size:13px;margin-bottom:2px">
+                            <b>#<t t-out="execution['index']"/></b>
+                            <t t-out="execution['role']"/>
+                            <span style="color:#9aa0a6">&#183;</span>
+                            <t t-if="execution['script_type']">
+                                <t t-out="execution['script_type']"/>
+                                <span style="color:#9aa0a6">&#183;</span>
+                            </t>
+                            <t t-out="execution['sig_version']"/>
+                            <span style="color:#9aa0a6">&#183;</span>
+                            <t t-out="execution['script_length']"/> bytes
+                        </div>
+                        <div t-if="execution['seed']"
+                             style="color:#5f6368;font-size:12px;font-style:italic;margin-top:2px">
+                            <t t-out="execution['seed']"/>
+                        </div>
+                        <div style="font-family:ui-monospace,monospace;font-size:11px;color:#80868b;word-break:break-all;margin:6px 0 8px">
+                            <t t-out="execution['script_hex']"/>
+                        </div>
+                        <table t-if="execution['steps']"
+                               style="width:100%;border-collapse:collapse;font-size:12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace">
+                            <thead>
+                                <tr style="text-align:left;color:#9aa0a6;border-bottom:1px solid #eee">
+                                    <th style="padding:4px 10px;font-weight:500">pos</th>
+                                    <th style="padding:4px 10px;font-weight:500">opcode</th>
+                                    <th style="padding:4px 10px;font-weight:500">description</th>
+                                    <th style="padding:4px 10px;font-weight:500">stack (before)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="execution['steps']" t-as="step"
+                                    t-att-style="'' if step['executed'] else 'opacity:.5'">
+                                    <td style="padding:4px 10px;color:#9aa0a6;font-variant-numeric:tabular-nums;vertical-align:top">
+                                        #<t t-out="'%04d' % step['opcode_pos']"/>
+                                    </td>
+                                    <td style="padding:4px 10px;font-weight:600;color:#1a73e8;white-space:nowrap;vertical-align:top">
+                                        <t t-out="step['opcode_name']"/>
+                                    </td>
+                                    <td style="padding:4px 10px;color:#5f6368;vertical-align:top">
+                                        <t t-out="step['description']"/>
+                                        <span t-if="not step['executed']" style="color:#9aa0a6"> (skipped)</span>
+                                    </td>
+                                    <td style="padding:4px 10px;vertical-align:top">
+                                        <t t-if="step['stack']">
+                                            <code t-foreach="step['stack']" t-as="item"
+                                                  t-attf-style="background:{{ item['bg'] }};border:1px solid rgba(0,0,0,.08);border-radius:3px;padding:1px 6px;margin:1px 3px 1px 0;display:inline-block;color:#202124;font-size:12px">
+                                                <t t-out="item['text']"/>
+                                            </code>
+                                        </t>
+                                        <t t-else="">
+                                            <span style="color:#9aa0a6;font-style:italic">empty</span>
+                                        </t>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div t-if="execution['result']"
+                         style="padding:8px 14px;background:#fafafa;border-top:1px solid #eee;font-family:ui-monospace,monospace;font-size:12px">
+                        <b style="color:#5f6368">result</b> &#8594;
+                        <t t-if="execution['result']['stack']">
+                            <code t-foreach="execution['result']['stack']" t-as="item"
+                                  t-attf-style="background:{{ item['bg'] }};border:1px solid rgba(0,0,0,.08);border-radius:3px;padding:1px 6px;margin:1px 3px 1px 0;display:inline-block;color:#202124;font-size:12px">
+                                <t t-out="item['text']"/>
+                            </code>
+                        </t>
+                        <t t-else="">
+                            <span style="color:#9aa0a6;font-style:italic">empty</span>
+                        </t>
+                        <code style="color:#5f6368"><t t-out="execution['result']['error']"/></code>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </template>
+</odoo>

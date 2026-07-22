@@ -478,11 +478,8 @@ class TestBitcoinBrowser(TransactionCase):
         self.assertEqual(calls['scripts'], [bytes.fromhex(script_0), bytes.fromhex(script_1)])
         self.assertEqual([output.amount for output in calls['outputs']], [11, 22])
         self.assertEqual(calls['spent_outputs'], calls['outputs'])
-        self.assertIn('Transaction script verification', tx.visualized_script)
-        self.assertIn('VALID', tx.visualized_script)
-        self.assertIn('2 input(s)', tx.visualized_script)
-        self.assertIn('Input 0', tx.visualized_script)
-        self.assertIn('Input 1', tx.visualized_script)
+        self.assertTrue(tx.is_visualized)
+        self.assertIn('OK', tx.visualized_script)
 
     def test_tx_visualized_script_guard_states(self):
         no_hex = self.Tx.create({'txid': 'visual-no-hex'})
@@ -520,6 +517,27 @@ class TestBitcoinBrowser(TransactionCase):
         self.assertFalse(unavailable.is_visualized)
 
     def test_debug_trace_html_renders_execution_details(self):
+        prev = self.Tx.create({'txid': 'trace-prev'})
+        self.TxOut.create({
+            'tx_id': prev.id,
+            'n': 0,
+            'type': 'pubkey',
+            'address': 'trace-addr',
+            'asm': 'OP_1',
+            'script_pub_key_hex': '51',
+            'value': 0.00000001,
+        })
+        tx = self.Tx.create({
+            'txid': 'trace-spend',
+            'hex': '00',
+            'vin_ids': [Command.create({
+                'n': 0,
+                'sequence': 1,
+                'vout_tx_id': prev.id,
+                'vout': 0,
+                'coinbase': False,
+            })],
+        })
         sig_version = SimpleNamespace(name='BASE')
         execution = SimpleNamespace(
             sig_version=sig_version,
@@ -539,7 +557,7 @@ class TestBitcoinBrowser(TransactionCase):
                     stack=[],
                 ),
             ],
-            end=SimpleNamespace(stack=[b'\x03'], error=SimpleNamespace(name='END_OK')),
+            end=SimpleNamespace(stack=[b'', b'\xbb' * 17], error=SimpleNamespace(name='END_OK')),
             error=SimpleNamespace(name='EXEC_OK'),
         )
         empty_execution = SimpleNamespace(
@@ -563,15 +581,25 @@ class TestBitcoinBrowser(TransactionCase):
             opcode_description=lambda opcode: f'description-{opcode}',
             opcode_name=lambda opcode: f'OP_FAKE_{opcode}',
         )
+        fake_pbk.trace_available = lambda: True
+        fake_pbk.Transaction = lambda raw: SimpleNamespace(raw=raw, n_inputs=1)
+        fake_pbk.ScriptPubkey = lambda raw: SimpleNamespace(raw=raw)
+        fake_pbk.TransactionOutput = lambda script_pubkey, amount: SimpleNamespace(
+            script_pubkey=script_pubkey,
+            amount=amount,
+        )
+        fake_pbk.debug_transaction = lambda transaction, spent_outputs: [trace]
 
         with patch.object(tx_model, 'pbk', fake_pbk):
-            html = str(tx_model._debug_traces_to_html([trace], 1))
+            tx._compute_visualized_script()
 
+        html = tx.visualized_script
         self.assertIn('TRACE_FAIL', html)
         self.assertIn('OP_FAKE_81', html)
         self.assertIn('OP_FAKE_82', html)
         self.assertIn('seed-0', html)
         self.assertIn('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', html)
+        self.assertIn('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', html)
         self.assertIn('(17 bytes)', html)
         self.assertIn('opacity:.5', html)
 

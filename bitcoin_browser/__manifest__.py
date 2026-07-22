@@ -18,6 +18,7 @@
         'data/cron.xml',
         'views/bitcoin_block.xml',
         'views/bitcoin_tx.xml',
+        'templates/visualized_script.xml',
         'controllers/public_bitcoin.xml',
         'views/bitcoin_tx_in.xml',
         'views/bitcoin_tx_out.xml',

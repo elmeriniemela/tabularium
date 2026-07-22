@@ -5,224 +5,9 @@ import logging
 import tinyrpc
 import pybitcoinkernel as pbk
 
-from markupsafe import Markup, escape
-
 from odoo import api, exceptions, fields, models, Command, _
 from odoo.orm.domains import DomainCondition
 _logger = logging.getLogger(__name__)
-
-
-# A palette of distinct light backgrounds. Each unique stack value is assigned
-# the next unused color and keeps it everywhere it appears, so the same bytes
-# are easy to follow as they move across scripts and inputs.
-_DEBUG_ITEM_PALETTE = [
-    "#fde0dc", "#fce8b2", "#d7f2ba", "#c6ecec", "#d4e4fb",
-    "#e6d9f2", "#f9d5e5", "#e0f0d8", "#fdecc8", "#d9e7ff",
-    "#f0d9c0", "#d9f0ee", "#efd9f0", "#dff0d9", "#f0dfd9",
-]
-
-
-def _debug_color_for(colors, key):
-    """Return the color assigned to ``key``, assigning a new one on first sight."""
-    if key not in colors:
-        colors[key] = _DEBUG_ITEM_PALETTE[len(colors) % len(_DEBUG_ITEM_PALETTE)]
-    return colors[key]
-
-
-def _debug_hex_item(item, max_item_bytes=16):
-    """Render a single stack item as hex, truncating long items."""
-    if not item:
-        return "0x"
-    h = item.hex()
-    if max_item_bytes is not None and len(item) > max_item_bytes:
-        return f"{h[:max_item_bytes * 2]}…({len(item)} bytes)"
-    return h
-
-
-def _debug_stack_html(stack, colors, max_item_bytes=16):
-    """Render a stack as a row of hex chips (or a muted ``empty`` marker).
-
-    ``colors`` is a shared map from hex value to background color so identical
-    items are drawn with the same color wherever they appear.
-    """
-    if not stack:
-        return Markup('<span style="color:#9aa0a6;font-style:italic">empty</span>')
-    chips = []
-    for item in stack:
-        bg = _debug_color_for(colors, item.hex()) if item else "#f1f3f4"
-        chips.append(
-            Markup(
-                '<code style="background:{bg};border:1px solid rgba(0,0,0,.08);'
-                'border-radius:3px;padding:1px 6px;margin:1px 3px 1px 0;'
-                'display:inline-block;color:#202124;font-size:12px">{item}</code>'
-            ).format(bg=bg, item=_debug_hex_item(item, max_item_bytes))
-        )
-    return Markup("").join(chips)
-
-
-def _debug_message_box(message, kind="info"):
-    """A single styled callout box for status/informational messages."""
-    palette = {
-        "info": ("#174ea6", "#e8f0fe", "#4285f4"),
-        "warn": ("#b06000", "#fef7e0", "#f9ab00"),
-        "muted": ("#3c4043", "#f1f3f4", "#9aa0a6"),
-    }
-    fg, bg, border = palette.get(kind, palette["info"])
-    return Markup(
-        '<div style="font-family:system-ui,-apple-system,sans-serif;color:{fg};'
-        'background:{bg};border-left:4px solid {border};border-radius:4px;'
-        'padding:10px 14px;margin:4px 0">{msg}</div>'
-    ).format(fg=fg, bg=bg, border=border, msg=message)
-
-
-def _debug_verdict_badge(valid):
-    if valid:
-        return Markup(
-            '<span style="background:#e6f4ea;color:#137333;border-radius:12px;'
-            'padding:2px 12px;font-weight:600;font-size:12px;'
-            'letter-spacing:.5px">✓ VALID</span>'
-        )
-    return Markup(
-        '<span style="background:#fce8e6;color:#c5221f;border-radius:12px;'
-        'padding:2px 12px;font-weight:600;font-size:12px;'
-        'letter-spacing:.5px">✗ INVALID</span>'
-    )
-
-
-def _debug_traces_to_html(traces, n_inputs):
-    """Render the full per-input script-verification trace as rich HTML."""
-    overall = all(t.valid for t in traces)
-    colors = {}
-    parts = []
-
-    # Overall summary header.
-    parts.append(
-        Markup(
-            '<div style="display:flex;align-items:center;gap:12px;'
-            'padding:12px 16px;background:{bg};border-radius:6px;margin-bottom:12px">'
-            '<span style="font-weight:600;font-size:14px;color:#202124">'
-            'Transaction script verification</span>{badge}'
-            '<span style="color:#5f6368;font-size:13px;margin-left:auto">'
-            '{n} input(s)</span></div>'
-        ).format(
-            bg="#e6f4ea" if overall else "#fce8e6",
-            badge=_debug_verdict_badge(overall),
-            n=n_inputs,
-        )
-    )
-
-    for i, trace in enumerate(traces):
-        parts.append(_debug_input_html(i, trace, colors))
-
-    return Markup(
-        '<div style="font-family:system-ui,-apple-system,sans-serif;'
-        'color:#202124">{}</div>'
-    ).format(Markup("").join(parts))
-
-
-def _debug_input_html(index, trace, colors):
-    """Render one input: its verdict, error, and each script execution."""
-    header = Markup(
-        '<div style="display:flex;align-items:center;gap:10px;'
-        'padding:8px 14px;background:#f8f9fa;border-bottom:1px solid #e0e0e0">'
-        '<span style="font-weight:600;color:#202124">Input {i}</span>{badge}'
-        '<span style="color:#5f6368;font-size:12px;margin-left:auto">'
-        'error: <code>{err}</code></span></div>'
-    ).format(i=index, badge=_debug_verdict_badge(trace.valid), err=trace.error.name)
-
-    executions = Markup("").join(
-        _debug_execution_html(idx, execution, colors)
-        for idx, execution in enumerate(trace.executions)
-    )
-
-    return Markup(
-        '<div style="border:1px solid #e0e0e0;border-radius:6px;'
-        'overflow:hidden;margin-bottom:12px">{header}{body}</div>'
-    ).format(header=header, body=executions)
-
-
-def _debug_execution_html(idx, execution, colors):
-    """Render a single script execution (scriptSig / scriptPubkey / …)."""
-    role = pbk.debugger.execution_role(idx, execution.sig_version)
-    script_hex = execution.script.hex() or "(empty)"
-
-    meta = [Markup('<b>#{}</b> {}').format(idx, escape(role))]
-    if execution.script_type:
-        meta.append(escape(execution.script_type))
-    meta.append(escape(execution.sig_version.name))
-    meta.append(escape(f"{len(execution.script)} bytes"))
-    meta_line = Markup(
-        ' <span style="color:#9aa0a6">·</span> '
-    ).join(meta)
-
-    seed = pbk.debugger.seed_note(idx, execution.sig_version)
-    seed_html = (
-        Markup('<div style="color:#5f6368;font-size:12px;font-style:italic;'
-               'margin-top:2px">{}</div>').format(escape(seed))
-        if seed else Markup("")
-    )
-
-    rows = []
-    for step in execution.steps:
-        note = pbk.opcode_description(step.opcode) or ""
-        row_style = "" if step.executed else "opacity:.5"
-        skipped = (
-            Markup(' <span style="color:#9aa0a6">(skipped)</span>')
-            if not step.executed else Markup("")
-        )
-        rows.append(
-            Markup(
-                '<tr style="{rstyle}">'
-                '<td style="padding:4px 10px;color:#9aa0a6;'
-                'font-variant-numeric:tabular-nums;vertical-align:top">#{pos:04d}</td>'
-                '<td style="padding:4px 10px;font-weight:600;color:#1a73e8;'
-                'white-space:nowrap;vertical-align:top">{name}</td>'
-                '<td style="padding:4px 10px;color:#5f6368;vertical-align:top">'
-                '{note}{skipped}</td>'
-                '<td style="padding:4px 10px;vertical-align:top">{stack}</td>'
-                '</tr>'
-            ).format(
-                rstyle=row_style,
-                pos=step.opcode_pos,
-                name=escape(pbk.opcode_name(step.opcode)),
-                note=escape(note),
-                skipped=skipped,
-                stack=_debug_stack_html(step.stack, colors),
-            )
-        )
-
-    table = Markup("")
-    if rows:
-        table = Markup(
-            '<table style="width:100%;border-collapse:collapse;font-size:12px;'
-            'font-family:ui-monospace,SFMono-Regular,Menlo,monospace">'
-            '<thead><tr style="text-align:left;color:#9aa0a6;'
-            'border-bottom:1px solid #eee">'
-            '<th style="padding:4px 10px;font-weight:500">pos</th>'
-            '<th style="padding:4px 10px;font-weight:500">opcode</th>'
-            '<th style="padding:4px 10px;font-weight:500">description</th>'
-            '<th style="padding:4px 10px;font-weight:500">stack (before)</th>'
-            '</tr></thead><tbody>{}</tbody></table>'
-        ).format(Markup("").join(rows))
-
-    end = execution.end
-    result = Markup("")
-    if end is not None:
-        result = Markup(
-            '<div style="padding:8px 14px;background:#fafafa;'
-            'border-top:1px solid #eee;font-family:ui-monospace,monospace;'
-            'font-size:12px"><b style="color:#5f6368">result</b> → {stack} '
-            '<code style="color:#5f6368">{err}</code></div>'
-        ).format(stack=_debug_stack_html(end.stack, colors), err=execution.error.name)
-
-    return Markup(
-        '<div style="padding:10px 14px;border-top:1px solid #f0f0f0">'
-        '<div style="font-size:13px;margin-bottom:2px">{meta}</div>{seed}'
-        '<div style="font-family:ui-monospace,monospace;font-size:11px;'
-        'color:#80868b;word-break:break-all;margin:6px 0 8px">{hex}</div>'
-        '{table}</div>{result}'
-    ).format(meta=meta_line, seed=seed_html, hex=escape(script_hex),
-             table=table, result=result)
 
 
 class BitcoinTx(models.Model):
@@ -393,20 +178,45 @@ class BitcoinTx(models.Model):
         'vin_ids.vout_tx_id.vout_ids.value',
     )
     def _compute_visualized_script(self):
+        qweb = self.env['ir.qweb']
         for rec in self:
             if not rec.hex:
-                rec.visualized_script = _debug_message_box("Missing raw transaction hex.", "muted")
+                rec.visualized_script = qweb._render('bitcoin_browser.tx_visualized_script_content', {
+                    'message': {
+                        'bg': "#f1f3f4",
+                        'border': "#9aa0a6",
+                        'fg': "#3c4043",
+                        'text': "Missing raw transaction hex.",
+                    },
+                    'mode': 'message',
+                })
                 rec.is_visualized = False
                 continue
             if rec.vin_ids.filtered('coinbase'):
-                rec.visualized_script = _debug_message_box(
-                    "Coinbase transactions have no input scripts to verify.", "info")
+                rec.visualized_script = qweb._render('bitcoin_browser.tx_visualized_script_content', {
+                    'message': {
+                        'bg': "#e8f0fe",
+                        'border': "#4285f4",
+                        'fg': "#174ea6",
+                        'text': "Coinbase transactions have no input scripts to verify.",
+                    },
+                    'mode': 'message',
+                })
                 rec.is_visualized = False
                 continue
             if not pbk.trace_available():
-                rec.visualized_script = _debug_message_box(
-                    "Script tracing is unavailable; rebuild libbitcoinkernel with "
-                    "-DENABLE_SCRIPT_TRACE=ON.", "warn")
+                rec.visualized_script = qweb._render('bitcoin_browser.tx_visualized_script_content', {
+                    'message': {
+                        'bg': "#fef7e0",
+                        'border': "#f9ab00",
+                        'fg': "#b06000",
+                        'text': (
+                            "Script tracing is unavailable; rebuild libbitcoinkernel with "
+                            "-DENABLE_SCRIPT_TRACE=ON."
+                        ),
+                    },
+                    'mode': 'message',
+                })
                 rec.is_visualized = False
                 continue
 
@@ -425,14 +235,110 @@ class BitcoinTx(models.Model):
                 ))
 
             if missing_inputs:
-                rec.visualized_script = _debug_message_box(
-                    f"Missing spent output data for input(s): {', '.join(missing_inputs)}.",
-                    "muted")
+                rec.visualized_script = qweb._render('bitcoin_browser.tx_visualized_script_content', {
+                    'message': {
+                        'bg': "#f1f3f4",
+                        'border': "#9aa0a6",
+                        'fg': "#3c4043",
+                        'text': f"Missing spent output data for input(s): {', '.join(missing_inputs)}.",
+                    },
+                    'mode': 'message',
+                })
                 rec.is_visualized = False
                 continue
 
             traces = pbk.debug_transaction(tx, spent_outputs)
-            rec.visualized_script = _debug_traces_to_html(traces, tx.n_inputs)
+            colors = {}
+            palette = (
+                "#fde0dc", "#fce8b2", "#d7f2ba", "#c6ecec", "#d4e4fb",
+                "#e6d9f2", "#f9d5e5", "#e0f0d8", "#fdecc8", "#d9e7ff",
+                "#f0d9c0", "#d9f0ee", "#efd9f0", "#dff0d9", "#f0dfd9",
+            )
+            trace_vals = []
+            for trace_index, trace in enumerate(traces):
+                execution_vals = []
+                for execution_index, execution in enumerate(trace.executions):
+                    step_vals = []
+                    for step in execution.steps:
+                        step_stack_vals = []
+                        for item in step.stack:
+                            if item:
+                                item_hex = item.hex()
+                                if item_hex not in colors:
+                                    colors[item_hex] = palette[len(colors) % len(palette)]
+                                text = item_hex
+                                if len(item) > 16:
+                                    text = f"{item_hex[:32]}…({len(item)} bytes)"
+                                step_stack_vals.append({
+                                    'bg': colors[item_hex],
+                                    'text': text,
+                                })
+                            else:
+                                step_stack_vals.append({
+                                    'bg': "#f1f3f4",
+                                    'text': "0x",
+                                })
+                        step_vals.append({
+                            'description': pbk.opcode_description(step.opcode) or "",
+                            'executed': step.executed,
+                            'opcode_name': pbk.opcode_name(step.opcode),
+                            'opcode_pos': step.opcode_pos,
+                            'stack': step_stack_vals,
+                        })
+
+                    result = False
+                    if execution.end is not None:
+                        result_stack_vals = []
+                        for item in execution.end.stack:
+                            if item:
+                                item_hex = item.hex()
+                                if item_hex not in colors:
+                                    colors[item_hex] = palette[len(colors) % len(palette)]
+                                text = item_hex
+                                if len(item) > 16:
+                                    text = f"{item_hex[:32]}…({len(item)} bytes)"
+                                result_stack_vals.append({
+                                    'bg': colors[item_hex],
+                                    'text': text,
+                                })
+                            else:
+                                result_stack_vals.append({
+                                    'bg': "#f1f3f4",
+                                    'text': "0x",
+                                })
+                        result = {
+                            'error': execution.error.name,
+                            'stack': result_stack_vals,
+                        }
+
+                    execution_vals.append({
+                        'index': execution_index,
+                        'result': result,
+                        'role': pbk.debugger.execution_role(execution_index, execution.sig_version),
+                        'script_hex': execution.script.hex() or "(empty)",
+                        'script_length': len(execution.script),
+                        'script_type': execution.script_type,
+                        'seed': pbk.debugger.seed_note(execution_index, execution.sig_version),
+                        'sig_version': execution.sig_version.name,
+                        'steps': step_vals,
+                    })
+
+                trace_vals.append({
+                    'error': trace.error.name,
+                    'executions': execution_vals,
+                    'index': trace_index,
+                    'valid': trace.valid,
+                })
+
+            rec.visualized_script = qweb._render(
+                'bitcoin_browser.tx_visualized_script_content',
+                {
+                    'mode': 'trace',
+                    'n_inputs': tx.n_inputs,
+                    'overall': all(trace.valid for trace in traces),
+                    'traces': trace_vals,
+                },
+            )
             rec.is_visualized = True
 
 
