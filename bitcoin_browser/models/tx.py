@@ -143,9 +143,7 @@ def _debug_input_html(index, trace, colors):
 
 def _debug_execution_html(idx, execution, colors):
     """Render a single script execution (scriptSig / scriptPubkey / …)."""
-    from pybitcoinkernel.debugger import _execution_role, _seed_note
-
-    role = _execution_role(idx, execution.sig_version)
+    role = pbk.debugger.execution_role(idx, execution.sig_version)
     script_hex = execution.script.hex() or "(empty)"
 
     meta = [Markup('<b>#{}</b> {}').format(idx, escape(role))]
@@ -157,7 +155,7 @@ def _debug_execution_html(idx, execution, colors):
         ' <span style="color:#9aa0a6">·</span> '
     ).join(meta)
 
-    seed = _seed_note(idx, execution.sig_version)
+    seed = pbk.debugger.seed_note(idx, execution.sig_version)
     seed_html = (
         Markup('<div style="color:#5f6368;font-size:12px;font-style:italic;'
                'margin-top:2px">{}</div>').format(escape(seed))
