@@ -16,8 +16,6 @@ traces for transactions.
   fees, weights, sizes, locktime, and block membership.
 - Provides a transaction script visualization in the backend transaction form.
 - Exposes a public script visualization route at `/bitcoin/tx/<txid>`.
-- Includes scheduled jobs for recent block fetching and incomplete transaction
-  repair.
 
 ## Configuration
 
@@ -28,10 +26,6 @@ After installing the module, configure these Odoo system parameters:
 | `bitcoind.url` | Bitcoin Core RPC endpoint URL | `http://127.0.0.1:8332` |
 | `bitcoind.user` | Bitcoin Core RPC username | `odoo` |
 | `bitcoind.pw` | Bitcoin Core RPC password | `secret` |
-| `bitoind.history.hours` | Number of recent hours scanned by the block-fetch cron | `1` |
-
-The last key is intentionally listed as `bitoind.history.hours` because that is
-the key currently read by the module.
 
 ## Usage
 
@@ -50,4 +44,3 @@ record automatically unless the caller disables auto-population through context.
 The route `/bitcoin/tx/<txid>` renders the script visualization for a stored
 transaction. If the stored transaction is not visualized yet, the controller
 forces a transaction refresh before rendering.
-

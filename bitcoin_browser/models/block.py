@@ -65,26 +65,6 @@ class BitcoinBlock(models.Model):
             record.computed_n_tx = counts.get(record.id, 0)
             record.all_tx_fetched = counts.get(record.id) == record.n_tx
 
-    @api.model
-    def cron_fetch(self):
-        delta = int(self.env['ir.config_parameter'].sudo().get_param('bitoind.history.hours', '1'))
-        mintime = fields.Datetime.now() - relativedelta(hours=delta)
-        proxy = self.env['ir.config_parameter'].bitcoind_proxy()
-        getblockchaininfo = proxy.getblockchaininfo()
-        current_hash = getblockchaininfo['bestblockhash']
-        current_block = self.search([('hash', '=', current_hash)])
-        confirmations = 1
-        while mintime <= current_block.mediantime:
-            if not tools.config.options['test_enable']: # pragma: no cover
-                self.env.cr.commit()
-
-            confirmations +=1
-            _logger.info("Update block %s.", current_block.height)
-            current_block = self.search([('hash', '=', current_block.previousblockhash)])
-            if not current_block.mediantime:
-                current_block.refresh()
-            current_block.confirmations = confirmations
-
 
     def fetchblock(self, tx):
         self.ensure_one()

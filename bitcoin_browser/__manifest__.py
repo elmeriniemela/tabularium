@@ -5,7 +5,7 @@
     'website': "https://eniemela.fi",
     'license': 'LGPL-3',
     'category': 'Bitcoin',
-    'version': '0.1.6',
+    'version': '0.1.7',
     'depends': [
         'mail',
     ],
@@ -15,7 +15,6 @@
         'security/security.xml',
         'security/ir.model.access.csv',
         'data/decimal.xml',
-        'data/cron.xml',
         'views/bitcoin_block.xml',
         'views/bitcoin_tx.xml',
         'templates/visualized_script.xml',

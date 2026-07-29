@@ -148,28 +148,6 @@ class BitcoinTx(models.Model):
                 if force:
                     record.vin_ids.mapped('vout_tx_id').with_context(force_tx_refresh=False).refresh()
 
-    @api.model
-    def cron_repair_incomplete_transactions(self, limit=100):
-        self.env.cr.execute("""
-            SELECT id
-              FROM (
-                    SELECT tx_id AS id
-                      FROM bitcoin_tx_in
-                     WHERE n IS NULL
-                       AND tx_id IS NOT NULL
-                     UNION
-                    SELECT tx_id AS id
-                      FROM bitcoin_tx_out
-                     WHERE (script_pub_key_hex IS NULL OR script_pub_key_hex = '')
-                       AND tx_id IS NOT NULL
-                   ) incomplete_tx
-             ORDER BY id
-             LIMIT %s
-        """, [limit])
-        txs = self.browse([row[0] for row in self.env.cr.fetchall()]).exists()
-        _logger.info("Repair %s incomplete Bitcoin transaction(s).", len(txs))
-        txs.with_context(force_tx_refresh=True).refresh()
-        return len(txs)
 
     def rawtx_to_vals(self, rawtx):
         return  {
