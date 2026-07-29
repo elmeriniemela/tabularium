@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo noupdate="True">
     <record forcecreate="True" id="decimal_bitcoin" model="decimal.precision">
-        <field name="name">Bitcoin Decimal</field>
+        <field name="name">BTC Decimal</field>
         <field name="digits">8</field>
     </record>
 </odoo>

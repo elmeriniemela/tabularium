@@ -12,8 +12,8 @@ from odoo.exceptions import UserError
 from odoo.orm.domains import DomainCondition
 from odoo.tests import HttpCase, TransactionCase, tagged
 
-from odoo.addons.bitcoin_browser.models import generic as generic_model
-from odoo.addons.bitcoin_browser.models import tx as tx_model
+from odoo.addons.bitcoin_explorer.models import generic as generic_model
+from odoo.addons.bitcoin_explorer.models import tx as tx_model
 
 
 def _now():
@@ -55,7 +55,7 @@ class FakeProxy:
 
 
 @tagged('post_install', '-at_install')
-class TestBitcoinBrowser(TransactionCase):
+class TestBitcoinExplorer(TransactionCase):
 
     @classmethod
     def setUpClass(cls):
@@ -798,7 +798,7 @@ class TestBitcoinBrowser(TransactionCase):
 
 
 @tagged('post_install', '-at_install')
-class TestBitcoinBrowserController(HttpCase):
+class TestBitcoinExplorerController(HttpCase):
 
     def _rawtx(self, txid, vin):
         return {

@@ -1,26 +1,16 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "Bitcoin Browser",
+    'name': "Bitcoin Browser Compatibility",
+    'summary': "Compatibility shim for the renamed Bitcoin Explorer module.",
     'author': "Elmeri Niemelä",
     'website': "https://eniemela.fi",
     'license': 'LGPL-3',
     'category': 'Bitcoin',
-    'version': '0.1.7',
+    'version': '0.1.8',
     'depends': [
-        'mail',
+        'bitcoin_explorer',
     ],
     'installable': True,
-    'application': True,
-    'data': [
-        'security/security.xml',
-        'security/ir.model.access.csv',
-        'data/decimal.xml',
-        'views/bitcoin_block.xml',
-        'views/bitcoin_tx.xml',
-        'templates/visualized_script.xml',
-        'controllers/public_bitcoin.xml',
-        'views/bitcoin_tx_in.xml',
-        'views/bitcoin_tx_out.xml',
-        'views/menuitems.xml',
-    ],
+    'application': False,
 }
+

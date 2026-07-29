@@ -2,7 +2,7 @@
     <record id="form_tx" model="ir.ui.view">
         <field name="name">bitcoin.tx.form</field>
         <field name="model">bitcoin.tx</field>
-        <field name="inherit_id" ref="bitcoin_browser.form_tx"/>
+        <field name="inherit_id" ref="bitcoin_explorer.form_tx"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='spent_input_ids']" position='after'>
                 <label for="wallet_address_ids" string="Wallet Addresses"/>

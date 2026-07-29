@@ -12,4 +12,4 @@ class BitcoinTxController(http.Controller):
             return request.not_found()
         if not tx.is_visualized:
             tx.with_context(force_tx_refresh=True).refresh()
-        return request.render('bitcoin_browser.tx_visualized_script', {'tx': tx})
+        return request.render('bitcoin_explorer.tx_visualized_script', {'tx': tx})

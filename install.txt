@@ -1,6 +1,6 @@
 account_financials
 api_endpoint
-bitcoin_browser
+bitcoin_explorer
 bitcoin_investment
 bitcoin_treasury
 cashflow_management

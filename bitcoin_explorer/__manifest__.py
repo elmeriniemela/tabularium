@@ -1,27 +1,26 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "Bitcoin Treasury",
+    'name': "Bitcoin Explorer",
     'author': "Elmeri Niemelä",
     'website': "https://eniemela.fi",
     'license': 'LGPL-3',
-    'category': 'Uncategorized',
-    'version': '1.0.6',
+    'category': 'Bitcoin',
+    'version': '0.1.8',
     'depends': [
         'mail',
-        'bitcoin_explorer',
     ],
     'installable': True,
     'application': True,
     'data': [
+        'security/security.xml',
         'security/ir.model.access.csv',
-
+        'data/decimal.xml',
+        'views/bitcoin_block.xml',
         'views/bitcoin_tx.xml',
-        'views/bitcoin_key.xml',
-        'views/bitcoin_wallet.xml',
-        'views/bitcoin_wallet_address.xml',
-        'views/bitcoin_tx_out.xml',
+        'templates/visualized_script.xml',
+        'controllers/public_bitcoin.xml',
         'views/bitcoin_tx_in.xml',
-
+        'views/bitcoin_tx_out.xml',
         'views/menuitems.xml',
     ],
 }

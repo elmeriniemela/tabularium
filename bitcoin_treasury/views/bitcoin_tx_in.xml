@@ -1,7 +1,7 @@
 <odoo>
     <record id="tree_tx_in" model="ir.ui.view">
         <field name="model">bitcoin.tx.in</field>
-        <field name="inherit_id" ref="bitcoin_browser.tree_tx_in"/>
+        <field name="inherit_id" ref="bitcoin_explorer.tree_tx_in"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='spent_output_id']" position="after">
                 <field name="wallet_ids" widget="many2many_tags"/>
@@ -11,7 +11,7 @@
 
     <record id="form_tx_in" model="ir.ui.view">
         <field name="model">bitcoin.tx.in</field>
-        <field name="inherit_id" ref="bitcoin_browser.form_tx_in"/>
+        <field name="inherit_id" ref="bitcoin_explorer.form_tx_in"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='spent_output_id']" position="after">
                 <field name="wallet_ids" widget="many2many_tags"/>

@@ -7,8 +7,8 @@ The Tabularium was the official records office of ancient Rome and housed the of
 ### Finance and investment
 
 - `investment_portfolio`: Full portfolio/position/transaction engine with price history, FIFO realized PnL, dashboard, cron jobs, and external market data endpoints.
-- `bitcoin_browser`: Bitcoin block/transaction ingestion and browsing models.
-- `bitcoin_treasury`: Wallet/key/address/transaction management on top of `bitcoin_browser`.
+- `bitcoin_explorer`: Lazy Bitcoin block/transaction browsing models.
+- `bitcoin_treasury`: Wallet/key/address/transaction management on top of `bitcoin_explorer`.
 - `bitcoin_investment`: Bridge module syncing treasury wallets to investment positions (`auto_install`).
 - `cashflow_management`: Cashflow parsing, import, planning, categories, and account-level tracking.
 - `account_financials`: Fiscal year financial exports/reports, including ODT template rendering.
@@ -35,4 +35,3 @@ The Tabularium was the official records office of ancient Rome and housed the of
 - `timeago_widget`: Relative time widget for backend views.
 - `save_button_mods`: Backend save/cancel button style overrides.
 - `muk_web_theme_mods`: Backend style patches for MuK theme.
-

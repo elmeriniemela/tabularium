@@ -196,7 +196,7 @@ class BitcoinTx(models.Model):
         'vout_ids.type',
     )
     def _compute_visualized_script(self):
-        template = 'bitcoin_browser.tx_visualized_script_content'
+        template = 'bitcoin_explorer.tx_visualized_script_content'
         qweb = self.env['ir.qweb']
 
         for rec in self:

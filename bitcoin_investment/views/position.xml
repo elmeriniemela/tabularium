@@ -6,7 +6,7 @@
             <xpath expr="//notebook" position="inside">
                 <page string="Wallets" invisible="1">
                     <field name="wallet_count" invisible="1"/>
-                    <field name="wallet_ids" groups="bitcoin_browser.group_bitcoin_user"/>
+                    <field name="wallet_ids" groups="bitcoin_explorer.group_bitcoin_user"/>
                 </page>
             </xpath>
             <xpath expr="//button[@name='run_integration']" position="after">
