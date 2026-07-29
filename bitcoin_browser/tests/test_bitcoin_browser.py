@@ -385,6 +385,46 @@ class TestBitcoinBrowser(TransactionCase):
             with self.assertRaises(UserError):
                 tx_error.refresh()
 
+    def test_tx_cron_repair_incomplete_transactions(self):
+        coinbase = '726570616972'
+        rawtx = self._rawtx('tx-repair-incomplete')
+        rawtx['vin'] = [{'sequence': 1, 'coinbase': coinbase}]
+
+        tx = self.Tx.create({
+            'txid': 'tx-repair-incomplete',
+            'vin_ids': [Command.create({
+                'n': 0,
+                'sequence': 1,
+                'vout_tx_id': False,
+                'vout': False,
+                'coinbase': coinbase,
+            })],
+            'vout_ids': [Command.create({
+                'n': 0,
+                'type': 'pubkey',
+                'address': 'repair-addr',
+                'asm': 'OP_1',
+                'script_pub_key_hex': '51',
+                'value': 0.00000003,
+            })],
+        })
+
+        self.env.cr.execute("ALTER TABLE bitcoin_tx_in ALTER COLUMN n DROP NOT NULL")
+        try:
+            self.env.cr.execute("UPDATE bitcoin_tx_in SET n = NULL WHERE tx_id = %s", [tx.id])
+            self.env.cr.execute("UPDATE bitcoin_tx_out SET script_pub_key_hex = '' WHERE tx_id = %s", [tx.id])
+            self.env.invalidate_all()
+
+            with self._patch_proxy(FakeProxy(txs={'tx-repair-incomplete': rawtx})):
+                self.assertEqual(self.Tx.cron_repair_incomplete_transactions(), 1)
+
+            tx = self.Tx.browse(tx.id)
+            self.assertEqual(tx.vin_ids.n, 0)
+            self.assertEqual(tx.vout_ids.script_pub_key_hex, rawtx['vout'][0]['scriptPubKey']['hex'])
+        finally:
+            self.env.cr.execute("UPDATE bitcoin_tx_in SET n = 0 WHERE n IS NULL")
+            self.env.cr.execute("ALTER TABLE bitcoin_tx_in ALTER COLUMN n SET NOT NULL")
+
     def test_tx_debug_script_builds_bitoplens_inputs_in_vin_order(self):
         script_0 = '51'
         script_1 = '52'
@@ -506,6 +546,28 @@ class TestBitcoinBrowser(TransactionCase):
         self.assertIn('Transaction output scripts', no_hex_with_output.visualized_script)
         self.assertIn('OP_PUSHBYTES_1', no_hex_with_output.visualized_script)
         self.assertIn('ee', no_hex_with_output.visualized_script)
+
+        no_hex_missing_output_script = self.Tx.create({
+            'txid': 'visual-no-hex-missing-output-script',
+            'vout_ids': [Command.create({
+                'n': 0,
+                'type': 'pubkey',
+                'address': 'visual-no-hex-missing-output-script-addr',
+                'asm': '',
+                'script_pub_key_hex': '51',
+                'value': 0.00000003,
+            })],
+        })
+        self.env.cr.execute(
+            "UPDATE bitcoin_tx_out SET script_pub_key_hex = '' WHERE tx_id = %s",
+            [no_hex_missing_output_script.id],
+        )
+        self.env.invalidate_all()
+        no_hex_missing_output_script = self.Tx.browse(no_hex_missing_output_script.id)
+        no_hex_missing_output_script._compute_visualized_script()
+        self.assertFalse(no_hex_missing_output_script.is_visualized)
+        self.assertIn('Transaction output scripts', no_hex_missing_output_script.visualized_script)
+        self.assertIn('(empty)', no_hex_missing_output_script.visualized_script)
 
         coinbase = self.Tx.create({
             'txid': 'visual-coinbase',
