@@ -36,9 +36,6 @@ class FakeProxy:
         self.fail_getblock = fail_getblock
         self.fail_getraw = fail_getraw
 
-    def getblockchaininfo(self):
-        return {'bestblockhash': self.bestblockhash}
-
     def getblock(self, block_hash, verbosity):
         if self.fail_getblock:
             raise _rpc_error(code=-1, message='boom getblock')
