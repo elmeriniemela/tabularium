@@ -2,12 +2,36 @@
 
 import datetime
 import logging
+
+import bitoplens as bl
 import tinyrpc
-import pybitcoinkernel as pbk
 
 from odoo import api, exceptions, fields, models, Command, _
 from odoo.orm.domains import DomainCondition
 _logger = logging.getLogger(__name__)
+
+
+_BITOPLENS_FLAGS = (
+    bl.ScriptVerificationFlags.P2SH
+    | bl.ScriptVerificationFlags.WITNESS
+    | bl.ScriptVerificationFlags.TAPROOT
+    | bl.ScriptVerificationFlags.DERSIG
+    | bl.ScriptVerificationFlags.NULLDUMMY
+    | bl.ScriptVerificationFlags.CHECKLOCKTIMEVERIFY
+    | bl.ScriptVerificationFlags.CHECKSEQUENCEVERIFY
+)
+
+
+def _btc_to_sats(value):
+    return int(round((value or 0.0) * 100000000))
+
+
+def _script_error_name(error):
+    return bl.ScriptError(error).name
+
+
+def _sig_version_name(sig_version):
+    return bl.SigVersion(sig_version).name
 
 
 class BitcoinTx(models.Model):
@@ -199,20 +223,30 @@ class BitcoinTx(models.Model):
                 })
                 rec.is_visualized = False
                 continue
-            if not pbk.trace_available():
+            try:
+                tx = bl.Transaction.parse(bytes.fromhex(rec.hex))
+            except (IndexError, ValueError) as error:
+                rec.visualized_script = render('bitcoin_browser.tx_visualized_script_content', {
+                    'message_kind': 'warn',
+                    'message_text': f"Unable to parse transaction hex: {error}.",
+                    'mode': 'message',
+                })
+                rec.is_visualized = False
+                continue
+
+            ordered_inputs = rec.vin_ids.sorted('n')
+            if len(ordered_inputs) != len(tx.vin):
                 rec.visualized_script = render('bitcoin_browser.tx_visualized_script_content', {
                     'message_kind': 'warn',
                     'message_text': (
-                        "Script tracing is unavailable; rebuild libbitcoinkernel with "
-                        "-DENABLE_SCRIPT_TRACE=ON."
+                        "Stored input data does not match the raw transaction "
+                        f"({len(ordered_inputs)} stored, {len(tx.vin)} serialized)."
                     ),
                     'mode': 'message',
                 })
                 rec.is_visualized = False
                 continue
 
-            tx = pbk.Transaction(bytes.fromhex(rec.hex))
-            ordered_inputs = rec.vin_ids.sorted('n')
             spent_outputs = []
             missing_inputs = []
             for txin in ordered_inputs:
@@ -220,9 +254,9 @@ class BitcoinTx(models.Model):
                 if not spent_output or not spent_output.script_pub_key_hex:
                     missing_inputs.append(str(txin.n))
                     continue
-                spent_outputs.append(pbk.TransactionOutput(
-                    pbk.ScriptPubkey(bytes.fromhex(spent_output.script_pub_key_hex)),
-                    int(round(spent_output.value * 100000000)),
+                spent_outputs.append(bl.TxOut(
+                    _btc_to_sats(spent_output.value),
+                    bytes.fromhex(spent_output.script_pub_key_hex),
                 ))
 
             if missing_inputs:
@@ -234,14 +268,21 @@ class BitcoinTx(models.Model):
                 rec.is_visualized = False
                 continue
 
-            traces = pbk.debug_transaction(tx, spent_outputs)
+            traces = [
+                bl.run(
+                    bytes(spent_output.script_pubkey),
+                    tx=tx,
+                    input_index=input_index,
+                    spent_outputs=spent_outputs,
+                    flags=_BITOPLENS_FLAGS,
+                )
+                for input_index, spent_output in enumerate(spent_outputs)
+            ]
             rec.visualized_script = render('bitcoin_browser.tx_visualized_script_content', {
-                'execution_role': pbk.debugger.execution_role,
                 'mode': 'trace',
-                'n_inputs': tx.n_inputs,
-                'opcode_description': pbk.opcode_description,
-                'opcode_name': pbk.opcode_name,
-                'seed_note': pbk.debugger.seed_note,
+                'n_inputs': len(tx.vin),
+                'script_error_name': _script_error_name,
+                'sig_version_name': _sig_version_name,
                 'traces': traces,
             })
             rec.is_visualized = True

@@ -40,27 +40,22 @@
                         <t t-if="trace.valid">&#10003; VALID</t>
                         <t t-else="">&#10007; INVALID</t>
                     </span>
-                    <span style="color:#5f6368;font-size:12px;margin-left:auto">error: <code><t t-out="trace.error.name"/></code></span>
+                    <span style="color:#5f6368;font-size:12px;margin-left:auto">error: <code><t t-out="trace.error_name"/></code></span>
                 </div>
 
-                <t t-foreach="trace.executions" t-as="execution">
+                <t t-foreach="trace.runs" t-as="execution">
                     <div style="padding:10px 14px;border-top:1px solid #f0f0f0">
                         <div style="font-size:13px;margin-bottom:2px">
                             <b>#<t t-out="execution_index"/></b>
-                            <t t-out="execution_role(execution_index, execution.sig_version)"/>
+                            <t t-out="execution.role"/>
                             <span style="color:#9aa0a6">&#183;</span>
                             <t t-if="execution.script_type">
                                 <t t-out="execution.script_type"/>
                                 <span style="color:#9aa0a6">&#183;</span>
                             </t>
-                            <t t-out="execution.sig_version.name"/>
+                            <t t-out="sig_version_name(execution.sig_version)"/>
                             <span style="color:#9aa0a6">&#183;</span>
                             <t t-out="len(execution.script)"/> bytes
-                        </div>
-                        <t t-set="seed" t-value="seed_note(execution_index, execution.sig_version)"/>
-                        <div t-if="seed"
-                             style="color:#5f6368;font-size:12px;font-style:italic;margin-top:2px">
-                            <t t-out="seed"/>
                         </div>
                         <div style="font-family:ui-monospace,monospace;font-size:11px;color:#80868b;word-break:break-all;margin:6px 0 8px">
                             <t t-out="execution.script.hex() or '(empty)'"/>
@@ -78,19 +73,20 @@
                             <tbody>
                                 <tr t-foreach="execution.steps" t-as="step"
                                     t-att-style="'' if step.executed else 'opacity:.5'">
+                                    <t t-set="step_stack" t-value="execution.initial_stack if step_index == 0 else execution.steps[step_index - 1].stack"/>
                                     <td style="padding:4px 10px;color:#9aa0a6;font-variant-numeric:tabular-nums;vertical-align:top">
-                                        #<t t-out="'%04d' % step.opcode_pos"/>
+                                        #<t t-out="'%04d' % step.script_offset"/>
                                     </td>
                                     <td style="padding:4px 10px;font-weight:600;color:#1a73e8;white-space:nowrap;vertical-align:top">
-                                        <t t-out="opcode_name(step.opcode)"/>
+                                        <t t-out="step.opcode_name"/>
                                     </td>
                                     <td style="padding:4px 10px;color:#5f6368;vertical-align:top">
-                                        <t t-out="opcode_description(step.opcode) or ''"/>
+                                        <t t-out="step.description or ''"/>
                                         <span t-if="not step.executed" style="color:#9aa0a6"> (skipped)</span>
                                     </td>
                                     <td style="padding:4px 10px;vertical-align:top">
-                                        <t t-if="step.stack">
-                                            <t t-foreach="step.stack" t-as="item">
+                                        <t t-if="step_stack">
+                                            <t t-foreach="step_stack" t-as="item">
                                                 <t t-if="item">
                                                     <t t-set="item_hex" t-value="item.hex()"/>
                                                     <t t-set="item_bg" t-value="colors[item_hex] if item_hex in colors else colors.setdefault(item_hex, palette[len(colors) % len(palette)])"/>
@@ -110,11 +106,11 @@
                             </tbody>
                         </table>
                     </div>
-                    <div t-if="execution.end is not None"
+                    <div t-if="execution.final_stack is not None"
                          style="padding:8px 14px;background:#fafafa;border-top:1px solid #eee;font-family:ui-monospace,monospace;font-size:12px">
                         <b style="color:#5f6368">result</b> &#8594;
-                        <t t-if="execution.end.stack">
-                            <t t-foreach="execution.end.stack" t-as="item">
+                        <t t-if="execution.final_stack">
+                            <t t-foreach="execution.final_stack" t-as="item">
                                 <t t-if="item">
                                     <t t-set="item_hex" t-value="item.hex()"/>
                                     <t t-set="item_bg" t-value="colors[item_hex] if item_hex in colors else colors.setdefault(item_hex, palette[len(colors) % len(palette)])"/>
@@ -129,7 +125,7 @@
                         <t t-else="">
                             <span style="color:#9aa0a6;font-style:italic">empty</span>
                         </t>
-                        <code style="color:#5f6368"><t t-out="execution.error.name"/></code>
+                        <code style="color:#5f6368"><t t-out="script_error_name(execution.error)"/></code>
                     </div>
                 </t>
             </div>

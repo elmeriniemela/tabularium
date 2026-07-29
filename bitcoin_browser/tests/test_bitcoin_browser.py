@@ -2,7 +2,6 @@
 
 import datetime
 import json
-from types import ModuleType
 from types import SimpleNamespace
 from unittest.mock import patch
 
@@ -386,7 +385,7 @@ class TestBitcoinBrowser(TransactionCase):
             with self.assertRaises(UserError):
                 tx_error.refresh()
 
-    def test_tx_debug_script_builds_kernel_inputs_in_vin_order(self):
+    def test_tx_debug_script_builds_bitoplens_inputs_in_vin_order(self):
         script_0 = '51'
         script_1 = '52'
         prev_0 = self.Tx.create({'txid': 'debug-prev-0'})
@@ -431,6 +430,7 @@ class TestBitcoinBrowser(TransactionCase):
         })
 
         calls = {
+            'runs': [],
             'scripts': [],
             'outputs': [],
         }
@@ -439,51 +439,48 @@ class TestBitcoinBrowser(TransactionCase):
 
             def __init__(self, raw):
                 self.raw = raw
-                self.n_inputs = 2
+                self.vin = [object(), object()]
 
-        class FakeScriptPubkey:
+            @classmethod
+            def parse(cls, raw):
+                calls['transaction'] = cls(raw)
+                return calls['transaction']
 
-            def __init__(self, raw):
-                self.raw = raw
-                calls['scripts'].append(raw)
+        class FakeTxOut:
 
-        class FakeTransactionOutput:
-
-            def __init__(self, script_pubkey, amount):
+            def __init__(self, value, script_pubkey):
+                self.value = value
                 self.script_pubkey = script_pubkey
-                self.amount = amount
+                calls['scripts'].append(script_pubkey)
                 calls['outputs'].append(self)
 
         class FakeTrace:
             valid = True
-            error = SimpleNamespace(name='OK')
-            executions = []
+            error_name = 'OK'
+            runs = []
 
-        def fake_debug_transaction(transaction, spent_outputs):
-            calls['transaction'] = transaction
+        def fake_run(script_pubkey, *, tx, input_index, spent_outputs, flags):
+            del flags
+            calls['runs'].append((script_pubkey, tx, input_index))
             calls['spent_outputs'] = spent_outputs
-            return [FakeTrace(), FakeTrace()]
+            return FakeTrace()
 
-        fake_pbk = ModuleType('fake_pbk')
-        fake_pbk.debugger = SimpleNamespace(
-            execution_role=lambda idx, sig: '',
-            seed_note=lambda idx, sig: '',
+        fake_bl = SimpleNamespace(
+            Transaction=FakeTransaction,
+            TxOut=FakeTxOut,
+            run=fake_run,
         )
-        fake_pbk.opcode_description = lambda opcode: ''
-        fake_pbk.opcode_name = lambda opcode: ''
-        fake_pbk.trace_available = lambda: True
-        fake_pbk.Transaction = FakeTransaction
-        fake_pbk.ScriptPubkey = FakeScriptPubkey
-        fake_pbk.TransactionOutput = FakeTransactionOutput
-        fake_pbk.debug_transaction = fake_debug_transaction
 
-        with patch.object(tx_model, 'pbk', fake_pbk):
+        with patch.object(tx_model, 'bl', fake_bl):
             tx._compute_visualized_script()
 
         self.assertEqual(calls['transaction'].raw, bytes.fromhex(tx.hex))
         self.assertEqual(calls['scripts'], [bytes.fromhex(script_0), bytes.fromhex(script_1)])
-        self.assertEqual([output.amount for output in calls['outputs']], [11, 22])
+        self.assertEqual([output.value for output in calls['outputs']], [11, 22])
         self.assertEqual(calls['spent_outputs'], calls['outputs'])
+        self.assertEqual([run[0] for run in calls['runs']], [bytes.fromhex(script_0), bytes.fromhex(script_1)])
+        self.assertEqual([run[1] for run in calls['runs']], [calls['transaction'], calls['transaction']])
+        self.assertEqual([run[2] for run in calls['runs']], [0, 1])
         self.assertTrue(tx.is_visualized)
         self.assertIn('OK', tx.visualized_script)
 
@@ -506,8 +503,8 @@ class TestBitcoinBrowser(TransactionCase):
         coinbase._compute_visualized_script()
         self.assertFalse(coinbase.is_visualized)
 
-        unavailable = self.Tx.create({
-            'txid': 'visual-trace-unavailable',
+        parse_error = self.Tx.create({
+            'txid': 'visual-parse-error',
             'hex': '00',
             'vin_ids': [Command.create({
                 'n': 0,
@@ -517,10 +514,29 @@ class TestBitcoinBrowser(TransactionCase):
                 'coinbase': False,
             })],
         })
-        fake_pbk = SimpleNamespace(trace_available=lambda: False)
-        with patch.object(tx_model, 'pbk', fake_pbk):
-            unavailable._compute_visualized_script()
-        self.assertFalse(unavailable.is_visualized)
+        parse_error._compute_visualized_script()
+        self.assertFalse(parse_error.is_visualized)
+        self.assertIn('Unable to parse transaction hex', parse_error.visualized_script)
+
+        input_mismatch = self.Tx.create({
+            'txid': 'visual-input-mismatch',
+            'hex': '00',
+            'vin_ids': [Command.create({
+                'n': 0,
+                'sequence': 1,
+                'vout_tx_id': False,
+                'vout': False,
+                'coinbase': False,
+            })],
+        })
+        fake_transaction = SimpleNamespace(parse=lambda raw: SimpleNamespace(vin=[object(), object()]))
+        with patch.object(tx_model.bl, 'Transaction', fake_transaction):
+            input_mismatch._compute_visualized_script()
+        self.assertFalse(input_mismatch.is_visualized)
+        self.assertIn(
+            "Stored input data does not match the raw transaction (1 stored, 2 serialized).",
+            input_mismatch.visualized_script,
+        )
 
     def test_debug_trace_html_renders_execution_details(self):
         prev = self.Tx.create({'txid': 'trace-prev'})
@@ -544,65 +560,69 @@ class TestBitcoinBrowser(TransactionCase):
                 'coinbase': False,
             })],
         })
-        sig_version = SimpleNamespace(name='BASE')
-        execution = SimpleNamespace(
-            sig_version=sig_version,
+        run = SimpleNamespace(
+            role='scriptPubKey',
+            sig_version=0,
             script=b'',
             script_type='pubkeyhash',
+            initial_stack=(b'', b'\x01', b'\x01', b'\xcc' * 17),
             steps=[
                 SimpleNamespace(
                     opcode=81,
-                    opcode_pos=0,
+                    opcode_name='OP_1',
+                    description='description-81',
+                    script_offset=0,
                     executed=True,
-                    stack=[b'', b'\x01', b'\x01', b'\xaa' * 17],
+                    stack=(b'\x01', b'\xaa' * 17),
                 ),
                 SimpleNamespace(
                     opcode=82,
-                    opcode_pos=1,
+                    opcode_name='OP_2',
+                    description='description-82',
+                    script_offset=1,
                     executed=False,
-                    stack=[],
+                    stack=(),
                 ),
             ],
-            end=SimpleNamespace(stack=[b'', b'\xbb' * 17], error=SimpleNamespace(name='END_OK')),
-            error=SimpleNamespace(name='EXEC_OK'),
+            final_stack=(b'', b'\xbb' * 17),
+            error=0,
         )
-        empty_execution = SimpleNamespace(
-            sig_version=sig_version,
+        empty_run = SimpleNamespace(
+            role='scriptSig',
+            sig_version=0,
             script=b'\x51',
             script_type=False,
+            initial_stack=(),
             steps=[],
-            end=None,
-            error=SimpleNamespace(name='NO_END'),
+            final_stack=(),
+            error=0,
         )
         trace = SimpleNamespace(
             valid=False,
-            error=SimpleNamespace(name='TRACE_FAIL'),
-            executions=[execution, empty_execution],
+            error=0,
+            error_name='TRACE_FAIL',
+            runs=[run, empty_run],
         )
-        fake_pbk = ModuleType('fake_pbk')
-        fake_pbk.debugger = SimpleNamespace(
-            execution_role=lambda idx, sig: f'role-{idx}-{sig.name}',
-            seed_note=lambda idx, sig: f'seed-{idx}' if idx == 0 else '',
-        )
-        fake_pbk.opcode_description = lambda opcode: f'description-{opcode}'
-        fake_pbk.opcode_name = lambda opcode: f'OP_FAKE_{opcode}'
-        fake_pbk.trace_available = lambda: True
-        fake_pbk.Transaction = lambda raw: SimpleNamespace(raw=raw, n_inputs=1)
-        fake_pbk.ScriptPubkey = lambda raw: SimpleNamespace(raw=raw)
-        fake_pbk.TransactionOutput = lambda script_pubkey, amount: SimpleNamespace(
-            script_pubkey=script_pubkey,
-            amount=amount,
-        )
-        fake_pbk.debug_transaction = lambda transaction, spent_outputs: [trace]
 
-        with patch.object(tx_model, 'pbk', fake_pbk):
+        fake_bl = SimpleNamespace(
+            Transaction=SimpleNamespace(parse=lambda raw: SimpleNamespace(raw=raw, vin=[object()])),
+            TxOut=lambda value, script_pubkey: SimpleNamespace(value=value, script_pubkey=script_pubkey),
+            run=lambda script_pubkey, *, tx, input_index, spent_outputs, flags: trace,
+            ScriptError=lambda error: SimpleNamespace(name='EXEC_OK'),
+            SigVersion=lambda sig_version: SimpleNamespace(name='BASE'),
+        )
+
+        with patch.object(tx_model, 'bl', fake_bl):
             tx._compute_visualized_script()
 
         html = tx.visualized_script
         self.assertIn('TRACE_FAIL', html)
-        self.assertIn('OP_FAKE_81', html)
-        self.assertIn('OP_FAKE_82', html)
-        self.assertIn('seed-0', html)
+        self.assertIn('scriptPubKey', html)
+        self.assertIn('OP_1', html)
+        self.assertIn('OP_2', html)
+        self.assertIn('stack (before)', html)
+        self.assertNotIn('stack (after)', html)
+        self.assertIn('cccccccccccccccccccccccccccccccc', html)
         self.assertIn('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', html)
         self.assertIn('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', html)
         self.assertIn('(17 bytes)', html)
@@ -725,38 +745,30 @@ class TestBitcoinBrowserController(HttpCase):
 
             def __init__(self, raw):
                 self.raw = raw
-                self.n_inputs = 1
+                self.vin = [object()]
 
-        class FakeScriptPubkey:
+            @classmethod
+            def parse(cls, raw):
+                return cls(raw)
 
-            def __init__(self, raw):
-                self.raw = raw
+        class FakeTxOut:
 
-        class FakeTransactionOutput:
-
-            def __init__(self, script_pubkey, amount):
+            def __init__(self, value, script_pubkey):
+                self.value = value
                 self.script_pubkey = script_pubkey
-                self.amount = amount
 
         class FakeTrace:
             valid = True
-            error = SimpleNamespace(name='CACHE_REFRESH_SENTINEL')
-            executions = []
+            error_name = 'CACHE_REFRESH_SENTINEL'
+            runs = []
 
-        fake_pbk = ModuleType('fake_pbk')
-        fake_pbk.debugger = SimpleNamespace(
-            execution_role=lambda idx, sig: '',
-            seed_note=lambda idx, sig: '',
+        fake_bl = SimpleNamespace(
+            Transaction=FakeTransaction,
+            TxOut=FakeTxOut,
+            run=lambda script_pubkey, *, tx, input_index, spent_outputs, flags: FakeTrace(),
         )
-        fake_pbk.opcode_description = lambda opcode: ''
-        fake_pbk.opcode_name = lambda opcode: ''
-        fake_pbk.trace_available = lambda: True
-        fake_pbk.Transaction = FakeTransaction
-        fake_pbk.ScriptPubkey = FakeScriptPubkey
-        fake_pbk.TransactionOutput = FakeTransactionOutput
-        fake_pbk.debug_transaction = lambda transaction, spent_outputs: [FakeTrace()]
 
-        with self._patch_proxy(proxy), patch.object(tx_model, 'pbk', fake_pbk):
+        with self._patch_proxy(proxy), patch.object(tx_model, 'bl', fake_bl):
             response = self.url_open('/bitcoin/tx/ctrl-refresh')
 
         self.assertEqual(response.status_code, 200)
