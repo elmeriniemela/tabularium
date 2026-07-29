@@ -489,6 +489,24 @@ class TestBitcoinBrowser(TransactionCase):
         no_hex._compute_visualized_script()
         self.assertFalse(no_hex.is_visualized)
 
+        no_hex_with_output = self.Tx.create({
+            'txid': 'visual-no-hex-with-output',
+            'vout_ids': [Command.create({
+                'n': 0,
+                'type': 'pubkey',
+                'address': 'visual-no-hex-output-addr',
+                'asm': 'OP_1 0xee',
+                'script_pub_key_hex': '5101ee',
+                'value': 0.00000003,
+            })],
+        })
+        no_hex_with_output._compute_visualized_script()
+        self.assertFalse(no_hex_with_output.is_visualized)
+        self.assertIn('Missing raw transaction hex.', no_hex_with_output.visualized_script)
+        self.assertIn('Transaction output scripts', no_hex_with_output.visualized_script)
+        self.assertIn('OP_PUSHBYTES_1', no_hex_with_output.visualized_script)
+        self.assertIn('ee', no_hex_with_output.visualized_script)
+
         coinbase = self.Tx.create({
             'txid': 'visual-coinbase',
             'hex': '00',
@@ -560,6 +578,15 @@ class TestBitcoinBrowser(TransactionCase):
                 'coinbase': False,
             })],
         })
+        self.TxOut.create({
+            'tx_id': tx.id,
+            'n': 0,
+            'type': 'pubkeyhash',
+            'address': 'trace-output-addr',
+            'asm': 'OP_DUP OP_HASH160 4bfbaf6afb76cc5771bc6404810d1cc041a69339 OP_EQUALVERIFY OP_CHECKSIG',
+            'script_pub_key_hex': '76a9144bfbaf6afb76cc5771bc6404810d1cc041a6933988ac',
+            'value': 0.00000002,
+        })
         run = SimpleNamespace(
             role='scriptPubKey',
             sig_version=0,
@@ -608,8 +635,6 @@ class TestBitcoinBrowser(TransactionCase):
             Transaction=SimpleNamespace(parse=lambda raw: SimpleNamespace(raw=raw, vin=[object()])),
             TxOut=lambda value, script_pubkey: SimpleNamespace(value=value, script_pubkey=script_pubkey),
             run=lambda script_pubkey, *, tx, input_index, spent_outputs, flags: trace,
-            ScriptError=lambda error: SimpleNamespace(name='EXEC_OK'),
-            SigVersion=lambda sig_version: SimpleNamespace(name='BASE'),
         )
 
         with patch.object(tx_model, 'bl', fake_bl):
@@ -618,8 +643,16 @@ class TestBitcoinBrowser(TransactionCase):
         html = tx.visualized_script
         self.assertIn('TRACE_FAIL', html)
         self.assertIn('scriptPubKey', html)
+        self.assertIn('Transaction output scripts', html)
+        self.assertIn('Output 0', html)
         self.assertIn('OP_1', html)
         self.assertIn('OP_2', html)
+        self.assertIn('OP_PUSHBYTES_20', html)
+        self.assertIn('#0023', html)
+        self.assertIn('OP_EQUALVERIFY', html)
+        self.assertIn('Fail the script unless the top two items are equal.', html)
+        self.assertIn('OP_CHECKSIG', html)
+        self.assertIn('Check a signature against a pubkey; push true or false.', html)
         self.assertIn('stack (before)', html)
         self.assertNotIn('stack (after)', html)
         self.assertIn('cccccccccccccccccccccccccccccccc', html)
@@ -774,6 +807,7 @@ class TestBitcoinBrowserController(HttpCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('text/html', response.headers['Content-Type'])
         self.assertIn('CACHE_REFRESH_SENTINEL', response.text)
+        self.assertIn('Transaction output scripts', response.text)
 
     def _patch_proxy(self, proxy):
         return patch.object(generic_model.ConfigParam, 'bitcoind_proxy', autospec=True, return_value=proxy)

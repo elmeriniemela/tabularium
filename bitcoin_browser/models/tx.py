@@ -4,6 +4,8 @@ import datetime
 import logging
 
 import bitoplens as bl
+from bitoplens import ScriptError, SigVersion
+from bitoplens.script import Script, opcode_description
 import tinyrpc
 
 from odoo import api, exceptions, fields, models, Command, _
@@ -20,18 +22,6 @@ _BITOPLENS_FLAGS = (
     | bl.ScriptVerificationFlags.CHECKLOCKTIMEVERIFY
     | bl.ScriptVerificationFlags.CHECKSEQUENCEVERIFY
 )
-
-
-def _btc_to_sats(value):
-    return int(round((value or 0.0) * 100000000))
-
-
-def _script_error_name(error):
-    return bl.ScriptError(error).name
-
-
-def _sig_version_name(sig_version):
-    return bl.SigVersion(sig_version).name
 
 
 class BitcoinTx(models.Model):
@@ -200,72 +190,86 @@ class BitcoinTx(models.Model):
         'vin_ids.vout_tx_id',
         'vin_ids.vout_tx_id.vout_ids.script_pub_key_hex',
         'vin_ids.vout_tx_id.vout_ids.value',
+        'vout_ids.n',
+        'vout_ids.script_pub_key_hex',
+        'vout_ids.type',
     )
     def _compute_visualized_script(self):
-
-        def render(template, vals):
-            return self.env['ir.qweb']._render(template, vals)
+        template = 'bitcoin_browser.tx_visualized_script_content'
+        qweb = self.env['ir.qweb']
 
         for rec in self:
-            if not rec.hex:
-                rec.visualized_script = render('bitcoin_browser.tx_visualized_script_content', {
-                    'message_kind': 'muted',
-                    'message_text': "Missing raw transaction hex.",
-                    'mode': 'message',
-                })
-                rec.is_visualized = False
-                continue
-            if rec.vin_ids.filtered('coinbase'):
-                rec.visualized_script = render('bitcoin_browser.tx_visualized_script_content', {
-                    'message_kind': 'info',
-                    'message_text': "Coinbase transactions have no input scripts to verify.",
-                    'mode': 'message',
-                })
-                rec.is_visualized = False
-                continue
-            try:
-                tx = bl.Transaction.parse(bytes.fromhex(rec.hex))
-            except (IndexError, ValueError) as error:
-                rec.visualized_script = render('bitcoin_browser.tx_visualized_script_content', {
-                    'message_kind': 'warn',
-                    'message_text': f"Unable to parse transaction hex: {error}.",
-                    'mode': 'message',
-                })
-                rec.is_visualized = False
-                continue
-
-            ordered_inputs = rec.vin_ids.sorted('n')
-            if len(ordered_inputs) != len(tx.vin):
-                rec.visualized_script = render('bitcoin_browser.tx_visualized_script_content', {
-                    'message_kind': 'warn',
-                    'message_text': (
-                        "Stored input data does not match the raw transaction "
-                        f"({len(ordered_inputs)} stored, {len(tx.vin)} serialized)."
-                    ),
-                    'mode': 'message',
-                })
-                rec.is_visualized = False
-                continue
-
+            input_message_kind = False
+            input_message_text = False
+            n_inputs = 0
             spent_outputs = []
-            missing_inputs = []
-            for txin in ordered_inputs:
-                spent_output = txin.spent_output_id
-                if not spent_output or not spent_output.script_pub_key_hex:
-                    missing_inputs.append(str(txin.n))
-                    continue
-                spent_outputs.append(bl.TxOut(
-                    _btc_to_sats(spent_output.value),
-                    bytes.fromhex(spent_output.script_pub_key_hex),
-                ))
+            traces = ()
+            output_scripts = [
+                (txout, Script(bytes.fromhex(txout.script_pub_key_hex)))
+                for txout in rec.vout_ids.sorted('n')
+            ]
+            render_vals = {
+                'ScriptError': ScriptError,
+                'SigVersion': SigVersion,
+                'input_message_kind': False,
+                'input_message_text': False,
+                'mode': 'trace',
+                'n_inputs': n_inputs,
+                'opcode_description': opcode_description,
+                'output_scripts': output_scripts,
+                'traces': traces,
+            }
 
-            if missing_inputs:
-                rec.visualized_script = render('bitcoin_browser.tx_visualized_script_content', {
-                    'message_kind': 'muted',
-                    'message_text': f"Missing spent output data for input(s): {', '.join(missing_inputs)}.",
-                    'mode': 'message',
-                })
+            if not rec.hex:
+                input_message_kind = 'muted'
+                input_message_text = "Missing raw transaction hex."
+            elif rec.vin_ids.filtered('coinbase'):
+                input_message_kind = 'info'
+                input_message_text = "Coinbase transactions have no input scripts to verify."
+            else:
+                try:
+                    tx = bl.Transaction.parse(bytes.fromhex(rec.hex))
+                except (IndexError, ValueError) as error:
+                    input_message_kind = 'warn'
+                    input_message_text = f"Unable to parse transaction hex: {error}."
+                else:
+                    n_inputs = len(tx.vin)
+                    ordered_inputs = rec.vin_ids.sorted('n')
+                    if len(ordered_inputs) != n_inputs:
+                        input_message_kind = 'warn'
+                        input_message_text = (
+                            "Stored input data does not match the raw transaction "
+                            f"({len(ordered_inputs)} stored, {n_inputs} serialized)."
+                        )
+                    else:
+                        missing_inputs = []
+                        for txin in ordered_inputs:
+                            spent_output = txin.spent_output_id
+                            if not spent_output or not spent_output.script_pub_key_hex:
+                                missing_inputs.append(str(txin.n))
+                                continue
+                            spent_outputs.append(bl.TxOut(
+                                int(round((spent_output.value or 0.0) * 100000000)),
+                                bytes.fromhex(spent_output.script_pub_key_hex),
+                            ))
+
+                        if missing_inputs:
+                            input_message_kind = 'muted'
+                            input_message_text = f"Missing spent output data for input(s): {', '.join(missing_inputs)}."
+
+            if input_message_text:
                 rec.is_visualized = False
+                if output_scripts:
+                    render_vals['input_message_kind'] = input_message_kind
+                    render_vals['input_message_text'] = input_message_text
+                    render_vals['n_inputs'] = n_inputs
+                    rec.visualized_script = qweb._render(template, render_vals)
+                else:
+                    rec.visualized_script = qweb._render(template, {
+                        'message_kind': input_message_kind,
+                        'message_text': input_message_text,
+                        'mode': 'message',
+                    })
                 continue
 
             traces = [
@@ -278,13 +282,9 @@ class BitcoinTx(models.Model):
                 )
                 for input_index, spent_output in enumerate(spent_outputs)
             ]
-            rec.visualized_script = render('bitcoin_browser.tx_visualized_script_content', {
-                'mode': 'trace',
-                'n_inputs': len(tx.vin),
-                'script_error_name': _script_error_name,
-                'sig_version_name': _sig_version_name,
-                'traces': traces,
-            })
+            render_vals['n_inputs'] = n_inputs
+            render_vals['traces'] = traces
+            rec.visualized_script = qweb._render(template, render_vals)
             rec.is_visualized = True
 
 
