@@ -1,17 +1,17 @@
 # Bitcoin Browser
 
 Bitcoin Browser is an Odoo addon for browsing Bitcoin blockchain data inside
-Odoo. It stores blocks, transactions, inputs, and outputs, fetches missing data
-from a Bitcoin Core JSON-RPC node, and renders Bitcoin Script verification
-traces for transactions.
+Odoo. It stores only the blocks, transactions, inputs, and outputs that users
+look up or refresh, fetching missing data lazily from a Bitcoin Core JSON-RPC
+node. It also renders Bitcoin Script verification traces for transactions.
 
 ## Features
 
 - Adds an `Explorer` application menu for blocks, transactions, inputs, and
   outputs.
-- Fetches block metadata and full transaction data from Bitcoin Core RPC.
-- Auto-populates exact block-hash and transaction-id searches when records are
-  not already stored.
+- Lazily fetches block metadata and full transaction data from Bitcoin Core RPC.
+- Auto-populates exact block-hash and transaction-id searches only when records
+  are not already stored.
 - Tracks transaction inputs, outputs, spent-output relationships, coinbase data,
   fees, weights, sizes, locktime, and block membership.
 - Provides a transaction script visualization in the backend transaction form.
@@ -36,8 +36,25 @@ After installing the module, configure these Odoo system parameters:
 5. Use the `Refresh` button on block and transaction forms to fetch or update
    data from the configured Bitcoin Core node.
 
-Searching by exact block hash or transaction ID can create and refresh the
-record automatically unless the caller disables auto-population through context.
+## Lazy Storage
+
+Bitcoin Browser does not import or mirror the full blockchain. Records are
+stored on demand:
+
+- An exact block-hash search creates a `bitcoin.block` record when it is missing
+  and fetches the block from Bitcoin Core.
+- An exact transaction-id search creates a `bitcoin.tx` record when it is
+  missing and fetches the transaction from Bitcoin Core.
+- Fetching a block with transactions stores the transactions included in that
+  block.
+- Fetching a transaction stores its inputs and outputs. Referenced previous
+  transactions are represented as lightweight records first, then populated when
+  they are looked up or refreshed.
+- The `Refresh` button updates an existing stored record from Bitcoin Core.
+
+This behavior keeps the Odoo database focused on the subset of Bitcoin data that
+has actually been browsed. Auto-population can be disabled by passing
+`disable_auto_populate` in context.
 
 ## Public Route
 
