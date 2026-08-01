@@ -15,4 +15,5 @@ btclib
 py3o.template
 py3o.formats
 packaging
-pip install git+https://github.com/elmeriniemela/pybitcoinkernel.git
+git+https://github.com/elmeriniemela/pybitcoinkernel.git
+git+https://github.com/elmeriniemela/bitoplens.git
