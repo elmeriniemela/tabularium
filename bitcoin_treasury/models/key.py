@@ -52,6 +52,7 @@ class BitcoinKey(models.Model):
 
     sequence = fields.Integer()
     name = fields.Char(tracking=True)
+    active = fields.Boolean(default=True, tracking=True)
 
     wif = fields.Char(required=True, tracking=True)
 
@@ -60,6 +61,7 @@ class BitcoinKey(models.Model):
         comodel_name='bitcoin.wallet.key',
         inverse_name='key_id',
         readonly=True,
+        context={'active_test': False},
     )
 
     multisig = fields.Boolean(

@@ -12,6 +12,7 @@ class BitcoinOut(models.Model):
     wallet_ids = fields.Many2many(
         comodel_name='bitcoin.wallet',
         compute='_compute_wallet_ids',
+        context={'active_test': False},
     )
 
     @api.depends('address')
@@ -27,6 +28,7 @@ class BitcoinIn(models.Model):
     wallet_ids = fields.Many2many(
         comodel_name='bitcoin.wallet',
         compute='_compute_wallet_ids',
+        context={'active_test': False},
     )
 
     @api.depends('spent_output_id')

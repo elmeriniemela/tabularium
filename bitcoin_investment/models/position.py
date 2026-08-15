@@ -10,6 +10,7 @@ class Position(models.Model):
         comodel_name='bitcoin.wallet',
         inverse_name='position_id',
         readonly=True,
+        context={'active_test': False},
     )
 
     wallet_count = fields.Integer(compute='_compute_wallet_count')

@@ -61,6 +61,7 @@ class BitcoinWallet(models.Model):
 
     sequence = fields.Integer()
     name = fields.Char()
+    active = fields.Boolean(default=True, tracking=True)
 
     history_ids = fields.One2many(
         comodel_name='bitcoin.wallet.history',
@@ -70,6 +71,7 @@ class BitcoinWallet(models.Model):
     key_ids = fields.One2many(
         comodel_name='bitcoin.wallet.key',
         inverse_name='wallet_id',
+        context={'active_test': False},
     )
 
     address_ids = fields.One2many(
@@ -97,6 +99,7 @@ class BitcoinWallet(models.Model):
     first_key_id = fields.Many2one(
         comodel_name='bitcoin.key',
         compute='_compute_first_key_id',
+        context={'active_test': False},
     )
 
     script_type = fields.Selection(
@@ -356,6 +359,7 @@ class BitcoinWalletKey(models.Model):
         comodel_name='bitcoin.key',
         required=True,
         ondelete='restrict',
+        context={'active_test': True},
     )
 
     wallet_id = fields.Many2one(
@@ -480,6 +484,7 @@ class BitcoinWalletHistory(models.Model):
     other_wallet_ids = fields.Many2many(
         comodel_name='bitcoin.wallet',
         compute='_compute_other_wallet_ids',
+        context={'active_test': False},
     )
 
     def _compute_other_wallet_ids(self):
