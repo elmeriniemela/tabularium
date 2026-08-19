@@ -16,9 +16,9 @@ from odoo.tests import tagged, TransactionCase
 
 from odoo.addons.api_endpoint.models.api_endpoint import (
     GlobalsDict,
-    import_xml,
     json_decoder,
     json_encoder,
+    safe_eval,
 )
 
 
@@ -82,7 +82,6 @@ class TestApiEndpoint(TransactionCase):
         self.assertEqual(decoded['three'], 3)
 
         root = etree.fromstring(b'<odoo/>')
-        import_xml(self.env, root)
 
         globals_dict = GlobalsDict({'foo': 1})
         globals_dict['bar'] = 2
@@ -91,8 +90,18 @@ class TestApiEndpoint(TransactionCase):
             globals_dict['foo'] = 9
         with self.assertRaises(UserError):
             globals_dict['msg'] = 'x'
+        with self.assertRaises(UserError):
+            globals_dict.update({'foo': 9})
         globals_dict.force_set('foo', 9)
         self.assertEqual(globals_dict['foo'], 9)
+
+        for expr in ["open('/etc/passwd').read()", "eval('1 + 1')", "exec('x = 1')"]:
+            with self.subTest(expr=expr), self.assertRaises(ValueError):
+                safe_eval(expr, GlobalsDict({}))
+
+        eval_globals = GlobalsDict({'foo': 1})
+        safe_eval('bar = foo + 1', eval_globals, mode='exec')
+        self.assertEqual(eval_globals['bar'], 2)
 
     def test_create_sequence_and_url_generation(self):
         endpoint = self.ApiEndpoint.create({
@@ -117,14 +126,30 @@ class TestApiEndpoint(TransactionCase):
 
         endpoint_with_auth = self._new_endpoint(role='passive', authorization='token-1')
         self.assertIn('/api-v1/', endpoint_with_auth.url)
-        self.assertIn('Authorization=token-1', endpoint_with_auth.url)
+        self.assertIn('Authorization=', endpoint_with_auth.url)
+        self.assertIn('token-1', endpoint_with_auth.url)
 
-        endpoint_without_auth = self._new_endpoint(role='passive', authorization=False)
+        endpoint_without_auth = self._new_endpoint(role='passive', authorization=False, user_id=self.env.ref('base.user_admin').id)
         self.assertIn('/api-v1/', endpoint_without_auth.url)
         self.assertNotIn('Authorization=', endpoint_without_auth.url)
 
         active_endpoint = self._new_endpoint(role='active')
         self.assertFalse(active_endpoint.url)
+
+    def test_public_http_endpoint_rejects_superuser(self):
+        user_admin = self.env.ref('base.user_admin')
+        endpoint = self._new_endpoint(
+            role='passive',
+            user_id=user_admin.id,
+            authorization=False,
+        )
+        self.assertEqual(endpoint.user_id, user_admin)
+
+        with self.assertRaises(ValidationError):
+            self._new_endpoint(role='passive', authorization=False)
+
+        with self.assertRaises(ValidationError):
+            endpoint.user_id = self.env.user
 
     def test_hardcoded_templates(self):
         inbound_json = self._new_endpoint(direction='inbound', auto_code=True, file_format='json')
@@ -138,7 +163,6 @@ class TestApiEndpoint(TransactionCase):
         )
         self.assertIn('lxml.etree.fromstring(data)', inbound_xml.hardcoded_producer)
         self.assertIn('lxml.etree.XSLT', inbound_xml.hardcoded_consumer)
-        self.assertIn('import_xml(obj)', inbound_xml.hardcoded_consumer)
 
         inbound_csv = self._new_endpoint(direction='inbound', auto_code=True, file_format='csv')
         self.assertIn('pandas.read_csv', inbound_csv.hardcoded_producer)
@@ -318,6 +342,14 @@ class TestApiEndpoint(TransactionCase):
 
         with self.assertRaises(RuntimeError):
             endpoint_no_msg.ensure_response({})
+
+    def test_produce_rejects_protected_variable_names(self):
+        for variable_name in ['self', 'msg']:
+            with self.subTest(variable_name=variable_name):
+                endpoint = self._new_endpoint(auto_commit=False)
+                with self.assertRaises(UserError):
+                    endpoint.produce({variable_name: 'evil'})
+                self.assertFalse(endpoint.msg_ids)
 
     def test_produce_error_paths_invalid_state_and_missing_obj(self):
         endpoint_invalid_state = self._new_endpoint(

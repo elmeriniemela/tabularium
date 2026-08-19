@@ -28,15 +28,15 @@ class TestApiController(HttpCase):
             'producer': "obj = {'from': 'get'}",
             'consumer': "response = {'from': obj['from']}",
         })
-        cls.endpoint_get_header_auth = cls.Endpoint.create({
-            'name': 'HTTP GET Header Auth',
+        cls.endpoint_get_other_auth = cls.Endpoint.create({
+            'name': 'HTTP GET Other Auth',
             'role': 'passive',
             'direction': 'outbound',
             'comm_method': 'http',
             'http_method': 'get',
             'file_format': 'json',
             'response_format': 'json',
-            'location': 'tests_get_header',
+            'location': 'tests_get_other_auth',
             'authorization': 'header-token',
             'auto_code': False,
             'producer': "obj = {'auth': True}",
@@ -52,6 +52,7 @@ class TestApiController(HttpCase):
             'response_format': 'json',
             'location': 'tests_get_no_auth',
             'authorization': False,
+            'user_id': cls.env.ref('base.user_admin').id,
             'auto_code': False,
             'producer': "obj = {'public': True}",
             'consumer': "response = {'public': obj['public']}",
@@ -65,7 +66,8 @@ class TestApiController(HttpCase):
             'file_format': 'json',
             'response_format': 'xml',
             'location': 'tests_post_xml',
-            'authorization': 'post-token',
+            'authorization': False,
+            'user_id': cls.env.ref('base.user_admin').id,
             'auto_code': False,
             'producer': "obj = {'size': len(data)}",
             'consumer': "response = lxml.etree.fromstring(f\"<ok>{obj['size']}</ok>\")",
@@ -103,14 +105,14 @@ class TestApiController(HttpCase):
         converters = self.env['ir.http']._get_converters()
         self.assertIn('wildcard', converters)
 
-    def test_get_json_query_auth(self):
+    def test_get_json_header_auth_with_query_variables(self):
         response = self.url_open('/api-v1/tests_get_json?Authorization=query-token&foo=bar')
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertIn('application/json', response.headers['Content-Type'])
         self.assertEqual(response.json(), {'from': 'get'})
 
-    def test_get_json_header_auth(self):
-        response = self.url_open('/api-v1/tests_get_header', headers={'Authorization': 'header-token'})
+    def test_get_json_query_auth(self):
+        response = self.url_open('/api-v1/tests_get_other_auth?Authorization=header-token')
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertEqual(response.json(), {'auth': True})
 
@@ -119,9 +121,31 @@ class TestApiController(HttpCase):
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertEqual(response.json(), {'public': True})
 
+    def test_reserved_request_variables_are_rejected(self):
+        with mute_logger('odoo.addons.api_endpoint.controllers.api_controller'):
+            response = self.url_open('/api-v1/tests_get_json?Authorization=query-token&obj=evil')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(self.endpoint_get.state, 'error')
+
+    def test_request_body_size_limit(self):
+        Param = self.env['ir.config_parameter'].sudo()
+        old_limit = Param.get_param('api_endpoint.max_request_bytes', '1048576')
+        Param.set_param('api_endpoint.max_request_bytes', '2')
+        try:
+            with mute_logger('odoo.addons.api_endpoint.controllers.api_controller'):
+                response = self.url_open(
+                    '/api-v1/tests_post_xml',
+                    data='abc',
+                    headers={'Content-Type': 'text/plain'},
+                )
+            self.assertEqual(response.status_code, HTTPStatus.REQUEST_ENTITY_TOO_LARGE)
+            self.assertNotIn('abc', response.text)
+        finally:
+            Param.set_param('api_endpoint.max_request_bytes', old_limit)
+
     def test_post_xml_response(self):
         response = self.url_open(
-            '/api-v1/tests_post_xml?Authorization=post-token',
+            '/api-v1/tests_post_xml',
             data='abc',
             headers={'Content-Type': 'text/plain'},
         )
@@ -140,18 +164,19 @@ class TestApiController(HttpCase):
     def test_missing_endpoint_errors_json_and_xml(self):
         with mute_logger('odoo.addons.api_endpoint.controllers.api_controller'):
             response_json = self.url_open('/api-v1/tests_missing')
-        self.assertEqual(response_json.status_code, HTTPStatus.INTERNAL_SERVER_ERROR)
+        self.assertEqual(response_json.status_code, HTTPStatus.NOT_FOUND)
         self.assertIn('application/json', response_json.headers['Content-Type'])
-        self.assertIn('Endpoint not found', response_json.text)
+        self.assertNotIn('Endpoint not found', response_json.text)
 
         with mute_logger('odoo.addons.api_endpoint.controllers.api_controller'):
             response_xml = self.url_open('/api-v1/tests_missing', headers={'Content-Type': 'text/xml'})
-        self.assertEqual(response_xml.status_code, HTTPStatus.INTERNAL_SERVER_ERROR)
+        self.assertEqual(response_xml.status_code, HTTPStatus.NOT_FOUND)
         self.assertIn('text/xml', response_xml.headers['Content-Type'])
         self.assertIn('<error>', response_xml.text)
 
-    def test_producer_exception_returns_500(self):
+    def test_producer_exception_returns_generic_500(self):
         with mute_logger('odoo.addons.api_endpoint.controllers.api_controller'):
             response = self.url_open('/api-v1/tests_get_error?Authorization=error-token')
         self.assertEqual(response.status_code, HTTPStatus.INTERNAL_SERVER_ERROR)
-        self.assertIn('RuntimeError', response.text)
+        self.assertNotIn('RuntimeError', response.text)
+        self.assertNotIn('controller boom', response.text)

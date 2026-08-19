@@ -110,4 +110,3 @@ class ApiMessage(models.Model):
         for msg in self:
             globals_dict = msg._get_msg_globals()
             msg.endpoint_id._consume(globals_dict)
-

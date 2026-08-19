@@ -62,15 +62,17 @@ urllib = wrap_module(__import__('urllib'), {mod: getattr(urllib, mod).__all__ fo
 _logger = logging.getLogger(__name__)
 
 
-def safe_eval(expr, /, context, *, mode="eval", filename=None):
+def safe_eval(expr, /, globals_dict, *, mode="eval", filename=None):
     """Adapted from odoo.tools.safe_eval.safe_eval to use GlobalsDict instead of regular dict in the evaluation.
     """
     if type(expr) is CodeType: # pragma: no cover
         raise TypeError("safe_eval does not allow direct evaluation of code objects.")
 
-    check_values(context)
+    if not isinstance(globals_dict, GlobalsDict):
+        raise TypeError("invalid type for globals_dict, GlobalsDict required.")
 
-    globals_dict = GlobalsDict(context or {}, __builtins__=dict(_BUILTINS))
+    check_values(globals_dict)
+    globals_dict.force_set('__builtins__', dict(_BUILTINS))
 
     c = compile_codeobj(expr, filename=filename, mode=mode)
     assert_valid_codeobj(_SAFE_OPCODES, c, expr)
@@ -85,9 +87,7 @@ def safe_eval(expr, /, context, *, mode="eval", filename=None):
         raise ValueError('%r while evaluating\n%r' % (e, expr))
 
     finally:
-        if context is not None:
-            del globals_dict['__builtins__']
-            context.update(globals_dict)
+        del globals_dict['__builtins__']
 
 
 def json_encoder(o):
@@ -112,26 +112,32 @@ def json_decoder(d):
     return d
 
 
-def import_xml(cr, root, noupdate=True, mode='init', module='__export__'):
-    obj = XMLImport(cr, module=module, idref=None, mode=mode, noupdate=noupdate, xml_filename=None)
-    obj.parse(root)
-
-
 class GlobalsDict(dict):
 
     def __init__(self, mapping=None, /, **kwargs):
+        mapping = dict(mapping or {})
         super().__init__(mapping)
-        self.__protected_keys = set(mapping.keys()) | {
+        super().update(kwargs)
+        self.__protected_keys = set(mapping.keys()) | set(kwargs.keys()) | {
             'msg',
         }
 
     def force_set(self, key, value):
         super().__setitem__(key, value)
 
-    def __setitem__(self, key, value):
+    def check_protected(self, key, value=None):
         if key in self.__protected_keys:
             raise exceptions.UserError(f"Cannot redefine a protected variable {key}={value}. Protected vars: {self.__protected_keys}")
+
+    def __setitem__(self, key, value):
+        self.check_protected(key, value)
         super().__setitem__(key, value)
+
+    def update(self, values):
+        for key, value in values.items():
+            self.check_protected(key, value)
+        return super().update(values)
+
 
 
 class ApiEndpoint(models.Model):
@@ -165,7 +171,6 @@ class ApiEndpoint(models.Model):
             'ValidationError': exceptions.ValidationError,
             'UserError': exceptions.UserError,
             'AccessError': exceptions.AccessError,
-            'import_xml': functools.partial(import_xml, self.env.cr),
             'locals': locals,
         })
 
@@ -305,6 +310,12 @@ class ApiEndpoint(models.Model):
         tracking=True,
         default=lambda self: secrets.token_urlsafe(),
     )
+
+    @api.constrains('authorization', 'comm_method', 'role', 'user_id')
+    def _check_public_http_endpoint_user(self):
+        for rec in self:
+            if rec.comm_method == 'http' and rec.role == 'passive' and not rec.authorization and rec.user_id._is_superuser():
+                raise exceptions.ValidationError(_("Public HTTP endpoints cannot run as the superuser."))
 
     location = fields.Char(
         required=True,
@@ -490,7 +501,6 @@ class ApiEndpoint(models.Model):
                     url += f'?Authorization={rec.authorization}'
             rec.url = url
 
-
     @api.depends('comm_method', 'role', 'direction', 'file_format')
     def _compute_hardcoded(self):
         for rec in self:
@@ -510,7 +520,6 @@ class ApiEndpoint(models.Model):
                             if (rec.xslt or '').strip():
                                 hardcoded_consumer += 'xslt = lxml.etree.XSLT(lxml.etree.XML(self.xslt))\n'
                                 hardcoded_consumer += 'obj = xslt(obj, test=lxml.etree.XSLT.strparam("test")).getroot()\n'
-                            hardcoded_consumer += 'import_xml(obj)\n'
                         elif rec.file_format == 'csv':
                             hardcoded_producer += "obj = pandas.read_csv(io.BytesIO(data))\n"
                         elif rec.file_format == 'zip':
@@ -565,6 +574,9 @@ class ApiEndpoint(models.Model):
     def produce(self, variables):
         self.ensure_one()
         globals_dict = self._get_globals()
+        for key in variables:
+            globals_dict.check_protected(key, 'user-input')
+
         if self.to_skip > 0:
             self.to_skip -= 1
             _logger.info("Skipped produce due to error backoff")
@@ -579,7 +591,7 @@ class ApiEndpoint(models.Model):
             serialized_vars = self._serialize_dict(globals_dict, variables)
             serialized_ctx = self._serialize_dict(globals_dict, self.env.context)
             globals_dict.update(variables)
-            copied_globals_dict = globals_dict.copy() # To prevent sharing new vars between Producer and Consumer. These vars are not stored in message queue.
+            copied_globals_dict = GlobalsDict(globals_dict.copy()) # To prevent sharing new vars between Producer and Consumer. These vars are not stored in message queue.
             safe_eval((self.hardcoded_producer or '') + (self.producer or ''), copied_globals_dict, mode="exec")
             if 'obj' in copied_globals_dict:
                 globals_dict['obj'] = copied_globals_dict['obj']
@@ -658,7 +670,7 @@ class ApiEndpoint(models.Model):
             'content': base64.b64encode(bytesdata),
             'variables': variables,
             'context': context,
-        }))
+        }).with_user(self.user_id).sudo(flag=False))
 
 
     def _consume(self, globals_dict):
@@ -672,15 +684,15 @@ class ApiEndpoint(models.Model):
                 self.env.cr.rollback()
             if commit:
                 if globals_dict.get('msg'):
-                    globals_dict['msg'].write({'state': 'error'})
-                    globals_dict['msg'].message_post(body=(str(error)), subtype_xmlid='api_endpoint.mt_integration_error', message_type='comment')
+                    globals_dict['msg'].sudo().write({'state': 'error'})
+                    globals_dict['msg'].sudo().message_post(body=(str(error)), subtype_xmlid='api_endpoint.mt_integration_error', message_type='comment')
                 if not config.options['test_enable']: # pragma: no cover
                     self.env.cr.commit()
             if raise_exc or not commit: # Commit required, silent bypass is not allowed
                 raise error
         else:
             if globals_dict.get('msg'):
-                globals_dict['msg'].write({'state': 'consumed'})
+                globals_dict['msg'].sudo().write({'state': 'consumed'})
             if commit and not config.options['test_enable']: # pragma: no cover:
                 self.env.cr.commit()
 
@@ -688,7 +700,7 @@ class ApiEndpoint(models.Model):
                 self.ensure_response(globals_dict)
                 bytesdata = self.obj_to_bytes(globals_dict['response'], self.response_format)
                 if globals_dict.get('msg'):
-                    globals_dict['msg'].write({
+                    globals_dict['msg'].sudo().write({
                         'response': base64.b64encode(bytesdata)
                     })
                 if commit and not config.options['test_enable']: # pragma: no cover:

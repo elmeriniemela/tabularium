@@ -444,7 +444,7 @@ obj = lxml.etree.fromstring(data)
         <field name="consumer">
 xslt = lxml.etree.XSLT(lxml.etree.XML(self.xslt))
 obj = xslt(obj, asset_id=lxml.etree.XSLT.strparam(str(asset.id))).getroot()
-import_xml(obj)
+import_xml(obj) # TODO; parse the XML into odoo records.
 </field>
     </record>
     </data>
