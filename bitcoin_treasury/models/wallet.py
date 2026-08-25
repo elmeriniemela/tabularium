@@ -5,11 +5,10 @@ import socket
 import ssl
 import json
 from contextlib import contextmanager
+from hashlib import sha256
 from odoo import api, fields, models, Command, _
-from ..electrum.bitcoin import address_to_scripthash
 from odoo.exceptions import UserError, ValidationError
 from btclib.script.script_pub_key import ScriptPubKey
-from btclib.bip32 import derive
 
 _logger = logging.getLogger(__name__)
 
@@ -56,7 +55,7 @@ def electumx_jsonrpc(host, port, use_ssl):
 class BitcoinWallet(models.Model):
     _name = 'bitcoin.wallet'
     _inherit = ['mail.thread', 'mail.activity.mixin']
-    _description = 'Bitcoin Wallet'
+    _description = 'Bitcoin Watch-only Wallet'
     _order = 'sequence, id'
 
     sequence = fields.Integer()
@@ -149,7 +148,7 @@ class BitcoinWallet(models.Model):
                     if len(wallet.key_ids) > 1 and len(wallet.key_ids) <= 15:
                         if st not in musig:
                             raise ValidationError(_("Multisig not supported for script type %s. Supported types %s.") % (st, musig))
-                        keys = [derive(k.key_id.wif, subkey_path) for k in wallet.key_ids]
+                        keys = [k.key_id._derive_public_key(subkey_path) for k in wallet.key_ids]
                         p2ms = ScriptPubKey.p2ms(
                             m=wallet.sigs_required,
                             keys=keys
@@ -158,9 +157,9 @@ class BitcoinWallet(models.Model):
                     elif len(wallet.key_ids) == 1:
                         if st not in sisig:
                             raise ValidationError(_("Multisig not supported for script type %s. Supported types %s.") % (st, sisig))
-                        addr_str = address_map[st](derive(wallet.first_key_id.wif, subkey_path))
+                        addr_str = address_map[st](wallet.first_key_id._derive_public_key(subkey_path))
                     else:
-                        raise UserError(_("Wrong amount of keys: %s") % len(wallet.key_ids))
+                        raise UserError(_("Wrong amount of extended public keys: %s") % len(wallet.key_ids))
 
 
                     if subkey_path in existing:
@@ -350,7 +349,7 @@ class BitcoinWallet(models.Model):
 
 class BitcoinWalletKey(models.Model):
     _name = 'bitcoin.wallet.key'
-    _description = 'Bitcoin Wallet Key'
+    _description = 'Bitcoin Wallet Extended Public Key'
     _order = 'sequence, id'
     _inherits = {'bitcoin.key': 'key_id'}
 
@@ -370,7 +369,10 @@ class BitcoinWalletKey(models.Model):
 
     sequence = fields.Integer()
 
-    _wallet_key_uniq = models.Constraint('unique(wallet_id, key_id)', 'The wallet already has this key!')
+    _wallet_key_uniq = models.Constraint(
+        'unique(wallet_id, key_id)',
+        'The wallet already has this extended public key!',
+    )
 
 
 class BitcoinWalletAddress(models.Model):
@@ -430,7 +432,12 @@ class BitcoinWalletAddress(models.Model):
     @api.depends('address')
     def _compute_scripthash(self):
         for record in self:
-            record.scripthash = address_to_scripthash(record.address) if record.address else False
+            record.scripthash = record._address_to_scripthash(record.address) if record.address else False
+
+    @staticmethod
+    def _address_to_scripthash(address):
+        script = ScriptPubKey.from_address(address).script
+        return sha256(script).digest()[::-1].hex()
 
     _wallet_address_uniq = models.Constraint('unique(wallet_id, address)', 'The wallet already has this address!')
 

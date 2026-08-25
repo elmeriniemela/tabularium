@@ -5,7 +5,7 @@
         <field name="inherit_id" ref="bitcoin_explorer.form_tx"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='spent_input_ids']" position='after'>
-                <label for="wallet_address_ids" string="Wallet Addresses"/>
+                <label for="wallet_address_ids" string="Watch-only Wallet Addresses"/>
                 <field name="wallet_address_ids">
                     <list>
                         <field name="wallet_id"/>

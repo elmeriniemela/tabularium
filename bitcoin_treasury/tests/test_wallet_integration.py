@@ -8,14 +8,13 @@ import ssl
 import tempfile
 import threading
 
-from btclib.bip32 import rootxprv_from_seed
+from btclib.bip32 import BIP32KeyData, derive
+from btclib.network import xpubversions_from_network
 
 from odoo import Command
 from odoo.exceptions import UserError, ValidationError
 from odoo.tests import TransactionCase, tagged
 
-from odoo.addons.bitcoin_treasury.electrum.bitcoin import address_to_scripthash
-from odoo.addons.bitcoin_treasury.models.key import script_type_default
 from odoo.addons.bitcoin_treasury.models.wallet import electumx_jsonrpc
 
 _TLS_CERT = """-----BEGIN CERTIFICATE-----
@@ -110,6 +109,10 @@ class TestBitcoinWalletIntegration(TransactionCase):
         cls.Tx = cls.env["bitcoin.tx"]
         cls.Block = cls.env["bitcoin.block"]
         cls.Config = cls.env["ir.config_parameter"].sudo()
+        cls._root_xpub = (
+            "xpub661MyMwAqRbcGFeMhhkrJL6Yj3YKQFNZQSM2BAvoMmhdjNKBh43n5v3c4YT5dFtjkirfhqQH"
+            "Md22br7cHAQXAV8cZdicedZJkNweja4WWBK"
+        )
         cls._seed = 1
 
     @classmethod
@@ -118,10 +121,10 @@ class TestBitcoinWalletIntegration(TransactionCase):
         return cls._seed
 
     def _new_key(self, **overrides):
-        seed = bytes([self._next_seed()]) * 32
+        index = self._next_seed()
         values = {
             "name": "Key %s" % self._seed,
-            "wif": rootxprv_from_seed(seed),
+            "wif": derive(self._root_xpub, str(index)),
             "witness_type": "segwit",
             "multisig": False,
         }
@@ -204,21 +207,15 @@ class TestBitcoinWalletIntegration(TransactionCase):
         return listener.getsockname()[1]
 
     def test_script_type_default_matrix_and_invalid(self):
-        self.assertEqual(script_type_default("legacy", False, True), "p2pkh")
-        self.assertEqual(script_type_default("legacy", False, False), "sig_pubkey")
-        self.assertEqual(script_type_default("legacy", True, True), "p2sh")
-        self.assertEqual(script_type_default("legacy", True, False), "p2sh_multisig")
-        self.assertEqual(script_type_default("segwit", False, True), "p2wpkh")
-        self.assertEqual(script_type_default("segwit", False, False), "sig_pubkey")
-        self.assertEqual(script_type_default("segwit", True, True), "p2wsh")
-        self.assertEqual(script_type_default("segwit", True, False), "p2sh_multisig")
-        self.assertEqual(script_type_default("p2sh-segwit", False, True), "p2sh")
-        self.assertEqual(script_type_default("p2sh-segwit", False, False), "p2sh_p2wpkh")
-        self.assertEqual(script_type_default("p2sh-segwit", True, True), "p2sh")
-        self.assertEqual(script_type_default("p2sh-segwit", True, False), "p2sh_p2wsh")
-        self.assertEqual(script_type_default("taproot", False, True), "p2tr")
+        self.assertEqual(self.Key._script_type_default("legacy", False), "p2pkh")
+        self.assertEqual(self.Key._script_type_default("legacy", True), "p2sh")
+        self.assertEqual(self.Key._script_type_default("segwit", False), "p2wpkh")
+        self.assertEqual(self.Key._script_type_default("segwit", True), "p2wsh")
+        self.assertEqual(self.Key._script_type_default("p2sh-segwit", False), "p2sh")
+        self.assertEqual(self.Key._script_type_default("p2sh-segwit", True), "p2sh")
+        self.assertEqual(self.Key._script_type_default("taproot", False), "p2tr")
         with self.assertRaises(ValidationError):
-            script_type_default("invalid", False, True)
+            self.Key._script_type_default("invalid", False)
 
     def test_key_computed_fields(self):
         key = self._new_key()
@@ -236,6 +233,56 @@ class TestBitcoinWalletIntegration(TransactionCase):
         key_virtual = self.Key.new({"name": "Virtual", "wif": False, "witness_type": "segwit"})
         key_virtual._compute_fingerprint()
         self.assertFalse(key_virtual.fingerprint)
+
+    def test_key_accepts_mainnet_extended_public_key_versions(self):
+        for index, version in enumerate(xpubversions_from_network("mainnet")):
+            key = self._new_key(wif=derive(self._root_xpub, str(index), forced_version=version))
+            self.assertEqual(len(key.fingerprint), 8)
+
+    def test_key_rejects_non_mainnet_public_material(self):
+        private_key = (
+            "xprv9s21ZrQH143K3mZtbgDqwC9pB1hpznei3DRRNnXBoSAerZz39WjXY7j8DGtLtww1M8dm"
+            "JsNngHtKFCdYG4oE5Lt1S1VtMCQ8XoYPEsbkuuT"
+        )
+        testnet_public_key = derive(
+            self._root_xpub,
+            "0",
+            forced_version=xpubversions_from_network("testnet")[0],
+        )
+        root_data = BIP32KeyData.b58decode(self._root_xpub)
+        unknown_version_key = BIP32KeyData(
+            version=b"\x01\x02\x03\x04",
+            depth=root_data.depth,
+            parent_fingerprint=root_data.parent_fingerprint,
+            index=root_data.index,
+            chain_code=root_data.chain_code,
+            key=root_data.key,
+            check_validity=False,
+        ).b58encode(check_validity=False)
+        initial_keys = self.Key.search_count([])
+        initial_messages = self.env["mail.message"].search_count([("model", "=", "bitcoin.key")])
+
+        for value in (private_key, testnet_public_key, unknown_version_key, "not-an-extended-key"):
+            with self.assertRaises(ValidationError):
+                self._new_key(wif=value)
+
+        self.assertEqual(self.Key.search_count([]), initial_keys)
+        self.assertEqual(
+            self.env["mail.message"].search_count([("model", "=", "bitcoin.key")]),
+            initial_messages,
+        )
+
+        key = self._new_key()
+        original_public_key = key.wif
+        with self.assertRaises(ValidationError):
+            key.write({"wif": private_key})
+        self.assertEqual(key.wif, original_public_key)
+
+    def test_address_to_scripthash(self):
+        scripthash = self.env["bitcoin.wallet.address"]._address_to_scripthash(
+            "bc1qdy2tx6quz0auwkm0k339r2ywy7wr7wrzq4m8mk"
+        )
+        self.assertEqual(scripthash, "9d8a38623329e4cc3a3ab29cfa7fef02bad30f3b2efa61c2c102898dff2c4f7e")
 
     def test_electrumx_jsonrpc_success_and_connection_failure(self):
         def dispatch(request):
@@ -338,13 +385,13 @@ class TestBitcoinWalletIntegration(TransactionCase):
         tx_new = self.Tx.create({"txid": "2" * 64})
         receiving_0.transaction_ids = [Command.set(tx_old.ids)]
 
-        receiving_0_scripthash = address_to_scripthash(receiving_0.address)
+        receiving_0_scripthash = receiving_0.scripthash
         history_map = {
             receiving_0_scripthash: [{"tx_hash": tx_new.txid}],
         }
         status_map = {
             receiving_0_scripthash: "status-new",
-            address_to_scripthash(receiving_1.address): None,
+            receiving_1.scripthash: None,
         }
 
         def dispatch(request):
@@ -387,7 +434,7 @@ class TestBitcoinWalletIntegration(TransactionCase):
         })
 
         status_map = {
-            address_to_scripthash(receiving_0.address): "same-status",
+            receiving_0.scripthash: "same-status",
         }
 
         def dispatch(request):
@@ -444,7 +491,7 @@ class TestBitcoinWalletIntegration(TransactionCase):
         def dispatch(request):
             if request["method"] == "blockchain.scripthash.subscribe":
                 sh = request["params"][0]
-                if sh == address_to_scripthash(receiving_0.address):
+                if sh == receiving_0.scripthash:
                     return {"id": request["id"], "result": "missing-status"}
                 return {"id": request["id"], "result": None}
             if request["method"] == "blockchain.scripthash.get_history":
@@ -465,7 +512,7 @@ class TestBitcoinWalletIntegration(TransactionCase):
         def dispatch(request):
             if request["method"] == "blockchain.scripthash.subscribe":
                 sh = request["params"][0]
-                if sh == address_to_scripthash(receiving_0.address):
+                if sh == receiving_0.scripthash:
                     return {"id": request["id"], "result": "bad-history-status"}
                 return {"id": request["id"], "result": None}
             if request["method"] == "blockchain.scripthash.get_history":
@@ -486,7 +533,7 @@ class TestBitcoinWalletIntegration(TransactionCase):
         def dispatch(request):
             if request["method"] == "blockchain.scripthash.subscribe":
                 sh = request["params"][0]
-                if sh == address_to_scripthash(receiving_0.address):
+                if sh == receiving_0.scripthash:
                     return {"id": request["id"], "result": "full-window-status"}
                 return {"id": request["id"], "result": None} # pragma: no cover
             raise AssertionError("Unexpected method %s" % request["method"]) # pragma: no cover

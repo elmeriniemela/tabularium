@@ -68,7 +68,7 @@
     </record>
 
     <record id="action_key" model="ir.actions.act_window">
-        <field name="name">Keys</field>
+        <field name="name">Extended Public Keys</field>
         <field name="res_model">bitcoin.key</field>
         <field name="view_mode">list,form</field>
         <field name="context">{'search_default_all': 1}</field>

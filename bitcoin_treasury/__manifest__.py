@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': "Bitcoin Treasury",
+    'summary': "Monitor watch-only Bitcoin wallets from extended public keys",
     'author': "Elmeri Niemelä",
     'website': "https://eniemela.fi",
     'license': 'LGPL-3',

@@ -1,63 +1,32 @@
 # -*- coding: utf-8 -*-
 
-import logging
-
-from odoo import api, exceptions, fields, models, Command, _
+from btclib.bip32 import BIP32KeyData, derive
+from btclib.exceptions import BTClibValueError
+from btclib.hashes import hash160
+from btclib.network import xpubversions_from_network
+from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
-from btclib.to_pub_key import fingerprint
-
-def script_type_default(witness_type=None, multisig=False, locking_script=False):
-    """
-    Determine default script type for provided witness type and key type combination used in this library.
-
-    >>> script_type_default('segwit', locking_script=True)
-    'p2wpkh'
-
-    :param witness_type: Witness type used: standard, p2sh-segwit or segwit
-    :type witness_type: str
-    :param multisig: Multi-signature key or not, default is False
-    :type multisig: bool
-    :param locking_script: Limit search to locking_script. Specify False for locking scripts and True for unlocking scripts
-    :type locking_script: bool
-
-    :return str: Default script type
-    """
-
-    if witness_type == 'legacy' and not multisig:
-        return 'p2pkh' if locking_script else 'sig_pubkey'
-    elif witness_type == 'legacy' and multisig:
-        return 'p2sh' if locking_script else 'p2sh_multisig'
-    elif witness_type == 'segwit' and not multisig:
-        return 'p2wpkh' if locking_script else 'sig_pubkey'
-    elif witness_type == 'segwit' and multisig:
-        return 'p2wsh' if locking_script else 'p2sh_multisig'
-    elif witness_type == 'p2sh-segwit' and not multisig:
-        return 'p2sh' if locking_script else 'p2sh_p2wpkh'
-    elif witness_type == 'p2sh-segwit' and multisig:
-        return 'p2sh' if locking_script else 'p2sh_p2wsh'
-    elif witness_type == 'taproot':
-        return 'p2tr'
-    else:
-        raise ValidationError("Wallet and key type combination not supported: %s / %s" % (witness_type, multisig))
 
 
-_logger = logging.getLogger(__name__)
-
-
-class BitcoinKey(models.Model):
+class BitcoinExtendedPublicKey(models.Model):
     _name = 'bitcoin.key'
     _inherit = ['mail.thread', 'mail.activity.mixin']
-    _description = 'Bitcoin Key'
+    _description = 'Bitcoin Extended Public Key'
     _order = 'sequence, id'
 
     sequence = fields.Integer()
     name = fields.Char(tracking=True)
     active = fields.Boolean(default=True, tracking=True)
 
-    wif = fields.Char(required=True, tracking=True)
+    wif = fields.Char(
+        string="Extended Public Key",
+        help="Mainnet extended public key used exclusively for watch-only address derivation.",
+        required=True,
+        tracking=True,
+    )
 
     wallet_ids = fields.One2many(
-        string="Wallets",
+        string="Watch-only Wallets",
         comodel_name='bitcoin.wallet.key',
         inverse_name='key_id',
         readonly=True,
@@ -65,7 +34,7 @@ class BitcoinKey(models.Model):
     )
 
     multisig = fields.Boolean(
-        help="Specify if key is part of multisig wallet, used when creating key representations such as WIF and addreses",
+        help="Specify whether this extended public key is used for multisignature address derivation.",
         tracking=True,
     )
     fingerprint = fields.Char(
@@ -125,18 +94,6 @@ class BitcoinKey(models.Model):
     real_parent_fingerprint = fields.Char(tracking=True)
     real_derivation_path = fields.Char(tracking=True)
 
-
-    _script_encoding_map = {
-        'p2pk': 'base58',
-        'p2pkh': 'base58',
-        'p2ms': 'base58',
-        'p2sh': 'base58',
-        'p2sh_p2wpkh': 'base58',
-        'p2sh_p2wsh': 'base58',
-        'p2wpkh': 'bech32',
-        'p2wsh': 'bech32',
-        'p2tr': 'bech32',
-    }
     _witness_encoding_map = {
         'segwit': 'bech32',
         'taproot': 'bech32',
@@ -144,25 +101,59 @@ class BitcoinKey(models.Model):
         'legacy': 'base58',
     }
 
-
-
     @api.depends('witness_type', 'multisig')
     def _compute_script_type(self):
         for rec in self:
-            rec.script_type = script_type_default(rec.witness_type, rec.multisig, locking_script=True)
+            rec.script_type = self._script_type_default(rec.witness_type, rec.multisig)
 
+    def _script_type_default(self, witness_type, multisig):
+        if witness_type == 'legacy':
+            return 'p2sh' if multisig else 'p2pkh'
+        if witness_type == 'segwit':
+            return 'p2wsh' if multisig else 'p2wpkh'
+        if witness_type == 'p2sh-segwit':
+            return 'p2sh'
+        if witness_type == 'taproot':
+            return 'p2tr'
+        raise ValidationError(
+            _("Wallet and extended public key type combination not supported: %s / %s")
+            % (witness_type, multisig)
+        )
 
     @api.depends('witness_type')
     def _compute_encoding(self):
         for rec in self:
             rec.encoding = self._witness_encoding_map[rec.witness_type]
 
-
     @api.depends('wif')
     def _compute_fingerprint(self):
         for record in self:
             if record.wif:
-                record.fingerprint = fingerprint(record.wif, "mainnet").hex()
+                key_data = record._decode_extended_public_key(record.wif)
+                record.fingerprint = hash160(key_data.key)[:4].hex()
             else:
                 record.fingerprint = False
 
+    def _decode_extended_public_key(self, value):
+        try:
+            key_data = BIP32KeyData.b58decode(value)
+        except BTClibValueError as error:
+            raise ValidationError(_("A valid mainnet extended public key is required.")) from error
+        if key_data.is_private or key_data.version not in xpubversions_from_network('mainnet'):
+            raise ValidationError(_("A valid mainnet extended public key is required."))
+        return key_data
+
+    def _derive_public_key(self, derivation_path):
+        self.ensure_one()
+        return derive(self.wif, derivation_path)
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            self._decode_extended_public_key(vals['wif'])
+        return super().create(vals_list)
+
+    def write(self, vals):
+        if 'wif' in vals:
+            self._decode_extended_public_key(vals['wif'])
+        return super().write(vals)
