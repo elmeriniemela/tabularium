@@ -11,9 +11,8 @@ pyxirr
 numpy-financial
 yfinance
 markdownify
-btclib
+btclib==2023.7.12
 py3o.template
 py3o.formats
 packaging
-git+https://github.com/elmeriniemela/pybitcoinkernel.git
 git+https://github.com/elmeriniemela/bitoplens.git
