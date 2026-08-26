@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import calendar
 import datetime
 import json
 import socket
@@ -9,6 +10,7 @@ import tempfile
 import threading
 
 from btclib.bip32 import BIP32KeyData, derive
+from btclib.descriptors import descriptor_checksum
 from btclib.network import xpubversions_from_network
 
 from odoo import Command
@@ -217,11 +219,111 @@ class TestBitcoinWalletIntegration(TransactionCase):
         with self.assertRaises(ValidationError):
             self.Key._script_type_default("invalid", False)
 
+    def test_single_signature_descriptor(self):
+        key = self._new_key(
+            real_parent_fingerprint="DEADBEEF",
+            real_derivation_path="m/84'/0'/0'",
+        )
+        wallet = self._new_wallet([key])
+        payload = "wpkh([deadbeef/84h/0h/0h]%s/<0;1>/*)" % key.wif
+        self.assertEqual(
+            wallet.descriptor,
+            "%s#%s" % (payload, descriptor_checksum(payload)),
+        )
+
+        key.write({"real_derivation_path": "m"})
+        payload = "wpkh([deadbeef]%s/<0;1>/*)" % key.wif
+        self.assertEqual(
+            wallet.descriptor,
+            "%s#%s" % (payload, descriptor_checksum(payload)),
+        )
+
+        key.write({"real_parent_fingerprint": False, "real_derivation_path": False})
+        payload = "wpkh(%s/<0;1>/*)" % key.wif
+        self.assertEqual(
+            wallet.descriptor,
+            "%s#%s" % (payload, descriptor_checksum(payload)),
+        )
+
+    def test_multisig_descriptor(self):
+        key_a = self._new_key(multisig=True)
+        key_b = self._new_key(multisig=True)
+        wallet = self._new_wallet([key_a, key_b], sigs_required=2)
+        payload = "wsh(sortedmulti(2,%s/<0;1>/*,%s/<0;1>/*))" % (key_a.wif, key_b.wif)
+        self.assertEqual(
+            wallet.descriptor,
+            "%s#%s" % (payload, descriptor_checksum(payload)),
+        )
+
+    def test_descriptor_timestamp(self):
+        wallet = self._new_wallet([self._new_key()])
+        self.assertEqual(
+            wallet.birth_timestamp,
+            str(calendar.timegm(wallet.create_date.utctimetuple())),
+        )
+
+        earliest = datetime.datetime(2024, 1, 1, 12, 0, 0)
+        for index, date in enumerate((datetime.datetime(2024, 2, 1, 12, 0, 0), earliest)):
+            self.WalletHistory.create({
+                "wallet_id": wallet.id,
+                "date": date,
+                "amount": 1,
+                "transaction_id": self.Tx.create({"txid": str(index) * 64}).id,
+            })
+
+        self.assertEqual(wallet.birth_timestamp, str(calendar.timegm(earliest.utctimetuple())))
+
+    def test_descriptor_unsupported_wallets(self):
+        invalid_wallets = [
+            self._new_wallet([]),
+            self._new_wallet([self._new_key(witness_type="legacy")]),
+            self._new_wallet([self._new_key(multisig=True)]),
+            self._new_wallet([self._new_key(multisig=True), self._new_key()]),
+        ]
+
+        keys = [self._new_key(multisig=True), self._new_key(multisig=True)]
+        invalid_wallets.append(self._new_wallet(keys, sigs_required=3))
+        keys = [self._new_key(multisig=True) for _index in range(16)]
+        invalid_wallets.append(self._new_wallet(keys))
+
+        for wallet in invalid_wallets:
+            self.assertTrue(wallet.descriptor)
+            self.assertNotIn('#', wallet.descriptor)
+
+    def test_descriptor_reports_invalid_existing_key_origin(self):
+        key = self._new_key()
+        wallet = self._new_wallet([key])
+        self.env.cr.execute(
+            "UPDATE bitcoin_key SET real_parent_fingerprint = %s WHERE id = %s",
+            ("deadbee", key.id),
+        )
+        key.invalidate_recordset(["real_parent_fingerprint"])
+
+        wallet._compute_descriptor()
+
+        self.assertTrue(wallet.descriptor)
+        self.assertNotIn('#', wallet.descriptor)
+
+    def test_key_origin_validation(self):
+        invalid_origins = [
+            {"real_parent_fingerprint": "deadbee"},
+            {"real_derivation_path": "m/84'/0'/0'"},
+            {"real_parent_fingerprint": "deadbeef", "real_derivation_path": "m/84'/0'/*"},
+        ]
+        for origin in invalid_origins:
+            with self.assertRaises(ValidationError):
+                self._new_key(**origin)
+
+        invalid_key = self.Key.new({
+            "wif": self._new_key().wif,
+            "real_parent_fingerprint": "deadbee",
+        })
+        self.assertTrue(invalid_key._key_origin_error())
+
     def test_key_computed_fields(self):
         key = self._new_key()
         self.assertEqual(key.encoding, "bech32")
         self.assertEqual(key.script_type, "p2wpkh")
-        self.assertEqual(len(key.fingerprint), 8)
 
         key.write({"witness_type": "legacy"})
         self.assertEqual(key.encoding, "base58")
@@ -230,14 +332,10 @@ class TestBitcoinWalletIntegration(TransactionCase):
         key.write({"multisig": True})
         self.assertEqual(key.script_type, "p2sh")
 
-        key_virtual = self.Key.new({"name": "Virtual", "wif": False, "witness_type": "segwit"})
-        key_virtual._compute_fingerprint()
-        self.assertFalse(key_virtual.fingerprint)
-
     def test_key_accepts_mainnet_extended_public_key_versions(self):
         for index, version in enumerate(xpubversions_from_network("mainnet")):
             key = self._new_key(wif=derive(self._root_xpub, str(index), forced_version=version))
-            self.assertEqual(len(key.fingerprint), 8)
+            self.assertTrue(key._descriptor_key().startswith("xpub"))
 
     def test_key_rejects_non_mainnet_public_material(self):
         private_key = (
@@ -356,6 +454,19 @@ class TestBitcoinWalletIntegration(TransactionCase):
         key_a.write({"witness_type": "segwit", "multisig": False})
         with self.assertRaises(ValidationError):
             wallet.refresh_addresses()
+
+    def test_refresh_addresses_multisig_uses_bip67_sorting(self):
+        key_a = self._new_key(multisig=True)
+        key_b = self._new_key(multisig=True)
+        wallet_ab = self._new_wallet([key_a, key_b], sigs_required=2)
+        wallet_ba = self._new_wallet([key_b, key_a], sigs_required=2)
+
+        (wallet_ab | wallet_ba).refresh_addresses()
+
+        self.assertEqual(
+            wallet_ab.address_ids.sorted(lambda address: (address.atype, address.index)).mapped("address"),
+            wallet_ba.address_ids.sorted(lambda address: (address.atype, address.index)).mapped("address"),
+        )
 
     def test_refresh_calls_refresh_addresses_transactions_and_history(self):
         key = self._new_key()

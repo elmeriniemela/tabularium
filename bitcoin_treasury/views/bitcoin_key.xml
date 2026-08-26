@@ -7,9 +7,10 @@
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
                 <field name="multisig"/>
-                <field name="fingerprint"/>
                 <field name="witness_type"/>
                 <field name="script_type"/>
+                <field name="real_derivation_path"/>
+                <field name="real_parent_fingerprint"/>
                 <field name="encoding"/>
                 <field name="wallet_ids" widget="many2many_tags" optional="show"/>
                 <field name="active" optional="hide"/>
@@ -35,7 +36,6 @@
                         <group>
                             <field name="witness_type"/>
                             <field name="multisig"/>
-                            <field name="fingerprint"/>
                             <field name="encoding"/>
                         </group>
                         <group>

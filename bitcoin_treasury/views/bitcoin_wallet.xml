@@ -86,11 +86,18 @@
                                     <field name="sequence" widget="handle"/>
                                     <field name="key_id"/>
                                     <field name="multisig" readonly="True"/>
-                                    <field name="fingerprint" readonly="True"/>
                                     <field name="witness_type" readonly="True"/>
                                     <field name="script_type" readonly="True"/>
+                                    <field name="real_derivation_path"/>
+                                    <field name="real_parent_fingerprint"/>
+                                    <field name="encoding" optional="hide" readonly="True"/>
+                                    <field name="active" optional="hide" readonly="True"/>
                                 </list>
                             </field>
+                            <label for="descriptor"/>
+                            <field name="descriptor"/>
+                            <label for="birth_timestamp"/>
+                            <field name="birth_timestamp"/>
                         </page>
                     </notebook>
                 </sheet>

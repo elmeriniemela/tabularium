@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import calendar
 import logging
 import socket
 import ssl
@@ -8,6 +9,7 @@ from contextlib import contextmanager
 from hashlib import sha256
 from odoo import api, fields, models, Command, _
 from odoo.exceptions import UserError, ValidationError
+from btclib.descriptors import descriptor_checksum
 from btclib.script.script_pub_key import ScriptPubKey
 
 _logger = logging.getLogger(__name__)
@@ -106,6 +108,16 @@ class BitcoinWallet(models.Model):
         depends=['key_ids'],
     )
 
+    descriptor = fields.Char(
+        compute='_compute_descriptor',
+        help="Bitcoin Core descriptor, or instructions for completing the wallet configuration.",
+    )
+    birth_timestamp = fields.Char(
+        string="Birth Timestamp",
+        compute='_compute_descriptor_timestamp',
+        help="Unix timestamp for Bitcoin Core descriptor imports, based on the earliest wallet transaction or wallet creation time.",
+    )
+
     def _compute_first_key_id(self):
         for wallet in self:
             wallet.first_key_id = wallet.key_ids[:1].key_id
@@ -114,6 +126,49 @@ class BitcoinWallet(models.Model):
     def _compute_multisig(self):
         for wallet in self:
             wallet.multisig = len(wallet.key_ids) > 1
+
+    @api.depends('history_ids.date', 'create_date')
+    def _compute_descriptor_timestamp(self):
+        for wallet in self:
+            timestamp = min(wallet.history_ids.mapped('date'), default=wallet.create_date)
+            wallet.birth_timestamp = str(calendar.timegm(timestamp.utctimetuple())) if timestamp else False
+
+    @api.depends(
+        'sigs_required',
+        'key_ids',
+        'key_ids.sequence',
+        'key_ids.key_id.wif',
+        'key_ids.key_id.script_type',
+        'key_ids.key_id.real_parent_fingerprint',
+        'key_ids.key_id.real_derivation_path',
+    )
+    def _compute_descriptor(self):
+        for wallet in self:
+            key_count = len(wallet.key_ids)
+            origin_error = False
+            for key in wallet.key_ids.key_id:
+                origin_error = key._key_origin_error()
+                if origin_error:
+                    break
+            if origin_error:
+                wallet.descriptor = origin_error
+            elif not key_count:
+                wallet.descriptor = _("Add an extended public key to compute the descriptor.")
+            elif key_count == 1 and wallet.script_type != 'p2wpkh':
+                wallet.descriptor = _("Use a native SegWit single-signature extended public key.")
+            elif key_count > 15:
+                wallet.descriptor = _("Use no more than 15 extended public keys.")
+            elif key_count > 1 and any(key.script_type != 'p2wsh' for key in wallet.key_ids.key_id):
+                wallet.descriptor = _("Use native SegWit multisig for every extended public key.")
+            elif key_count > 1 and not 0 < wallet.sigs_required <= key_count:
+                wallet.descriptor = _("Set Required Signatures between 1 and the number of extended public keys.")
+            elif key_count == 1:
+                descriptor = 'wpkh(%s)' % wallet.first_key_id._descriptor_key()
+                wallet.descriptor = '%s#%s' % (descriptor, descriptor_checksum(descriptor))
+            else:
+                keys = ','.join(wallet_key.key_id._descriptor_key() for wallet_key in wallet.key_ids)
+                descriptor = 'wsh(sortedmulti(%s,%s))' % (wallet.sigs_required, keys)
+                wallet.descriptor = '%s#%s' % (descriptor, descriptor_checksum(descriptor))
 
 
     def refresh(self):
@@ -151,7 +206,8 @@ class BitcoinWallet(models.Model):
                         keys = [k.key_id._derive_public_key(subkey_path) for k in wallet.key_ids]
                         p2ms = ScriptPubKey.p2ms(
                             m=wallet.sigs_required,
-                            keys=keys
+                            keys=keys,
+                            lexicographic_sorting=True,
                         )
                         addr_str = address_map[st](p2ms.script)
                     elif len(wallet.key_ids) == 1:
@@ -353,6 +409,7 @@ class BitcoinWalletKey(models.Model):
     _order = 'sequence, id'
     _inherits = {'bitcoin.key': 'key_id'}
 
+    name = fields.Char(related='wallet_id.name')
 
     key_id = fields.Many2one(
         comodel_name='bitcoin.key',

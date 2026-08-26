@@ -2,7 +2,6 @@
 
 from btclib.bip32 import BIP32KeyData, derive
 from btclib.exceptions import BTClibValueError
-from btclib.hashes import hash160
 from btclib.network import xpubversions_from_network
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
@@ -35,11 +34,6 @@ class BitcoinExtendedPublicKey(models.Model):
 
     multisig = fields.Boolean(
         help="Specify whether this extended public key is used for multisignature address derivation.",
-        tracking=True,
-    )
-    fingerprint = fields.Char(
-        compute='_compute_fingerprint',
-        store=True,
         tracking=True,
     )
     witness_type = fields.Selection(
@@ -91,8 +85,16 @@ class BitcoinExtendedPublicKey(models.Model):
         store=True,
     )
 
-    real_parent_fingerprint = fields.Char(tracking=True)
-    real_derivation_path = fields.Char(tracking=True)
+    real_parent_fingerprint = fields.Char(
+        string="Master Key Fingerprint",
+        help="Eight-character fingerprint of the master key, used in the descriptor key origin.",
+        tracking=True,
+    )
+    real_derivation_path = fields.Char(
+        string="Derivation Path",
+        help="Path from the master key to this extended public key, used in the descriptor key origin.",
+        tracking=True,
+    )
 
     _witness_encoding_map = {
         'segwit': 'bech32',
@@ -125,15 +127,6 @@ class BitcoinExtendedPublicKey(models.Model):
         for rec in self:
             rec.encoding = self._witness_encoding_map[rec.witness_type]
 
-    @api.depends('wif')
-    def _compute_fingerprint(self):
-        for record in self:
-            if record.wif:
-                key_data = record._decode_extended_public_key(record.wif)
-                record.fingerprint = hash160(key_data.key)[:4].hex()
-            else:
-                record.fingerprint = False
-
     def _decode_extended_public_key(self, value):
         try:
             key_data = BIP32KeyData.b58decode(value)
@@ -146,6 +139,59 @@ class BitcoinExtendedPublicKey(models.Model):
     def _derive_public_key(self, derivation_path):
         self.ensure_one()
         return derive(self.wif, derivation_path)
+
+    def _key_origin_error(self):
+        self.ensure_one()
+        fingerprint = self.real_parent_fingerprint
+        if self.real_derivation_path and not fingerprint:
+            return _("Add the master key fingerprint or remove the derivation path.")
+        if fingerprint and (
+            len(fingerprint) != 8
+            or any(character not in '0123456789abcdefABCDEF' for character in fingerprint)
+        ):
+            return _("The master key fingerprint must contain exactly eight hexadecimal characters.")
+
+        path = self.real_derivation_path
+        if path and path != 'm':
+            if path.startswith('m/'):
+                path = path[2:]
+            for step in path.split('/'):
+                number = step[:-1] if step.endswith(("'", 'h')) else step
+                if not number.isdigit() or int(number) >= 2**31:
+                    return _("Enter a valid BIP32 derivation path.")
+        return False
+
+    def _descriptor_key(self):
+        self.ensure_one()
+        key_data = self._decode_extended_public_key(self.wif)
+        xpub = BIP32KeyData(
+            version=xpubversions_from_network('mainnet')[0],
+            depth=key_data.depth,
+            parent_fingerprint=key_data.parent_fingerprint,
+            index=key_data.index,
+            chain_code=key_data.chain_code,
+            key=key_data.key,
+        ).b58encode()
+        origin = ''
+        if self.real_parent_fingerprint:
+            path = self.real_derivation_path or ''
+            if path == 'm':
+                path = ''
+            elif path.startswith('m/'):
+                path = path[2:]
+            path = path.replace("'", 'h')
+            origin = '[%s%s]' % (
+                self.real_parent_fingerprint.lower(),
+                '/%s' % path if path else '',
+            )
+        return '%s%s/<0;1>/*' % (origin, xpub)
+
+    @api.constrains('real_parent_fingerprint', 'real_derivation_path')
+    def _check_key_origin(self):
+        for key in self:
+            error = key._key_origin_error()
+            if error:
+                raise ValidationError(error)
 
     @api.model_create_multi
     def create(self, vals_list):
