@@ -196,7 +196,8 @@ class BitcoinExtendedPublicKey(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
-            self._decode_extended_public_key(vals['wif'])
+            if 'wif' in vals:
+                self._decode_extended_public_key(vals['wif'])
         return super().create(vals_list)
 
     def write(self, vals):

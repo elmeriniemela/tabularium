@@ -84,12 +84,13 @@
                             <field name="key_ids">
                                 <list editable="top">
                                     <field name="sequence" widget="handle"/>
-                                    <field name="key_id"/>
-                                    <field name="multisig" readonly="True"/>
-                                    <field name="witness_type" readonly="True"/>
-                                    <field name="script_type" readonly="True"/>
-                                    <field name="real_derivation_path"/>
-                                    <field name="real_parent_fingerprint"/>
+                                    <field name="key_id" optional="show"/>
+                                    <field name="wif" optional="hide"/>
+                                    <field name="multisig" optional="show" readonly="True"/>
+                                    <field name="witness_type" optional="show" readonly="True"/>
+                                    <field name="script_type" optional="show" readonly="True"/>
+                                    <field name="real_derivation_path" optional="show"/>
+                                    <field name="real_parent_fingerprint" optional="show"/>
                                     <field name="encoding" optional="hide" readonly="True"/>
                                     <field name="active" optional="hide" readonly="True"/>
                                 </list>

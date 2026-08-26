@@ -37,7 +37,11 @@ class BitcoinWallet(models.Model):
             if not wallet.position_id:
                 continue
 
-            for hist in wallet.history_ids.sorted()[:wallet.position_sync_limit]:
+            histories = wallet.env['bitcoin.wallet.history'].search([ # search is more reliable than 'history_ids' as it may have old cached value.
+                ('wallet_id', '=', wallet.id)
+            ], order='date desc, id desc')[:wallet.position_sync_limit]
+
+            for hist in histories:
                 if hist.position_transaction_id:
                     continue
 

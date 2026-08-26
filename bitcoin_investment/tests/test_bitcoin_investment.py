@@ -5,7 +5,7 @@ import socketserver
 import threading
 from datetime import datetime, timedelta
 
-from btclib.bip32 import rootxprv_from_seed
+from btclib.bip32 import derive
 
 from odoo import fields
 from odoo.exceptions import UserError
@@ -50,6 +50,10 @@ class TestBitcoinInvestmentIntegration(TransactionCase):
             'name': 'Bitcoin Test Portfolio',
         })
         cls.config = cls.env['ir.config_parameter'].sudo()
+        cls._root_xpub = (
+            'xpub661MyMwAqRbcGFeMhhkrJL6Yj3YKQFNZQSM2BAvoMmhdjNKBh43n5v3c4YT5dFtjkirfhqQH'
+            'Md22br7cHAQXAV8cZdicedZJkNweja4WWBK'
+        )
         cls._seed = 1
         cls._tx_counter = 1
 
@@ -64,10 +68,10 @@ class TestBitcoinInvestmentIntegration(TransactionCase):
         return f'{cls._tx_counter:064x}'
 
     def _new_key(self, **overrides):
-        seed = bytes([self._next_seed()]) * 32
+        index = self._next_seed()
         values = {
             'name': f'Key {self._seed}',
-            'wif': rootxprv_from_seed(seed),
+            'wif': derive(self._root_xpub, str(index)),
             'witness_type': 'segwit',
             'multisig': False,
         }
@@ -165,6 +169,97 @@ class TestBitcoinInvestmentIntegration(TransactionCase):
         action = wallet.show_investment_transactions()
         self.assertEqual(action['res_model'], 'investment.position.transaction')
         self.assertEqual(action['domain'], [('id', 'in', history.position_transaction_id.ids)])
+
+    def test_sync_investments_limit_one_creates_latest_transaction(self):
+        asset, position = self._new_asset_position('BTC-SYNC-LATEST')
+        wallet = self._new_wallet(position=position)
+        wallet.position_sync_limit = 1
+        history_time = fields.Datetime.now().replace(hour=18, minute=0, second=0, microsecond=0)
+        self._new_price(asset, history_time.replace(hour=12), 20000.0)
+        histories = self.env['bitcoin.wallet.history']
+        for minutes_ago in range(2):
+            histories |= self._new_history(
+                wallet=wallet,
+                tx=self._new_tx(),
+                amount=0.1,
+                date=history_time - timedelta(minutes=minutes_ago),
+            )
+
+        wallet.sync_investments()
+
+        self.assertEqual(position.transaction_ids, histories.sorted()[:1].position_transaction_id)
+        self.assertFalse(histories.sorted()[1:].position_transaction_id)
+
+    def test_sync_investments_does_not_unlink_over_lowered_limit(self):
+        asset, position = self._new_asset_position('BTC-SYNC-LIMIT')
+        wallet = self._new_wallet(position=position)
+        history_time = fields.Datetime.now().replace(hour=18, minute=0, second=0, microsecond=0)
+        self._new_price(asset, history_time.replace(hour=12), 20000.0)
+        histories = self.env['bitcoin.wallet.history']
+        for minutes_ago in range(3):
+            histories |= self._new_history(
+                wallet=wallet,
+                tx=self._new_tx(),
+                amount=0.1,
+                date=history_time - timedelta(minutes=minutes_ago),
+            )
+
+        wallet.sync_investments()
+        wallet.position_sync_limit = 1
+        wallet.sync_investments()
+
+        self.assertEqual(len(position.transaction_ids), 3)
+        self.assertEqual(len(histories.position_transaction_id), 3)
+
+    def test_sync_investments_counts_existing_position_transactions(self):
+        asset, position = self._new_asset_position('BTC-SYNC-REASSIGN')
+        old_wallet = self._new_wallet(position=position, name='Old wallet')
+        history_time = fields.Datetime.now().replace(hour=18, minute=0, second=0, microsecond=0)
+        self._new_price(asset, history_time.replace(hour=12), 20000.0)
+        old_history = self._new_history(
+            wallet=old_wallet,
+            tx=self._new_tx(),
+            amount=0.1,
+            date=history_time - timedelta(minutes=2),
+        )
+        old_wallet.position_sync_limit = 1
+        old_wallet.sync_investments()
+
+        old_wallet.position_id = False
+        new_wallet = self._new_wallet(position=position, name='New wallet')
+        new_wallet.position_sync_limit = 1
+        new_histories = self.env['bitcoin.wallet.history']
+        for minutes_ago in range(2):
+            new_histories |= self._new_history(
+                wallet=new_wallet,
+                tx=self._new_tx(),
+                amount=0.1,
+                date=history_time - timedelta(minutes=minutes_ago),
+            )
+
+        new_wallet.sync_investments()
+
+        self.assertEqual(len(position.transaction_ids), 2)
+
+    def test_sync_investments_zero_limit_creates_nothing(self):
+        asset, position = self._new_asset_position('BTC-SYNC-ZERO')
+        wallet = self._new_wallet(position=position)
+        wallet.position_sync_limit = 0
+        history_time = fields.Datetime.now().replace(hour=18, minute=0, second=0, microsecond=0)
+        self._new_price(asset, history_time.replace(hour=12), 20000.0)
+        histories = self.env['bitcoin.wallet.history']
+        for minutes_ago in range(2):
+            histories |= self._new_history(
+                wallet=wallet,
+                tx=self._new_tx(),
+                amount=0.1,
+                date=history_time - timedelta(minutes=minutes_ago),
+            )
+
+        wallet.sync_investments()
+
+        self.assertFalse(position.transaction_ids)
+        self.assertFalse(histories.position_transaction_id)
 
     def test_sync_investments_skips_unlinked_wallet_and_existing_line(self):
         asset, position = self._new_asset_position('BTC-SYNC-SKIP')

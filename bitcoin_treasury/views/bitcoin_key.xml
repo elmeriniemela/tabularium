@@ -5,13 +5,14 @@
         <field name="arch" type="xml">
             <list decoration-muted="not active">
                 <field name="sequence" widget="handle"/>
-                <field name="name"/>
-                <field name="multisig"/>
-                <field name="witness_type"/>
-                <field name="script_type"/>
-                <field name="real_derivation_path"/>
-                <field name="real_parent_fingerprint"/>
-                <field name="encoding"/>
+                <field name="wif" optional="hide"/>
+                <field name="name" optional="show"/>
+                <field name="multisig" optional="show"/>
+                <field name="witness_type" optional="show"/>
+                <field name="script_type" optional="show"/>
+                <field name="real_derivation_path" optional="show"/>
+                <field name="real_parent_fingerprint" optional="show"/>
+                <field name="encoding" optional="show"/>
                 <field name="wallet_ids" widget="many2many_tags" optional="show"/>
                 <field name="active" optional="hide"/>
             </list>
