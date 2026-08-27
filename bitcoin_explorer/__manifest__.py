@@ -9,6 +9,7 @@
     'depends': [
         'mail',
     ],
+    'external_dependencies': {'python': ['bitwalkit']},
     'installable': True,
     'application': True,
     'data': [

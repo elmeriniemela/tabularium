@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import datetime
-import tinyrpc
 import logging
 from dateutil.relativedelta import relativedelta
 
 from odoo import api, tools, exceptions, fields, models, Command, _
 from odoo.orm.domains import DomainCondition
+from bitwalkit import RpcError
 
 
 _logger = logging.getLogger(__name__)
@@ -74,7 +74,7 @@ class BitcoinBlock(models.Model):
         _logger.info(f"proxy.getblock({self.hash}, {verbosity})")
         try:
             getblock = proxy.getblock(self.hash, verbosity)
-        except tinyrpc.protocols.jsonrpc.JSONRPCError as error:
+        except RpcError as error:
             raise exceptions.UserError(error.args[0])
         _logger.info("Done.")
 

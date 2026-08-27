@@ -11,6 +11,7 @@
         'mail',
         'bitcoin_explorer',
     ],
+    'external_dependencies': {'python': ['bitwalkit']},
     'installable': True,
     'application': True,
     'data': [

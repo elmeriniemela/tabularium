@@ -6,7 +6,7 @@ import logging
 import bitoplens as bl
 from bitoplens import ScriptError, SigVersion
 from bitoplens.script import Script, opcode_description
-import tinyrpc
+from bitwalkit import RpcError
 
 from odoo import api, exceptions, fields, models, Command, _
 from odoo.orm.domains import DomainCondition
@@ -137,7 +137,7 @@ class BitcoinTx(models.Model):
                 try:
                     _logger.info(f"proxy.getrawtransaction({record.txid}, {True})")
                     rawtx = proxy.getrawtransaction(record.txid, True)
-                except tinyrpc.protocols.jsonrpc.JSONRPCError as error:
+                except RpcError as error:
                     raise exceptions.UserError(error.args[0])
                 _logger.info("Done: %s", rawtx)
                 blockhash = rawtx.get('blockhash')

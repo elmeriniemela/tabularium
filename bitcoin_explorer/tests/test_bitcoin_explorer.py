@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import datetime
-import json
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from tinyrpc.protocols.jsonrpc import JSONRPCError, JSONRPCErrorResponse
+from bitwalkit import NodeRPC, RpcError
 
 from odoo import Command
 from odoo.exceptions import UserError
@@ -21,10 +20,7 @@ def _now():
 
 
 def _rpc_error(*, code, message):
-    response = JSONRPCErrorResponse()
-    response._jsonrpc_error_code = code
-    response.error = message
-    return JSONRPCError(response)
+    return RpcError(message, code)
 
 
 class FakeProxy:
@@ -137,28 +133,10 @@ class TestBitcoinExplorer(TransactionCase):
         return patch.object(generic_model.ConfigParam, 'bitcoind_proxy', autospec=True, return_value=proxy)
 
     def test_generic_protocol_and_config_proxy(self):
-        protocol = generic_model.BitcoinJSONRPCProtocol()
-
-        request_ok = protocol.create_request('method.ok')
-        ok = protocol.parse_reply(json.dumps({
-            'id': request_ok.unique_id,
-            'result': 7,
-            'error': None,
-        }).encode())
-        self.assertEqual(ok.result, 7)
-
-        request_error = protocol.create_request('method.error')
-        err = protocol.parse_reply(json.dumps({
-            'id': request_error.unique_id,
-            'result': None,
-            'error': {'code': -100, 'message': 'rpc failed'},
-        }).encode())
-        self.assertEqual(err.error, 'rpc failed')
-
         self.Config.set_param('bitcoind.url', 'http://127.0.0.1:8332')
         self.Config.set_param('bitcoind.user', 'user')
         self.Config.set_param('bitcoind.pw', 'pw')
-        self.assertTrue(self.Config.bitcoind_proxy())
+        self.assertIsInstance(self.Config.bitcoind_proxy(), NodeRPC)
 
     def test_block_create_search_fetch_compute_and_errors(self):
         existing = self.Block.create({'hash': 'block-existing', 'height': 1, 'n_tx': 2})

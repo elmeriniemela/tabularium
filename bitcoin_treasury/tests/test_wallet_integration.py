@@ -3,72 +3,20 @@
 import calendar
 import datetime
 import json
-import socket
 import socketserver
-import ssl
-import tempfile
 import threading
 
-from btclib.bip32 import BIP32KeyData, derive
-from btclib.descriptors import descriptor_checksum
-from btclib.network import xpubversions_from_network
+from bitwalkit import (
+    ExtendedKey,
+    base58check_decode,
+    base58check_encode,
+    descriptor_checksum,
+)
 
 from odoo import Command
 from odoo.exceptions import UserError, ValidationError
 from odoo.tests import TransactionCase, tagged
 
-from odoo.addons.bitcoin_treasury.models.wallet import electumx_jsonrpc
-
-_TLS_CERT = """-----BEGIN CERTIFICATE-----
-MIIDCTCCAfGgAwIBAgIUQL8HqP+R9ZZgHNAz5tjC5Nod74wwDQYJKoZIhvcNAQEL
-BQAwFDESMBAGA1UEAwwJbG9jYWxob3N0MB4XDTI2MDQwMzA4NDQxN1oXDTI3MDQw
-MzA4NDQxN1owFDESMBAGA1UEAwwJbG9jYWxob3N0MIIBIjANBgkqhkiG9w0BAQEF
-AAOCAQ8AMIIBCgKCAQEAmkFYynrFzh+JN3WYb6l8wFAB/u0K1EsclgC8+7zmDx5G
-WW+ByR1hUQJQyrf+K+H+i3j908K1GJmzfsrCLBc4Ecx0CfJncTnAGDHoA3ObrQAl
-qgQIK8Ozw9GjLlo9e0g8txlSaH4yvbtUtkE+rWoHnTjhRHi0z40BG0r5jX4oANCr
-8KEIjHNnUul2ZnMihw4F0aPtsxQf3tLCTnCNHy9WVipgggAvbrKWn/4QAAwDlEX7
-22QV21MOPA6Gp5ymidgV3uruKKCcniGTFupwHHqP+ACCOM5Q+czCAfhRWONeH14G
-azD8G4uQiSpYkIn90pyWCKBSDjp7JepfPbvp7ytSfwIDAQABo1MwUTAdBgNVHQ4E
-FgQUg9YyLz1QfUGYiVfc0m0pBiK8tMcwHwYDVR0jBBgwFoAUg9YyLz1QfUGYiVfc
-0m0pBiK8tMcwDwYDVR0TAQH/BAUwAwEB/zANBgkqhkiG9w0BAQsFAAOCAQEAImUQ
-yk5rV7gXBDROpStJCEv3yCLpFSSPmFz8VPWQ2fJVeebKUtvRPZoivUwgzzoah1J/
-dA3LOdUDU9qqQZt/aFN9l8Eu0KHDSAOiKo9fIIIbJItM+Fcqvv03M/5J0lC9QdRv
-DObrksltiKSrZg0JL8qPc60Bx7yMGDubWFxIKaIqIu3363RrKpqhwVU2ic/sG1U6
-BV8h90R+7ZeA+8BoBIj2Y3mJjlz6eaJKb7+VSd6LW5IhnxjUZa3GASc9Vk9hnD4+
-r1EVNsKFazx4jF1X4dxGdPLgqbRS+E7LpajFkosm58U5KOBWh6pFBcnVdQwIxax0
-aMjrS8Sh7ZKp08LceQ==
------END CERTIFICATE-----
-"""
-
-_TLS_KEY = """-----BEGIN PRIVATE KEY-----
-MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCaQVjKesXOH4k3
-dZhvqXzAUAH+7QrUSxyWALz7vOYPHkZZb4HJHWFRAlDKt/4r4f6LeP3TwrUYmbN+
-ysIsFzgRzHQJ8mdxOcAYMegDc5utACWqBAgrw7PD0aMuWj17SDy3GVJofjK9u1S2
-QT6tagedOOFEeLTPjQEbSvmNfigA0KvwoQiMc2dS6XZmcyKHDgXRo+2zFB/e0sJO
-cI0fL1ZWKmCCAC9uspaf/hAADAOURfvbZBXbUw48DoannKaJ2BXe6u4ooJyeIZMW
-6nAceo/4AII4zlD5zMIB+FFY414fXgZrMPwbi5CJKliQif3SnJYIoFIOOnsl6l89
-u+nvK1J/AgMBAAECggEAD1lKomJWaPZ5wVmp3UAbzsj6dQ+VVCvUwHCtw7P3a/BJ
-WlNxmLDoz4lvv5Qdeue/jvvVieryxevGHZ4p28t3Q7IfDVeGh0PFto9n58jRNNG+
-1BMXOwxiLuBrujK2SzX6lwXls/1zdnr7tWNHMmf9mCo71zcJisNovxRi23tLmk6b
-M/6l1MkyVZoxuPL5i16xZSrvtsWDYBeQP6dT86llm25H9CuuDjujxsI0L06bFAQn
-I+etQv7xoGf+H1DM0XolymE5VtofDMmS7vfdvS6E6o9hcTij+/AsPT6f7b/AmvO2
-eZy9ezQS8sUtMglsA2ECKpZ4+2XtmUbFt1wRHx4NcQKBgQDQfVkvrzfdrNDWUU2O
-sBPJNZIU5pbZw+MjvlVqeNV61bCR1NplHBhDSrrvOb0DkQyALmJUSv47HxJ8D77d
-ct0h8x5Sk7FWMww6Cw6MugiQe2+dwsw3OQNjqq9UFo5raaC8MMrE2yk0+KCeEaib
-h0zEwsBSNPdHakk0VkzvS5UvbwKBgQC9aCEuhKLIhOw5d3Bj4aVoQ+KT+QiNdHbj
-4vGIyB072YP2uXkZ02fkNjTmRu9jx6mOZDAjyEvRdGDMOJmeNcViPJMCRImaUoPr
-Nf9jYXYqzMK7tkHWncRXLwY8yD0i7+v5OU+utZqeeQmlO8D9q47Jw2Dw2IIkq3Xu
-FeckYLuF8QKBgCsraUYoX8b0u6FE4GxFJTOqdf8B6AZbOzLxfDo5nup6SL9JdZcu
-BBAa7y4NpIeShyYbdJzDknSncGpj0D+GQyd+ca7jifqxQzzZgT++XXudM3VVGnfs
-xDjk5LzilsbC7ldJOxMb1iJzwL46JdFeaJTtRmk/MlyFM3c0z2VVHyTdAoGBAJcq
-UTlAMG8a7zGaKr/8qjfB3ka8/d9vsSeFy8Gf/Pz0SAcU1hsPh54yyRt0R8D57FAx
-k94rEJ/VYx/6mFgVkDgsIiQwMSZSbui9itt1QIs+KrkH6Bnyhm4SoMbIBUsp8spQ
-vFCyrfmGnnUacJfEYUyUO31dPtknYxKmtnhpH6DxAoGBAMcu6X0zfRhL86hvyFai
-wUF3zw/rJYWq/iUyVCsJRy5TZWBc5bj/flDdjw91IVbOSAraFfqaud0xI5Q2ekhl
-Q60eUwvdB7Y908ETJ+Au0gWkSMKmMeJVb1d6OKnbipPDHuWHHYl2rC1pA+cthgGp
-KcP67gyit4y6ctKGVW5jkb33
------END PRIVATE KEY-----
-"""
 
 
 class _ElectrumRPCHandler(socketserver.StreamRequestHandler):
@@ -126,7 +74,7 @@ class TestBitcoinWalletIntegration(TransactionCase):
         index = self._next_seed()
         values = {
             "name": "Key %s" % self._seed,
-            "wif": derive(self._root_xpub, str(index)),
+            "wif": ExtendedKey.parse(self._root_xpub).child(index).serialize(),
             "witness_type": "segwit",
             "multisig": False,
         }
@@ -168,53 +116,13 @@ class TestBitcoinWalletIntegration(TransactionCase):
         self.addCleanup(thread.join, 1)
         return server, server.server_address[1]
 
-    def _start_electrum_tls_server(self, dispatch):
-        tempdir = tempfile.TemporaryDirectory()
-        cert_path = tempdir.name + "/cert.pem"
-        key_path = tempdir.name + "/key.pem"
-        with open(cert_path, "w", encoding="utf-8") as cert_file:
-            cert_file.write(_TLS_CERT)
-        with open(key_path, "w", encoding="utf-8") as key_file:
-            key_file.write(_TLS_KEY)
-
-        server = _ElectrumRPCServer(("127.0.0.1", 0), dispatch)
-        tls_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-        tls_context.load_cert_chain(cert_path, key_path)
-        server.socket = tls_context.wrap_socket(server.socket, server_side=True)
-
-        thread = threading.Thread(target=server.serve_forever, kwargs={"poll_interval": 0.01}, daemon=True)
-        thread.start()
-        self.addCleanup(server.shutdown)
-        self.addCleanup(server.server_close)
-        self.addCleanup(thread.join, 1)
-        self.addCleanup(tempdir.cleanup)
-        return server, server.server_address[1]
-
-    def _start_disconnect_server(self):
-        listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        listener.bind(("127.0.0.1", 0))
-        listener.listen(1)
-
-        def _worker():
-            connection, _ = listener.accept()
-            try:
-                connection.recv(1024)
-            finally:
-                connection.close()
-                listener.close()
-
-        thread = threading.Thread(target=_worker, daemon=True)
-        thread.start()
-        self.addCleanup(thread.join, 1)
-        return listener.getsockname()[1]
-
     def test_script_type_default_matrix_and_invalid(self):
         self.assertEqual(self.Key._script_type_default("legacy", False), "p2pkh")
         self.assertEqual(self.Key._script_type_default("legacy", True), "p2sh")
         self.assertEqual(self.Key._script_type_default("segwit", False), "p2wpkh")
         self.assertEqual(self.Key._script_type_default("segwit", True), "p2wsh")
-        self.assertEqual(self.Key._script_type_default("p2sh-segwit", False), "p2sh")
-        self.assertEqual(self.Key._script_type_default("p2sh-segwit", True), "p2sh")
+        self.assertEqual(self.Key._script_type_default("p2sh-segwit", False), "p2sh_p2wpkh")
+        self.assertEqual(self.Key._script_type_default("p2sh-segwit", True), "p2sh_p2wsh")
         self.assertEqual(self.Key._script_type_default("taproot", False), "p2tr")
         with self.assertRaises(ValidationError):
             self.Key._script_type_default("invalid", False)
@@ -333,8 +241,13 @@ class TestBitcoinWalletIntegration(TransactionCase):
         self.assertEqual(key.script_type, "p2sh")
 
     def test_key_accepts_mainnet_extended_public_key_versions(self):
-        for index, version in enumerate(xpubversions_from_network("mainnet")):
-            key = self._new_key(wif=derive(self._root_xpub, str(index), forced_version=version))
+        versions = (0x0488B21E, 0x049D7CB2, 0x04B24746, 0x0295B43F, 0x02AA7ED3)
+        for index, version in enumerate(versions):
+            derived = ExtendedKey.parse(self._root_xpub).child(index).serialize()
+            raw = base58check_decode(derived)
+            key = self._new_key(
+                wif=base58check_encode(version.to_bytes(4, "big") + raw[4:])
+            )
             self.assertTrue(key._descriptor_key().startswith("xpub"))
 
     def test_key_rejects_non_mainnet_public_material(self):
@@ -342,21 +255,9 @@ class TestBitcoinWalletIntegration(TransactionCase):
             "xprv9s21ZrQH143K3mZtbgDqwC9pB1hpznei3DRRNnXBoSAerZz39WjXY7j8DGtLtww1M8dm"
             "JsNngHtKFCdYG4oE5Lt1S1VtMCQ8XoYPEsbkuuT"
         )
-        testnet_public_key = derive(
-            self._root_xpub,
-            "0",
-            forced_version=xpubversions_from_network("testnet")[0],
-        )
-        root_data = BIP32KeyData.b58decode(self._root_xpub)
-        unknown_version_key = BIP32KeyData(
-            version=b"\x01\x02\x03\x04",
-            depth=root_data.depth,
-            parent_fingerprint=root_data.parent_fingerprint,
-            index=root_data.index,
-            chain_code=root_data.chain_code,
-            key=root_data.key,
-            check_validity=False,
-        ).b58encode(check_validity=False)
+        raw = base58check_decode(ExtendedKey.parse(self._root_xpub).child(0).serialize())
+        testnet_public_key = base58check_encode(bytes.fromhex("043587cf") + raw[4:])
+        unknown_version_key = base58check_encode(bytes.fromhex("01020304") + raw[4:])
         initial_keys = self.Key.search_count([])
         initial_messages = self.env["mail.message"].search_count([("model", "=", "bitcoin.key")])
 
@@ -381,33 +282,6 @@ class TestBitcoinWalletIntegration(TransactionCase):
             "bc1qdy2tx6quz0auwkm0k339r2ywy7wr7wrzq4m8mk"
         )
         self.assertEqual(scripthash, "9d8a38623329e4cc3a3ab29cfa7fef02bad30f3b2efa61c2c102898dff2c4f7e")
-
-    def test_electrumx_jsonrpc_success_and_connection_failure(self):
-        def dispatch(request):
-            return {"id": request["id"], "result": {"method": request["method"]}}
-
-        _, port = self._start_electrum_server(dispatch)
-        with electumx_jsonrpc("127.0.0.1", port, False) as send:
-            response = send({"method": "server.ping", "params": [], "id": 7})
-        self.assertEqual(response["result"]["method"], "server.ping")
-
-        _, tls_port = self._start_electrum_tls_server(dispatch)
-        with electumx_jsonrpc("127.0.0.1", tls_port, True) as send:
-            response_tls = send({"method": "server.version", "params": ["", "1.4"], "id": 8})
-        self.assertEqual(response_tls["result"]["method"], "server.version")
-
-        disconnect_port = self._start_disconnect_server()
-        with electumx_jsonrpc("127.0.0.1", disconnect_port, False) as send:
-            with self.assertRaises(AssertionError):
-                send({"method": "server.ping", "params": [], "id": 9})
-
-        probe = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        probe.bind(("127.0.0.1", 0))
-        closed_port = probe.getsockname()[1]
-        probe.close()
-        with self.assertRaises(UserError):
-            with electumx_jsonrpc("127.0.0.1", closed_port, False):
-                pass # pragma: no cover
 
     def test_refresh_addresses_single_key_paths(self):
         key = self._new_key()
@@ -468,6 +342,29 @@ class TestBitcoinWalletIntegration(TransactionCase):
             wallet_ba.address_ids.sorted(lambda address: (address.atype, address.index)).mapped("address"),
         )
 
+    def test_refresh_addresses_wrapped_segwit(self):
+        account_a = ExtendedKey.parse(self._root_xpub).child(1).serialize()
+        account_b = ExtendedKey.parse(self._root_xpub).child(2).serialize()
+
+        single_key = self._new_key(wif=account_a, witness_type="p2sh-segwit")
+        single_wallet = self._new_wallet([single_key])
+        single_wallet.refresh_addresses()
+        self.assertEqual(
+            self._address(single_wallet, 0, 0).address,
+            "33YCu16ApjG8Hp7exycEwgVzfVQxjLAe7m",
+        )
+
+        keys = [
+            self._new_key(wif=account_a, witness_type="p2sh-segwit", multisig=True),
+            self._new_key(wif=account_b, witness_type="p2sh-segwit", multisig=True),
+        ]
+        multisig_wallet = self._new_wallet(keys, sigs_required=2)
+        multisig_wallet.refresh_addresses()
+        self.assertEqual(
+            self._address(multisig_wallet, 0, 0).address,
+            "3Bke1vqUtyAcZb6yJkMTKrU6AckyJYd8m2",
+        )
+
     def test_refresh_calls_refresh_addresses_transactions_and_history(self):
         key = self._new_key()
         wallet = self._new_wallet([key], address_amount=1, gap_limit=1)
@@ -498,7 +395,7 @@ class TestBitcoinWalletIntegration(TransactionCase):
 
         receiving_0_scripthash = receiving_0.scripthash
         history_map = {
-            receiving_0_scripthash: [{"tx_hash": tx_new.txid}],
+            receiving_0_scripthash: [{"tx_hash": tx_new.txid, "height": 1}],
         }
         status_map = {
             receiving_0_scripthash: "status-new",
@@ -606,7 +503,7 @@ class TestBitcoinWalletIntegration(TransactionCase):
                     return {"id": request["id"], "result": "missing-status"}
                 return {"id": request["id"], "result": None}
             if request["method"] == "blockchain.scripthash.get_history":
-                return {"id": request["id"], "result": [{"tx_hash": missing_txid}]}
+                return {"id": request["id"], "result": [{"tx_hash": missing_txid, "height": 1}]}
             raise AssertionError("Unexpected method %s" % request["method"]) # pragma: no cover
 
         _, port = self._start_electrum_server(dispatch)

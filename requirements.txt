@@ -6,12 +6,10 @@ cryptography
 paramiko
 xmltodict
 dicttoxml
-tinyrpc
 pyxirr
 numpy-financial
 yfinance
 markdownify
-btclib==2023.7.12
 py3o.template
 py3o.formats
 packaging

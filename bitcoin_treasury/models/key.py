@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from btclib.bip32 import BIP32KeyData, derive
-from btclib.exceptions import BTClibValueError
-from btclib.network import xpubversions_from_network
+from bitwalkit import EncodingError, ExtendedKey
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
@@ -50,10 +48,6 @@ class BitcoinExtendedPublicKey(models.Model):
     script_type = fields.Selection(
         string="Script Type",
         selection=[
-            # Rare
-            ('p2pk', 'Pay To Public Key'),
-            ('p2ms', 'Pay To Multisig'), # "Bare multisig"
-
             # LEGACY
             ('p2pkh', 'Pay to Public Key Hash (m/44)'),
             ('p2sh', 'Pay to Script Hash (m/45)'),
@@ -114,7 +108,7 @@ class BitcoinExtendedPublicKey(models.Model):
         if witness_type == 'segwit':
             return 'p2wsh' if multisig else 'p2wpkh'
         if witness_type == 'p2sh-segwit':
-            return 'p2sh'
+            return 'p2sh_p2wsh' if multisig else 'p2sh_p2wpkh'
         if witness_type == 'taproot':
             return 'p2tr'
         raise ValidationError(
@@ -129,16 +123,16 @@ class BitcoinExtendedPublicKey(models.Model):
 
     def _decode_extended_public_key(self, value):
         try:
-            key_data = BIP32KeyData.b58decode(value)
-        except BTClibValueError as error:
+            key_data = ExtendedKey.parse(value)
+        except EncodingError as error:
             raise ValidationError(_("A valid mainnet extended public key is required.")) from error
-        if key_data.is_private or key_data.version not in xpubversions_from_network('mainnet'):
+        if key_data.is_private or key_data.network != 'mainnet':
             raise ValidationError(_("A valid mainnet extended public key is required."))
         return key_data
 
     def _derive_public_key(self, derivation_path):
         self.ensure_one()
-        return derive(self.wif, derivation_path)
+        return ExtendedKey.parse(self.wif).derive_path(derivation_path).pubkey
 
     def _key_origin_error(self):
         self.ensure_one()
@@ -164,14 +158,7 @@ class BitcoinExtendedPublicKey(models.Model):
     def _descriptor_key(self):
         self.ensure_one()
         key_data = self._decode_extended_public_key(self.wif)
-        xpub = BIP32KeyData(
-            version=xpubversions_from_network('mainnet')[0],
-            depth=key_data.depth,
-            parent_fingerprint=key_data.parent_fingerprint,
-            index=key_data.index,
-            chain_code=key_data.chain_code,
-            key=key_data.key,
-        ).b58encode()
+        xpub = key_data.to_xpub()
         origin = ''
         if self.real_parent_fingerprint:
             path = self.real_derivation_path or ''
