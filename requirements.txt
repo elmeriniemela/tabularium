@@ -13,4 +13,5 @@ markdownify
 py3o.template
 py3o.formats
 packaging
+bitwalkit
 git+https://github.com/elmeriniemela/bitoplens.git
