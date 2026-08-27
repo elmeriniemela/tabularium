@@ -430,6 +430,41 @@ class TestBitcoinWalletIntegration(TransactionCase):
         self.assertTrue(all(req["method"] == "blockchain.scripthash.subscribe" for req in server.raw_requests[0]))
         self.assertTrue(all(req["method"] == "blockchain.scripthash.get_history" for req in server.raw_requests[1]))
 
+    def test_refresh_transactions_batches_multiple_wallets(self):
+        wallets = self.Wallet
+        status_map = {}
+        history_map = {}
+        transactions = self.Tx
+        for index in range(2):
+            wallet = self._new_wallet([self._new_key()], address_amount=2, gap_limit=1)
+            wallet.refresh_addresses()
+            address = self._address(wallet, 0, 0)
+            transaction = self.Tx.create({"txid": str(index + 3) * 64})
+            wallets |= wallet
+            transactions |= transaction
+            status_map.update(dict.fromkeys(wallet.address_ids.mapped("scripthash")))
+            status_map[address.scripthash] = "status-%s" % index
+            history_map[address.scripthash] = [{"tx_hash": transaction.txid, "height": 1}]
+
+        def dispatch(request):
+            scripthash = request["params"][0]
+            if request["method"] == "blockchain.scripthash.subscribe":
+                return {"id": request["id"], "result": status_map[scripthash]}
+            if request["method"] == "blockchain.scripthash.get_history":
+                return {"id": request["id"], "result": history_map[scripthash]}
+            raise AssertionError("Unexpected method %s" % request["method"]) # pragma: no cover
+
+        server, port = self._start_electrum_server(dispatch)
+        self._set_electrumx(port)
+        wallets.with_context(disable_auto_populate=True).refresh_transactions()
+
+        self.assertEqual(wallets.address_ids.transaction_ids, transactions)
+        self.assertEqual(len(server.raw_requests), 2)
+        self.assertEqual(len(server.raw_requests[0]), 8)
+        self.assertEqual(len(server.raw_requests[1]), 2)
+        self.assertTrue(all(req["method"] == "blockchain.scripthash.subscribe" for req in server.raw_requests[0]))
+        self.assertTrue(all(req["method"] == "blockchain.scripthash.get_history" for req in server.raw_requests[1]))
+
     def test_refresh_transactions_unchanged_status_skips_history(self):
         key = self._new_key()
         wallet = self._new_wallet([key], address_amount=2, gap_limit=1)

@@ -16,6 +16,7 @@
     'application': True,
     'data': [
         'security/ir.model.access.csv',
+        'data/ir_cron.xml',
 
         'views/bitcoin_tx.xml',
         'views/bitcoin_key.xml',

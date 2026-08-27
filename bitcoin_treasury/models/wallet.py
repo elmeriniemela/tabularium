@@ -218,16 +218,17 @@ class BitcoinWallet(models.Model):
         chain = ChainQuery(host, port, use_ssl)
 
         try:
+            addresses = self.address_ids
+            _logger.info("Subscribe batch(%s)", len(addresses))
+            statuses = chain.get_statuses(addresses.mapped('address'))
+            changed = {}
             for wallet in self:
                 per_type = {}
                 for addr_record in wallet.address_ids:
                     per_type.setdefault(addr_record.atype, []).append(addr_record)
 
                 for atype, addr_records in per_type.items():
-                    _logger.info("Subscribe batch(%s)", len(addr_records))
-                    statuses = chain.get_statuses([record.address for record in addr_records])
                     empty = 0
-                    changed = {}
                     for addr_record in addr_records:
                         status = statuses[addr_record.address]
                         if status is None:
@@ -248,35 +249,30 @@ class BitcoinWallet(models.Model):
                         if not empty:
                             raise UserError(_("Ran out of addresses! Please icrease address amount."))
 
+            _logger.info("History batch(%s)", len(changed))
+            histories = chain.get_history_many([record.address for record in changed])
+            tx_hashes = []
+            known_tx_hashes = set()
+            for addr_record in changed:
+                trans_list = histories[addr_record.address]
+                _logger.info("%s has %s transactions", addr_record.address, len(trans_list))
+                for entry in trans_list:
+                    tx_hash = entry.txid
+                    if tx_hash not in known_tx_hashes:
+                        known_tx_hashes.add(tx_hash)
+                        tx_hashes.append(tx_hash)
 
-                    _logger.info("History batch(%s)", len(changed))
-                    histories = chain.get_history_many([record.address for record in changed])
-                    history_by_addr = {}
-                    tx_hashes = []
-                    known_tx_hashes = set()
-                    for addr_record in changed:
-                        trans_list = histories[addr_record.address]
-                        _logger.info("%s has %s transactions", addr_record.address, len(trans_list))
-                        history_by_addr[addr_record] = trans_list
-                        for entry in trans_list:
-                            tx_hash = entry.txid
-                            if tx_hash not in known_tx_hashes:
-                                known_tx_hashes.add(tx_hash)
-                                tx_hashes.append(tx_hash)
-
-                    tx_by_hash = wallet._find_transactions_by_txid(tx_hashes)
-                    for addr_record, trans_list in history_by_addr.items():
-                        tx_ids = []
-                        for entry in trans_list:
-                            tx = tx_by_hash[entry.txid]
-                            if tx.id not in tx_ids:
-                                tx_ids.append(tx.id)
-                        addr_record.write({
-                            'transaction_ids': [Command.set(tx_ids)],
-                            'scripthash_status': changed[addr_record],
-                        })
-
-                _logger.info("Wallet %s done.", wallet.name)
+            tx_by_hash = self._find_transactions_by_txid(tx_hashes)
+            for addr_record in changed:
+                tx_ids = []
+                for entry in histories[addr_record.address]:
+                    tx = tx_by_hash[entry.txid]
+                    if tx.id not in tx_ids:
+                        tx_ids.append(tx.id)
+                addr_record.write({
+                    'transaction_ids': [Command.set(tx_ids)],
+                    'scripthash_status': changed[addr_record],
+                })
         except BitwalkitError as error:
             raise UserError(str(error)) from error
 

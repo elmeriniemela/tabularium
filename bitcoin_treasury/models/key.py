@@ -126,7 +126,7 @@ class BitcoinExtendedPublicKey(models.Model):
             key_data = ExtendedKey.parse(value)
         except EncodingError as error:
             raise ValidationError(_("A valid mainnet extended public key is required.")) from error
-        if key_data.is_private or key_data.network != 'mainnet':
+        if key_data.network != 'mainnet':
             raise ValidationError(_("A valid mainnet extended public key is required."))
         return key_data
 
