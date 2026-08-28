@@ -276,7 +276,7 @@ profit_percent = profit / max_investment
 Where `max_investment` is the highest invested amount (handles partial sales).
 
 #### IRR (Internal Rate of Return)
-Uses the pyxirr library to calculate money-weighted returns considering:
+Calculates money-weighted returns from dated cash flows considering:
 - Investment timing
 - Cash flows (buys, sells, yields, costs)
 - Current position value
@@ -321,4 +321,3 @@ Create categories for any asset type:
 - Check currency conversion rates
 - Ensure no duplicate transactions
 - Recompute position values
-

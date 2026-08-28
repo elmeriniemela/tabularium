@@ -6,11 +6,89 @@ from odoo.tools import float_is_zero
 
 from odoo.tools.safe_eval import safe_eval
 import logging
+import math
 
 from collections import defaultdict
-from pyxirr import xirr
 
 _logger = logging.getLogger(__name__)
+
+
+def _xnpv_scaled(log_rate, periods, values):
+    """Return XNPV and its derivative with a shared overflow-safe scale."""
+    terms = [
+        (math.log(abs(value)) - log_rate * period, math.copysign(1.0, value), period)
+        for period, value in zip(periods, values)
+        if value
+    ]
+    scale = max(log_value for log_value, _sign, _period in terms)
+    result = 0.0
+    derivative = 0.0
+    for log_value, sign, period in terms:
+        scaled_value = sign * math.exp(log_value - scale)
+        result += scaled_value
+        derivative -= period * scaled_value
+    return result, derivative
+
+
+def xirr(dates, values, guess=0.1):
+    """Calculate an annualized IRR for irregular cash flows without NumPy."""
+    if len(dates) != len(values) or len(values) < 2:
+        raise ValueError("XIRR requires matching dates and values")
+    values = [float(value) for value in values]
+    if not any(value > 0 for value in values) or not any(value < 0 for value in values):
+        raise ValueError("XIRR requires at least one positive and one negative cash flow")
+
+    start = min(dates)
+    periods = [(cashflow_date - start).days / 365.0 for cashflow_date in dates]
+    if not any(periods):
+        raise ValueError("XIRR cash flows must occur on different dates")
+
+    initial = math.log1p(guess) if guess > -1 else math.log1p(0.1)
+    log_rate = initial
+    for _iteration in range(100):
+        value, derivative = _xnpv_scaled(log_rate, periods, values)
+        if abs(value) < 1e-12:
+            return math.expm1(log_rate)
+        if not derivative:
+            break
+        next_log_rate = log_rate - value / derivative
+        if not math.isfinite(next_log_rate) or not -50 < next_log_rate < 50:
+            break
+        if abs(next_log_rate - log_rate) < 1e-12:
+            return math.expm1(next_log_rate)
+        log_rate = next_log_rate
+
+    # Newton's method can jump past a root for unusual cash-flow patterns. Find
+    # every sign-changing interval and use the one nearest the conventional 10%
+    # starting guess.
+    brackets = []
+    left = -50.0
+    left_value, _derivative = _xnpv_scaled(left, periods, values)
+    for index in range(1, 401):
+        right = -50.0 + index * 0.25
+        right_value, _derivative = _xnpv_scaled(right, periods, values)
+        if not right_value:
+            return math.expm1(right)
+        if math.copysign(1.0, left_value) != math.copysign(1.0, right_value):
+            brackets.append((left, right, left_value, right_value))
+        left, left_value = right, right_value
+    if not brackets:
+        raise ValueError("XIRR did not converge")
+
+    left, right, left_value, _right_value = min(
+        brackets,
+        key=lambda bracket: abs((bracket[0] + bracket[1]) / 2 - initial),
+    )
+    for _iteration in range(200):
+        middle = (left + right) / 2
+        middle_value, _derivative = _xnpv_scaled(middle, periods, values)
+        if abs(middle_value) < 1e-12 or right - left < 1e-12:
+            return math.expm1(middle)
+        if math.copysign(1.0, left_value) == math.copysign(1.0, middle_value):
+            left, left_value = middle, middle_value
+        else:
+            right = middle
+    raise ValueError("XIRR did not converge")
 
 
 class InvestmentPeriod(models.Model):

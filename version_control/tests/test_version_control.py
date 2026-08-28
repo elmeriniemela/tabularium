@@ -3,6 +3,8 @@ import hashlib
 from odoo.tests import tagged
 from odoo.tests.common import TransactionCase
 
+from odoo.addons.version_control.models.html_to_markdown import html_to_markdown
+
 
 @tagged('post_install', '-at_install')
 class TestVersionControl(TransactionCase):
@@ -87,6 +89,51 @@ class TestVersionControl(TransactionCase):
         self.assertIn('+++ comment', text_version.diff)
         self.assertIn('-Old comment line', text_version.diff)
         self.assertIn('+New comment line', text_version.diff)
+
+    def test_html_diff_preserves_markdown_lists_and_links(self):
+        old_value = (
+            '<div data-oe-version="1.2">Project resources</div>'
+            '<ul>'
+            '<li>Sample data:&nbsp;'
+            '<a href="https://data.example">https://data.example</a></li>'
+            '<li class="oe-nested"><ul><li>Archive documentation:&nbsp;'
+            '<a href="https://docs.example/archive">https://docs.example/archive</a>'
+            '</li></ul></li>'
+            '<li>Dashboard application</li>'
+            '<li>Desktop application</li>'
+            '</ul>'
+        )
+        new_value = old_value.replace(
+            '<li>Desktop application',
+            '<li class="oe-nested"><ul><li>'
+            '<a href="https://media.example/watch?v=sample_video_01">'
+            'https://media.example/watch?v=sample_video_01</a>'
+            '</li></ul></li><li>Desktop application',
+        )
+
+        self.assertEqual(
+            html_to_markdown(new_value),
+            'Project resources\n\n'
+            '* Sample data: <https://data.example>\n'
+            '* + Archive documentation: <https://docs.example/archive>\n'
+            '* Dashboard application\n'
+            '* + <https://media.example/watch?v=sample_video_01>\n'
+            '* Desktop application',
+        )
+        self.assertEqual(
+            html_to_markdown(
+                '<a href="https://example.test/path_with_underscores">'
+                'https://example.test/path_with_underscores</a>'
+            ),
+            '<https://example.test/path_with_underscores>',
+        )
+
+        tracking = self._create_tracking(self.body_field, old_value, new_value)
+        version = self.env['version.control'].browse(tracking.id)
+        self.assertIn(
+            '+* + <https://media.example/watch?v=sample_video_01>\n',
+            version.diff,
+        )
 
     def test_mail_thread_helpers_and_field_reflection(self):
         tracking = self._create_tracking(self.body_field, '<p>old</p>', '<p>new</p>')

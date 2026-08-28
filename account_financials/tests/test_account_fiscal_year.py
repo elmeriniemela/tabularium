@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import base64
+import io
 from datetime import date
+from types import SimpleNamespace
+from zipfile import ZipFile
 
+from lxml import etree
 from markupsafe import Markup
 
 from odoo import fields
@@ -10,7 +14,7 @@ from odoo.exceptions import ValidationError
 from odoo.tests import TransactionCase, tagged
 from odoo.tools import misc
 
-from odoo.addons.account_financials.models import account_fiscal_year
+from odoo.addons.account_financials.models import account_fiscal_year, odt_template
 
 
 @tagged('post_install', '-at_install')
@@ -32,13 +36,7 @@ class TestAccountFiscalYear(TransactionCase):
             'company_id': self.company.id,
         })
 
-    def test_tmp_odt_and_format_multiline_value(self):
-        with account_fiscal_year.tmp_odt() as tmp_file:
-            self.assertTrue(tmp_file.name.endswith('odt'))
-            tmp_file.write(b'x')
-            tmp_file.seek(0)
-            self.assertEqual(tmp_file.read(), b'x')
-
+    def test_format_multiline_value(self):
         formatted = account_fiscal_year.format_multiline_value("row\n\t<&>")
         self.assertIsInstance(formatted, Markup)
         self.assertEqual(
@@ -181,3 +179,115 @@ class TestAccountFiscalYear(TransactionCase):
         attachment = self.env['ir.attachment'].search(attachment_domain, order='id desc', limit=1)
         result = base64.b64decode(attachment.datas)
         self.assertIn(b'PK', result)
+        with ZipFile(io.BytesIO(result)) as rendered_odt:
+            content = rendered_odt.read('content.xml')
+        self.assertIn(self.company.name.encode(), content)
+        self.assertNotIn(b'text:user-field-get text:name="py3o.', content)
+
+    def test_odt_renderer_renders_headers_and_deduplicates_images(self):
+        content_xml = b'''<?xml version="1.0" encoding="UTF-8"?>
+            <office:document-content
+                xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0"
+                xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0"
+                xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0"
+                xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0"
+                xmlns:xlink="http://www.w3.org/1999/xlink">
+                <office:body><office:text>
+                    <text:p><text:user-field-get text:name="py3o.objects.report_title">report_title</text:user-field-get></text:p>
+                    <draw:frame draw:name="py3o.image(objects.signature, 'png', height='2cm', isb64=True, keep_ratio=True)" svg:width="8cm"><draw:text-box/></draw:frame>
+                    <draw:frame draw:name="py3o.image(objects.signature, 'png', height='2cm', isb64=True, keep_ratio=True)" svg:width="8cm"><draw:text-box/></draw:frame>
+                    <draw:frame draw:name="py3o.image(objects.missing_logo, 'png', height='2cm', isb64=True, keep_ratio=True)" svg:width="2cm"><draw:text-box/></draw:frame>
+                </office:text></office:body>
+            </office:document-content>'''
+        styles_xml = b'''<?xml version="1.0" encoding="UTF-8"?>
+            <office:document-styles
+                xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0"
+                xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0"
+                xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0">
+                <office:master-styles><style:master-page style:name="Synthetic">
+                    <style:header><text:p>
+                        <text:user-field-get text:name="py3o.objects.company.name">company.name</text:user-field-get>
+                    </text:p></style:header>
+                    <style:footer><text:p>
+                        <text:user-field-get text:name="py3o.objects.company.registration">company.registration</text:user-field-get>
+                        <text:text-input text:description="py3o://function=&quot;format_address(objects.company.address)&quot;">Company Address</text:text-input>
+                    </text:p></style:footer>
+                </style:master-page></office:master-styles>
+            </office:document-styles>'''
+        manifest_xml = b'''<?xml version="1.0" encoding="UTF-8"?>
+            <manifest:manifest xmlns:manifest="urn:oasis:names:tc:opendocument:xmlns:manifest:1.0">
+                <manifest:file-entry manifest:full-path="/" manifest:media-type="application/vnd.oasis.opendocument.text"/>
+                <manifest:file-entry manifest:full-path="content.xml" manifest:media-type="text/xml"/>
+                <manifest:file-entry manifest:full-path="styles.xml" manifest:media-type="text/xml"/>
+            </manifest:manifest>'''
+        signature = (
+            b'iVBORw0KGgoAAAANSUhEUgAAAAMAAAABAQAAAAAzmykZAAAAIGNIUk0AAHomAACAhAAA+'
+            b'gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAACYktHRAAB3YoTpAAAAAd0SU1FB+oI'
+            b'HBADKFMKaesAAAAldEVYdGRhdGU6Y3JlYXRlADIwMjYtMDgtMjhUMTY6MDM6NDArMDA6'
+            b'MDCCdKUtAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDI2LTA4LTI4VDE2OjAzOjQwKzAwOjAw'
+            b'8ykdkQAAACh0RVh0ZGF0ZTp0aW1lc3RhbXAAMjAyNi0wOC0yOFQxNjowMzo0MCswMDow'
+            b'MKQ8PE4AAAAKSURBVAjXY2AAAAACAAHiIbwzAAAAAElFTkSuQmCC'
+        )
+
+        template = io.BytesIO()
+        with ZipFile(template, 'w') as archive:
+            archive.writestr('mimetype', 'application/vnd.oasis.opendocument.text')
+            archive.writestr('content.xml', content_xml)
+            archive.writestr('styles.xml', styles_xml)
+            archive.writestr('META-INF/manifest.xml', manifest_xml)
+
+        objects = SimpleNamespace(
+            report_title='Synthetic annual report',
+            company=SimpleNamespace(
+                name='Example Industries Ltd',
+                registration='TEST-12345',
+                address='Example Street 1\nExample City',
+            ),
+            signature=signature,
+            missing_logo=False,
+        )
+        rendered = odt_template.render_odt_template(
+            template.getvalue(),
+            {
+                'objects': objects,
+                'format_address': account_fiscal_year.format_multiline_value,
+            },
+        )
+
+        with ZipFile(io.BytesIO(rendered)) as archive:
+            content = etree.fromstring(archive.read('content.xml'))
+            styles = archive.read('styles.xml')
+            manifest = archive.read('META-INF/manifest.xml')
+            pictures = [name for name in archive.namelist() if name.startswith('Pictures/')]
+
+        self.assertIn(b'Synthetic annual report', etree.tostring(content))
+        self.assertIn(b'Example Industries Ltd', styles)
+        self.assertIn(b'TEST-12345', styles)
+        self.assertIn(b'Example Street 1', styles)
+        self.assertIn(b'Example City', styles)
+        self.assertIn(b'text:line-break', styles)
+        self.assertNotIn(b'text:user-field-get', styles)
+        self.assertNotIn(b'text:text-input', styles)
+
+        namespaces = {
+            'draw': odt_template.DRAW_NS,
+            'svg': odt_template.SVG_NS,
+            'xlink': odt_template.XLINK_NS,
+        }
+        image_frames = content.xpath('.//draw:frame[draw:image/@xlink:href]', namespaces=namespaces)
+        self.assertEqual(len(image_frames), 2)
+        self.assertEqual(
+            {frame.get(f'{{{namespaces["svg"]}}}width') for frame in image_frames},
+            {'6.000cm'},
+        )
+        image_paths = {
+            frame.xpath('./draw:image/@xlink:href', namespaces=namespaces)[0]
+            for frame in image_frames
+        }
+        self.assertEqual(len(image_paths), 1)
+        self.assertEqual(pictures, list(image_paths))
+        self.assertEqual(manifest.count(next(iter(image_paths)).encode()), 1)
+
+        empty_frames = content.xpath('.//draw:frame[not(@*)]', namespaces=namespaces)
+        self.assertEqual(len(empty_frames), 1)
+        self.assertTrue(empty_frames[0].xpath('./draw:image[not(@*)]', namespaces=namespaces))

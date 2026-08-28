@@ -3,9 +3,10 @@
 import logging
 import difflib
 import hashlib
-from markdownify import markdownify as md
 
 from odoo import models, tools, fields, api, _
+
+from .html_to_markdown import html_to_markdown
 
 _logger = logging.getLogger(__name__)
 
@@ -77,8 +78,8 @@ class VersionControl(models.Model):
             src = rec.old_value_text or ''
             dst = rec.new_value_text or ''
             if rec.field_id.ttype == 'html':
-                src = md(src)
-                dst = md(dst)
+                src = html_to_markdown(src)
+                dst = html_to_markdown(dst)
             lines = difflib.unified_diff(
                 src.splitlines(True),
                 dst.splitlines(True),

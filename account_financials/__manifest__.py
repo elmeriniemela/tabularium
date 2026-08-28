@@ -15,7 +15,4 @@
         'security/ir.model.access.csv',
         'views/account_fiscal_year.xml',
     ],
-    'external_dependencies': {
-        'python': ['py3o.template', 'py3o.formats'],
-    },
 }

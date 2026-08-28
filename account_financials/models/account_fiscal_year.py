@@ -3,16 +3,15 @@
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
 import logging
-import tempfile
 import base64
 import datetime
 import html
 from markupsafe import Markup
 from odoo.tools import misc, float_is_zero
 from dateutil.relativedelta import relativedelta
-from py3o.template import Template
 import json
-import warnings
+
+from .odt_template import render_odt_template
 
 
 FILETYPE_BASE64_MAGICWORD = {
@@ -23,10 +22,6 @@ FILETYPE_BASE64_MAGICWORD = {
 }
 
 _logger = logging.getLogger(__name__)
-
-
-def tmp_odt():
-    return tempfile.NamedTemporaryFile(mode='w+b', suffix='odt')
 
 
 def format_multiline_value(value):
@@ -133,18 +128,13 @@ class AccountFiscalYear(models.Model):
 
 
     def render_financials(self):
-        with tmp_odt() as infile, tmp_odt() as outfile:
-            infile.write(base64.b64decode(self.financials_template_id.datas))
-            infile.seek(0)
-            t = Template(infile.name, outfile.name)
-            with warnings.catch_warnings():
-                warnings.filterwarnings("ignore", category=DeprecationWarning)
-                t.render(dict(
-                    objects=self,
-                    format_multiline_value=format_multiline_value,
-                ))
-
-            outdata = outfile.read()
+        outdata = render_odt_template(
+            base64.b64decode(self.financials_template_id.datas),
+            {
+                'objects': self,
+                'format_multiline_value': format_multiline_value,
+            },
+        )
 
         self.env['ir.attachment'].create({
             'name': f"{self.name}-{datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S')}.odt",
@@ -215,7 +205,6 @@ class AccountFiscalYear(models.Model):
 
             py3o_lines.append(vals)
         return py3o_lines
-
 
 
 
