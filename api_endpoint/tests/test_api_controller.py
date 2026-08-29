@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import base64
 from http import HTTPStatus
 
 from odoo.tests import HttpCase, tagged
@@ -25,8 +26,8 @@ class TestApiController(HttpCase):
             'location': 'tests_get_json',
             'authorization': 'query-token',
             'auto_code': False,
-            'producer': "obj = {'from': 'get'}",
-            'consumer': "response = {'from': obj['from']}",
+            'producer': "obj = {'from': 'get', 'username': username}",
+            'consumer': "response = {'from': obj['from'], 'username': obj['username']}",
         })
         cls.endpoint_get_other_auth = cls.Endpoint.create({
             'name': 'HTTP GET Other Auth',
@@ -39,8 +40,8 @@ class TestApiController(HttpCase):
             'location': 'tests_get_other_auth',
             'authorization': 'header-token',
             'auto_code': False,
-            'producer': "obj = {'auth': True}",
-            'consumer': "response = {'auth': obj['auth']}",
+            'producer': "obj = {'auth': True, 'username': username}",
+            'consumer': "response = {'auth': obj['auth'], 'username': obj['username']}",
         })
         cls.endpoint_get_no_auth = cls.Endpoint.create({
             'name': 'HTTP GET No Auth',
@@ -120,16 +121,48 @@ class TestApiController(HttpCase):
         converters = self.env['ir.http']._get_converters()
         self.assertIn('wildcard', converters)
 
-    def test_get_json_header_auth_with_query_variables(self):
-        response = self.url_open('/api-v1/tests_get_json?Authorization=query-token&foo=bar')
+    def _basic_auth_header(self, username, token):
+        credentials = base64.b64encode(f'{username}:{token}'.encode()).decode()
+        return {'Authorization': f'Basic {credentials}'}
+
+    def test_get_json_basic_auth_with_query_variables(self):
+        response = self.url_open(
+            '/api-v1/tests_get_json?foo=bar',
+            headers=self._basic_auth_header('first-user', 'query-token'),
+        )
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertIn('application/json', response.headers['Content-Type'])
-        self.assertEqual(response.json(), {'from': 'get'})
+        self.assertEqual(response.json(), {'from': 'get', 'username': 'first-user'})
 
-    def test_get_json_query_auth(self):
-        response = self.url_open('/api-v1/tests_get_other_auth?Authorization=header-token')
+    def test_basic_auth_accepts_any_username(self):
+        response = self.url_open(
+            '/api-v1/tests_get_other_auth',
+            headers=self._basic_auth_header('another-user', 'header-token'),
+        )
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        self.assertEqual(response.json(), {'auth': True})
+        self.assertEqual(response.json(), {'auth': True, 'username': 'another-user'})
+
+    def test_basic_auth_rejects_invalid_tokens_and_schemes(self):
+        with mute_logger('odoo.addons.api_endpoint.controllers.api_controller'):
+            missing = self.url_open('/api-v1/tests_get_json')
+            wrong = self.url_open(
+                '/api-v1/tests_get_json',
+                headers=self._basic_auth_header('user', 'wrong-token'),
+            )
+            query = self.url_open('/api-v1/tests_get_json?Authorization=query-token')
+            bearer = self.url_open(
+                '/api-v1/tests_get_json',
+                headers={'Authorization': 'Bearer query-token'},
+            )
+            malformed = self.url_open(
+                '/api-v1/tests_get_json',
+                headers={'Authorization': 'Basic !!!'},
+            )
+        self.assertEqual(missing.status_code, HTTPStatus.FORBIDDEN)
+        self.assertEqual(wrong.status_code, HTTPStatus.FORBIDDEN)
+        self.assertEqual(query.status_code, HTTPStatus.FORBIDDEN)
+        self.assertEqual(bearer.status_code, HTTPStatus.FORBIDDEN)
+        self.assertEqual(malformed.status_code, HTTPStatus.FORBIDDEN)
 
     def test_get_json_without_auth_token(self):
         response = self.url_open('/api-v1/tests_get_no_auth')
@@ -138,9 +171,20 @@ class TestApiController(HttpCase):
 
     def test_reserved_request_variables_are_rejected(self):
         with mute_logger('odoo.addons.api_endpoint.controllers.api_controller'):
-            response = self.url_open('/api-v1/tests_get_json?Authorization=query-token&obj=evil')
+            response = self.url_open(
+                '/api-v1/tests_get_json?obj=evil',
+                headers=self._basic_auth_header('user', 'query-token'),
+            )
         self.assertEqual(response.status_code, 400)
         self.assertEqual(self.endpoint_get.state, 'error')
+
+    def test_username_request_variable_is_reserved(self):
+        with mute_logger('odoo.addons.api_endpoint.controllers.api_controller'):
+            response = self.url_open(
+                '/api-v1/tests_get_json?username=spoofed',
+                headers=self._basic_auth_header('user', 'query-token'),
+            )
+        self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
 
     def test_request_body_size_limit(self):
         Param = self.env['ir.config_parameter'].sudo()
@@ -206,7 +250,8 @@ class TestApiController(HttpCase):
 
     def test_redirect_response(self):
         response = self.url_open(
-            '/api-v1/tests_get_redirect?Authorization=redirect-token',
+            '/api-v1/tests_get_redirect',
+            headers=self._basic_auth_header('user', 'redirect-token'),
             allow_redirects=False,
         )
         self.assertIn(response.status_code, (HTTPStatus.FOUND, HTTPStatus.SEE_OTHER))
@@ -227,7 +272,10 @@ class TestApiController(HttpCase):
 
     def test_producer_exception_returns_generic_500(self):
         with mute_logger('odoo.addons.api_endpoint.controllers.api_controller'):
-            response = self.url_open('/api-v1/tests_get_error?Authorization=error-token')
+            response = self.url_open(
+                '/api-v1/tests_get_error',
+                headers=self._basic_auth_header('user', 'error-token'),
+            )
         self.assertEqual(response.status_code, HTTPStatus.INTERNAL_SERVER_ERROR)
         self.assertNotIn('RuntimeError', response.text)
         self.assertNotIn('controller boom', response.text)

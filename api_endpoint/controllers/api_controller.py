@@ -39,12 +39,21 @@ class ApiController(http.Controller):
 
     def _process(self, location, **variables):
         method = request.httprequest.method.lower()
-        auth = request.httprequest.headers.get('Authorization') or variables.get('Authorization') or ''
-        _logger.info("API method=%s location=%s auth=%s variables=%s",
-            method, location, 'set' if auth else 'empty', sorted(variables),
+        authorization = request.httprequest.authorization
+        if authorization and authorization.type == 'basic':
+            username = authorization.username
+            token = authorization.password
+        else:
+            username = ''
+            token = ''
+        _logger.info("API method=%s location=%s username=%r variables=%s",
+            method, location, username, sorted(variables),
         )
         try:
-            endpoint = self._match_to_endpoint(method, location, auth)
+            if 'username' in variables:
+                raise BadRequest("'username' is reserved for Basic Auth.")
+            variables['username'] = username
+            endpoint = self._match_to_endpoint(method, location, token)
             if not endpoint.authorization:
                 variables['data'] = self._read_request_data()
             else:
@@ -101,7 +110,7 @@ class ApiController(http.Controller):
             raise RequestEntityTooLarge()
         return data
 
-    def _match_to_endpoint(self, method, location, auth):
+    def _match_to_endpoint(self, method, location, token):
         if method not in ['get', 'post', 'delete', 'put']:
             raise NotFound()
 
@@ -114,7 +123,7 @@ class ApiController(http.Controller):
             ('direction', '=', 'outbound' if method == 'get' else 'inbound'),
         ]
         endpoint = Endpoint.search(domain, limit=1)
-        if endpoint.authorization and endpoint.authorization != auth:
+        if endpoint.authorization and endpoint.authorization != token:
             raise Forbidden()
         elif endpoint:
             return endpoint

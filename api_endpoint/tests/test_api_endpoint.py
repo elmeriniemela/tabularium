@@ -6,6 +6,7 @@ import threading
 import zipfile
 from datetime import date, datetime
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from urllib.parse import unquote, urlsplit
 from xmlrpc.server import Fault, SimpleXMLRPCServer
 
 import pandas
@@ -125,14 +126,17 @@ class TestApiEndpoint(TransactionCase):
         })
         self.assertEqual(endpoint_manual.sequence_id, manual_sequence)
 
-        endpoint_with_auth = self._new_endpoint(role='passive', authorization='token-1')
-        self.assertIn('/api-v1/', endpoint_with_auth.url)
-        self.assertIn('Authorization=', endpoint_with_auth.url)
-        self.assertIn('token-1', endpoint_with_auth.url)
+        endpoint_with_auth = self._new_endpoint(role='passive', authorization='token:/ @')
+        auth_url = urlsplit(endpoint_with_auth.url)
+        self.assertIn('/api-v1/', auth_url.path)
+        self.assertEqual(auth_url.username, 'api')
+        self.assertEqual(unquote(auth_url.password), 'token:/ @')
+        self.assertFalse(auth_url.query)
 
         endpoint_without_auth = self._new_endpoint(role='passive', authorization=False, user_id=self.env.ref('base.user_admin').id)
         self.assertIn('/api-v1/', endpoint_without_auth.url)
-        self.assertNotIn('Authorization=', endpoint_without_auth.url)
+        self.assertNotIn('@', urlsplit(endpoint_without_auth.url).netloc)
+        self.assertFalse(urlsplit(endpoint_without_auth.url).query)
 
         active_endpoint = self._new_endpoint(role='active')
         self.assertFalse(active_endpoint.url)

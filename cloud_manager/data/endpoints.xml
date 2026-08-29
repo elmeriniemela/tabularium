@@ -49,7 +49,11 @@ if method == 'status':
         <field name="file_format">json</field>
         <field name="response_format">json</field>
         <field name="auto_code" eval="False"/>
-        <field name="documentation" eval="False"/>
+        <field name="documentation" type="html">
+<p>
+The 'url' is sent to the cloud agent during self upgrades, and the agent uses it to report the results. Authentication needs to be part of the URL for this to work.
+</p>
+        </field>
         <field name="test_example">
 resp = requests.post(
     url=self.url,

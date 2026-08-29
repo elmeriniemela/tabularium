@@ -489,7 +489,7 @@ class ApiEndpoint(models.Model):
             rec.msg_count = len(rec.msg_ids)
 
 
-    @api.depends('comm_method', 'role', 'direction', 'file_format')
+    @api.depends('comm_method', 'role', 'location', 'authorization')
     def _compute_url(self):
         base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url').rstrip('/')
         for rec in self:
@@ -497,7 +497,8 @@ class ApiEndpoint(models.Model):
             if rec.comm_method == 'http' and rec.role == 'passive' and rec.location:
                 url = f'{base_url}/api-v1/{rec.location}'
                 if rec.authorization:
-                    url += f'?Authorization={rec.authorization}'
+                    password = urllib.parse.quote(rec.authorization, safe='')
+                    url = url.replace('://', f'://api:{password}@', 1)
             rec.url = url
 
     @api.depends('comm_method', 'role', 'direction', 'file_format')
