@@ -27,7 +27,6 @@ from odoo.tools.safe_eval import (
 from odoo.tools.convert import xml_import as XMLImport
 from odoo.tools import config
 from odoo.http import request
-import werkzeug
 
 requests = wrap_module(__import__('requests'), {'get': None, 'post': None, 'put': None, 'delete': None, 'request': None, 'exceptions': ['ReadTimeout', 'Timeout', 'ConnectionError']})
 io = wrap_module(__import__('io'), ['StringIO', 'BytesIO'])
@@ -639,7 +638,9 @@ class ApiEndpoint(models.Model):
 
 
     def _serialize_dict(self, globals_dict, original_dict):
-        d = original_dict.copy()
+        if not isinstance(original_dict, dict) or any(not isinstance(key, str) for key in original_dict):
+            raise exceptions.UserError("Serialized values must be a dictionary with string keys.")
+
         class EvalModel:
             def __init__(self, recs):
                 self.recs = recs
@@ -647,15 +648,25 @@ class ApiEndpoint(models.Model):
             def __repr__(self) -> str:
                 return f"self.env['{self.recs._name}'].browse({self.recs.ids})"
 
-        for key, val in d.items():
-            if isinstance(val, models.AbstractModel):
-                d[key] = EvalModel(val)
-            elif isinstance(val, werkzeug.datastructures.FileStorage):
-                d[key] = {
-                    'filename': val.filename,
-                    'data': val.read(),
+        def serialize(value, path):
+            if isinstance(value, models.AbstractModel):
+                return EvalModel(value)
+            if isinstance(value, dict):
+                return {
+                    serialize(key, f'{path}.key'): serialize(item, f'{path}[{key!r}]')
+                    for key, item in value.items()
                 }
+            if isinstance(value, list):
+                return [serialize(item, f'{path}[{index}]') for index, item in enumerate(value)]
+            if isinstance(value, tuple):
+                return tuple(serialize(item, f'{path}[{index}]') for index, item in enumerate(value))
+            if isinstance(value, set):
+                return {serialize(item, f'{path}[]') for item in value}
+            if isinstance(value, (type(None), bool, int, float, str, bytes, realdt.date, realdt.time, realdt.timedelta)):
+                return value
+            raise exceptions.UserError(f"Unsupported producer variable at {path}: {type(value).__name__}.")
 
+        d = serialize(original_dict, 'variables')
         serialized_dict = str(d)
         assert isinstance(safe_eval(serialized_dict, globals_dict), dict), "Ensure that the dict can be evaluated from message queue."
         return serialized_dict
@@ -721,6 +732,8 @@ class ApiEndpoint(models.Model):
             assert isinstance(obj, (pandas.DataFrame)), str(type(obj))
         elif fmt == 'zip':
             assert isinstance(obj, (zipfile.ZipFile)), str(type(obj))
+        elif fmt == 'bytes':
+            assert isinstance(obj, bytes), str(type(obj))
         else:
             raise NotImplementedError(f"Invalid file format: {fmt}")
 

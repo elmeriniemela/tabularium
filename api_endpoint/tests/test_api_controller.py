@@ -100,6 +100,21 @@ class TestApiController(HttpCase):
             'producer': "raise RuntimeError('controller boom')",
             'consumer': "response = {'ok': False}",
         })
+        cls.endpoint_upload = cls.Endpoint.create({
+            'name': 'HTTP Upload',
+            'role': 'passive',
+            'direction': 'inbound',
+            'comm_method': 'http',
+            'http_method': 'post',
+            'file_format': 'bytes',
+            'response_format': 'json',
+            'location': 'tests_upload',
+            'authorization': False,
+            'user_id': cls.env.ref('base.user_admin').id,
+            'auto_code': False,
+            'producer': "obj = files[0]['data']",
+            'consumer': "response = [{'name': file['name'], 'filename': file['filename'], 'content_type': file['content_type'], 'size': len(file['data'])} for file in files]",
+        })
 
     def test_get_converters_includes_wildcard(self):
         converters = self.env['ir.http']._get_converters()
@@ -152,6 +167,42 @@ class TestApiController(HttpCase):
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertIn('text/xml', response.headers['Content-Type'])
         self.assertIn('<ok>3</ok>', response.text)
+
+    def test_multipart_files_are_normalized(self):
+        response = self.url_open(
+            '/api-v1/tests_upload',
+            files=[
+                ('document', ('one.bin', b'one', 'application/octet-stream')),
+                ('document', ('two.txt', b'two!', 'text/plain')),
+            ],
+        )
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertEqual(response.json(), [
+            {'name': 'document', 'filename': 'one.bin', 'content_type': 'application/octet-stream', 'size': 3},
+            {'name': 'document', 'filename': 'two.txt', 'content_type': 'text/plain', 'size': 4},
+        ])
+
+        msg = self.env['api.message'].search([('endpoint_id', '=', self.endpoint_upload.id)], limit=1)
+        self.assertEqual(msg._get_msg_globals()['files'][1]['data'], b'two!')
+
+    def test_upload_endpoint_requires_one_file(self):
+        response = self.url_open('/api-v1/upload', files={'file': ('test.bin', b'contents')})
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertEqual(response.json(), 'OK')
+
+        with mute_logger('odoo.addons.api_endpoint.controllers.api_controller'):
+            missing = self.url_open('/api-v1/upload', data='body')
+            multiple = self.url_open('/api-v1/upload', files=[
+                ('file', ('one.bin', b'one')),
+                ('file', ('two.bin', b'two')),
+            ])
+        self.assertEqual(missing.status_code, HTTPStatus.BAD_REQUEST)
+        self.assertEqual(multiple.status_code, HTTPStatus.BAD_REQUEST)
+
+    def test_files_parameter_is_reserved(self):
+        with mute_logger('odoo.addons.api_endpoint.controllers.api_controller'):
+            response = self.url_open('/api-v1/tests_upload?files=value', data='body')
+        self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
 
     def test_redirect_response(self):
         response = self.url_open(

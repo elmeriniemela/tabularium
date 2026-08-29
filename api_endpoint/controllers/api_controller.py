@@ -3,7 +3,7 @@ import logging
 import json
 from lxml import etree
 
-from werkzeug.exceptions import Forbidden, HTTPException, NotFound, RequestEntityTooLarge
+from werkzeug.exceptions import BadRequest, Forbidden, HTTPException, NotFound, RequestEntityTooLarge
 from werkzeug.routing import BaseConverter
 
 from odoo import http, models, exceptions
@@ -49,6 +49,17 @@ class ApiController(http.Controller):
                 variables['data'] = self._read_request_data()
             else:
                 variables['data'] = request.httprequest.data
+
+            request_files = request.httprequest.files
+            variables = {name: value for name, value in variables.items() if name not in request_files}
+            if 'files' in variables:
+                raise BadRequest("'files' is reserved for uploaded files.")
+            variables['files'] = [{
+                'name': name,
+                'filename': file.filename,
+                'content_type': file.content_type,
+                'data': file.read(),
+            } for name, file in request_files.items(multi=True)]
         except Exception as exc:
             return self._raise_error(exc)
 

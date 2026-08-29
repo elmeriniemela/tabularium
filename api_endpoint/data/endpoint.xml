@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <record id="upload_endpoint" model="api.endpoint">
+        <field name="name">Upload</field>
+        <field name="location">upload</field>
+        <field name="usage_field_id" eval="False"/>
+        <field name="user_id" ref="base.public_user"/>
+        <field name="authorization" eval="False"/>
+        <field name="direction">inbound</field>
+        <field name="role">passive</field>
+        <field name="comm_method">http</field>
+        <field name="http_method">post</field>
+        <field name="file_format">bytes</field>
+        <field name="response_format">json</field>
+        <field name="auto_code" eval="False"/>
+        <field name="documentation" type="html">
+            <div data-oe-version="2.0">curl -X POST -F 'file=@config' 'https://example.com/api-v1/upload'</div>
+        </field>
+        <field name="test_example" eval="False"/>
+        <field name="xslt" eval="False"/>
+        <field name="initiator">self.produce(variables={})</field>
+        <field name="producer">
+if len(files) != 1:
+    raise ValidationError('Expected exactly one uploaded file.')
+obj = files[0]['data']
+</field>
+        <field name="consumer">response = 'OK'</field>
+    </record>
+</odoo>

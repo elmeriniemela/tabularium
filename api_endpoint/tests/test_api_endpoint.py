@@ -10,6 +10,7 @@ from xmlrpc.server import Fault, SimpleXMLRPCServer
 
 import pandas
 from lxml import etree
+from werkzeug.datastructures import FileStorage
 
 from odoo.exceptions import UserError, ValidationError
 from odoo.tests import tagged, TransactionCase
@@ -283,6 +284,42 @@ class TestApiEndpoint(TransactionCase):
         serialized = endpoint._serialize_dict(globals_dict, {'partner': partner})
         self.assertIn("self.env['res.partner'].browse", serialized)
 
+        nested = endpoint._serialize_dict(globals_dict, {'items': [{'partner': partner}]})
+        self.assertEqual(safe_eval(nested, globals_dict)['items'][0]['partner'], partner)
+
+    def test_produce_validates_variables(self):
+        endpoint = self._new_endpoint(auto_commit=False)
+        with self.assertRaises(UserError):
+            endpoint.produce([])
+        with self.assertRaises(UserError):
+            endpoint.produce({1: 'value'})
+        with self.assertRaisesRegex(UserError, r"variables\['value'\]"):
+            endpoint.produce({'value': FileStorage(stream=io.BytesIO(b'data'))})
+        self.assertFalse(endpoint.msg_ids)
+
+        globals_dict = endpoint._get_globals()
+        with self.assertRaises(UserError):
+            endpoint._serialize_dict(globals_dict, [])
+
+    def test_uploaded_file_variables_round_trip(self):
+        endpoint = self._new_endpoint(
+            file_format='bytes',
+            producer="obj = files[0]['data']",
+            consumer="response = {'filename': files[0]['filename']}",
+        )
+        files = [{
+            'name': 'document',
+            'filename': 'test.bin',
+            'content_type': 'application/octet-stream',
+            'data': b'contents',
+        }]
+
+        endpoint.produce({'files': files})
+
+        globals_dict = endpoint.msg_ids._get_msg_globals()
+        self.assertEqual(globals_dict['files'], files)
+        self.assertEqual(globals_dict['obj'], b'contents')
+
     def test_produce_consume_action_consume_and_msg_globals(self):
         endpoint = self._new_endpoint(
             producer="obj = {'name': partner.name}",
@@ -414,11 +451,12 @@ class TestApiEndpoint(TransactionCase):
         zip_obj_read.close()
 
         self.assertEqual(endpoint.obj_to_bytes(b'raw', 'bytes'), b'raw')
-        with self.assertRaises(NotImplementedError):
-            endpoint.bytes_to_obj(b'raw', 'bytes')
+        self.assertEqual(endpoint.bytes_to_obj(b'raw', 'bytes'), b'raw')
 
         with self.assertRaises(AssertionError):
             endpoint.assert_obj_type(1, 'json')
+        with self.assertRaises(AssertionError):
+            endpoint.assert_obj_type('raw', 'bytes')
         with self.assertRaises(NotImplementedError):
             endpoint.assert_obj_type({}, 'invalid')
         with self.assertRaises(NotImplementedError):
