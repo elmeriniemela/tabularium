@@ -85,11 +85,15 @@ class ApiController(http.Controller):
 
         if endpoint.response_format == 'xml':
             content_type = 'text/xml'
+        elif endpoint.response_format == 'csv':
+            content_type = 'text/csv'
+        elif endpoint.response_format == 'zip':
+            content_type = 'application/zip'
         elif endpoint.response_format == 'bytes':
             content_type = 'application/octet-stream'
         elif endpoint.response_format == 'redirect':
             return request.redirect(**response)
-        else: # TODO zip, csv
+        else:
             content_type = 'application/json'
 
         return http.Response(

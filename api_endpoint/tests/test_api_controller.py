@@ -101,6 +101,34 @@ class TestApiController(HttpCase):
             'producer': "obj = b'#!/bin/sh'",
             'consumer': 'response = obj',
         })
+        cls.endpoint_get_csv = cls.Endpoint.create({
+            'name': 'HTTP GET CSV',
+            'role': 'passive',
+            'direction': 'outbound',
+            'comm_method': 'http',
+            'http_method': 'get',
+            'file_format': 'csv',
+            'response_format': 'csv',
+            'location': 'tests_get_csv',
+            'authorization': 'csv-token',
+            'auto_code': False,
+            'producer': "obj = pandas.DataFrame({'value': ['one']})",
+            'consumer': 'response = obj',
+        })
+        cls.endpoint_get_zip = cls.Endpoint.create({
+            'name': 'HTTP GET ZIP',
+            'role': 'passive',
+            'direction': 'outbound',
+            'comm_method': 'http',
+            'http_method': 'get',
+            'file_format': 'zip',
+            'response_format': 'zip',
+            'location': 'tests_get_zip',
+            'authorization': 'zip-token',
+            'auto_code': False,
+            'producer': "fp = io.BytesIO()\narchive = zipfile.ZipFile(fp, 'w')\narchive.close()\nobj = zipfile.ZipFile(io.BytesIO(fp.getvalue()))",
+            'consumer': 'response = obj',
+        })
         cls.endpoint_error = cls.Endpoint.create({
             'name': 'HTTP Error',
             'role': 'passive',
@@ -156,6 +184,24 @@ class TestApiController(HttpCase):
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertIn('application/octet-stream', response.headers['Content-Type'])
         self.assertEqual(response.content, b'#!/bin/sh')
+
+    def test_get_csv(self):
+        response = self.url_open(
+            '/api-v1/tests_get_csv',
+            headers=self._basic_auth_header('user', 'csv-token'),
+        )
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertIn('text/csv', response.headers['Content-Type'])
+        self.assertEqual(response.content, b',value\n0,one\n')
+
+    def test_get_zip(self):
+        response = self.url_open(
+            '/api-v1/tests_get_zip',
+            headers=self._basic_auth_header('user', 'zip-token'),
+        )
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertIn('application/zip', response.headers['Content-Type'])
+        self.assertEqual(response.content, b'PK\x05\x06' + bytes(18))
 
     def test_basic_auth_accepts_any_username(self):
         response = self.url_open(

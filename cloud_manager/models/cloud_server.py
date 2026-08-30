@@ -312,18 +312,20 @@ class CloudServer(models.Model):
 
         return "\n".join(warnings)
 
-    def _ensure_hardware_warning_activity(self, warning):
+    def _update_hardware_warning_activity(self, warning):
         self.ensure_one()
         activity_type = self.env.ref('mail.mail_activity_data_warning')
         existing_activity = self.activity_ids.filtered(
             lambda activity: activity.activity_type_id == activity_type and activity.user_id == self.create_uid
         )
-        if not existing_activity:
+        if warning and not existing_activity:
             self.activity_schedule(
                 'mail.mail_activity_data_warning',
                 note=warning,
                 user_id=self.create_uid.id,
             )
+        elif not warning and existing_activity:
+            existing_activity.unlink()
 
 
     def parse_hardware(self, hw_dict):
@@ -384,5 +386,4 @@ class CloudServer(models.Model):
         self.env.flush_all()
         self.invalidate_recordset(['disk_ids'])
         warning = self._get_hardware_warning()
-        if warning:
-            self._ensure_hardware_warning_activity(warning)
+        self._update_hardware_warning_activity(warning)

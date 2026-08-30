@@ -640,6 +640,10 @@ class TestCloudManagerIntegration(TransactionCase):
         server.parse_hardware(hardware(18.4, 45.6, 55.6))
         self.assertTrue(server.status_updated)
         self.assertFalse(server._get_hardware_warning())
+        warning_activities = server.activity_ids.filtered(
+            lambda activity: activity.activity_type_id == warning_type and activity.user_id == server.create_uid
+        )
+        self.assertFalse(warning_activities)
 
     def test_cloud_server_diff_fetch_and_update(self):
         endpoint = self._new_endpoint(
