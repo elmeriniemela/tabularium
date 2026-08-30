@@ -87,6 +87,20 @@ class TestApiController(HttpCase):
             'producer': "obj = {'redirect': True}",
             'consumer': "response = {'location': '/web/login', 'code': 302}",
         })
+        cls.endpoint_get_bytes = cls.Endpoint.create({
+            'name': 'HTTP GET Bytes',
+            'role': 'passive',
+            'direction': 'outbound',
+            'comm_method': 'http',
+            'http_method': 'get',
+            'file_format': 'bytes',
+            'response_format': 'bytes',
+            'location': 'tests_get_bytes',
+            'authorization': 'bytes-token',
+            'auto_code': False,
+            'producer': "obj = b'#!/bin/sh'",
+            'consumer': 'response = obj',
+        })
         cls.endpoint_error = cls.Endpoint.create({
             'name': 'HTTP Error',
             'role': 'passive',
@@ -133,6 +147,15 @@ class TestApiController(HttpCase):
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertIn('application/json', response.headers['Content-Type'])
         self.assertEqual(response.json(), {'from': 'get', 'username': 'first-user'})
+
+    def test_get_bytes(self):
+        response = self.url_open(
+            '/api-v1/tests_get_bytes',
+            headers=self._basic_auth_header('user', 'bytes-token'),
+        )
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertIn('application/octet-stream', response.headers['Content-Type'])
+        self.assertEqual(response.content, b'#!/bin/sh')
 
     def test_basic_auth_accepts_any_username(self):
         response = self.url_open(

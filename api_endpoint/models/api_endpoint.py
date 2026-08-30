@@ -292,6 +292,7 @@ class ApiEndpoint(models.Model):
             ('xml', 'XML'),
             ('csv', 'CSV'),
             ('zip', 'ZIP'),
+            ('bytes', 'Bytes'),
             ('redirect', 'HTTP Redirect'),
         ],
         tracking=True,
