@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-06 05:55+0000\n"
-"PO-Revision-Date: 2026-09-06 05:55+0000\n"
+"POT-Creation-Date: 2026-09-06 07:08+0000\n"
+"PO-Revision-Date: 2026-09-06 07:08+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -1048,7 +1048,9 @@ msgstr ""
 
 #. module: bitcoin_treasury
 #: model:ir.actions.act_window,name:bitcoin_treasury.action_psbt_list
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_address__psbt_ids
 #: model:ir.ui.menu,name:bitcoin_treasury.menu_psbt
+#: model_terms:ir.ui.view,arch_db:bitcoin_treasury.form_wallet_address
 #: model_terms:ir.ui.view,arch_db:bitcoin_treasury.list_psbt
 msgid "PSBTs"
 msgstr ""
@@ -1445,6 +1447,7 @@ msgstr ""
 
 #. module: bitcoin_treasury
 #: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__transactions
+#: model_terms:ir.ui.view,arch_db:bitcoin_treasury.form_wallet_address
 msgid "Transactions"
 msgstr ""
 
@@ -1473,6 +1476,11 @@ msgid ""
 msgstr ""
 
 #. module: bitcoin_treasury
+#: model_terms:ir.ui.view,arch_db:bitcoin_treasury.search_wallet_address
+msgid "Unused"
+msgstr ""
+
+#. module: bitcoin_treasury
 #. odoo-python
 #: code:addons/bitcoin_treasury/models/wallet.py:0
 msgid "Use a native SegWit single-signature extended public key."
@@ -1494,6 +1502,12 @@ msgstr ""
 #. odoo-python
 #: code:addons/bitcoin_treasury/models/wallet.py:0
 msgid "Use no more than 15 extended public keys."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_address__used
+#: model_terms:ir.ui.view,arch_db:bitcoin_treasury.search_wallet_address
+msgid "Used"
 msgstr ""
 
 #. module: bitcoin_treasury

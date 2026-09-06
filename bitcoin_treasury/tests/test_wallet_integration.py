@@ -15,7 +15,7 @@ from bitwalkit import (
 
 from odoo import Command
 from odoo.exceptions import UserError, ValidationError
-from odoo.tests import TransactionCase, tagged
+from odoo.tests import Form, TransactionCase, tagged
 
 
 
@@ -708,3 +708,151 @@ class TestBitcoinWalletIntegration(TransactionCase):
 
         history_out.invalidate_recordset(["amount"])
         self.assertAlmostEqual(history_out.amount, -0.8)
+
+    def test_wallet_address_used_computation_and_manual_assignment(self):
+        key = self._new_key()
+        wallet = self._new_wallet([key], address_amount=2)
+        wallet.refresh_addresses()
+        addr = self._address(wallet, 0, 0)
+        self.assertFalse(addr.transaction_ids)
+        self.assertFalse(addr.used)
+
+        # Manual assignment without transactions
+        addr.write({"used": True})
+        self.assertTrue(addr.used)
+        addr.invalidate_recordset(["used"])
+        self.assertTrue(addr.used)
+
+        addr.write({"used": False})
+        self.assertFalse(addr.used)
+        addr.invalidate_recordset(["used"])
+        self.assertFalse(addr.used)
+
+        # Automatic computation when transaction_ids is set
+        tx = self.Tx.create({"txid": "9" * 64})
+        addr.write({"transaction_ids": [Command.set(tx.ids)]})
+        self.assertTrue(addr.used)
+        addr.invalidate_recordset(["used"])
+        self.assertTrue(addr.used)
+
+        # Manual assignment while transactions exist
+        addr.write({"used": False})
+        self.assertFalse(addr.used)
+        addr.invalidate_recordset(["used"])
+        self.assertFalse(addr.used)
+
+        # Clearing transaction_ids automatically resets used to False
+        addr.write({"transaction_ids": [Command.clear()]})
+        self.assertFalse(addr.used)
+        addr.invalidate_recordset(["used"])
+        self.assertFalse(addr.used)
+
+        # Editing used via wallet form
+        with Form(wallet) as wallet_form:
+            with wallet_form.address_ids.edit(0) as addr_form:
+                addr_form.used = True
+                with self.assertRaises(AssertionError):
+                    addr_form.index = 999
+            wallet_form.save()
+        self.assertTrue(addr.used)
+
+    def test_wallet_address_psbt_ids_computation(self):
+        key_a = self._new_key()
+        wallet_a = self._new_wallet([key_a], address_amount=1)
+        wallet_a.refresh_addresses()
+        addr_a_recv = self._address(wallet_a, 0, 0)
+        addr_a_change = self._address(wallet_a, 1, 0)
+
+        key_b = self._new_key()
+        wallet_b = self._new_wallet([key_b], address_amount=1)
+        wallet_b.refresh_addresses()
+        addr_b_recv = self._address(wallet_b, 0, 0)
+
+        self.assertFalse(addr_a_recv.psbt_ids)
+        self.assertFalse(addr_a_change.psbt_ids)
+        self.assertFalse(addr_b_recv.psbt_ids)
+
+        # PSBT 1: Input spending from addr_a_recv
+        psbt_1 = self.env["bitcoin.psbt"].create({
+            "name": "psbt_1.psbt",
+            "input_ids": [Command.create({
+                "wallet_id": wallet_a.id,
+                "branch": "0",
+                "address_index": 0,
+                "txid": "1" * 64,
+                "output_index": 0,
+                "sats": 50000,
+            })],
+            "output_ids": [Command.create({
+                "destination_type": "address",
+                "address": "bc1qcr8te4kr609gcawutmrza0j4xv80jy8z306fyu",
+                "sats": 40000,
+            })],
+        })
+
+        # PSBT 2: Output paying to addr_a_change (destination_type='wallet')
+        psbt_2 = self.env["bitcoin.psbt"].create({
+            "name": "psbt_2.psbt",
+            "input_ids": [Command.create({
+                "wallet_id": wallet_b.id,
+                "branch": "0",
+                "address_index": 99,
+                "txid": "2" * 64,
+                "output_index": 0,
+                "sats": 60000,
+            })],
+            "output_ids": [Command.create({
+                "destination_type": "wallet",
+                "wallet_id": wallet_a.id,
+                "branch": "1",
+                "address_index": 0,
+                "sats": 50000,
+            })],
+        })
+
+        # PSBT 3: Output paying to addr_b_recv (destination_type='address')
+        psbt_3 = self.env["bitcoin.psbt"].create({
+            "name": "psbt_3.psbt",
+            "input_ids": [Command.create({
+                "wallet_id": wallet_a.id,
+                "branch": "1",
+                "address_index": 99,
+                "txid": "3" * 64,
+                "output_index": 0,
+                "sats": 50000,
+            })],
+            "output_ids": [Command.create({
+                "destination_type": "address",
+                "address": addr_b_recv.address,
+                "sats": 40000,
+            })],
+        })
+
+        # PSBT 4: Both input and output referencing addr_a_recv (deduplication check)
+        psbt_4 = self.env["bitcoin.psbt"].create({
+            "name": "psbt_4.psbt",
+            "input_ids": [Command.create({
+                "wallet_id": wallet_a.id,
+                "branch": "0",
+                "address_index": 0,
+                "txid": "4" * 64,
+                "output_index": 0,
+                "sats": 50000,
+            })],
+            "output_ids": [Command.create({
+                "destination_type": "wallet",
+                "wallet_id": wallet_a.id,
+                "branch": "0",
+                "address_index": 0,
+                "sats": 40000,
+            })],
+        })
+
+        # Batch compute check
+        addresses = addr_a_recv + addr_a_change + addr_b_recv
+        addresses.invalidate_recordset(["psbt_ids"])
+
+        self.assertEqual(addr_a_recv.psbt_ids, psbt_1 | psbt_4)
+        self.assertEqual(addr_a_change.psbt_ids, psbt_2)
+        self.assertEqual(addr_b_recv.psbt_ids, psbt_3)
+

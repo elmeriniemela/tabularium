@@ -43,7 +43,6 @@ class BitcoinWallet(models.Model):
     address_ids = fields.One2many(
         comodel_name='bitcoin.wallet.address',
         inverse_name='wallet_id',
-        readonly=True,
     )
 
     sigs_required = fields.Integer(default=1)
@@ -386,6 +385,18 @@ class BitcoinWalletAddress(models.Model):
         readonly=True,
     )
 
+    used = fields.Boolean(
+        compute='_compute_used',
+        store=True,
+        readonly=False,
+    )
+
+    psbt_ids = fields.Many2many(
+        comodel_name='bitcoin.psbt',
+        compute='_compute_psbt_ids',
+        string="PSBTs",
+    )
+
     balance = fields.Float(
         digits='Bitcoin Decimal',
         readonly=True,
@@ -399,6 +410,54 @@ class BitcoinWalletAddress(models.Model):
     )
 
     scripthash_status = fields.Char(readonly=True)
+
+    @api.depends('transaction_ids')
+    def _compute_used(self):
+        for record in self:
+            record.used = bool(record.transaction_ids)
+
+    def _compute_psbt_ids(self):
+        if not self:
+            return
+        wallet_ids = self.wallet_id.ids
+        addresses = [a.strip() for a in self.mapped('address') if a]
+
+        inputs = self.env['bitcoin.psbt.input'].search([
+            ('wallet_id', 'in', wallet_ids),
+        ])
+        outputs = self.env['bitcoin.psbt.output'].search([
+            '|',
+            ('wallet_id', 'in', wallet_ids),
+            ('address', 'in', addresses),
+        ])
+
+        input_psbts = {}
+        for inp in inputs:
+            key = (inp.wallet_id.id, inp.branch, inp.address_index)
+            input_psbts.setdefault(key, self.env['bitcoin.psbt'])
+            input_psbts[key] |= inp.psbt_id
+
+        output_wallet_psbts = {}
+        output_addr_psbts = {}
+        for out in outputs:
+            if out.destination_type == 'wallet' and out.wallet_id:
+                key = (out.wallet_id.id, out.branch, out.address_index)
+                output_wallet_psbts.setdefault(key, self.env['bitcoin.psbt'])
+                output_wallet_psbts[key] |= out.psbt_id
+            elif out.destination_type == 'address' and out.address:
+                addr_clean = out.address.strip()
+                output_addr_psbts.setdefault(addr_clean, self.env['bitcoin.psbt'])
+                output_addr_psbts[addr_clean] |= out.psbt_id
+
+        empty_psbts = self.env['bitcoin.psbt']
+        for addr in self:
+            key = (addr.wallet_id.id, addr.atype, addr.index)
+            addr_str = (addr.address or '').strip()
+            addr.psbt_ids = (
+                input_psbts.get(key, empty_psbts)
+                | output_wallet_psbts.get(key, empty_psbts)
+                | output_addr_psbts.get(addr_str, empty_psbts)
+            )
 
     @api.depends('address')
     def _compute_scripthash(self):

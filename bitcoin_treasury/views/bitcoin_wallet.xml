@@ -69,15 +69,17 @@
                             </group>
                             <button name="refresh_addresses" type="object" string="Refresh addresses" icon="fa-cogs"/>
                             <field name="address_ids">
-                                <list>
-                                    <field name="index"/>
-                                    <field name="atype"/>
-                                    <field name="address"/>
-                                    <field name="scripthash" optional="hide"/>
-                                    <field name="scripthash_status" optional="hide"/>
-                                    <field name="balance"/>
-                                    <field name="transaction_ids"/>
-                                    <field name="write_date" optional="hide"/>
+                                <list editable="bottom" create="false" delete="false" decoration-muted="used">
+                                    <field name="index" optional="show" readonly="True"/>
+                                    <field name="atype" optional="show" readonly="True"/>
+                                    <field name="address" optional="show" readonly="True"/>
+                                    <field name="scripthash" optional="hide" readonly="True"/>
+                                    <field name="scripthash_status" optional="hide" readonly="True"/>
+                                    <field name="balance" optional="show" readonly="True"/>
+                                    <field name="used" widget="boolean_toggle" readonly="False" optional="show"/>
+                                    <field name="transaction_ids" optional="show" readonly="True"/>
+                                    <field name="psbt_ids" widget="many2many_tags" optional="hide" readonly="True"/>
+                                    <field name="write_date" optional="hide" readonly="True"/>
                                 </list>
                             </field>
                         </page>

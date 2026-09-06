@@ -11,7 +11,9 @@
                 <field name="scripthash" optional="hide"/>
                 <field name="scripthash_status" optional="hide"/>
                 <field name="balance"/>
+                <field name="used" widget="boolean_toggle"/>
                 <field name="transaction_ids"/>
+                <field name="psbt_ids" widget="many2many_tags" optional="show"/>
                 <field name="write_date" optional="hide"/>
             </list>
         </field>
@@ -33,6 +35,7 @@
                             <field name="scripthash"/>
                             <field name="scripthash_status"/>
                             <field name="balance"/>
+                            <field name="used" widget="boolean_toggle"/>
                         </group>
                         <group>
                             <field name="write_date"/>
@@ -41,7 +44,10 @@
                             <field name="atype"/>
                         </group>
                     </group>
+                    <separator string="Transactions"/>
                     <field name="transaction_ids"/>
+                    <separator string="PSBTs"/>
+                    <field name="psbt_ids"/>
                 </sheet>
                 <div class="o_attachment_preview"/>
                 <chatter/>
@@ -55,6 +61,9 @@
         <field name="arch" type="xml">
             <search>
                 <field name="address"/>
+                <separator/>
+                <filter string="Used" name="used" domain="[('used', '=', True)]"/>
+                <filter string="Unused" name="unused" domain="[('used', '=', False)]"/>
                 <separator/>
                 <filter string="Has transactions" name="has_transactions" domain="[('transaction_ids', '!=', False)]"/>
                 <filter string="No transactions" name="no_transactions" domain="[('transaction_ids', '=', False)]"/>
