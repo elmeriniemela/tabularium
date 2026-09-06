@@ -277,6 +277,16 @@ class BitcoinWallet(models.Model):
 
     def refresh_history(self):
         for wallet in self:
+            unconfirmed = self.env['bitcoin.wallet.history'].search([
+                ('wallet_id', '=', wallet.id),
+                ('transaction_id.block_id', '=', False),
+            ])
+            if unconfirmed:
+                tx_ids = set(wallet.address_ids.transaction_ids.ids)
+                stale = unconfirmed.filtered(lambda h: h.transaction_id.id not in tx_ids)
+                if stale:
+                    stale.unlink()
+
             existing = {h.transaction_id: h for h in wallet.history_ids}
             addr_balance = {}
             rbf_addrs = wallet.address_ids.filtered(lambda a: a.balance and not a.transaction_ids)

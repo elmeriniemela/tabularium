@@ -709,6 +709,143 @@ class TestBitcoinWalletIntegration(TransactionCase):
         history_out.invalidate_recordset(["amount"])
         self.assertAlmostEqual(history_out.amount, -0.8)
 
+    def test_refresh_history_evicted_unconfirmed_tx_deleted(self):
+        wallet = self._new_wallet([self._new_key()], address_amount=2)
+        wallet.refresh_addresses()
+        addr_1 = self._address(wallet, 0, 0)
+        addr_2 = self._address(wallet, 0, 1)
+
+        block = self.Block.create({"hash": "c" * 64, "time": datetime.datetime(2024, 1, 1, 12, 0, 0)})
+        tx_confirmed = self.Tx.create(
+            {
+                "txid": "8" * 64,
+                "block_id": block.id,
+                "vout_ids": [
+                    Command.create(
+                        {
+                            "n": 0,
+                            "type": "pubkeyhash",
+                            "address": addr_1.address,
+                            "asm": "asm",
+                            "script_pub_key_hex": "00",
+                            "value": 1.5,
+                        }
+                    )
+                ],
+            }
+        )
+        tx_unconfirmed = self.Tx.create(
+            {
+                "txid": "9" * 64,
+                "vout_ids": [
+                    Command.create(
+                        {
+                            "n": 0,
+                            "type": "pubkeyhash",
+                            "address": addr_2.address,
+                            "asm": "asm",
+                            "script_pub_key_hex": "00",
+                            "value": 0.5,
+                        }
+                    )
+                ],
+            }
+        )
+
+        addr_1.transaction_ids = [Command.set([tx_confirmed.id])]
+        addr_2.transaction_ids = [Command.set([tx_unconfirmed.id])]
+
+        wallet.refresh_history()
+        self.assertEqual(wallet.transactions, 2)
+        self.assertAlmostEqual(wallet.balance, 2.0)
+        self.assertAlmostEqual(addr_1.balance, 1.5)
+        self.assertAlmostEqual(addr_2.balance, 0.5)
+
+        history_unconfirmed = self.WalletHistory.search(
+            [("wallet_id", "=", wallet.id), ("transaction_id", "=", tx_unconfirmed.id)]
+        )
+        self.assertTrue(history_unconfirmed)
+
+        # Evict unconfirmed transaction from mempool
+        addr_2.transaction_ids = [Command.clear()]
+        wallet.refresh_history()
+
+        self.assertFalse(history_unconfirmed.exists())
+        self.assertEqual(wallet.transactions, 1)
+        self.assertAlmostEqual(wallet.balance, 1.5)
+        self.assertAlmostEqual(addr_1.balance, 1.5)
+        self.assertAlmostEqual(addr_2.balance, 0.0)
+
+        # Evict another unconfirmed tx on an address that still has a confirmed tx
+        tx_unconfirmed_2 = self.Tx.create(
+            {
+                "txid": "a" * 64,
+                "vout_ids": [
+                    Command.create(
+                        {
+                            "n": 0,
+                            "type": "pubkeyhash",
+                            "address": addr_1.address,
+                            "asm": "asm",
+                            "script_pub_key_hex": "00",
+                            "value": 1.0,
+                        }
+                    )
+                ],
+            }
+        )
+        addr_1.transaction_ids = [Command.set([tx_confirmed.id, tx_unconfirmed_2.id])]
+        wallet.refresh_history()
+        self.assertEqual(wallet.transactions, 2)
+        self.assertAlmostEqual(wallet.balance, 2.5)
+        self.assertAlmostEqual(addr_1.balance, 2.5)
+
+        addr_1.transaction_ids = [Command.set([tx_confirmed.id])]
+        wallet.refresh_history()
+        self.assertEqual(wallet.transactions, 1)
+        self.assertAlmostEqual(wallet.balance, 1.5)
+        self.assertAlmostEqual(addr_1.balance, 1.5)
+        self.assertFalse(
+            self.WalletHistory.search(
+                [("wallet_id", "=", wallet.id), ("transaction_id", "=", tx_unconfirmed_2.id)]
+            )
+        )
+
+    def test_refresh_history_clears_rbf_address_balance(self):
+        wallet = self._new_wallet([self._new_key()], address_amount=2)
+        wallet.refresh_addresses()
+        addr_1 = self._address(wallet, 0, 0)
+        addr_2 = self._address(wallet, 0, 1)
+
+        block = self.Block.create({"hash": "e" * 64, "time": datetime.datetime(2024, 1, 1, 12, 0, 0)})
+        tx = self.Tx.create(
+            {
+                "txid": "f" * 64,
+                "block_id": block.id,
+                "vout_ids": [
+                    Command.create(
+                        {
+                            "n": 0,
+                            "type": "pubkeyhash",
+                            "address": addr_1.address,
+                            "asm": "asm",
+                            "script_pub_key_hex": "00",
+                            "value": 1.0,
+                        }
+                    )
+                ],
+            }
+        )
+        addr_1.transaction_ids = [Command.set([tx.id])]
+        addr_2.write({"balance": 0.5})
+
+        wallet.refresh_history()
+
+        self.assertAlmostEqual(addr_1.balance, 1.0)
+        self.assertAlmostEqual(addr_2.balance, 0.0)
+        self.assertEqual(wallet.transactions, 1)
+        self.assertAlmostEqual(wallet.balance, 1.0)
+
     def test_wallet_address_used_computation_and_manual_assignment(self):
         key = self._new_key()
         wallet = self._new_wallet([key], address_amount=2)
