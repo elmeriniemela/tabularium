@@ -1,0 +1,17 @@
+<odoo>
+    <record id="rule_psbt_owner" model="ir.rule">
+        <field name="name">PSBT: own drafts</field>
+        <field name="model_id" ref="model_bitcoin_psbt"/>
+        <field name="domain_force">[('create_uid', '=', user.id)]</field>
+    </record>
+    <record id="rule_psbt_input_owner" model="ir.rule">
+        <field name="name">PSBT inputs: own drafts</field>
+        <field name="model_id" ref="model_bitcoin_psbt_input"/>
+        <field name="domain_force">[('psbt_id.create_uid', '=', user.id)]</field>
+    </record>
+    <record id="rule_psbt_output_owner" model="ir.rule">
+        <field name="name">PSBT outputs: own drafts</field>
+        <field name="model_id" ref="model_bitcoin_psbt_output"/>
+        <field name="domain_force">[('psbt_id.create_uid', '=', user.id)]</field>
+    </record>
+</odoo>

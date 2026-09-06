@@ -2,3 +2,4 @@
 from . import key
 from . import wallet
 from . import tx
+from . import psbt
