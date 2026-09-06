@@ -279,10 +279,13 @@ class BitcoinWallet(models.Model):
         for wallet in self:
             existing = {h.transaction_id: h for h in wallet.history_ids}
             addr_balance = {}
+            rbf_addrs = wallet.address_ids.filtered(lambda a: a.balance and not a.transaction_ids)
+            if rbf_addrs:
+                rbf_addrs.write({'balance': 0})
+
             for tx in wallet.address_ids.transaction_ids:
                 amount = 0.0
                 for addr in tx.wallet_address_ids.filtered(lambda a: a.wallet_id == wallet):
-                    addr_balance[addr] = addr_balance.get(addr, 0) # ensure 0 is assigned incase TX got RBF'd
                     for vin in tx.vin_ids:
                         if addr.address == vin.spent_output_id.address:
                             amount -= vin.spent_output_id.value
