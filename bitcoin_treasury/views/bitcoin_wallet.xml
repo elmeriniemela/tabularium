@@ -69,7 +69,7 @@
                             </group>
                             <button name="refresh_addresses" type="object" string="Refresh addresses" icon="fa-cogs"/>
                             <field name="address_ids">
-                                <list editable="bottom" create="false" delete="false" decoration-muted="used">
+                                <list create="false" delete="false" decoration-muted="used">
                                     <field name="index" optional="show" readonly="True"/>
                                     <field name="atype" optional="show" readonly="True"/>
                                     <field name="address" optional="show" readonly="True"/>
