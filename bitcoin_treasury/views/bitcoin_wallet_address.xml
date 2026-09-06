@@ -22,6 +22,9 @@
         <field name="model">bitcoin.wallet.address</field>
         <field name="arch" type="xml">
             <form>
+                <header>
+                    <button name="%(action_psbt)d" type="action" string="Generate PSBT" context="{'default_source_address_id': id}"/>
+                </header>
                 <sheet>
                     <group>
                         <group>

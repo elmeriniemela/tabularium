@@ -7,5 +7,5 @@ paramiko==5.0.0
 xmltodict==1.0.4
 dicttoxml==1.7.16
 yfinance==1.7.0
-bitwalkit==0.1.0
+bitwalkit==0.2.0
 bitoplens==0.1.0

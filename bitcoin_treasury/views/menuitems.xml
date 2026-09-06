@@ -4,6 +4,7 @@
         <menuitem id="menu_wallet" action="action_wallet"/>
         <menuitem id="menu_key" action="action_key"/>
         <menuitem id="menu_wallet_address" action="action_wallet_address"/>
+        <menuitem id="menu_psbt" action="action_psbt_list" groups="bitcoin_explorer.group_bitcoin_user"/>
     </menuitem>
 
 </odoo>

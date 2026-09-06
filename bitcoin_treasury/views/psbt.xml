@@ -1,0 +1,103 @@
+<odoo>
+    <record id="form_psbt" model="ir.ui.view">
+        <field name="name">bitcoin.psbt.form</field>
+        <field name="model">bitcoin.psbt</field>
+        <field name="arch" type="xml">
+            <form string="Generate PSBT">
+                <group>
+                    <field name="name" placeholder="e.g. supplier_payment_2026-09-05.psbt"/>
+                    <field name="rbf"/>
+                </group>
+                <p>Enter previous outputs and their amounts manually. Balances and spent status are not checked.</p>
+                <p>Amounts are in satoshis (1 BTC = 100,000,000 sat). Totals and fee are displayed in BTC.</p>
+                <separator string="Inputs"/>
+                <field name="input_ids">
+                    <list editable="bottom">
+                        <field name="sequence" widget="handle"/>
+                        <field name="wallet_id" optional="show"/>
+                        <field name="branch" optional="show"/>
+                        <field name="address_index" optional="show"/>
+                        <field name="derived_address" optional="show"/>
+                        <field name="txid"  optional="show"/>
+                        <field name="output_index" optional="show"/>
+                        <field name="sats" optional="show"/>
+                        <field name="derivation_error" optional="show"/>
+                    </list>
+                </field>
+                <separator string="Outputs"/>
+                <p>Add change as another wallet output. The difference between input and output totals is the fee.</p>
+                <field name="output_ids">
+                    <list editable="bottom">
+                        <field name="sequence" widget="handle"/>
+                        <field name="destination_type" optional="show"/>
+                        <field name="address" invisible="destination_type != 'address'" required="destination_type == 'address'" optional="show"/>
+                        <field name="wallet_id" invisible="destination_type != 'wallet'" required="destination_type == 'wallet'" optional="show"/>
+                        <field name="branch" invisible="destination_type != 'wallet'" optional="show"/>
+                        <field name="address_index" invisible="destination_type != 'wallet'" optional="show"/>
+                        <field name="derived_address" invisible="destination_type != 'wallet'" optional="show"/>
+                        <field name="op_return_format" invisible="destination_type != 'op_return'" required="destination_type == 'op_return'" optional="hide"/>
+                        <field name="op_return_data" invisible="destination_type != 'op_return'" optional="hide"/>
+                        <field name="sats" optional="show"/>
+                        <field name="derivation_error" invisible="destination_type != 'wallet'" optional="show"/>
+                    </list>
+                </field>
+                <group>
+                    <field name="input_total"/>
+                    <field name="output_total"/>
+                    <field name="fee"/>
+                </group>
+                <div class="alert alert-danger" role="status" invisible="not amount_error">
+                    <field name="amount_error" nolabel="1"/>
+                </div>
+                <div class="alert alert-warning" role="status" invisible="not review_warnings">
+                    <field name="review_warnings" nolabel="1"/>
+                </div>
+                <details class="mb-3">
+                    <summary>Double-check before signing</summary>
+                    <ul>
+                        <li>Check each input's txid, zero-based output index, actual amount, and source address against trusted transaction data. Generation does not verify these claims or whether an output is spendable.</li>
+                        <li>Verify every destination, change address, amount, and the total fee on your signing device. Change is never added automatically.</li>
+                        <li>This PSBT includes extended public keys and derivation paths that can reveal other wallet addresses. Share it only with intended signers.</li>
+                        <li>Some signers require full previous transactions; this export provides witness UTXOs. When RBF is enabled, inputs signal BIP 125 replaceability (sequence 0xFFFFFFFD). When disabled, final sequences (0xFFFFFFFF) are used.</li>
+                    </ul>
+                    <button name="action_generate" type="object" string="Generate PSBT" class="btn-primary"/>
+                </details>
+                <group string="Generated PSBT" invisible="not psbt_binary">
+                    <field name="psbt_binary" filename="name"/>
+                    <field name="psbt_base64"/>
+                    <field name="psbt_base64" widget="CopyClipboardButton" string="Copy Base64" nolabel="1"/>
+                </group>
+            </form>
+        </field>
+    </record>
+
+    <record id="list_psbt" model="ir.ui.view">
+        <field name="name">bitcoin.psbt.list</field>
+        <field name="model">bitcoin.psbt</field>
+        <field name="arch" type="xml">
+            <list string="PSBTs">
+                <field name="name"/>
+                <field name="rbf" optional="show"/>
+                <field name="create_uid" optional="show"/>
+                <field name="create_date" optional="show"/>
+                <field name="input_total" optional="show"/>
+                <field name="output_total" optional="show"/>
+                <field name="fee" optional="show"/>
+                <field name="review_warnings" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_psbt" model="ir.actions.act_window">
+        <field name="name">Generate PSBT</field>
+        <field name="res_model">bitcoin.psbt</field>
+        <field name="view_mode">form</field>
+        <field name="target">fullscreen</field>
+    </record>
+
+    <record id="action_psbt_list" model="ir.actions.act_window">
+        <field name="name">PSBTs</field>
+        <field name="res_model">bitcoin.psbt</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

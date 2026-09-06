@@ -1,0 +1,1651 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* bitcoin_treasury
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-06 05:55+0000\n"
+"PO-Revision-Date: 2026-09-06 05:55+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_psbt__name
+msgid ""
+"A human-readable label for this PSBT. It does not change the transaction, "
+"the fee, or any signing data. Use a name that identifies the intended "
+"payment, such as 'supplier_payment_2026-09-05.psbt' or "
+"'cold_storage_consolidation.psbt'."
+msgstr ""
+
+#. module: bitcoin_treasury
+#. odoo-python
+#: code:addons/bitcoin_treasury/models/key.py:0
+msgid "A valid mainnet extended public key is required."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields.selection,name:bitcoin_treasury.selection__bitcoin_psbt_output__op_return_format__text
+msgid "ASCII-text"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_key__message_needaction
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__message_needaction
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_address__message_needaction
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__message_needaction
+msgid "Action Needed"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_key__active
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__active
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__active
+msgid "Active"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_key__activity_ids
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__activity_ids
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__activity_ids
+msgid "Activities"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_key__activity_exception_decoration
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__activity_exception_decoration
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__activity_exception_decoration
+msgid "Activity Exception Decoration"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_key__activity_state
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__activity_state
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__activity_state
+msgid "Activity State"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_key__activity_type_icon
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__activity_type_icon
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__activity_type_icon
+msgid "Activity Type Icon"
+msgstr ""
+
+#. module: bitcoin_treasury
+#. odoo-python
+#: code:addons/bitcoin_treasury/models/wallet.py:0
+msgid "Add an extended public key to compute the descriptor."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model_terms:ir.ui.view,arch_db:bitcoin_treasury.form_psbt
+msgid ""
+"Add change as another wallet output. The difference between input and output"
+" totals is the fee."
+msgstr ""
+
+#. module: bitcoin_treasury
+#. odoo-python
+#: code:addons/bitcoin_treasury/models/psbt.py:0
+msgid "Add derivation path for %s."
+msgstr ""
+
+#. module: bitcoin_treasury
+#. odoo-python
+#: code:addons/bitcoin_treasury/models/psbt.py:0
+msgid "Add parent fingerprint for %s."
+msgstr ""
+
+#. module: bitcoin_treasury
+#. odoo-python
+#: code:addons/bitcoin_treasury/models/key.py:0
+msgid "Add the master key fingerprint or remove the derivation path."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__address_ids
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_address__address
+#: model:ir.model.fields.selection,name:bitcoin_treasury.selection__bitcoin_psbt_output__destination_type__address
+msgid "Address"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__address_amount
+msgid "Address Amount"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_input__address_index
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_output__address_index
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_wallet_line__address_index
+msgid "Address Index"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.actions.act_window,name:bitcoin_treasury.action_wallet_address
+#: model:ir.ui.menu,name:bitcoin_treasury.menu_wallet_address
+#: model_terms:ir.ui.view,arch_db:bitcoin_treasury.form_wallet
+msgid "Addresses"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_psbt__review_warnings
+msgid ""
+"Advisory checks for possible mistakes: large or zero declared fees, missing "
+"explicit change, dust outputs, repeated destinations, and wallet outputs "
+"outside the configured address window. These warnings do not block "
+"generation or verify chain state. Large-fee warnings start at 0.001 BTC or "
+"1% of declared inputs; these are review thresholds, not recommended fees. "
+"Example: declaring a 1 BTC input and only a 0.5 BTC payment warns that the "
+"remaining 0.5 BTC is the fee and that you may have forgotten change."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model_terms:ir.ui.view,arch_db:bitcoin_treasury.search_key
+#: model_terms:ir.ui.view,arch_db:bitcoin_treasury.search_wallet
+msgid "All"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_history__amount
+msgid "Amount"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt__amount_error
+msgid "Amount Error"
+msgstr ""
+
+#. module: bitcoin_treasury
+#. odoo-python
+#: code:addons/bitcoin_treasury/models/psbt.py:0
+msgid "Amount cannot exceed 21,000,000 BTC."
+msgstr ""
+
+#. module: bitcoin_treasury
+#. odoo-python
+#: code:addons/bitcoin_treasury/models/psbt.py:0
+msgid "Amount must be nonnegative."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model_terms:ir.ui.view,arch_db:bitcoin_treasury.form_psbt
+msgid ""
+"Amounts are in satoshis (1 BTC = 100,000,000 sat). Totals and fee are "
+"displayed in BTC."
+msgstr ""
+"Määrät ovat satosheina (1 BTC = 100 000 000 sat). Summat ja palkkio "
+"näytetään BTC:nä."
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_key__message_attachment_count
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__message_attachment_count
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_address__message_attachment_count
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__message_attachment_count
+msgid "Attachment Count"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_key__script_type
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_wallet__script_type
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_wallet_key__script_type
+msgid ""
+"BIP44 specifies derivation paths m / purpose' / coin_type' / account' / "
+"change / address_index."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__balance
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_address__balance
+msgid "Balance"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__birth_timestamp
+msgid "Birth Timestamp"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_wallet__descriptor
+msgid ""
+"Bitcoin Core descriptor, or instructions for completing the wallet "
+"configuration."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model,name:bitcoin_treasury.model_bitcoin_key
+msgid "Bitcoin Extended Public Key"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model,name:bitcoin_treasury.model_bitcoin_tx_in
+msgid "Bitcoin Input"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model,name:bitcoin_treasury.model_bitcoin_tx_out
+msgid "Bitcoin Output"
+msgstr ""
+
+#. module: bitcoin_treasury
+#. odoo-python
+#: code:addons/bitcoin_treasury/models/wallet.py:0
+msgid "Bitcoin TX '%s' not found"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model,name:bitcoin_treasury.model_bitcoin_wallet_address
+msgid "Bitcoin Wallet Address"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model,name:bitcoin_treasury.model_bitcoin_wallet_key
+msgid "Bitcoin Wallet Extended Public Key"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model,name:bitcoin_treasury.model_bitcoin_wallet_history
+msgid "Bitcoin Wallet History"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model,name:bitcoin_treasury.model_bitcoin_wallet
+msgid "Bitcoin Watch-only Wallet"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_input__branch
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_output__branch
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_wallet_line__branch
+msgid "Branch"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields.selection,name:bitcoin_treasury.selection__bitcoin_psbt_input__branch__1
+#: model:ir.model.fields.selection,name:bitcoin_treasury.selection__bitcoin_psbt_output__branch__1
+#: model:ir.model.fields.selection,name:bitcoin_treasury.selection__bitcoin_psbt_wallet_line__branch__1
+#: model:ir.model.fields.selection,name:bitcoin_treasury.selection__bitcoin_wallet_address__atype__1
+msgid "Change"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model_terms:ir.ui.view,arch_db:bitcoin_treasury.form_psbt
+msgid ""
+"Check each input's txid, zero-based output index, actual amount, and source "
+"address against trusted transaction data. Generation does not verify these "
+"claims or whether an output is spendable."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_psbt_output__destination_type
+msgid ""
+"Chooses how this output's destination is specified. Address uses the mainnet"
+" address you paste into Destination Address. Wallet derives an address from "
+"a selected wallet, branch, and index and includes that wallet's key "
+"derivations and any multisig witness script in the PSBT. OP_RETURN creates a"
+" provably unspendable data carrier output with the specified text or "
+"hexadecimal payload. Only the selected mode's destination is used. Example: "
+"choose Address for a recipient, Wallet for your change, or OP_RETURN to "
+"embed an arbitrary data commitment."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_psbt_input__sequence
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_psbt_output__sequence
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_psbt_wallet_line__sequence
+msgid ""
+"Controls this row's position within the transaction's input list or output "
+"list. Lower values come first; use the drag handle to reorder rows in the "
+"wizard. This is a display and serialization order, not the Bitcoin input "
+"sequence value used for locktime or fee replacement. Example: rows ordered "
+"10 and 20 appear first and second respectively. Reordering transaction rows "
+"requires a matching regenerated export."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model_terms:ir.ui.view,arch_db:bitcoin_treasury.form_psbt
+msgid "Copy Base64"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_key__create_uid
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt__create_uid
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_input__create_uid
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_output__create_uid
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__create_uid
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_address__create_uid
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_history__create_uid
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__create_uid
+msgid "Created by"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_key__create_date
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt__create_date
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_input__create_date
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_output__create_date
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__create_date
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_address__create_date
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_history__create_date
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__create_date
+msgid "Created on"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_output__op_return_format
+msgid "Data Format"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_history__date
+msgid "Date"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_psbt_input__sats
+msgid ""
+"Declare the full satoshi value of the previous output identified by this "
+"row's txid and output index, even when you intend to pay only part of it to "
+"a recipient. This manually entered value is included in the PSBT and used to"
+" calculate the declared fee; it is not looked up or checked against a "
+"balance. Example: to spend a 50,000,000 sat output and pay 20,000,000 sat, "
+"enter 50000000 here, then enter the payment and any change as output rows."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt__fee
+msgid "Declared Fee (BTC)"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt__input_total
+msgid "Declared Inputs (BTC)"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_psbt__fee
+msgid ""
+"Declared input total minus total outputs, expressed in BTC. This is an "
+"absolute fee amount, not a fee rate in sat/vB or a recommendation based on "
+"network conditions. Its accuracy depends on entering the actual full value "
+"of every previous output. Any change you omit increases this fee. Example: "
+"0.10000000 BTC of inputs minus 0.09990000 BTC of outputs leaves 0.00010000 "
+"BTC, or 10,000 satoshis. A negative fee prevents generation; a zero fee is "
+"allowed with an advisory warning."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_input__derivation_error
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_output__derivation_error
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_wallet_line__derivation_error
+msgid "Derivation Error"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_key__real_derivation_path
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__real_derivation_path
+msgid "Derivation Path"
+msgstr ""
+
+#. module: bitcoin_treasury
+#. odoo-python
+#: code:addons/bitcoin_treasury/models/psbt.py:0
+msgid ""
+"Derived address %(derived)s does not match wallet address %(wallet)s for "
+"branch %(branch)s, index %(index)s."
+msgstr "Johdettu osoite %(derived)s ei vastaa lompakon osoitetta %(wallet)s haaralle %(branch)s, indeksi %(index)s."
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_history__name
+msgid "Description"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__descriptor
+msgid "Descriptor"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_output__address
+msgid "Destination Address"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_output__destination_type
+msgid "Destination Type"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_key__display_name
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt__display_name
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_input__display_name
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_output__display_name
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_wallet_line__display_name
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_tx__display_name
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_tx_in__display_name
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_tx_out__display_name
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__display_name
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_address__display_name
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_history__display_name
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__display_name
+msgid "Display Name"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model_terms:ir.ui.view,arch_db:bitcoin_treasury.form_psbt
+msgid "Double-check before signing"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_psbt__psbt_binary
+msgid ""
+"Download the generated unsigned transaction as a binary .psbt file for a "
+"compatible external signer. The file includes declared previous-output "
+"values, wallet key derivations, extended public keys, and any required "
+"multisig witness scripts. Generation does not sign or broadcast the "
+"transaction. The download is available only when the stored export matches "
+"the current draft. Example: click transaction.psbt to save the file, then "
+"import it into your signing wallet and verify every destination, amount, and"
+" fee before signing."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_key__real_parent_fingerprint
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_wallet_key__real_parent_fingerprint
+msgid ""
+"Eight-character fingerprint of the master key, used in the descriptor key "
+"origin."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_key__encoding
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__encoding
+msgid "Encoding"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_psbt_output__op_return_format
+msgid ""
+"Encoding format used to interpret the OP_RETURN data payload. Text encodes "
+"the string as ASCII bytes. Hex parses hexadecimal characters into raw bytes."
+" Example: entering 'hello' in Text mode produces bytes 68656c6c6f, while "
+"entering '68656c6c6f' in Hex mode produces the same 5 bytes. Incomplete or "
+"invalid hex strings are rejected during generation."
+msgstr ""
+"Koodausmuoto, jota käytetään OP_RETURN-datan tulkitsemiseen. Teksti koodaa "
+"merkkijonon ASCII-tavuiksi. Heksa tulkitsee heksadesimaalimerkit "
+"raakatavuiksi. Esimerkki: 'hello' tekstitilassa tuottaa tavut 68656c6c6f, "
+"kun taas '68656c6c6f' heksatilassa tuottaa samat 5 tavua. Keskeneräiset tai "
+"virheelliset heksamerkkijonot hylätään luonnin yhteydessä."
+
+#. module: bitcoin_treasury
+#. odoo-python
+#: code:addons/bitcoin_treasury/models/key.py:0
+msgid "Enter a valid BIP32 derivation path."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model_terms:ir.ui.view,arch_db:bitcoin_treasury.form_psbt
+msgid ""
+"Enter previous outputs and their amounts manually. Balances and spent status"
+" are not checked."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_psbt__amount_error
+msgid ""
+"Explains an amount or total that must be corrected before the PSBT can be "
+"generated. Amounts must be nonnegative integer satoshi values, and outputs "
+"must fit within the declared inputs. Individual amounts and transaction "
+"totals cannot exceed 21,000,000 BTC (2,100,000,000,000,000 satoshis). Clear "
+"messages do not establish that the supplied input details are correct on the"
+" blockchain."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_psbt_input__derivation_error
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_psbt_output__derivation_error
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_psbt_wallet_line__derivation_error
+msgid ""
+"Explains why the selected wallet address or its signing metadata cannot be "
+"derived. Possible causes include an unsupported script type, missing "
+"account-key origin details, an origin path that does not match the extended "
+"key, or an invalid address index. Correct the row or the wallet's key "
+"settings before generating an input or wallet output. Example: an account "
+"key exported at m/84'/0'/0' needs that full origin path and its master key "
+"fingerprint; omitting them produces a derivation error."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_key__wif
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__wif
+msgid "Extended Public Key"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.actions.act_window,name:bitcoin_treasury.action_key
+#: model:ir.ui.menu,name:bitcoin_treasury.menu_key
+#: model_terms:ir.ui.view,arch_db:bitcoin_treasury.form_wallet
+msgid "Extended Public Keys"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt__name
+msgid "Filename"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__first_key_id
+msgid "First Key"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_key__message_follower_ids
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__message_follower_ids
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_address__message_follower_ids
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__message_follower_ids
+msgid "Followers"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_key__message_partner_ids
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__message_partner_ids
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_address__message_partner_ids
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__message_partner_ids
+msgid "Followers (Partners)"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_key__activity_type_icon
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_wallet__activity_type_icon
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_wallet_key__activity_type_icon
+msgid "Font awesome icon e.g. fa-tasks"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__gap_limit
+msgid "Gap Limit"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model,name:bitcoin_treasury.model_bitcoin_psbt
+msgid "Generate Bitcoin PSBT"
+msgstr ""
+
+#. module: bitcoin_treasury
+#. odoo-python
+#: code:addons/bitcoin_treasury/models/psbt.py:0
+#: model:ir.actions.act_window,name:bitcoin_treasury.action_psbt
+#: model_terms:ir.ui.view,arch_db:bitcoin_treasury.form_psbt
+#: model_terms:ir.ui.view,arch_db:bitcoin_treasury.form_wallet
+#: model_terms:ir.ui.view,arch_db:bitcoin_treasury.form_wallet_address
+msgid "Generate PSBT"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt__generated_fingerprint
+msgid "Generated Fingerprint"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model_terms:ir.ui.view,arch_db:bitcoin_treasury.form_psbt
+msgid "Generated PSBT"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt__generated_psbt
+msgid "Generated Psbt"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model_terms:ir.ui.view,arch_db:bitcoin_treasury.search_wallet
+msgid "Has Balance"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_key__has_message
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__has_message
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_address__has_message
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__has_message
+msgid "Has Message"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model_terms:ir.ui.view,arch_db:bitcoin_treasury.search_wallet_address
+msgid "Has transactions"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields.selection,name:bitcoin_treasury.selection__bitcoin_psbt_output__op_return_format__hex
+msgid "Hex"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__history_ids
+#: model_terms:ir.ui.view,arch_db:bitcoin_treasury.form_wallet
+msgid "History"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_key__id
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt__id
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_input__id
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_output__id
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_wallet_line__id
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_tx__id
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_tx_in__id
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_tx_out__id
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__id
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_address__id
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_history__id
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__id
+msgid "ID"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_key__activity_exception_icon
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__activity_exception_icon
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__activity_exception_icon
+msgid "Icon"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_key__activity_exception_icon
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_wallet__activity_exception_icon
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_wallet_key__activity_exception_icon
+msgid "Icon to indicate an exception activity."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_key__message_needaction
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_wallet__message_needaction
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_wallet_address__message_needaction
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_wallet_key__message_needaction
+msgid "If checked, new messages require your attention."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_key__message_has_error
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_wallet__message_has_error
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_wallet_address__message_has_error
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_wallet_key__message_has_error
+msgid "If checked, some messages have a delivery error."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_address__index
+msgid "Index"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt__input_ids
+#: model_terms:ir.ui.view,arch_db:bitcoin_treasury.form_psbt
+msgid "Inputs"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_psbt__generated_fingerprint
+msgid ""
+"Internal SHA-256 fingerprint of the transaction rows and wallet key settings"
+" used for the stored PSBT. The wizard compares this fingerprint with its "
+"current settings to avoid offering an outdated export. It is not a "
+"transaction ID or a master key fingerprint. Example: changing an output from"
+" 0.01000000 BTC to 0.02000000 BTC changes the fingerprint and makes the "
+"previous export unavailable for the edited draft."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_psbt__generated_psbt
+msgid ""
+"Internal storage for the most recently generated unsigned PSBT, encoded by "
+"Odoo as binary field data. It is retained with this PSBT and is used to "
+"prepare the downloadable file and Base64 text. Use those export fields to "
+"obtain a result matching the current transaction details. Example: "
+"generating a draft stores its PSBT here; changing a payment afterward hides "
+"the public export until a matching PSBT is generated."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_key__message_is_follower
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__message_is_follower
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_address__message_is_follower
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__message_is_follower
+msgid "Is Follower"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__key_ids
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__key_id
+msgid "Key"
+msgstr ""
+
+#. module: bitcoin_treasury
+#. odoo-python
+#: code:addons/bitcoin_treasury/models/psbt.py:0
+msgid ""
+"Large declared fee: %(fee)s BTC (%(sats)s sat). Review fees of at least "
+"0.001 BTC or 1%% of declared inputs. Any omitted change becomes the fee."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_key__write_uid
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt__write_uid
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_input__write_uid
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_output__write_uid
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__write_uid
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_address__write_uid
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_history__write_uid
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__write_uid
+msgid "Last Updated by"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_key__write_date
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt__write_date
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_input__write_date
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_output__write_date
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__write_date
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_address__write_date
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_history__write_date
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__write_date
+msgid "Last Updated on"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields.selection,name:bitcoin_treasury.selection__bitcoin_key__witness_type__legacy
+msgid "Legacy"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_psbt_output__address
+msgid ""
+"Mainnet Bitcoin address that receives this output when Destination Type is "
+"Address. The generator validates and converts it to an output script, but it"
+" does not verify who controls the address. Testnet and regtest addresses are"
+" rejected. This field is ignored in Wallet mode, where Wallet Address "
+"supplies the destination instead. Example: a published test-vector address "
+"has the form bc1qcr8te4kr609gcawutmrza0j4xv80jy8z306fyu; use your intended "
+"recipient's verified address rather than this example, and confirm it on the"
+" signing device."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_psbt_input__derived_address
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_psbt_output__derived_address
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_psbt_wallet_line__derived_address
+msgid ""
+"Mainnet address calculated from the selected wallet, branch, and address "
+"index. It is read-only because changing those choices determines the "
+"address. For an input, verify that this address matches the previous output "
+"you intend to spend; for a wallet output, it is the destination that will "
+"receive the entered amount. Example: selecting Receiving and index 0 "
+"displays the wallet's first receiving address. Deriving an address does not "
+"prove that an output exists or is unspent."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_key__wif
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_wallet_key__wif
+msgid ""
+"Mainnet extended public key used exclusively for watch-only address "
+"derivation."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_key__real_parent_fingerprint
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__real_parent_fingerprint
+msgid "Master Key Fingerprint"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_key__message_has_error
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__message_has_error
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_address__message_has_error
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__message_has_error
+msgid "Message Delivery error"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_key__message_ids
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__message_ids
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_address__message_ids
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__message_ids
+msgid "Messages"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_key__multisig
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__multisig
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__multisig
+msgid "Multisig"
+msgstr ""
+
+#. module: bitcoin_treasury
+#. odoo-python
+#: code:addons/bitcoin_treasury/models/wallet.py:0
+msgid "Multisig not supported for script type %s. Supported types %s."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_key__my_activity_date_deadline
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__my_activity_date_deadline
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__my_activity_date_deadline
+msgid "My Activity Deadline"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_key__name
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__name
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__name
+msgid "Name"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_key__activity_date_deadline
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__activity_date_deadline
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__activity_date_deadline
+msgid "Next Activity Deadline"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_key__activity_summary
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__activity_summary
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__activity_summary
+msgid "Next Activity Summary"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_key__activity_type_id
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__activity_type_id
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__activity_type_id
+msgid "Next Activity Type"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model_terms:ir.ui.view,arch_db:bitcoin_treasury.search_wallet
+msgid "No Balance"
+msgstr ""
+
+#. module: bitcoin_treasury
+#. odoo-python
+#: code:addons/bitcoin_treasury/models/psbt.py:0
+msgid ""
+"No explicit change output to an input wallet is declared. Confirm a full "
+"spend is intended, or add change; the entire remainder is the fee."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model_terms:ir.ui.view,arch_db:bitcoin_treasury.search_wallet_address
+msgid "No transactions"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_key__message_needaction_counter
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__message_needaction_counter
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_address__message_needaction_counter
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__message_needaction_counter
+msgid "Number of Actions"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_key__message_has_error_counter
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__message_has_error_counter
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_address__message_has_error_counter
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__message_has_error_counter
+msgid "Number of errors"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_key__message_needaction_counter
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_wallet__message_needaction_counter
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_wallet_address__message_needaction_counter
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_wallet_key__message_needaction_counter
+msgid "Number of messages requiring action"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_key__message_has_error_counter
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_wallet__message_has_error_counter
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_wallet_address__message_has_error_counter
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_wallet_key__message_has_error_counter
+msgid "Number of messages with delivery error"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields.selection,name:bitcoin_treasury.selection__bitcoin_psbt_output__destination_type__op_return
+msgid "OP_RETURN"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_output__op_return_data
+msgid "OP_RETURN Data"
+msgstr ""
+
+#. module: bitcoin_treasury
+#. odoo-python
+#: code:addons/bitcoin_treasury/models/psbt.py:0
+msgid "OP_RETURN data exceeds maximum script size of 10,000 bytes."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_history__other_wallet_ids
+msgid "Other Wallet"
+msgstr ""
+
+#. module: bitcoin_treasury
+#. odoo-python
+#: code:addons/bitcoin_treasury/models/psbt.py:0
+msgid ""
+"Output %(row)s OP_RETURN script is %(bytes)s bytes, exceeding the standard "
+"83-byte relay limit. Standard nodes may not relay this transaction."
+msgstr ""
+
+#. module: bitcoin_treasury
+#. odoo-python
+#: code:addons/bitcoin_treasury/models/psbt.py:0
+msgid ""
+"Output %(row)s is %(amount)s sat, below the %(threshold)s sat dust threshold"
+" at the 3000 sat/kvB policy baseline. Relay policies vary; this output may "
+"be rejected."
+msgstr ""
+
+#. module: bitcoin_treasury
+#. odoo-python
+#: code:addons/bitcoin_treasury/models/psbt.py:0
+msgid ""
+"Output %(row)s is an OP_RETURN output with %(amount)s BTC (%(sats)s sat). "
+"Any funds sent to an OP_RETURN output are provably unspendable and "
+"permanently burned."
+msgstr ""
+
+#. module: bitcoin_treasury
+#. odoo-python
+#: code:addons/bitcoin_treasury/models/psbt.py:0
+msgid ""
+"Output %(row)s uses wallet address index %(index)s, outside its configured "
+"address window. Make sure your receiving and recovery wallets scan this "
+"index."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt__output_ids
+#: model_terms:ir.ui.view,arch_db:bitcoin_treasury.form_psbt
+msgid "Outputs"
+msgstr ""
+
+#. module: bitcoin_treasury
+#. odoo-python
+#: code:addons/bitcoin_treasury/models/psbt.py:0
+msgid ""
+"Outputs %(first)s and %(second)s pay the same destination. Check for an "
+"accidental duplicate payment."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields.selection,name:bitcoin_treasury.selection__bitcoin_key__witness_type__p2sh-segwit
+msgid "P2SH Segwit"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt__psbt_base64
+msgid "PSBT Base64"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt__psbt_binary
+msgid "PSBT File"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model,name:bitcoin_treasury.model_bitcoin_psbt_input
+msgid "PSBT Input"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model,name:bitcoin_treasury.model_bitcoin_psbt_output
+msgid "PSBT Output"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model,name:bitcoin_treasury.model_bitcoin_psbt_wallet_line
+msgid "PSBT Wallet Derivation"
+msgstr ""
+
+#. module: bitcoin_treasury
+#. odoo-python
+#: code:addons/bitcoin_treasury/models/psbt.py:0
+msgid ""
+"PSBT inputs and wallet outputs require native SegWit single-signature or "
+"multisig keys."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_psbt_input__psbt_id
+msgid ""
+"PSBT that owns this input row. The wizard assigns this link automatically so"
+" the row contributes to the correct input total and generated transaction. "
+"Deleting the draft also deletes its input rows. Example: adding an input in "
+"the currently open Generate PSBT dialog links it to that draft, not to "
+"another open PSBT draft."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_psbt_output__psbt_id
+msgid ""
+"PSBT that owns this output row. The wizard sets this link automatically so "
+"the payment is included in that draft's output total and serialized "
+"transaction. Deleting the draft also deletes its output rows. Example: a "
+"recipient payment and a change row added in the same Generate PSBT dialog "
+"both belong to this linked draft."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.actions.act_window,name:bitcoin_treasury.action_psbt_list
+#: model:ir.ui.menu,name:bitcoin_treasury.menu_psbt
+#: model_terms:ir.ui.view,arch_db:bitcoin_treasury.list_psbt
+msgid "PSBTs"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_key__real_derivation_path
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_wallet_key__real_derivation_path
+msgid ""
+"Path from the master key to this extended public key, used in the descriptor"
+" key origin."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields.selection,name:bitcoin_treasury.selection__bitcoin_key__script_type__p2tr
+msgid "Pay To Taproot (m/86)"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields.selection,name:bitcoin_treasury.selection__bitcoin_key__script_type__p2wpkh
+msgid "Pay To Witness Public Key Hash (m/84)"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields.selection,name:bitcoin_treasury.selection__bitcoin_key__script_type__p2sh_p2wpkh
+msgid "Pay To Witness Public Key Hash Wrapped In P2SH (m/49)"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields.selection,name:bitcoin_treasury.selection__bitcoin_key__script_type__p2wsh
+msgid "Pay To Witness Script Hash (m/48h/0h/0h/2h)"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields.selection,name:bitcoin_treasury.selection__bitcoin_key__script_type__p2sh_p2wsh
+msgid "Pay To Witness Script Hash Wrapped In P2SH (m/48h/0h/0h/1h)"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields.selection,name:bitcoin_treasury.selection__bitcoin_key__script_type__p2pkh
+msgid "Pay to Public Key Hash (m/44)"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields.selection,name:bitcoin_treasury.selection__bitcoin_key__script_type__p2sh
+msgid "Pay to Script Hash (m/45)"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_psbt_output__op_return_data
+msgid ""
+"Payload data embedded in this OP_RETURN script. When Data Format is Text, "
+"enter plain text encoded as ASCII. When Data Format is Hex, enter an even "
+"number of hexadecimal digits. Standard Bitcoin network relay policy allows "
+"at most 80 bytes of data (83 bytes total script size). Example: enter "
+"'invoice-12345' in Text format or '4f4d4e49' in Hex format. Leaving this "
+"empty creates a bare OP_RETURN output with no pushed data."
+msgstr ""
+"Hyötykuormadata, joka upotetaan tähän OP_RETURN-skriptiin. Kun datamuoto on "
+"Teksti, syötä ASCII-koodattua tekstiä. Kun datamuoto on Heksa, syötä "
+"parillinen määrä heksadesimaalimerkkejä. Bitcoin-verkon standardi "
+"välityskäytäntö sallii enintään 80 tavua dataa (yhteensä 83 tavun "
+"skriptikoko). Esimerkki: syötä 'invoice-12345' tekstimuodossa tai '4f4d4e49'"
+" heksamuodossa. Kentän jättäminen tyhjäksi luo pelkän OP_RETURN-tulosteen "
+"ilman dataa."
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_psbt__output_ids
+msgid ""
+"Payments created by the new transaction, including any change you want to "
+"keep. Each row specifies a destination and an amount in satoshis. Use a "
+"pasted address for a recipient or select a wallet address to include its "
+"signing metadata. Change is never added automatically: the entire difference"
+" between declared inputs and these outputs is the fee. Example: for "
+"50,000,000 sat of inputs, send 20,000,000 sat to a recipient and 29,990,000 "
+"sat to your wallet's Change branch, leaving a declared fee of 10,000 sat."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_input__output_index
+msgid "Previous Output Index"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_input__txid
+msgid "Previous Transaction ID"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_psbt__input_ids
+msgid ""
+"Previous transaction outputs that this transaction will spend. Each row "
+"identifies one output by its transaction ID and output index, declares its "
+"full satoshi amount, and selects the wallet address whose keys should "
+"authorize the spend. You can combine inputs from several wallets. No "
+"balance, transaction history, or spent-status lookup is performed, but the "
+"same outpoint cannot appear twice. Example: add output 0 of one transaction "
+"for 30,000,000 sat and output 2 of another for 20,000,000 sat to declare "
+"50,000,000 sat of inputs."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_input__psbt_id
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_output__psbt_id
+msgid "Psbt"
+msgstr ""
+
+#. module: bitcoin_treasury
+#. odoo-python
+#: code:addons/bitcoin_treasury/models/wallet.py:0
+msgid "Ran out of addresses! Please icrease address amount."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields.selection,name:bitcoin_treasury.selection__bitcoin_psbt_input__branch__0
+#: model:ir.model.fields.selection,name:bitcoin_treasury.selection__bitcoin_psbt_output__branch__0
+#: model:ir.model.fields.selection,name:bitcoin_treasury.selection__bitcoin_psbt_wallet_line__branch__0
+#: model:ir.model.fields.selection,name:bitcoin_treasury.selection__bitcoin_wallet_address__atype__0
+msgid "Receiving"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model_terms:ir.ui.view,arch_db:bitcoin_treasury.form_wallet
+msgid "Refresh"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.actions.server,name:bitcoin_treasury.cron_refresh_wallets_ir_actions_server
+msgid "Refresh Bitcoin Wallets"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model_terms:ir.ui.view,arch_db:bitcoin_treasury.form_wallet
+msgid "Refresh addresses"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt__rbf
+msgid "Replace-by-Fee (RBF)"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_key__activity_user_id
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__activity_user_id
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__activity_user_id
+msgid "Responsible User"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt__review_warnings
+msgid "Review Before Signing"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_psbt_wallet_line__sats
+msgid ""
+"Satoshi amount assigned to this row (1 BTC = 100,000,000 satoshis). Inputs "
+"declare the full previous-output value; outputs specify the value sent to "
+"their destination. Must be a nonnegative integer up to 2,100,000,000,000,000"
+" satoshis (21,000,000 BTC). Example: enter 100000 for 0.001 BTC, or 1 for "
+"one satoshi."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_psbt_output__sats
+msgid ""
+"Satoshi value to send to this output's destination. Enter recipient payments"
+" and change as separate rows; there is no automatic change calculation. The "
+"combined output amounts must not exceed the declared input total. Example: "
+"enter 20000000 for a 20,000,000 sat payment, then 29990000 on a change row "
+"when spending a 50,000,000 sat input with a 10,000 sat fee. Zero and dust "
+"amounts can be exported with warnings, but may not be accepted for relay."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_input__sats
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_output__sats
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_wallet_line__sats
+msgid "Satoshis"
+msgstr "Satoshit"
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_key__script_type
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__script_type
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__script_type
+msgid "Script Type"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_address__scripthash
+msgid "Scripthash"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_address__scripthash_status
+msgid "Scripthash Status"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields.selection,name:bitcoin_treasury.selection__bitcoin_key__witness_type__segwit
+msgid "Segwit"
+msgstr ""
+
+#. module: bitcoin_treasury
+#. odoo-python
+#: code:addons/bitcoin_treasury/models/psbt.py:0
+msgid "Select a wallet for this row."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_psbt_input__branch
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_psbt_output__branch
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_psbt_wallet_line__branch
+msgid ""
+"Selects the address branch below the wallet's extended public keys: "
+"Receiving appends /0 and Change appends /1 before the address index. For an "
+"input, choose the branch of the address that received the previous output. "
+"For a wallet output, Change normally returns the unused amount to your "
+"wallet. Selecting it does not calculate or add change automatically. "
+"Example: Change with address index 5 appends /1/5 to an account path, such "
+"as m/84'/0'/0'/1/5."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_key__sequence
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_input__sequence
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_output__sequence
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_wallet_line__sequence
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__sequence
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__sequence
+msgid "Sequence"
+msgstr ""
+
+#. module: bitcoin_treasury
+#. odoo-python
+#: code:addons/bitcoin_treasury/models/wallet.py:0
+msgid ""
+"Set Required Signatures between 1 and the number of extended public keys."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_psbt__rbf
+msgid ""
+"Signal opt-in replaceability under BIP 125. When checked, inputs use "
+"sequence 0xFFFFFFFD, allowing this transaction to be fee-bumped or replaced "
+"while unconfirmed. When unchecked, inputs use final sequence 0xFFFFFFFF. "
+"Example: leave checked for standard payments so you can bump fees if mempool"
+" traffic increases."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__sigs_required
+msgid "Sigs Required"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model_terms:ir.ui.view,arch_db:bitcoin_treasury.form_psbt
+msgid ""
+"Some signers require full previous transactions; this export provides "
+"witness UTXOs. When RBF is enabled, inputs signal BIP 125 replaceability "
+"(sequence 0xFFFFFFFD). When disabled, final sequences (0xFFFFFFFF) are used."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_key__multisig
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_wallet_key__multisig
+msgid ""
+"Specify whether this extended public key is used for multisignature address "
+"derivation."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_key__activity_state
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_wallet__activity_state
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_wallet_key__activity_state
+msgid ""
+"Status based on activities\n"
+"Overdue: Due date is already passed\n"
+"Today: Activity date is today\n"
+"Planned: Future activities."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_psbt__input_total
+msgid ""
+"Sum of all amounts entered in the input rows, displayed in BTC with eight "
+"decimal places. This is a total of your declarations, not the wallet's "
+"recorded balance or an independently verified amount available on the "
+"blockchain. It updates when input amounts change. Example: input amounts of "
+"0.10000000 BTC and 0.02500000 BTC produce 0.12500000 BTC here, even if the "
+"selected wallets have no recorded balance."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_psbt__output_total
+msgid ""
+"Sum of all new output amounts, including recipient payments and explicitly "
+"entered change. This total excludes the transaction fee and cannot exceed "
+"the declared input total when generating a PSBT. It updates automatically as"
+" you edit the output rows. Example: a 0.04000000 BTC payment plus 0.05990000"
+" BTC of change gives an output total of 0.09990000 BTC."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields.selection,name:bitcoin_treasury.selection__bitcoin_key__witness_type__taproot
+msgid "Taproot"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_psbt_input__txid
+msgid ""
+"The 64 hexadecimal characters of the previous transaction's txid, as "
+"displayed by a trusted explorer or wallet. Combined with Previous Output "
+"Index, it identifies the exact output to spend. Use txid rather than wtxid, "
+"and do not reverse its displayed byte order. The generator checks its format"
+" but does not fetch the transaction. Example: a dummy txid consisting of "
+"'ab' repeated 32 times is accepted for an offline experiment; an actual "
+"spend needs the real transaction ID."
+msgstr ""
+
+#. module: bitcoin_treasury
+#. odoo-python
+#: code:addons/bitcoin_treasury/models/psbt.py:0
+msgid ""
+"The declared fee is zero. A signed transaction may not be relayed or mined."
+msgstr ""
+
+#. module: bitcoin_treasury
+#. odoo-python
+#: code:addons/bitcoin_treasury/models/key.py:0
+msgid ""
+"The master key fingerprint must contain exactly eight hexadecimal "
+"characters."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_psbt__psbt_base64
+msgid ""
+"The same generated PSBT as the downloadable file, represented as Base64 text"
+" for software that accepts pasted PSBTs. Copy the complete value, including "
+"any trailing equals signs; Base64 is an encoding, not encryption. The text "
+"includes public wallet metadata and should only be shared with intended "
+"signers. Example: use Copy Base64 and paste the full string beginning with "
+"cHNidP into a compatible wallet's PSBT import field."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.constraint,message:bitcoin_treasury.constraint_bitcoin_wallet_address_wallet_address_uniq
+msgid "The wallet already has this address!"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.constraint,message:bitcoin_treasury.constraint_bitcoin_wallet_key_wallet_key_uniq
+msgid "The wallet already has this extended public key!"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model_terms:ir.ui.view,arch_db:bitcoin_treasury.form_psbt
+msgid ""
+"This PSBT includes extended public keys and derivation paths that can reveal"
+" other wallet addresses. Share it only with intended signers."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt__output_total
+msgid "Total Outputs (BTC)"
+msgstr ""
+
+#. module: bitcoin_treasury
+#. odoo-python
+#: code:addons/bitcoin_treasury/models/psbt.py:0
+msgid "Total input amount cannot exceed 21,000,000 BTC."
+msgstr ""
+
+#. module: bitcoin_treasury
+#. odoo-python
+#: code:addons/bitcoin_treasury/models/psbt.py:0
+msgid "Total outputs exceed the declared input amounts."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_address__transaction_ids
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_history__transaction_id
+msgid "Transaction"
+msgstr ""
+
+#. module: bitcoin_treasury
+#. odoo-python
+#: code:addons/bitcoin_treasury/models/psbt.py:0
+msgid ""
+"Transaction contains multiple OP_RETURN outputs. Standard Bitcoin relay "
+"policy allows at most one OP_RETURN output per transaction; transactions "
+"with multiple OP_RETURN outputs may not be relayed."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__transactions
+msgid "Transactions"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.ui.menu,name:bitcoin_treasury.menu_root
+msgid "Treasury"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_address__atype
+msgid "Type"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_key__activity_exception_decoration
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_wallet__activity_exception_decoration
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_wallet_key__activity_exception_decoration
+msgid "Type of the exception activity on record."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_wallet__birth_timestamp
+msgid ""
+"Unix timestamp for Bitcoin Core descriptor imports, based on the earliest "
+"wallet transaction or wallet creation time."
+msgstr ""
+
+#. module: bitcoin_treasury
+#. odoo-python
+#: code:addons/bitcoin_treasury/models/wallet.py:0
+msgid "Use a native SegWit single-signature extended public key."
+msgstr ""
+
+#. module: bitcoin_treasury
+#. odoo-python
+#: code:addons/bitcoin_treasury/models/psbt.py:0
+msgid "Use mainnet extended public keys."
+msgstr ""
+
+#. module: bitcoin_treasury
+#. odoo-python
+#: code:addons/bitcoin_treasury/models/wallet.py:0
+msgid "Use native SegWit multisig for every extended public key."
+msgstr ""
+
+#. module: bitcoin_treasury
+#. odoo-python
+#: code:addons/bitcoin_treasury/models/wallet.py:0
+msgid "Use no more than 15 extended public keys."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model_terms:ir.ui.view,arch_db:bitcoin_treasury.form_psbt
+msgid ""
+"Verify every destination, change address, amount, and the total fee on your "
+"signing device. Change is never added automatically."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_input__wallet_id
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_output__wallet_id
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_wallet_line__wallet_id
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_tx_in__wallet_ids
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_tx_out__wallet_ids
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_address__wallet_id
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_history__wallet_id
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__wallet_id
+#: model:ir.model.fields.selection,name:bitcoin_treasury.selection__bitcoin_psbt_output__destination_type__wallet
+msgid "Wallet"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_input__derived_address
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_output__derived_address
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_wallet_line__derived_address
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_tx__wallet_address_ids
+msgid "Wallet Address"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_tx__wallet_history_ids
+msgid "Wallet History"
+msgstr ""
+
+#. module: bitcoin_treasury
+#. odoo-python
+#: code:addons/bitcoin_treasury/models/key.py:0
+msgid "Wallet and extended public key type combination not supported: %s / %s"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_psbt_output__wallet_id
+msgid ""
+"Wallet that will receive this output when Destination Type is Wallet. Its "
+"keys, branch, and address index determine the destination and the metadata "
+"included for external signers. This can be an input wallet receiving change "
+"or a different wallet receiving a transfer; choosing it never calculates the"
+" amount automatically. This field is ignored in Address mode. Example: "
+"select Treasury Savings and its Change branch to return 0.29990000 BTC from "
+"a 0.5 BTC input after a 0.2 BTC payment and 0.0001 BTC fee."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_psbt_input__wallet_id
+msgid ""
+"Wallet whose keys should authorize spending this previous output. Its "
+"extended public keys, together with the Receiving/Change branch and address "
+"index, determine the source script and the derivation metadata supplied to "
+"the signer. Selecting a wallet does not select coins, verify ownership on-"
+"chain, or require a balance. Use a supported native SegWit wallet with "
+"complete account-key origins. Example: if a previous payment went to "
+"Treasury Savings at /0/7, select Treasury Savings, Receiving, and address "
+"index 7."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model_terms:ir.ui.view,arch_db:bitcoin_treasury.form_tx
+msgid "Watch-only Wallet Addresses"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.actions.act_window,name:bitcoin_treasury.action_wallet
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_key__wallet_ids
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__wallet_ids
+#: model:ir.ui.menu,name:bitcoin_treasury.menu_wallet
+msgid "Watch-only Wallets"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_psbt_wallet_line__wallet_id
+msgid ""
+"Watch-only wallet whose extended public keys determine this row's address "
+"and signing metadata. The branch and address index select a child address "
+"directly; a balance and refreshed address history are unnecessary. Supported"
+" wallet configurations are native SegWit single-signature and multisig, with"
+" complete key origins for account keys. Example: select Treasury Savings, "
+"then Change and index 5 to derive that wallet's /1/5 address."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_key__witness_type
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__witness_type
+msgid "Witness Type"
+msgstr ""
+
+#. module: bitcoin_treasury
+#. odoo-python
+#: code:addons/bitcoin_treasury/models/wallet.py:0
+msgid "Wrong amount of extended public keys: %s"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.constraint,message:bitcoin_treasury.constraint_bitcoin_wallet_history_wallet_transaction_uniq
+msgid ""
+"You should net out the balance change of one transaction instead of creating"
+" multiple lines per transaction!"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_psbt_input__address_index
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_psbt_output__address_index
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_psbt_wallet_line__address_index
+msgid ""
+"Zero-based child address number within the selected Receiving or Change "
+"branch. This is a wallet derivation index, not the previous transaction's "
+"output index. Values from 0 to 2,147,483,647 are supported, and the address "
+"is derived without requiring a stored address record. Example: Receiving "
+"with index 5 selects /0/5, the sixth address on that branch. If you send to "
+"a high index, make sure your receiving and recovery wallets scan far enough "
+"to discover it."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_psbt_input__output_index
+msgid ""
+"Zero-based vout position of the output within the previous transaction: 0 is"
+" its first output, 1 its second, and so on. This is different from the "
+"wallet Address Index, which selects a derived address. Values from 0 to "
+"4,294,967,295 can be encoded, but an actual spend must reference an output "
+"that exists. Example: to spend the third output of the transaction "
+"identified by txid, enter 2 here and verify that output's full amount and "
+"source address against the other fields in this row."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields.selection,name:bitcoin_treasury.selection__bitcoin_key__encoding__base58
+msgid "base58"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields.selection,name:bitcoin_treasury.selection__bitcoin_key__encoding__bech32
+msgid "bech32"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model,name:bitcoin_treasury.model_bitcoin_tx
+msgid "bitcoin transaction"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model_terms:ir.ui.view,arch_db:bitcoin_treasury.form_psbt
+msgid "e.g. supplier_payment_2026-09-05.psbt"
+msgstr ""
+
