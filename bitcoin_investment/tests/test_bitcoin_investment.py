@@ -49,6 +49,10 @@ class TestBitcoinInvestmentIntegration(TransactionCase):
         cls.portfolio = cls.env['investment.portfolio'].create({
             'name': 'Bitcoin Test Portfolio',
         })
+        cls.block = cls.env['bitcoin.block'].create({
+            'hash': '0' * 64,
+            'time': fields.Datetime.now(),
+        })
         cls.config = cls.env['ir.config_parameter'].sudo()
         cls._root_xpub = (
             'xpub661MyMwAqRbcGFeMhhkrJL6Yj3YKQFNZQSM2BAvoMmhdjNKBh43n5v3c4YT5dFtjkirfhqQH'
@@ -115,8 +119,13 @@ class TestBitcoinInvestmentIntegration(TransactionCase):
         })
         return wallet
 
-    def _new_tx(self):
-        return self.env['bitcoin.tx'].create({'txid': self._next_txid()})
+    def _new_tx(self, **overrides):
+        values = {
+            'txid': self._next_txid(),
+            'block_id': self.block.id,
+        }
+        values.update(overrides)
+        return self.env['bitcoin.tx'].create(values)
 
     def _new_history(self, *, wallet, tx, amount, date, position_transaction=None):
         values = {
