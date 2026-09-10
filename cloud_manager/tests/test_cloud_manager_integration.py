@@ -558,6 +558,7 @@ class TestCloudManagerIntegration(TransactionCase):
         server.action_agent_restart()
         self.assertTrue(server.restarted)
 
+        module_odoo = server.module_ids.filtered(lambda module: module.name == 'odoo')
         to_restart = self._new_instance(server)
         to_restart.module_ids = [(6, 0, [module_odoo.id])]
         to_restart.restart_requested = fields.Datetime.now()

@@ -279,7 +279,6 @@ class CloudInstance(models.Model):
             raise exceptions.ValidationError(_("Unable to proceed with the action. This server is protected."))
 
         action = self.env['ir.actions.act_window']._for_xml_id('cloud_manager.cloud_restore_action')
-        action['context'] = {'default_instance_id': self.id}
         return action
 
     def action_config(self):
