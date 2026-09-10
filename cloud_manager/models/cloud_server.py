@@ -215,20 +215,16 @@ class CloudServer(models.Model):
 
     def parse_instances(self, obj):
         def docker_vals(container):
-            vals = {}
-            ports = {p['PublicPort'] for p in container["Ports"]}
-
-            for port in ports:
-                if port % 2 == 0:
-                    vals['http_port'] = port
-                else:
-                    vals['gevent_port'] = port
-
-
-            state = container['State']
+            details = container['inspect']
+            ports = details['HostConfig']['PortBindings']
+            vals = {
+                'http_port': int(ports['8069/tcp'][0]['HostPort']),
+                'gevent_port': int(ports['8072/tcp'][0]['HostPort']),
+            }
+            state = details['State']['Status']
             assert state in {'created', 'running', 'restarting', 'exited', 'paused', 'dead'}, state
             vals['state'] = state
-            vals['restarted'] = dateutil.parser.isoparse(container['inspect']['State']['StartedAt']).replace(tzinfo=None)
+            vals['restarted'] = dateutil.parser.isoparse(details['State']['StartedAt']).replace(tzinfo=None)
             return vals
 
 

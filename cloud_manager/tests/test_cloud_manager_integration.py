@@ -2,6 +2,7 @@
 
 import json
 from datetime import timedelta
+from pathlib import Path
 
 from odoo import fields
 from odoo.exceptions import UserError, ValidationError
@@ -68,9 +69,16 @@ elif method == 'status':
         'instances': [{
             'uid': 'status-uid',
             'docker': {
-                'Ports': [{'PublicPort': 54000}, {'PublicPort': 54001}],
-                'State': 'running',
-                'inspect': {'State': {'StartedAt': '2024-01-02T03:04:05+00:00'}},
+                'inspect': {
+                    'HostConfig': {'PortBindings': {
+                        '8069/tcp': [{'HostPort': '54000'}],
+                        '8072/tcp': [{'HostPort': '54001'}],
+                    }},
+                    'State': {
+                        'Status': 'running',
+                        'StartedAt': '2024-01-02T03:04:05+00:00',
+                    },
+                },
             },
             'backups': [{
                 'fname': 'status-backup.zip',
@@ -446,9 +454,16 @@ class TestCloudManagerIntegration(TransactionCase):
         status_obj['instances'].append({
             'uid': 'new-status-uid',
             'docker': {
-                'Ports': [{'PublicPort': 54100}, {'PublicPort': 54101}],
-                'State': 'running',
-                'inspect': {'State': {'StartedAt': '2024-01-02T03:04:05+00:00'}},
+                'inspect': {
+                    'HostConfig': {'PortBindings': {
+                        '8069/tcp': [{'HostPort': '54100'}],
+                        '8072/tcp': [{'HostPort': '54101'}],
+                    }},
+                    'State': {
+                        'Status': 'running',
+                        'StartedAt': '2024-01-02T03:04:05+00:00',
+                    },
+                },
             },
             'backups': [],
         })
@@ -490,9 +505,16 @@ class TestCloudManagerIntegration(TransactionCase):
                 'instances': [{
                     'uid': 'bad-state',
                     'docker': {
-                        'Ports': [{'PublicPort': 56000}, {'PublicPort': 56001}],
-                        'State': 'invalid',
-                        'inspect': {'State': {'StartedAt': '2024-01-02T03:04:05+00:00'}},
+                        'inspect': {
+                            'HostConfig': {'PortBindings': {
+                                '8069/tcp': [{'HostPort': '56000'}],
+                                '8072/tcp': [{'HostPort': '56001'}],
+                            }},
+                            'State': {
+                                'Status': 'invalid',
+                                'StartedAt': '2024-01-02T03:04:05+00:00',
+                            },
+                        },
                     },
                     'backups': [],
                 }],
@@ -512,6 +534,24 @@ class TestCloudManagerIntegration(TransactionCase):
         server.ssl_renewal_pinged = fields.Datetime.now()
         server._compute_ssl_renewal_ping_now()
         self.assertFalse(server.ssl_renewal_ping_now)
+
+    def test_cloud_server_parses_deploy_manager_v19_status(self):
+        endpoint = self._new_endpoint(
+            'Cloud Endpoint',
+            CLOUD_ENDPOINT_PRODUCER,
+            usage_field=self._server_usage_field(),
+        )
+        server = self._new_server(endpoint=endpoint, branch='19.0')
+        fixture = Path(__file__).parent / 'data' / 'odoo_v19_cloud_00000170.json'
+
+        with fixture.open(encoding='utf-8') as status_file:
+            server.parse_status(json.load(status_file))
+
+        instance = server.instance_ids.filtered(lambda record: record.uid == 'a1b2c3d4e5f6')
+        self.assertEqual(instance.state, 'exited')
+        self.assertEqual(instance.http_port, 49152)
+        self.assertEqual(instance.gevent_port, 49153)
+        self.assertTrue(instance.restarted)
 
         server.action_ping_ssl_renewal()
         self.assertEqual(server.ssl_renewal_response, 'ssl-ok')

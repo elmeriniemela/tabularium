@@ -1,0 +1,427 @@
+{
+    "agent": {
+        "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "commit_date": "2026-09-09 21:49:40 +0300"
+    },
+    "hardware": {
+        "cpu": {
+            "usage_percent": 85.5
+        },
+        "disks": [
+            {
+                "free_gb": 31.77,
+                "mount": "/",
+                "total_gb": 37.21,
+                "usage_percent": 14.6,
+                "used_gb": 5.44
+            }
+        ],
+        "memory": {
+            "available_gb": 2.66,
+            "total_gb": 3.73,
+            "usage_percent": 28.6,
+            "used_gb": 1.06
+        }
+    },
+    "instances": [
+        {
+            "backups": [],
+            "docker": {
+                "Id": "1111111111111111111111111111111111111111111111111111111111111111",
+                "Labels": {
+                    "odoo.version": "19.0",
+                    "org.opencontainers.image.authors": "admin@example.invalid",
+                    "org.opencontainers.image.description": "Odoo 19.0 image",
+                    "org.opencontainers.image.version": "24.04"
+                },
+                "Names": [
+                    "/a1b2c3d4e5f6"
+                ],
+                "inspect": {
+                    "AppArmorProfile": "docker-default",
+                    "Args": [],
+                    "Config": {
+                        "AttachStderr": false,
+                        "AttachStdin": false,
+                        "AttachStdout": false,
+                        "Cmd": [
+                            "odoo"
+                        ],
+                        "Domainname": "",
+                        "Entrypoint": null,
+                        "Env": [
+                            "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                            "LANG=en_US.UTF-8",
+                            "LANGUAGE=en_US:en",
+                            "LC_ALL=en_US.UTF-8",
+                            "ODOO_RC=/etc/odoo/odoo.conf"
+                        ],
+                        "ExposedPorts": {
+                            "8069/tcp": {},
+                            "8072/tcp": {}
+                        },
+                        "Hostname": "111111111111",
+                        "Image": "ghcr.io/example/odoo-src:19.0",
+                        "Labels": {
+                            "odoo.version": "19.0",
+                            "org.opencontainers.image.authors": "admin@example.invalid",
+                            "org.opencontainers.image.description": "Odoo 19.0 image",
+                            "org.opencontainers.image.version": "24.04"
+                        },
+                        "OpenStdin": false,
+                        "StdinOnce": false,
+                        "Tty": true,
+                        "User": "ubuntu",
+                        "Volumes": {
+                            "/mnt": {},
+                            "/var/lib/odoo": {}
+                        },
+                        "WorkingDir": ""
+                    },
+                    "Created": "2026-09-10T15:01:57.505116519Z",
+                    "Driver": "overlayfs",
+                    "ExecIDs": null,
+                    "HostConfig": {
+                        "AutoRemove": false,
+                        "Binds": [
+                            "/opt/19/src:/mnt:ro",
+                            "/var/run/postgresql/:/var/run/postgresql/",
+                            "/etc/odoo/a1b2c3d4e5f6:/etc/odoo:ro",
+                            "a1b2c3d4e5f6:/var/lib/odoo"
+                        ],
+                        "BlkioDeviceReadBps": [],
+                        "BlkioDeviceReadIOps": [],
+                        "BlkioDeviceWriteBps": [],
+                        "BlkioDeviceWriteIOps": [],
+                        "BlkioWeight": 0,
+                        "BlkioWeightDevice": [],
+                        "CapAdd": null,
+                        "CapDrop": null,
+                        "Cgroup": "",
+                        "CgroupParent": "",
+                        "CgroupnsMode": "private",
+                        "ConsoleSize": [
+                            0,
+                            0
+                        ],
+                        "ContainerIDFile": "",
+                        "CpuCount": 0,
+                        "CpuPercent": 0,
+                        "CpuPeriod": 0,
+                        "CpuQuota": 0,
+                        "CpuRealtimePeriod": 0,
+                        "CpuRealtimeRuntime": 0,
+                        "CpuShares": 0,
+                        "CpusetCpus": "",
+                        "CpusetMems": "",
+                        "DeviceCgroupRules": null,
+                        "DeviceRequests": null,
+                        "Devices": [],
+                        "Dns": [],
+                        "DnsOptions": [],
+                        "DnsSearch": [],
+                        "ExtraHosts": null,
+                        "GroupAdd": null,
+                        "IOMaximumBandwidth": 0,
+                        "IOMaximumIOps": 0,
+                        "IpcMode": "private",
+                        "Isolation": "",
+                        "Links": null,
+                        "LogConfig": {
+                            "Config": {
+                                "keep-file": "true",
+                                "loki-batch-size": "400",
+                                "loki-max-backoff": "3s",
+                                "loki-retries": "5",
+                                "loki-timeout": "5s",
+                                "loki-tls-insecure-skip-verify": "true",
+                                "loki-url": "https://loki.example.invalid:3110/loki/api/v1/push"
+                            },
+                            "Type": "loki"
+                        },
+                        "MaskedPaths": [
+                            "/proc/acpi",
+                            "/proc/asound",
+                            "/proc/interrupts",
+                            "/proc/kcore",
+                            "/proc/keys",
+                            "/proc/latency_stats",
+                            "/proc/sched_debug",
+                            "/proc/scsi",
+                            "/proc/timer_list",
+                            "/proc/timer_stats",
+                            "/sys/devices/virtual/powercap",
+                            "/sys/firmware"
+                        ],
+                        "Memory": 0,
+                        "MemoryReservation": 0,
+                        "MemorySwap": 0,
+                        "MemorySwappiness": null,
+                        "NanoCpus": 0,
+                        "NetworkMode": "bridge",
+                        "OomKillDisable": null,
+                        "OomScoreAdj": 0,
+                        "PidMode": "",
+                        "PidsLimit": null,
+                        "PortBindings": {
+                            "8069/tcp": [
+                                {
+                                    "HostIp": "127.0.0.1",
+                                    "HostPort": "49152"
+                                },
+                                {
+                                    "HostIp": "::1",
+                                    "HostPort": "49152"
+                                }
+                            ],
+                            "8072/tcp": [
+                                {
+                                    "HostIp": "127.0.0.1",
+                                    "HostPort": "49153"
+                                },
+                                {
+                                    "HostIp": "::1",
+                                    "HostPort": "49153"
+                                }
+                            ]
+                        },
+                        "Privileged": false,
+                        "PublishAllPorts": false,
+                        "ReadonlyPaths": [
+                            "/proc/bus",
+                            "/proc/fs",
+                            "/proc/irq",
+                            "/proc/sys",
+                            "/proc/sysrq-trigger"
+                        ],
+                        "ReadonlyRootfs": false,
+                        "RestartPolicy": {
+                            "MaximumRetryCount": 0,
+                            "Name": "unless-stopped"
+                        },
+                        "Runtime": "runc",
+                        "SecurityOpt": null,
+                        "ShmSize": 67108864,
+                        "UTSMode": "",
+                        "Ulimits": null,
+                        "UsernsMode": "",
+                        "VolumeDriver": "",
+                        "VolumesFrom": null
+                    },
+                    "HostnamePath": "/var/lib/docker/containers/1111111111111111111111111111111111111111111111111111111111111111/hostname",
+                    "HostsPath": "/var/lib/docker/containers/1111111111111111111111111111111111111111111111111111111111111111/hosts",
+                    "Id": "1111111111111111111111111111111111111111111111111111111111111111",
+                    "Image": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+                    "ImageManifestDescriptor": {
+                        "digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+                        "mediaType": "application/vnd.oci.image.manifest.v1+json",
+                        "platform": {
+                            "architecture": "amd64",
+                            "os": "linux"
+                        },
+                        "size": 2008
+                    },
+                    "LogPath": "",
+                    "MountLabel": "",
+                    "Mounts": [
+                        {
+                            "Destination": "/mnt",
+                            "Mode": "ro",
+                            "Propagation": "rprivate",
+                            "RW": false,
+                            "Source": "/opt/19/src",
+                            "Type": "bind"
+                        },
+                        {
+                            "Destination": "/etc/odoo",
+                            "Mode": "ro",
+                            "Propagation": "rprivate",
+                            "RW": false,
+                            "Source": "/etc/odoo/a1b2c3d4e5f6",
+                            "Type": "bind"
+                        },
+                        {
+                            "Destination": "/var/lib/odoo",
+                            "Driver": "local",
+                            "Mode": "z",
+                            "Name": "a1b2c3d4e5f6",
+                            "Propagation": "",
+                            "RW": true,
+                            "Source": "/var/lib/docker/volumes/a1b2c3d4e5f6/_data",
+                            "Type": "volume"
+                        },
+                        {
+                            "Destination": "/var/run/postgresql",
+                            "Mode": "",
+                            "Propagation": "rprivate",
+                            "RW": true,
+                            "Source": "/var/run/postgresql",
+                            "Type": "bind"
+                        }
+                    ],
+                    "Name": "/a1b2c3d4e5f6",
+                    "NetworkSettings": {
+                        "Networks": {
+                            "bridge": {
+                                "Aliases": null,
+                                "DNSNames": null,
+                                "DriverOpts": null,
+                                "EndpointID": "",
+                                "Gateway": "",
+                                "GlobalIPv6Address": "",
+                                "GlobalIPv6PrefixLen": 0,
+                                "GwPriority": 0,
+                                "IPAMConfig": null,
+                                "IPAddress": "",
+                                "IPPrefixLen": 0,
+                                "IPv6Gateway": "",
+                                "Links": null,
+                                "MacAddress": "",
+                                "NetworkID": "4444444444444444444444444444444444444444444444444444444444444444"
+                            }
+                        },
+                        "Ports": {},
+                        "SandboxID": "",
+                        "SandboxKey": ""
+                    },
+                    "Path": "odoo",
+                    "Platform": "linux",
+                    "ProcessLabel": "",
+                    "ResolvConfPath": "/var/lib/docker/containers/1111111111111111111111111111111111111111111111111111111111111111/resolv.conf",
+                    "RestartCount": 0,
+                    "State": {
+                        "Dead": false,
+                        "Error": "",
+                        "ExitCode": 0,
+                        "FinishedAt": "2026-09-10T15:05:57.073586017Z",
+                        "OOMKilled": false,
+                        "Paused": false,
+                        "Pid": 0,
+                        "Restarting": false,
+                        "Running": false,
+                        "StartedAt": "2026-09-10T15:02:50.203077167Z",
+                        "Status": "exited"
+                    },
+                    "Storage": {
+                        "RootFS": {
+                            "Snapshot": {
+                                "Name": "overlayfs"
+                            }
+                        }
+                    }
+                }
+            },
+            "uid": "a1b2c3d4e5f6"
+        }
+    ],
+    "modules": [
+        {
+            "branch": "19.0",
+            "commit": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "commit_date": "2026-09-08 18:19:09 +0300",
+            "name": "tabularium",
+            "url": "https://example.invalid/tabularium.git"
+        },
+        {
+            "branch": "19.0",
+            "commit": "cccccccccccccccccccccccccccccccccccccccc",
+            "commit_date": "2026-09-10 16:33:35 +0200",
+            "name": "OpenUpgrade",
+            "url": "https://example.invalid/OpenUpgrade.git"
+        },
+        {
+            "branch": "19.0",
+            "commit": "dddddddddddddddddddddddddddddddddddddddd",
+            "commit_date": "2026-09-10 11:27:03 +0000",
+            "name": "odoo",
+            "url": "https://example.invalid/odoo.git"
+        }
+    ],
+    "postgres": {
+        "databases": [
+            {
+                "datacl": null,
+                "datallowconn": true,
+                "datcollate": "en_US.UTF-8",
+                "datcollversion": "2.43",
+                "datconnlimit": -1,
+                "datctype": "en_US.UTF-8",
+                "datdba": 10,
+                "datfrozenxid": "744",
+                "dathasloginevt": false,
+                "daticurules": null,
+                "datistemplate": false,
+                "datlocale": null,
+                "datlocprovider": "c",
+                "datminmxid": "1",
+                "datname": "postgres",
+                "dattablespace": 1663,
+                "encoding": 6,
+                "oid": 5
+            },
+            {
+                "datacl": "{=c/postgres,postgres=CTc/postgres}",
+                "datallowconn": true,
+                "datcollate": "en_US.UTF-8",
+                "datcollversion": "2.43",
+                "datconnlimit": -1,
+                "datctype": "en_US.UTF-8",
+                "datdba": 10,
+                "datfrozenxid": "744",
+                "dathasloginevt": false,
+                "daticurules": null,
+                "datistemplate": true,
+                "datlocale": null,
+                "datlocprovider": "c",
+                "datminmxid": "1",
+                "datname": "template1",
+                "dattablespace": 1663,
+                "encoding": 6,
+                "oid": 1
+            },
+            {
+                "datacl": "{=c/postgres,postgres=CTc/postgres}",
+                "datallowconn": false,
+                "datcollate": "en_US.UTF-8",
+                "datcollversion": null,
+                "datconnlimit": -1,
+                "datctype": "en_US.UTF-8",
+                "datdba": 10,
+                "datfrozenxid": "744",
+                "dathasloginevt": false,
+                "daticurules": null,
+                "datistemplate": true,
+                "datlocale": null,
+                "datlocprovider": "c",
+                "datminmxid": "1",
+                "datname": "template0",
+                "dattablespace": 1663,
+                "encoding": 6,
+                "oid": 4
+            },
+            {
+                "datacl": "{a1b2c3d4e5f6=CTc/a1b2c3d4e5f6}",
+                "datallowconn": true,
+                "datcollate": "en_US.UTF-8",
+                "datcollversion": "2.43",
+                "datconnlimit": -1,
+                "datctype": "en_US.UTF-8",
+                "datdba": 16389,
+                "datfrozenxid": "744",
+                "dathasloginevt": false,
+                "daticurules": null,
+                "datistemplate": false,
+                "datlocale": null,
+                "datlocprovider": "c",
+                "datminmxid": "1",
+                "datname": "a1b2c3d4e5f6",
+                "dattablespace": 1663,
+                "encoding": 6,
+                "oid": 19941
+            }
+        ],
+        "users": [
+        ]
+    },
+    "timestamp": "2026-09-10 15:20:38"
+}
