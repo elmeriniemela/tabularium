@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import base64
 import calendar
 import datetime
 import json
@@ -162,6 +163,15 @@ class TestBitcoinWalletIntegration(TransactionCase):
             wallet.descriptor,
             "%s#%s" % (payload, descriptor_checksum(payload)),
         )
+
+    def test_descriptor_qr(self):
+        wallet = self._new_wallet([self._new_key()])
+        self.assertEqual(
+            base64.b64decode(wallet.descriptor_qr),
+            self.env['ir.actions.report'].barcode('QR', wallet.descriptor, width=250, height=250),
+        )
+
+        self.assertFalse(self._new_wallet([]).descriptor_qr)
 
     def test_descriptor_timestamp(self):
         wallet = self._new_wallet([self._new_key()])
@@ -992,4 +1002,3 @@ class TestBitcoinWalletIntegration(TransactionCase):
         self.assertEqual(addr_a_recv.psbt_ids, psbt_1 | psbt_4)
         self.assertEqual(addr_a_change.psbt_ids, psbt_2)
         self.assertEqual(addr_b_recv.psbt_ids, psbt_3)
-

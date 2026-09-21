@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import base64
 import calendar
 import logging
 
@@ -76,6 +77,7 @@ class BitcoinWallet(models.Model):
         compute='_compute_descriptor',
         help="Bitcoin Core descriptor, or instructions for completing the wallet configuration.",
     )
+    descriptor_qr = fields.Binary(string="Descriptor QR Code", compute='_compute_descriptor_qr')
     birth_timestamp = fields.Char(
         string="Birth Timestamp",
         compute='_compute_descriptor_timestamp',
@@ -134,6 +136,14 @@ class BitcoinWallet(models.Model):
                 descriptor = 'wsh(sortedmulti(%s,%s))' % (wallet.sigs_required, keys)
                 wallet.descriptor = '%s#%s' % (descriptor, descriptor_checksum(descriptor))
 
+    @api.depends('descriptor')
+    def _compute_descriptor_qr(self):
+        for wallet in self:
+            wallet.descriptor_qr = (
+                base64.b64encode(self.env['ir.actions.report'].barcode(
+                    'QR', wallet.descriptor, width=250, height=250,
+                )).decode() if '#' in wallet.descriptor else False
+            )
 
     def refresh(self):
         self.filtered(lambda w: not w.address_ids).refresh_addresses()

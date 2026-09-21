@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-06 07:08+0000\n"
-"PO-Revision-Date: 2026-09-06 07:08+0000\n"
+"POT-Creation-Date: 2026-09-21 14:25+0000\n"
+"PO-Revision-Date: 2026-09-21 14:25+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -410,6 +410,11 @@ msgstr ""
 #. module: bitcoin_treasury
 #: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__descriptor
 msgid "Descriptor"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__descriptor_qr
+msgid "Descriptor QR Code"
 msgstr ""
 
 #. module: bitcoin_treasury

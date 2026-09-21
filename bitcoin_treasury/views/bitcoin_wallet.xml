@@ -100,6 +100,10 @@
                             </field>
                             <label for="descriptor"/>
                             <field name="descriptor"/>
+                            <label for="descriptor_qr"/>
+                            <div class="text-center">
+                                <field name="descriptor_qr" widget="image" readonly="True" invisible="not descriptor_qr"/>
+                            </div>
                             <label for="birth_timestamp"/>
                             <field name="birth_timestamp"/>
                         </page>
