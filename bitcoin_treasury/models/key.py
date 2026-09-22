@@ -30,10 +30,6 @@ class BitcoinExtendedPublicKey(models.Model):
         context={'active_test': False},
     )
 
-    multisig = fields.Boolean(
-        help="Specify whether this extended public key is used for multisignature address derivation.",
-        tracking=True,
-    )
     witness_type = fields.Selection(
         selection=[
             ('taproot', 'Taproot'),
@@ -44,28 +40,6 @@ class BitcoinExtendedPublicKey(models.Model):
         default='segwit',
         tracking=True,
         required=True,
-    )
-    script_type = fields.Selection(
-        string="Script Type",
-        selection=[
-            # LEGACY
-            ('p2pkh', 'Pay to Public Key Hash (m/44)'),
-            ('p2sh', 'Pay to Script Hash (m/45)'),
-            ('p2sh_p2wpkh', 'Pay To Witness Public Key Hash Wrapped In P2SH (m/49)'),
-            ('p2sh_p2wsh', 'Pay To Witness Script Hash Wrapped In P2SH (m/48h/0h/0h/1h)'),
-
-            # Segwit
-            ('p2wpkh', 'Pay To Witness Public Key Hash (m/84)'),
-            ('p2wsh', 'Pay To Witness Script Hash (m/48h/0h/0h/2h)'),
-            ('p2tr', 'Pay To Taproot (m/86)'),
-        ],
-        compute='_compute_script_type',
-        help=(
-            "BIP44 specifies derivation paths m / purpose' / coin_type' / account' / change / address_index."
-        ),
-        tracking=True,
-        store=True,
-        readonly=False,
     )
     encoding = fields.Selection(
         selection=[
@@ -96,25 +70,6 @@ class BitcoinExtendedPublicKey(models.Model):
         'p2sh-segwit': 'base58',
         'legacy': 'base58',
     }
-
-    @api.depends('witness_type', 'multisig')
-    def _compute_script_type(self):
-        for rec in self:
-            rec.script_type = self._script_type_default(rec.witness_type, rec.multisig)
-
-    def _script_type_default(self, witness_type, multisig):
-        if witness_type == 'legacy':
-            return 'p2sh' if multisig else 'p2pkh'
-        if witness_type == 'segwit':
-            return 'p2wsh' if multisig else 'p2wpkh'
-        if witness_type == 'p2sh-segwit':
-            return 'p2sh_p2wsh' if multisig else 'p2sh_p2wpkh'
-        if witness_type == 'taproot':
-            return 'p2tr'
-        raise ValidationError(
-            _("Wallet and extended public key type combination not supported: %s / %s")
-            % (witness_type, multisig)
-        )
 
     @api.depends('witness_type')
     def _compute_encoding(self):

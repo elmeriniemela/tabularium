@@ -289,7 +289,7 @@ class BitcoinPSBT(models.Model):
         'input_ids.wallet_id.sigs_required', 'output_ids.wallet_id.sigs_required',
         'input_ids.wallet_id.key_ids', 'output_ids.wallet_id.key_ids',
         'input_ids.wallet_id.key_ids.key_id.wif', 'output_ids.wallet_id.key_ids.key_id.wif',
-        'input_ids.wallet_id.key_ids.key_id.script_type', 'output_ids.wallet_id.key_ids.key_id.script_type',
+        'input_ids.wallet_id.key_ids.key_id.witness_type', 'output_ids.wallet_id.key_ids.key_id.witness_type',
         'input_ids.wallet_id.key_ids.key_id.real_parent_fingerprint',
         'output_ids.wallet_id.key_ids.key_id.real_parent_fingerprint',
         'input_ids.wallet_id.key_ids.key_id.real_derivation_path',
@@ -311,7 +311,7 @@ class BitcoinPSBT(models.Model):
         def wallet_spec(line):
             wallet = line.wallet_id
             return [wallet.id, wallet.sigs_required, line.branch, line.address_index, [
-                [key.wif, key.script_type, key.real_parent_fingerprint, key.real_derivation_path]
+                [key.wif, key.witness_type, key.real_parent_fingerprint, key.real_derivation_path]
                 for key in wallet.key_ids.key_id
             ]]
 
@@ -436,7 +436,7 @@ class BitcoinPSBTWalletLine(models.AbstractModel):
             raise ValidationError(_("Select a wallet for this row."))
         keys = wallet.key_ids.key_id
         script_type = 'p2wpkh' if len(keys) == 1 else 'p2wsh'
-        if not keys or any(key.script_type != script_type for key in keys):
+        if not keys or wallet.script_type != script_type or any(key.witness_type != 'segwit' for key in keys):
             raise ValidationError(_("PSBT inputs and wallet outputs require native SegWit single-signature or multisig keys."))
         origins = []
         for key in keys:
@@ -474,7 +474,7 @@ class BitcoinPSBTWalletLine(models.AbstractModel):
 
     @api.depends(
         'wallet_id', 'branch', 'address_index', 'wallet_id.sigs_required', 'wallet_id.key_ids',
-        'wallet_id.key_ids.key_id.wif', 'wallet_id.key_ids.key_id.script_type',
+        'wallet_id.key_ids.key_id.wif', 'wallet_id.key_ids.key_id.witness_type',
         'wallet_id.key_ids.key_id.real_parent_fingerprint', 'wallet_id.key_ids.key_id.real_derivation_path',
         'wallet_id.address_ids.address', 'wallet_id.address_ids.atype', 'wallet_id.address_ids.index',
     )

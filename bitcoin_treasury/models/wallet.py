@@ -69,8 +69,16 @@ class BitcoinWallet(models.Model):
     )
 
     script_type = fields.Selection(
-        related='first_key_id.script_type',
-        depends=['key_ids'],
+        selection=[
+            ('p2pkh', 'Pay to Public Key Hash (m/44)'),
+            ('p2sh', 'Pay to Script Hash (m/45)'),
+            ('p2sh_p2wpkh', 'Pay To Witness Public Key Hash Wrapped In P2SH (m/49)'),
+            ('p2sh_p2wsh', 'Pay To Witness Script Hash Wrapped In P2SH (m/48h/0h/0h/1h)'),
+            ('p2wpkh', 'Pay To Witness Public Key Hash (m/84)'),
+            ('p2wsh', 'Pay To Witness Script Hash (m/48h/0h/0h/2h)'),
+            ('p2tr', 'Pay To Taproot (m/86)'),
+        ],
+        compute='_compute_script_type',
     )
 
     descriptor = fields.Char(
@@ -170,7 +178,6 @@ class BitcoinWallet(models.Model):
             key_values = {
                 'name': fingerprint,
                 'wif': public_key,
-                'multisig': True,
                 'witness_type': setup['witness_type'],
                 'real_parent_fingerprint': normalized_fingerprint,
                 'real_derivation_path': derivation_path,
@@ -178,7 +185,6 @@ class BitcoinWallet(models.Model):
             key = (
                 self.env['bitcoin.key'].search([
                     ('wif', '=', public_key),
-                    ('multisig', '=', True),
                     ('witness_type', '=', setup['witness_type']),
                     ('real_parent_fingerprint', '=', normalized_fingerprint),
                     ('real_derivation_path', '=', derivation_path),
@@ -192,14 +198,37 @@ class BitcoinWallet(models.Model):
             })
         return True
 
+    @api.depends('key_ids', 'key_ids.sequence')
     def _compute_first_key_id(self):
         for wallet in self:
             wallet.first_key_id = wallet.key_ids[:1].key_id
 
-
+    @api.depends('key_ids')
     def _compute_multisig(self):
         for wallet in self:
             wallet.multisig = len(wallet.key_ids) > 1
+
+    @api.depends('key_ids', 'key_ids.sequence', 'key_ids.key_id.witness_type')
+    def _compute_script_type(self):
+        for wallet in self:
+            key = wallet.key_ids[:1].key_id
+            wallet.script_type = (
+                wallet._script_type_default(key.witness_type, len(wallet.key_ids) > 1)
+                if key else False
+            )
+
+    def _script_type_default(self, witness_type, multisig):
+        if witness_type == 'legacy':
+            return 'p2sh' if multisig else 'p2pkh'
+        if witness_type == 'segwit':
+            return 'p2wsh' if multisig else 'p2wpkh'
+        if witness_type == 'p2sh-segwit':
+            return 'p2sh_p2wsh' if multisig else 'p2sh_p2wpkh'
+        if witness_type == 'taproot':
+            return 'p2tr'
+        raise ValidationError(
+            _("Wallet type combination not supported: %s / %s") % (witness_type, multisig)
+        )
 
     @api.depends('history_ids.date', 'create_date')
     def _compute_descriptor_timestamp(self):
@@ -212,7 +241,7 @@ class BitcoinWallet(models.Model):
         'key_ids',
         'key_ids.sequence',
         'key_ids.key_id.wif',
-        'key_ids.key_id.script_type',
+        'key_ids.key_id.witness_type',
         'key_ids.key_id.real_parent_fingerprint',
         'key_ids.key_id.real_derivation_path',
     )
@@ -228,11 +257,11 @@ class BitcoinWallet(models.Model):
                 wallet.descriptor = origin_error
             elif not key_count:
                 wallet.descriptor = _("Add an extended public key to compute the descriptor.")
-            elif key_count == 1 and wallet.script_type != 'p2wpkh':
+            elif key_count == 1 and wallet.first_key_id.witness_type != 'segwit':
                 wallet.descriptor = _("Use a native SegWit single-signature extended public key.")
             elif key_count > 15:
                 wallet.descriptor = _("Use no more than 15 extended public keys.")
-            elif key_count > 1 and any(key.script_type != 'p2wsh' for key in wallet.key_ids.key_id):
+            elif key_count > 1 and any(key.witness_type != 'segwit' for key in wallet.key_ids.key_id):
                 wallet.descriptor = _("Use native SegWit multisig for every extended public key.")
             elif key_count > 1 and not 0 < wallet.sigs_required <= key_count:
                 wallet.descriptor = _("Set Required Signatures between 1 and the number of extended public keys.")
@@ -278,11 +307,13 @@ class BitcoinWallet(models.Model):
         musig = {'p2sh', 'p2wsh', 'p2sh_p2wsh'}
         for wallet in self:
             existing = {(str(r.atype), str(r.index)): r for r in wallet.address_ids}
-            st = wallet.first_key_id.script_type
+            st = wallet.script_type
             for atype in range(2):
                 for index in range(wallet.address_amount):
                     subkey_path = (str(atype), str(index))
                     if len(wallet.key_ids) > 1 and len(wallet.key_ids) <= 15:
+                        if any(key.key_id.witness_type != wallet.first_key_id.witness_type for key in wallet.key_ids):
+                            raise ValidationError(_("Use the same witness type for every extended public key."))
                         if st not in musig:
                             raise ValidationError(_("Multisig not supported for script type %s. Supported types %s.") % (st, musig))
                         keys = [k.key_id._derive_public_key(subkey_path) for k in wallet.key_ids]

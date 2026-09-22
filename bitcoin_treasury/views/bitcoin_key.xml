@@ -7,9 +7,7 @@
                 <field name="sequence" widget="handle"/>
                 <field name="wif" optional="hide"/>
                 <field name="name" optional="show"/>
-                <field name="multisig" optional="show"/>
                 <field name="witness_type" optional="show"/>
-                <field name="script_type" optional="show"/>
                 <field name="real_derivation_path" optional="show"/>
                 <field name="real_parent_fingerprint" optional="show"/>
                 <field name="encoding" optional="show"/>
@@ -36,11 +34,9 @@
                     <group>
                         <group>
                             <field name="witness_type"/>
-                            <field name="multisig"/>
                             <field name="encoding"/>
                         </group>
                         <group>
-                            <field name="script_type"/>
                             <field name="real_derivation_path"/>
                             <field name="real_parent_fingerprint"/>
                             <field name="wallet_ids" widget="many2many_tags"/>

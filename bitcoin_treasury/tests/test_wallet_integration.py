@@ -77,7 +77,6 @@ class TestBitcoinWalletIntegration(TransactionCase):
             "name": "Key %s" % self._seed,
             "wif": ExtendedKey.parse(self._root_xpub).child(index).serialize(),
             "witness_type": "segwit",
-            "multisig": False,
         }
         values.update(overrides)
         return self.Key.create(values)
@@ -130,15 +129,15 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
         return server, server.server_address[1]
 
     def test_script_type_default_matrix_and_invalid(self):
-        self.assertEqual(self.Key._script_type_default("legacy", False), "p2pkh")
-        self.assertEqual(self.Key._script_type_default("legacy", True), "p2sh")
-        self.assertEqual(self.Key._script_type_default("segwit", False), "p2wpkh")
-        self.assertEqual(self.Key._script_type_default("segwit", True), "p2wsh")
-        self.assertEqual(self.Key._script_type_default("p2sh-segwit", False), "p2sh_p2wpkh")
-        self.assertEqual(self.Key._script_type_default("p2sh-segwit", True), "p2sh_p2wsh")
-        self.assertEqual(self.Key._script_type_default("taproot", False), "p2tr")
+        self.assertEqual(self.Wallet._script_type_default("legacy", False), "p2pkh")
+        self.assertEqual(self.Wallet._script_type_default("legacy", True), "p2sh")
+        self.assertEqual(self.Wallet._script_type_default("segwit", False), "p2wpkh")
+        self.assertEqual(self.Wallet._script_type_default("segwit", True), "p2wsh")
+        self.assertEqual(self.Wallet._script_type_default("p2sh-segwit", False), "p2sh_p2wpkh")
+        self.assertEqual(self.Wallet._script_type_default("p2sh-segwit", True), "p2sh_p2wsh")
+        self.assertEqual(self.Wallet._script_type_default("taproot", False), "p2tr")
         with self.assertRaises(ValidationError):
-            self.Key._script_type_default("invalid", False)
+            self.Wallet._script_type_default("invalid", False)
 
     def test_single_signature_descriptor(self):
         key = self._new_key(
@@ -167,9 +166,11 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
         )
 
     def test_multisig_descriptor(self):
-        key_a = self._new_key(multisig=True)
-        key_b = self._new_key(multisig=True)
+        key_a = self._new_key()
+        key_b = self._new_key()
+        self.assertEqual(self._new_wallet([key_a]).script_type, 'p2wpkh')
         wallet = self._new_wallet([key_a, key_b], sigs_required=2)
+        self.assertEqual(wallet.script_type, 'p2wsh')
         payload = "wsh(sortedmulti(2,%s/<0;1>/*,%s/<0;1>/*))" % (key_a.wif, key_b.wif)
         self.assertEqual(
             wallet.descriptor,
@@ -196,8 +197,8 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
             ['m/48h/0h/0h/2h', 'm/48h/0h/0h/2h'],
         )
         self.assertEqual(wallet.key_ids.key_id.mapped('witness_type'), ['segwit', 'segwit'])
-        self.assertEqual(wallet.key_ids.key_id.mapped('script_type'), ['p2wsh', 'p2wsh'])
-        self.assertTrue(all(wallet.key_ids.key_id.mapped('multisig')))
+        self.assertEqual(wallet.script_type, 'p2wsh')
+        self.assertTrue(wallet.multisig)
         self.assertIn('#', wallet.descriptor)
 
         imported_keys = wallet.key_ids.key_id
@@ -213,7 +214,6 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
         different_key = self.Key.create({
             'name': fingerprint,
             'wif': public_key,
-            'multisig': True,
             'witness_type': 'legacy',
             'real_parent_fingerprint': fingerprint,
             'real_derivation_path': setup['derivation'],
@@ -285,13 +285,12 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
         invalid_wallets = [
             self._new_wallet([]),
             self._new_wallet([self._new_key(witness_type="legacy")]),
-            self._new_wallet([self._new_key(multisig=True)]),
-            self._new_wallet([self._new_key(multisig=True), self._new_key()]),
+            self._new_wallet([self._new_key(), self._new_key(witness_type="legacy")]),
         ]
 
-        keys = [self._new_key(multisig=True), self._new_key(multisig=True)]
+        keys = [self._new_key(), self._new_key()]
         invalid_wallets.append(self._new_wallet(keys, sigs_required=3))
-        keys = [self._new_key(multisig=True) for _index in range(16)]
+        keys = [self._new_key() for _index in range(16)]
         invalid_wallets.append(self._new_wallet(keys))
 
         for wallet in invalid_wallets:
@@ -343,17 +342,12 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
         self.assertEqual(key.real_parent_fingerprint, 'a1b2c3d4')
         self.assertEqual(key.real_derivation_path, 'm/48h/0h/0h/2h')
 
-    def test_key_computed_fields(self):
+    def test_key_encoding(self):
         key = self._new_key()
         self.assertEqual(key.encoding, "bech32")
-        self.assertEqual(key.script_type, "p2wpkh")
 
         key.write({"witness_type": "legacy"})
         self.assertEqual(key.encoding, "base58")
-        self.assertEqual(key.script_type, "p2pkh")
-
-        key.write({"multisig": True})
-        self.assertEqual(key.script_type, "p2sh")
 
     def test_key_accepts_mainnet_extended_public_key_versions(self):
         versions = (0x0488B21E, 0x049D7CB2, 0x04B24746, 0x0295B43F, 0x02AA7ED3)
@@ -423,30 +417,26 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
         self.assertFalse(receiving_0.scripthash_status)
         self.assertEqual(len(wallet.address_ids), 4)
 
-        key.write({"witness_type": "segwit", "multisig": True})
-        with self.assertRaises(ValidationError):
-            wallet.refresh_addresses()
-
         empty_wallet = self._new_wallet([])
         with self.assertRaises(UserError):
             empty_wallet.refresh_addresses()
 
     def test_refresh_addresses_multisig_paths(self):
-        key_a = self._new_key(multisig=True, witness_type="legacy")
-        key_b = self._new_key(multisig=True, witness_type="legacy")
+        key_a = self._new_key(witness_type="legacy")
+        key_b = self._new_key(witness_type="legacy")
         wallet = self._new_wallet([key_a, key_b], sigs_required=2)
         self.assertTrue(wallet.multisig)
 
         wallet.refresh_addresses()
         self.assertEqual(len(wallet.address_ids), 2)
 
-        key_a.write({"witness_type": "segwit", "multisig": False})
+        key_a.write({"witness_type": "segwit"})
         with self.assertRaises(ValidationError):
             wallet.refresh_addresses()
 
     def test_refresh_addresses_multisig_uses_bip67_sorting(self):
-        key_a = self._new_key(multisig=True)
-        key_b = self._new_key(multisig=True)
+        key_a = self._new_key()
+        key_b = self._new_key()
         wallet_ab = self._new_wallet([key_a, key_b], sigs_required=2)
         wallet_ba = self._new_wallet([key_b, key_a], sigs_required=2)
 
@@ -470,8 +460,8 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
         )
 
         keys = [
-            self._new_key(wif=account_a, witness_type="p2sh-segwit", multisig=True),
-            self._new_key(wif=account_b, witness_type="p2sh-segwit", multisig=True),
+            self._new_key(wif=account_a, witness_type="p2sh-segwit"),
+            self._new_key(wif=account_b, witness_type="p2sh-segwit"),
         ]
         multisig_wallet = self._new_wallet(keys, sigs_required=2)
         multisig_wallet.refresh_addresses()

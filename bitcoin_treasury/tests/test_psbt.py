@@ -83,7 +83,7 @@ class TestBitcoinPSBT(TransactionCase):
         keys = self.env['bitcoin.key']
         for index in range(3):
             keys |= keys.create({
-                'wif': self.root.child(index).serialize(), 'witness_type': 'segwit', 'multisig': True,
+                'wif': self.root.child(index).serialize(), 'witness_type': 'segwit',
                 'real_parent_fingerprint': self.root.fingerprint.hex(), 'real_derivation_path': 'm/%s' % index,
             })
         multisig = self.env['bitcoin.wallet'].create({
@@ -487,5 +487,4 @@ class TestBitcoinPSBT(TransactionCase):
             wizard.input_ids._spend()
         with self.assertRaises(ValidationError):
             wizard.action_generate()
-
 
