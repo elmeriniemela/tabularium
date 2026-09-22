@@ -75,7 +75,7 @@ class TestBitcoinInvestmentIntegration(TransactionCase):
         index = self._next_seed()
         values = {
             'name': f'Key {self._seed}',
-            'wif': ExtendedKey.parse(self._root_xpub).child(index).serialize(),
+            'xpub': ExtendedKey.parse(self._root_xpub).child(index).serialize(),
             'witness_type': 'segwit',
             'multisig': False,
         }

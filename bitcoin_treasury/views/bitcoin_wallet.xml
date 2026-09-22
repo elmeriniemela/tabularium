@@ -88,10 +88,10 @@
                                 <list editable="top">
                                     <field name="sequence" widget="handle"/>
                                     <field name="key_id" optional="show"/>
-                                    <field name="wif" optional="hide"/>
+                                    <field name="xpub" optional="hide"/>
                                     <field name="witness_type" optional="show" readonly="True"/>
-                                    <field name="real_derivation_path" optional="show"/>
-                                    <field name="real_parent_fingerprint" optional="show"/>
+                                    <field name="derivation" optional="show"/>
+                                    <field name="master_fingerprint" optional="show"/>
                                     <field name="encoding" optional="hide" readonly="True"/>
                                     <field name="active" optional="hide" readonly="True"/>
                                 </list>

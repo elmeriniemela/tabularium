@@ -18,10 +18,10 @@ class TestBitcoinPSBT(TransactionCase):
             'Md22br7cHAQXAV8cZdicedZJkNweja4WWBK'
         )
         cls.key = cls.env['bitcoin.key'].create({
-            'wif': cls.root.serialize(),
+            'xpub': cls.root.serialize(),
             'witness_type': 'segwit',
-            'real_parent_fingerprint': cls.root.fingerprint.hex(),
-            'real_derivation_path': 'm',
+            'master_fingerprint': cls.root.fingerprint.hex(),
+            'derivation': 'm',
         })
         cls.wallet = cls.env['bitcoin.wallet'].create({
             'name': 'Empty PSBT wallet', 'key_ids': [Command.create({'key_id': cls.key.id})],
@@ -83,8 +83,8 @@ class TestBitcoinPSBT(TransactionCase):
         keys = self.env['bitcoin.key']
         for index in range(3):
             keys |= keys.create({
-                'wif': self.root.child(index).serialize(), 'witness_type': 'segwit',
-                'real_parent_fingerprint': self.root.fingerprint.hex(), 'real_derivation_path': 'm/%s' % index,
+                'xpub': self.root.child(index).serialize(), 'witness_type': 'segwit',
+                'master_fingerprint': self.root.fingerprint.hex(), 'derivation': 'm/%s' % index,
             })
         multisig = self.env['bitcoin.wallet'].create({
             'name': 'Multisig', 'sigs_required': 2,
@@ -142,28 +142,28 @@ class TestBitcoinPSBT(TransactionCase):
 
         wizard = self._wizard()
         self.env.cr.execute(
-            'UPDATE bitcoin_key SET real_parent_fingerprint = NULL WHERE id = %s', [self.key.id],
+            'UPDATE bitcoin_key SET master_fingerprint = NULL WHERE id = %s', [self.key.id],
         )
-        self.key.invalidate_recordset(['real_parent_fingerprint'])
+        self.key.invalidate_recordset(['master_fingerprint'])
         with self.assertRaises(ValidationError):
             wizard.input_ids._spend()
 
         raw = base58check_decode(self.root.serialize())
         self.env.cr.execute(
-            'UPDATE bitcoin_key SET wif = %s WHERE id = %s',
+            'UPDATE bitcoin_key SET xpub = %s WHERE id = %s',
             [base58check_encode(bytes.fromhex('043587cf') + raw[4:]), self.key.id],
         )
-        self.key.invalidate_recordset(['wif'])
+        self.key.invalidate_recordset(['xpub'])
         with self.assertRaises(ValidationError):
             wizard.input_ids._spend()
 
     def test_missing_origin_and_unsupported_keys(self):
         wizard = self._wizard()
-        self.key.wif = self.root.child(1).serialize()
+        self.key.xpub = self.root.child(1).serialize()
         self.assertTrue(wizard.input_ids.derivation_error)
         with self.assertRaises(Exception):
             wizard.action_generate()
-        self.key.write({'real_parent_fingerprint': self.root.fingerprint.hex(), 'real_derivation_path': 'm/1'})
+        self.key.write({'master_fingerprint': self.root.fingerprint.hex(), 'derivation': 'm/1'})
         wizard.action_generate()
         self.key.witness_type = 'legacy'
         with self.assertRaises(Exception):
@@ -198,7 +198,7 @@ class TestBitcoinPSBT(TransactionCase):
         wizard.output_ids.address = derive_native_segwit([(self.root, None)], 0, 13).address
         self.assertFalse(wizard.psbt_binary)
         wizard.action_generate()
-        self.key.wif = self.root.child(1).serialize()
+        self.key.xpub = self.root.child(1).serialize()
         # Simulate a fresh download/read request after another form changed a key.
         wizard.invalidate_recordset(['psbt_binary', 'psbt_base64'])
         self.assertFalse(wizard.psbt_binary)
@@ -484,10 +484,10 @@ class TestBitcoinPSBT(TransactionCase):
 
     def test_spend_missing_key_derivation_path_or_fingerprint_raises(self):
         wizard = self._wizard()
-        self.key.write({'real_derivation_path': False, 'real_parent_fingerprint': self.root.fingerprint.hex()})
+        self.key.write({'derivation': False, 'master_fingerprint': self.root.fingerprint.hex()})
         with self.assertRaises(ValidationError):
             wizard.input_ids._spend()
-        self.key.write({'real_derivation_path': False, 'real_parent_fingerprint': False})
+        self.key.write({'derivation': False, 'master_fingerprint': False})
         with self.assertRaises(ValidationError):
             wizard.input_ids._spend()
 

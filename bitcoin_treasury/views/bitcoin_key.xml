@@ -5,13 +5,14 @@
         <field name="arch" type="xml">
             <list decoration-muted="not active">
                 <field name="sequence" widget="handle"/>
-                <field name="wif" optional="hide"/>
+                <field name="xpub" optional="hide"/>
                 <field name="name" optional="show"/>
                 <field name="witness_type" optional="show"/>
-                <field name="real_derivation_path" optional="show"/>
-                <field name="real_parent_fingerprint" optional="show"/>
+                <field name="derivation" optional="show"/>
+                <field name="master_fingerprint" optional="show"/>
                 <field name="encoding" optional="show"/>
                 <field name="wallet_ids" widget="many2many_tags" optional="show"/>
+                <field name="compromised" optional="show"/>
                 <field name="active" optional="hide"/>
             </list>
         </field>
@@ -29,16 +30,17 @@
                         </h1>
                     </div>
                     <group>
-                        <field name="wif"/>
+                        <field name="xpub"/>
                     </group>
                     <group>
                         <group>
                             <field name="witness_type"/>
                             <field name="encoding"/>
+                            <field name="compromised"/>
                         </group>
                         <group>
-                            <field name="real_derivation_path"/>
-                            <field name="real_parent_fingerprint"/>
+                            <field name="derivation"/>
+                            <field name="master_fingerprint"/>
                         </group>
                     </group>
                     <field name="wallet_ids" nolabel="1">
@@ -64,8 +66,11 @@
         <field name="arch" type="xml">
             <search>
                 <field name="name"/>
-                <field name="wif"/>
+                <field name="xpub"/>
                 <field name="wallet_ids"/>
+                <field name="compromised"/>
+                <separator/>
+                <filter name="compromised" string="Compromised" domain="[('compromised', '=', True)]"/>
                 <separator/>
                 <filter name="all" string="All" domain="['|', ('active', '=', False), ('active', '=', True)]"/>
                 <separator/>

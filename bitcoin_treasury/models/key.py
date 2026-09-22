@@ -14,10 +14,11 @@ class BitcoinExtendedPublicKey(models.Model):
     sequence = fields.Integer()
     name = fields.Char(tracking=True)
     active = fields.Boolean(default=True, tracking=True)
+    compromised = fields.Boolean(tracking=True)
 
-    wif = fields.Char(
-        string="Extended Public Key",
-        help="Mainnet extended public key used exclusively for watch-only address derivation.",
+    xpub = fields.Char(
+        string="xpub",
+        help="Mainnet extended public key used for watch-only address derivation.",
         required=True,
         tracking=True,
     )
@@ -53,12 +54,12 @@ class BitcoinExtendedPublicKey(models.Model):
         store=True,
     )
 
-    real_parent_fingerprint = fields.Char(
+    master_fingerprint = fields.Char(
         string="Master Key Fingerprint",
         help="Eight-character fingerprint of the master key, used in the descriptor key origin.",
         tracking=True,
     )
-    real_derivation_path = fields.Char(
+    derivation = fields.Char(
         string="Derivation Path",
         help="Path from the master key to this extended public key, used in the descriptor key origin.",
         tracking=True,
@@ -87,8 +88,8 @@ class BitcoinExtendedPublicKey(models.Model):
 
     def _key_origin_error(self):
         self.ensure_one()
-        fingerprint = self.real_parent_fingerprint
-        if self.real_derivation_path and not fingerprint:
+        fingerprint = self.master_fingerprint
+        if self.derivation and not fingerprint:
             return _("Add the master key fingerprint or remove the derivation path.")
         if fingerprint and (
             len(fingerprint) != 8
@@ -96,7 +97,7 @@ class BitcoinExtendedPublicKey(models.Model):
         ):
             return _("The master key fingerprint must contain exactly eight hexadecimal characters.")
 
-        path = self.real_derivation_path
+        path = self.derivation
         if path and path != 'm':
             if path.startswith('m/'):
                 path = path[2:]
@@ -108,23 +109,23 @@ class BitcoinExtendedPublicKey(models.Model):
 
     def _descriptor_key(self):
         self.ensure_one()
-        key_data = self._decode_extended_public_key(self.wif)
+        key_data = self._decode_extended_public_key(self.xpub)
         xpub = key_data.to_xpub()
         origin = ''
-        if self.real_parent_fingerprint:
-            path = self.real_derivation_path or ''
+        if self.master_fingerprint:
+            path = self.derivation or ''
             if path == 'm':
                 path = ''
             elif path.startswith('m/'):
                 path = path[2:]
             path = path.replace("'", 'h')
             origin = '[%s%s]' % (
-                self.real_parent_fingerprint.lower(),
+                self.master_fingerprint.lower(),
                 '/%s' % path if path else '',
             )
         return '%s%s/<0;1>/*' % (origin, xpub)
 
-    @api.constrains('real_parent_fingerprint', 'real_derivation_path')
+    @api.constrains('master_fingerprint', 'derivation')
     def _check_key_origin(self):
         for key in self:
             error = key._key_origin_error()
@@ -134,19 +135,19 @@ class BitcoinExtendedPublicKey(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
-            if vals.get('real_parent_fingerprint'):
-                vals['real_parent_fingerprint'] = vals['real_parent_fingerprint'].lower()
-            if vals.get('real_derivation_path'):
-                vals['real_derivation_path'] = vals['real_derivation_path'].lower().replace("'", 'h')
-            if 'wif' in vals:
-                self._decode_extended_public_key(vals['wif'])
+            if vals.get('master_fingerprint'):
+                vals['master_fingerprint'] = vals['master_fingerprint'].lower()
+            if vals.get('derivation'):
+                vals['derivation'] = vals['derivation'].lower().replace("'", 'h')
+            if 'xpub' in vals:
+                self._decode_extended_public_key(vals['xpub'])
         return super().create(vals_list)
 
     def write(self, vals):
-        if vals.get('real_parent_fingerprint'):
-            vals['real_parent_fingerprint'] = vals['real_parent_fingerprint'].lower()
-        if vals.get('real_derivation_path'):
-            vals['real_derivation_path'] = vals['real_derivation_path'].lower().replace("'", 'h')
-        if 'wif' in vals:
-            self._decode_extended_public_key(vals['wif'])
+        if vals.get('master_fingerprint'):
+            vals['master_fingerprint'] = vals['master_fingerprint'].lower()
+        if vals.get('derivation'):
+            vals['derivation'] = vals['derivation'].lower().replace("'", 'h')
+        if 'xpub' in vals:
+            self._decode_extended_public_key(vals['xpub'])
         return super().write(vals)

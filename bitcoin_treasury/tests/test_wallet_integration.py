@@ -75,7 +75,7 @@ class TestBitcoinWalletIntegration(TransactionCase):
         index = self._next_seed()
         values = {
             "name": "Key %s" % self._seed,
-            "wif": ExtendedKey.parse(self._root_xpub).child(index).serialize(),
+            "xpub": ExtendedKey.parse(self._root_xpub).child(index).serialize(),
             "witness_type": "segwit",
         }
         values.update(overrides)
@@ -141,25 +141,25 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
 
     def test_single_signature_descriptor(self):
         key = self._new_key(
-            real_parent_fingerprint="DEADBEEF",
-            real_derivation_path="m/84'/0'/0'",
+            master_fingerprint="DEADBEEF",
+            derivation="m/84'/0'/0'",
         )
         wallet = self._new_wallet([key])
-        payload = "wpkh([deadbeef/84h/0h/0h]%s/<0;1>/*)" % key.wif
+        payload = "wpkh([deadbeef/84h/0h/0h]%s/<0;1>/*)" % key.xpub
         self.assertEqual(
             wallet.descriptor,
             "%s#%s" % (payload, descriptor_checksum(payload)),
         )
 
-        key.write({"real_derivation_path": "m"})
-        payload = "wpkh([deadbeef]%s/<0;1>/*)" % key.wif
+        key.write({"derivation": "m"})
+        payload = "wpkh([deadbeef]%s/<0;1>/*)" % key.xpub
         self.assertEqual(
             wallet.descriptor,
             "%s#%s" % (payload, descriptor_checksum(payload)),
         )
 
-        key.write({"real_parent_fingerprint": False, "real_derivation_path": False})
-        payload = "wpkh(%s/<0;1>/*)" % key.wif
+        key.write({"master_fingerprint": False, "derivation": False})
+        payload = "wpkh(%s/<0;1>/*)" % key.xpub
         self.assertEqual(
             wallet.descriptor,
             "%s#%s" % (payload, descriptor_checksum(payload)),
@@ -171,7 +171,7 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
         self.assertEqual(self._new_wallet([key_a]).script_type, 'p2wpkh')
         wallet = self._new_wallet([key_a, key_b], sigs_required=2)
         self.assertEqual(wallet.script_type, 'p2wsh')
-        payload = "wsh(sortedmulti(2,%s/<0;1>/*,%s/<0;1>/*))" % (key_a.wif, key_b.wif)
+        payload = "wsh(sortedmulti(2,%s/<0;1>/*,%s/<0;1>/*))" % (key_a.xpub, key_b.xpub)
         self.assertEqual(
             wallet.descriptor,
             "%s#%s" % (payload, descriptor_checksum(payload)),
@@ -189,11 +189,11 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
         self.assertEqual(wallet.sigs_required, 2)
         self.assertEqual(wallet.key_ids.mapped('sequence'), [0, 1])
         self.assertEqual(
-            wallet.key_ids.key_id.mapped('real_parent_fingerprint'),
+            wallet.key_ids.key_id.mapped('master_fingerprint'),
             ['00bc0e84', 'f9039c6d'],
         )
         self.assertEqual(
-            wallet.key_ids.key_id.mapped('real_derivation_path'),
+            wallet.key_ids.key_id.mapped('derivation'),
             ['m/48h/0h/0h/2h', 'm/48h/0h/0h/2h'],
         )
         self.assertEqual(wallet.key_ids.key_id.mapped('witness_type'), ['segwit', 'segwit'])
@@ -213,10 +213,10 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
         fingerprint, public_key = setup['keys'][0]
         different_key = self.Key.create({
             'name': fingerprint,
-            'wif': public_key,
+            'xpub': public_key,
             'witness_type': 'legacy',
-            'real_parent_fingerprint': fingerprint,
-            'real_derivation_path': setup['derivation'],
+            'master_fingerprint': fingerprint,
+            'derivation': setup['derivation'],
         })
 
         wallet = self.Wallet.create({'parsed_qr': self._wallet_import()})
@@ -304,10 +304,10 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
         key = self._new_key()
         wallet = self._new_wallet([key])
         self.env.cr.execute(
-            "UPDATE bitcoin_key SET real_parent_fingerprint = %s WHERE id = %s",
+            "UPDATE bitcoin_key SET master_fingerprint = %s WHERE id = %s",
             ("deadbee", key.id),
         )
-        key.invalidate_recordset(["real_parent_fingerprint"])
+        key.invalidate_recordset(["master_fingerprint"])
 
         wallet._compute_descriptor()
 
@@ -316,34 +316,34 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
 
     def test_key_origin_validation(self):
         invalid_origins = [
-            {"real_parent_fingerprint": "deadbee"},
-            {"real_derivation_path": "m/84'/0'/0'"},
-            {"real_parent_fingerprint": "deadbeef", "real_derivation_path": "m/84'/0'/*"},
+            {"master_fingerprint": "deadbee"},
+            {"derivation": "m/84'/0'/0'"},
+            {"master_fingerprint": "deadbeef", "derivation": "m/84'/0'/*"},
         ]
         for origin in invalid_origins:
             with self.assertRaises(ValidationError):
                 self._new_key(**origin)
 
         invalid_key = self.Key.new({
-            "wif": self._new_key().wif,
-            "real_parent_fingerprint": "deadbee",
+            "xpub": self._new_key().xpub,
+            "master_fingerprint": "deadbee",
         })
         self.assertTrue(invalid_key._key_origin_error())
 
     def test_key_origin_normalization(self):
         key = self._new_key(
-            real_parent_fingerprint='DEADBEEF',
-            real_derivation_path="M/84'/0H/0h",
+            master_fingerprint='DEADBEEF',
+            derivation="M/84'/0H/0h",
         )
-        self.assertEqual(key.real_parent_fingerprint, 'deadbeef')
-        self.assertEqual(key.real_derivation_path, 'm/84h/0h/0h')
+        self.assertEqual(key.master_fingerprint, 'deadbeef')
+        self.assertEqual(key.derivation, 'm/84h/0h/0h')
 
         key.write({
-            'real_parent_fingerprint': 'A1B2C3D4',
-            'real_derivation_path': "M/48'/0'/0'/2'",
+            'master_fingerprint': 'A1B2C3D4',
+            'derivation': "M/48'/0'/0'/2'",
         })
-        self.assertEqual(key.real_parent_fingerprint, 'a1b2c3d4')
-        self.assertEqual(key.real_derivation_path, 'm/48h/0h/0h/2h')
+        self.assertEqual(key.master_fingerprint, 'a1b2c3d4')
+        self.assertEqual(key.derivation, 'm/48h/0h/0h/2h')
 
     def test_key_encoding(self):
         key = self._new_key()
@@ -368,7 +368,7 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
             derived = ExtendedKey.parse(self._root_xpub).child(index).serialize()
             raw = base58check_decode(derived)
             key = self._new_key(
-                wif=base58check_encode(version.to_bytes(4, "big") + raw[4:])
+                xpub=base58check_encode(version.to_bytes(4, "big") + raw[4:])
             )
             self.assertTrue(key._descriptor_key().startswith("xpub"))
 
@@ -385,7 +385,7 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
 
         for value in (private_key, testnet_public_key, unknown_version_key, "not-an-extended-key"):
             with self.assertRaises(ValidationError):
-                self._new_key(wif=value)
+                self._new_key(xpub=value)
 
         self.assertEqual(self.Key.search_count([]), initial_keys)
         self.assertEqual(
@@ -394,10 +394,10 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
         )
 
         key = self._new_key()
-        original_public_key = key.wif
+        original_public_key = key.xpub
         with self.assertRaises(ValidationError):
-            key.write({"wif": private_key})
-        self.assertEqual(key.wif, original_public_key)
+            key.write({"xpub": private_key})
+        self.assertEqual(key.xpub, original_public_key)
 
     def test_address_to_scripthash(self):
         scripthash = self.env["bitcoin.wallet.address"]._address_to_scripthash(
@@ -472,7 +472,7 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
         account_a = ExtendedKey.parse(self._root_xpub).child(1).serialize()
         account_b = ExtendedKey.parse(self._root_xpub).child(2).serialize()
 
-        single_key = self._new_key(wif=account_a, witness_type="p2sh-segwit")
+        single_key = self._new_key(xpub=account_a, witness_type="p2sh-segwit")
         single_wallet = self._new_wallet([single_key])
         single_wallet.refresh_addresses()
         self.assertEqual(
@@ -481,8 +481,8 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
         )
 
         keys = [
-            self._new_key(wif=account_a, witness_type="p2sh-segwit"),
-            self._new_key(wif=account_b, witness_type="p2sh-segwit"),
+            self._new_key(xpub=account_a, witness_type="p2sh-segwit"),
+            self._new_key(xpub=account_b, witness_type="p2sh-segwit"),
         ]
         multisig_wallet = self._new_wallet(keys, sigs_required=2)
         multisig_wallet.refresh_addresses()

@@ -288,12 +288,12 @@ class BitcoinPSBT(models.Model):
         'output_ids.op_return_format', 'output_ids.op_return_data',
         'input_ids.wallet_id.sigs_required', 'output_ids.wallet_id.sigs_required',
         'input_ids.wallet_id.key_ids', 'output_ids.wallet_id.key_ids',
-        'input_ids.wallet_id.key_ids.key_id.wif', 'output_ids.wallet_id.key_ids.key_id.wif',
+        'input_ids.wallet_id.key_ids.key_id.xpub', 'output_ids.wallet_id.key_ids.key_id.xpub',
         'input_ids.wallet_id.key_ids.key_id.witness_type', 'output_ids.wallet_id.key_ids.key_id.witness_type',
-        'input_ids.wallet_id.key_ids.key_id.real_parent_fingerprint',
-        'output_ids.wallet_id.key_ids.key_id.real_parent_fingerprint',
-        'input_ids.wallet_id.key_ids.key_id.real_derivation_path',
-        'output_ids.wallet_id.key_ids.key_id.real_derivation_path',
+        'input_ids.wallet_id.key_ids.key_id.master_fingerprint',
+        'output_ids.wallet_id.key_ids.key_id.master_fingerprint',
+        'input_ids.wallet_id.key_ids.key_id.derivation',
+        'output_ids.wallet_id.key_ids.key_id.derivation',
     )
     def _compute_result(self):
         for wizard in self:
@@ -311,7 +311,7 @@ class BitcoinPSBT(models.Model):
         def wallet_spec(line):
             wallet = line.wallet_id
             return [wallet.id, wallet.sigs_required, line.branch, line.address_index, [
-                [key.wif, key.witness_type, key.real_parent_fingerprint, key.real_derivation_path]
+                [key.xpub, key.witness_type, key.master_fingerprint, key.derivation]
                 for key in wallet.key_ids.key_id
             ]]
 
@@ -440,18 +440,18 @@ class BitcoinPSBTWalletLine(models.AbstractModel):
             raise ValidationError(_("PSBT inputs and wallet outputs require native SegWit single-signature or multisig keys."))
         origins = []
         for key in keys:
-            parsed = ExtendedKey.parse(key.wif)
+            parsed = ExtendedKey.parse(key.xpub)
             if parsed.network != 'mainnet':
                 raise ValidationError(_("Use mainnet extended public keys."))
 
-            key_label = key.display_name or key.name or key.wif[:16]
-            if not key.real_derivation_path:
+            key_label = key.display_name or key.name or key.xpub[:16]
+            if not key.derivation:
                 raise ValidationError(_("Add derivation path for %s.") % key_label)
 
-            if not key.real_parent_fingerprint:
+            if not key.master_fingerprint:
                 raise ValidationError(_("Add parent fingerprint for %s.") % key_label)
 
-            origin = KeyOrigin.parse(key.real_parent_fingerprint, key.real_derivation_path)
+            origin = KeyOrigin.parse(key.master_fingerprint, key.derivation)
             origins.append((parsed, origin))
         spend = derive_native_segwit(
             origins, int(self.branch), self.address_index,
@@ -474,8 +474,8 @@ class BitcoinPSBTWalletLine(models.AbstractModel):
 
     @api.depends(
         'wallet_id', 'branch', 'address_index', 'wallet_id.sigs_required', 'wallet_id.key_ids',
-        'wallet_id.key_ids.key_id.wif', 'wallet_id.key_ids.key_id.witness_type',
-        'wallet_id.key_ids.key_id.real_parent_fingerprint', 'wallet_id.key_ids.key_id.real_derivation_path',
+        'wallet_id.key_ids.key_id.xpub', 'wallet_id.key_ids.key_id.witness_type',
+        'wallet_id.key_ids.key_id.master_fingerprint', 'wallet_id.key_ids.key_id.derivation',
         'wallet_id.address_ids.address', 'wallet_id.address_ids.atype', 'wallet_id.address_ids.index',
     )
     def _compute_derived_address(self):

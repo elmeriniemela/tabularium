@@ -178,17 +178,17 @@ class BitcoinWallet(models.Model):
             derivation_path = setup['derivation'].lower().replace("'", 'h')
             key_values = {
                 'name': fingerprint,
-                'wif': public_key,
+                'xpub': public_key,
                 'witness_type': setup['witness_type'],
-                'real_parent_fingerprint': normalized_fingerprint,
-                'real_derivation_path': derivation_path,
+                'master_fingerprint': normalized_fingerprint,
+                'derivation': derivation_path,
             }
             key = (
                 self.env['bitcoin.key'].search([
-                    ('wif', '=', public_key),
+                    ('xpub', '=', public_key),
                     ('witness_type', '=', setup['witness_type']),
-                    ('real_parent_fingerprint', '=', normalized_fingerprint),
-                    ('real_derivation_path', '=', derivation_path),
+                    ('master_fingerprint', '=', normalized_fingerprint),
+                    ('derivation', '=', derivation_path),
                 ], limit=1)
                 or self.env['bitcoin.key'].create(key_values)
             )
@@ -241,10 +241,10 @@ class BitcoinWallet(models.Model):
         'sigs_required',
         'key_ids',
         'key_ids.sequence',
-        'key_ids.key_id.wif',
+        'key_ids.key_id.xpub',
         'key_ids.key_id.witness_type',
-        'key_ids.key_id.real_parent_fingerprint',
-        'key_ids.key_id.real_derivation_path',
+        'key_ids.key_id.master_fingerprint',
+        'key_ids.key_id.derivation',
     )
     def _compute_descriptor(self):
         for wallet in self:
@@ -322,7 +322,7 @@ class BitcoinWallet(models.Model):
             else:
                 raise UserError(_("Wrong amount of extended public keys: %s") % key_count)
 
-            keys = [ExtendedKey.parse(key.key_id.wif) for key in wallet.key_ids]
+            keys = [ExtendedKey.parse(key.key_id.xpub) for key in wallet.key_ids]
             for atype in range(2):
                 branch_keys = [key.child(atype) for key in keys]
                 for index in range(wallet.address_amount):
