@@ -15,6 +15,7 @@ import * as assets from "@web/core/assets";
 import { browser } from "@web/core/browser/browser";
 import { Dialog } from "@web/core/dialog/dialog";
 import { _t } from "@web/core/l10n/translation";
+import { BBQrDecoder } from "./bbqr_decoder";
 
 export class QRCodeScanner extends Component {
     static template = "qrcode_widget.QRCodeScanner";
@@ -149,8 +150,12 @@ export class QRCodeScanner extends Component {
         try {
             const [result] = await this.detector.detect(this.video.el);
             if (result) {
-                this.stop();
-                this.props.onResult(result.rawValue);
+                const complete = await this.props.onResult(result.rawValue);
+                if (complete !== false) {
+                    this.stop();
+                } else if (this.stream) {
+                    this.timeout = setTimeout(() => this.detect(), 200);
+                }
             } else if (this.stream) {
                 this.timeout = setTimeout(() => this.detect(), 200);
             }
@@ -169,15 +174,26 @@ export class QRCodeDialog extends Component {
     static props = ["close", "onResult"];
 
     setup() {
+        this.decoder = new BBQrDecoder();
         this.state = useState({
             supported: Boolean(browser.navigator.mediaDevices?.getUserMedia),
             error: _t("Camera scanning is not supported by this browser."),
+            progress: false,
         });
     }
 
-    onResult(result) {
+    async onResult(result) {
+        const decoded = await this.decoder.receive(result);
+        if (!decoded.complete) {
+            this.state.progress = _t("BBQr: %(received)s of %(total)s parts scanned", {
+                received: decoded.received,
+                total: decoded.total,
+            });
+            return false;
+        }
         this.props.close();
-        this.props.onResult(result);
+        this.props.onResult(decoded.value);
+        return true;
     }
 
     onError(error) {

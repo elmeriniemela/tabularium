@@ -15,7 +15,12 @@
     <t t-name="qrcode_widget.QRCodeDialog">
         <Dialog title.translate="QR Code Scanner" fullscreen="true" footer="false"
                 contentClass="'o_qrcode_scanner_modal'">
-            <QRCodeScanner t-if="state.supported" onResult.bind="onResult" onError.bind="onError"/>
+            <div t-if="state.supported" class="position-relative h-100">
+                <QRCodeScanner onResult.bind="onResult" onError.bind="onError"/>
+                <div t-if="state.progress"
+                     class="position-absolute bottom-0 start-50 translate-middle-x mb-3 py-2 px-3 rounded bg-dark text-white"
+                     t-out="state.progress"/>
+            </div>
             <div t-else="" class="h-100 d-flex flex-column justify-content-center align-items-center gap-1">
                 <i class="fa fa-2x fa-camera text-muted"/>
                 <strong>Unable to access camera</strong>
