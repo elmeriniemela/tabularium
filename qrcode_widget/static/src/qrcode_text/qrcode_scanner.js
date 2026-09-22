@@ -11,7 +11,7 @@ import {
     useRef,
     useState,
 } from "@odoo/owl";
-import { loadJS } from "@web/core/assets";
+import * as assets from "@web/core/assets";
 import { browser } from "@web/core/browser/browser";
 import { Dialog } from "@web/core/dialog/dialog";
 import { _t } from "@web/core/l10n/translation";
@@ -24,28 +24,77 @@ export class QRCodeScanner extends Component {
         this.video = useRef("video");
         this.stream = null;
         this.timeout = null;
+        this.detecting = false;
 
         onWillStart(async () => {
-            if ("BarcodeDetector" in window) {
-                this.detector = new BarcodeDetector({ formats: ["qr_code"] });
-                return;
-            }
-            await loadJS("/web/static/lib/zxing-library/zxing-library.js");
-            const reader = new window.ZXing.BrowserQRCodeReader();
+            await assets.loadJS("/web/static/lib/zxing-library/zxing-library.js");
+            const reader = new window.ZXing.QRCodeReader();
+            const hints = new Map([[window.ZXing.DecodeHintType.TRY_HARDER, true]]);
+            const canvas = document.createElement("canvas");
+            const context = canvas.getContext("2d", { willReadFrequently: true });
+            const nativeDetector = window.BarcodeDetector
+                ? new BarcodeDetector({ formats: ["qr_code"] })
+                : null;
             this.detector = {
-                detect(video) {
-                    try {
-                        return [{ rawValue: reader.decode(video).getText() }];
-                    } catch (error) {
-                        if (
-                            error instanceof window.ZXing.NotFoundException ||
-                            error instanceof window.ZXing.ChecksumException ||
-                            error instanceof window.ZXing.FormatException
-                        ) {
-                            return [];
+                async detect(video) {
+                    if (nativeDetector) {
+                        const results = await nativeDetector.detect(video);
+                        if (results.length) {
+                            return results;
                         }
-                        throw error;
                     }
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    context.drawImage(video, 0, 0);
+                    const decode = () => {
+                        const source = new window.ZXing.HTMLCanvasElementLuminanceSource(canvas);
+                        const bitmap = new window.ZXing.BinaryBitmap(
+                            new window.ZXing.HybridBinarizer(source)
+                        );
+                        try {
+                            return reader.decode(bitmap, hints).getText();
+                        } catch (error) {
+                            if (
+                                error instanceof window.ZXing.NotFoundException ||
+                                error instanceof window.ZXing.ChecksumException ||
+                                error instanceof window.ZXing.FormatException
+                            ) {
+                                return false;
+                            }
+                            throw error;
+                        }
+                    };
+                    let result = decode();
+                    if (result) {
+                        return [{ rawValue: result }];
+                    }
+                    const size = Math.floor(Math.min(video.videoWidth, video.videoHeight) / 2);
+                    canvas.width = size;
+                    canvas.height = size;
+                    context.drawImage(
+                        video,
+                        (video.videoWidth - size) / 2,
+                        (video.videoHeight - size) / 2,
+                        size,
+                        size,
+                        0,
+                        0,
+                        size,
+                        size
+                    );
+                    result = decode();
+                    if (result) {
+                        return [{ rawValue: result }];
+                    }
+                    context.globalCompositeOperation = "difference";
+                    context.fillStyle = "white";
+                    context.fillRect(0, 0, size, size);
+                    context.globalCompositeOperation = "source-over";
+                    result = decode();
+                    if (result) {
+                        return [{ rawValue: result }];
+                    }
+                    return [];
                 },
             };
         });
@@ -56,8 +105,6 @@ export class QRCodeScanner extends Component {
                     audio: false,
                     video: {
                         facingMode: { ideal: "environment" },
-                        width: { ideal: 1920 },
-                        height: { ideal: 1080 },
                     },
                 });
             } catch (error) {
@@ -95,17 +142,23 @@ export class QRCodeScanner extends Component {
     }
 
     async detect() {
+        if (this.detecting || !this.stream) {
+            return;
+        }
+        this.detecting = true;
         try {
             const [result] = await this.detector.detect(this.video.el);
             if (result) {
                 this.stop();
                 this.props.onResult(result.rawValue);
             } else if (this.stream) {
-                this.timeout = setTimeout(() => this.detect(), 100);
+                this.timeout = setTimeout(() => this.detect(), 200);
             }
         } catch (error) {
             this.stop();
             this.props.onError(error);
+        } finally {
+            this.detecting = false;
         }
     }
 }

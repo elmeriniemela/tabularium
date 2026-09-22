@@ -14,6 +14,7 @@ import {
     patchWithCleanup,
 } from "@web/../tests/web_test_helpers";
 import { browser } from "@web/core/browser/browser";
+import * as assets from "@web/core/assets";
 import * as QRCodeScanner from "@qrcode_widget/qrcode_text/qrcode_scanner";
 import "@qrcode_widget/qrcode_text/qrcode_text";
 
@@ -80,7 +81,7 @@ test("keeps the current value when scanning returns no result", async () => {
     expect('[name="char_value"] input').toHaveValue("Initial");
 });
 
-test("requests a 1080p camera stream and scans QR codes", async () => {
+test("requests a camera stream and scans QR codes", async () => {
     patchWithCleanup(browser.navigator, {
         mediaDevices: {
             async getUserMedia(constraints) {
@@ -115,8 +116,61 @@ test("requests a 1080p camera stream and scans QR codes", async () => {
 
     expect.verifySteps([
         '{"formats":["qr_code"]}',
-        '{"audio":false,"video":{"facingMode":{"ideal":"environment"},"width":{"ideal":1920},"height":{"ideal":1080}}}',
+        '{"audio":false,"video":{"facingMode":{"ideal":"environment"}}}',
         "camera stopped",
         "Scanned QR",
     ]);
+});
+
+test("tries a centered crop with ZXing TRY_HARDER", async () => {
+    class NotFoundException extends Error {}
+    let attempts = 0;
+    patchWithCleanup(assets, { loadJS: async () => {} });
+    patchWithCleanup(CanvasRenderingContext2D.prototype, { drawImage() {} });
+    patchWithCleanup(browser.navigator, {
+        mediaDevices: {
+            async getUserMedia() {
+                return document.createElement("canvas").captureStream();
+            },
+        },
+    });
+    patchWithCleanup(window, {
+        BarcodeDetector: class {
+            async detect() {
+                return [];
+            }
+        },
+        ZXing: {
+            BinaryBitmap: class {},
+            ChecksumException: class extends Error {},
+            DecodeHintType: { TRY_HARDER: "try_harder" },
+            FormatException: class extends Error {},
+            HTMLCanvasElementLuminanceSource: class {},
+            HybridBinarizer: class {},
+            NotFoundException,
+            QRCodeReader: class {
+                decode(bitmap, hints) {
+                    expect(hints.get("try_harder")).toBe(true);
+                    attempts++;
+                    if (attempts === 1) {
+                        throw new NotFoundException();
+                    }
+                    return { getText: () => "Dense QR" };
+                }
+            },
+        },
+    });
+    await mountWithCleanup(QRCodeScanner.QRCodeScanner, {
+        props: {
+            onResult: (result) => expect.step(result),
+            onError: (error) => expect.step(error.message),
+        },
+    });
+
+    await animationFrame();
+    await manuallyDispatchProgrammaticEvent(queryOne("video"), "loadeddata");
+    await animationFrame();
+
+    expect(attempts).toBe(2);
+    expect.verifySteps(["Dense QR"]);
 });
