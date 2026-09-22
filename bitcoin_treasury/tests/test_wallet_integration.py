@@ -189,11 +189,11 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
         self.assertEqual(wallet.key_ids.mapped('sequence'), [0, 1])
         self.assertEqual(
             wallet.key_ids.key_id.mapped('real_parent_fingerprint'),
-            ['00BC0E84', 'F9039C6D'],
+            ['00bc0e84', 'f9039c6d'],
         )
         self.assertEqual(
             wallet.key_ids.key_id.mapped('real_derivation_path'),
-            ["m/48'/0'/0'/2'", "m/48'/0'/0'/2'"],
+            ['m/48h/0h/0h/2h', 'm/48h/0h/0h/2h'],
         )
         self.assertEqual(wallet.key_ids.key_id.mapped('witness_type'), ['segwit', 'segwit'])
         self.assertEqual(wallet.key_ids.key_id.mapped('script_type'), ['p2wsh', 'p2wsh'])
@@ -327,6 +327,21 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
             "real_parent_fingerprint": "deadbee",
         })
         self.assertTrue(invalid_key._key_origin_error())
+
+    def test_key_origin_normalization(self):
+        key = self._new_key(
+            real_parent_fingerprint='DEADBEEF',
+            real_derivation_path="M/84'/0H/0h",
+        )
+        self.assertEqual(key.real_parent_fingerprint, 'deadbeef')
+        self.assertEqual(key.real_derivation_path, 'm/84h/0h/0h')
+
+        key.write({
+            'real_parent_fingerprint': 'A1B2C3D4',
+            'real_derivation_path': "M/48'/0'/0'/2'",
+        })
+        self.assertEqual(key.real_parent_fingerprint, 'a1b2c3d4')
+        self.assertEqual(key.real_derivation_path, 'm/48h/0h/0h/2h')
 
     def test_key_computed_fields(self):
         key = self._new_key()

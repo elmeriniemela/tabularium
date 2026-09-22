@@ -165,21 +165,23 @@ class BitcoinWallet(models.Model):
             'sigs_required': setup['sigs_required'],
         })
         for sequence, (fingerprint, public_key) in enumerate(setup['keys']):
+            normalized_fingerprint = fingerprint.lower()
+            derivation_path = setup['derivation'].lower().replace("'", 'h')
             key_values = {
                 'name': fingerprint,
                 'wif': public_key,
                 'multisig': True,
                 'witness_type': setup['witness_type'],
-                'real_parent_fingerprint': fingerprint,
-                'real_derivation_path': setup['derivation'],
+                'real_parent_fingerprint': normalized_fingerprint,
+                'real_derivation_path': derivation_path,
             }
             key = (
                 self.env['bitcoin.key'].search([
                     ('wif', '=', public_key),
                     ('multisig', '=', True),
                     ('witness_type', '=', setup['witness_type']),
-                    ('real_parent_fingerprint', '=', fingerprint),
-                    ('real_derivation_path', '=', setup['derivation']),
+                    ('real_parent_fingerprint', '=', normalized_fingerprint),
+                    ('real_derivation_path', '=', derivation_path),
                 ], limit=1)
                 or self.env['bitcoin.key'].create(key_values)
             )

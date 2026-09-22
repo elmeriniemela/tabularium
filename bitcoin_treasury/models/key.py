@@ -183,11 +183,19 @@ class BitcoinExtendedPublicKey(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
+            if vals.get('real_parent_fingerprint'):
+                vals['real_parent_fingerprint'] = vals['real_parent_fingerprint'].lower()
+            if vals.get('real_derivation_path'):
+                vals['real_derivation_path'] = vals['real_derivation_path'].lower().replace("'", 'h')
             if 'wif' in vals:
                 self._decode_extended_public_key(vals['wif'])
         return super().create(vals_list)
 
     def write(self, vals):
+        if vals.get('real_parent_fingerprint'):
+            vals['real_parent_fingerprint'] = vals['real_parent_fingerprint'].lower()
+        if vals.get('real_derivation_path'):
+            vals['real_derivation_path'] = vals['real_derivation_path'].lower().replace("'", 'h')
         if 'wif' in vals:
             self._decode_extended_public_key(vals['wif'])
         return super().write(vals)
