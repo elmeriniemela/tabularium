@@ -79,11 +79,116 @@ class BitcoinWallet(models.Model):
     )
     descriptor_qr = fields.Binary(string="Descriptor QR Code", compute='_compute_descriptor_qr')
     parsed_qr = fields.Text(string="Parsed QR")
+    is_wallet_import = fields.Boolean(
+        string="Wallet Import",
+        compute='_compute_is_wallet_import',
+    )
     birth_timestamp = fields.Char(
         string="Birth Timestamp",
         compute='_compute_descriptor_timestamp',
         help="Unix timestamp for Bitcoin Core descriptor imports, based on the earliest wallet transaction or wallet creation time.",
     )
+
+    @api.model
+    def _parse_wallet_import(self, content):
+        if not content:
+            return False
+        lines = [line.strip() for line in content.splitlines()]
+
+        values = {}
+        keys = []
+        fingerprints = set()
+        for line in lines:
+            if not line or line.startswith('#'):
+                continue
+            label, separator, value = line.partition(':')
+            value = value.strip()
+            if not separator or not value:
+                return False
+            if label in {'Name', 'Policy', 'Derivation', 'Format'}:
+                if label in values:
+                    return False
+                values[label] = value
+            elif (
+                len(label) == 8
+                and all(character in '0123456789abcdefABCDEF' for character in label)
+                and label.lower() not in fingerprints
+            ):
+                fingerprints.add(label.lower())
+                keys.append((label, value))
+            else:
+                return False
+
+        if set(values) != {'Name', 'Policy', 'Derivation', 'Format'}:
+            return False
+        policy = values['Policy'].split()
+        if (
+            len(policy) != 3
+            or not policy[0].isdigit()
+            or policy[1] != 'of'
+            or not policy[2].isdigit()
+        ):
+            return False
+        required, total = int(policy[0]), int(policy[2])
+        if not 0 < required <= total or total != len(keys):
+            return False
+
+        witness_types = {
+            'P2SH': 'legacy',
+            'P2SH-P2WSH': 'p2sh-segwit',
+            'P2WSH': 'segwit',
+        }
+        if values['Format'] not in witness_types:
+            return False
+        return {
+            'name': values['Name'],
+            'sigs_required': required,
+            'derivation': values['Derivation'],
+            'witness_type': witness_types[values['Format']],
+            'keys': keys,
+        }
+
+    @api.depends('parsed_qr')
+    def _compute_is_wallet_import(self):
+        for wallet in self:
+            wallet.is_wallet_import = bool(wallet._parse_wallet_import(wallet.parsed_qr))
+
+    def action_import_wallet(self):
+        self.ensure_one()
+        if self.key_ids:
+            raise ValidationError(_("Only a wallet without extended public keys can be imported."))
+        setup = self._parse_wallet_import(self.parsed_qr)
+        if not setup:
+            raise ValidationError(_("Enter a valid multisig wallet import."))
+        self.write({
+            'name': setup['name'],
+            'sigs_required': setup['sigs_required'],
+        })
+        for sequence, (fingerprint, public_key) in enumerate(setup['keys']):
+            key_values = {
+                'name': fingerprint,
+                'wif': public_key,
+                'multisig': True,
+                'witness_type': setup['witness_type'],
+                'real_parent_fingerprint': fingerprint,
+                'real_derivation_path': setup['derivation'],
+            }
+            key = (
+                self.env['bitcoin.key'].search([
+                    ('wif', '=', public_key),
+                    ('multisig', '=', True),
+                    ('witness_type', '=', setup['witness_type']),
+                    ('real_parent_fingerprint', '=', fingerprint),
+                    ('real_derivation_path', '=', setup['derivation']),
+                ], limit=1)
+                or self.env['bitcoin.key'].create(key_values)
+            )
+            self.env['bitcoin.wallet.key'].create({
+                'wallet_id': self.id,
+                'key_id': key.id,
+                'sequence': sequence,
+            })
+        return True
 
     def _compute_first_key_id(self):
         for wallet in self:

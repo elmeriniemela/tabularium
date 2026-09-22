@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-22 14:53+0000\n"
-"PO-Revision-Date: 2026-09-22 14:53+0000\n"
+"POT-Creation-Date: 2026-09-22 16:41+0000\n"
+"PO-Revision-Date: 2026-09-22 16:41+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -497,6 +497,12 @@ msgid "Enter a valid BIP32 derivation path."
 msgstr ""
 
 #. module: bitcoin_treasury
+#. odoo-python
+#: code:addons/bitcoin_treasury/models/wallet.py:0
+msgid "Enter a valid multisig wallet import."
+msgstr "Anna kelvollinen multisig-lompakon tuontitiedosto."
+
+#. module: bitcoin_treasury
 #: model_terms:ir.ui.view,arch_db:bitcoin_treasury.form_psbt
 msgid ""
 "Enter previous outputs and their amounts manually. Balances and spent status"
@@ -683,6 +689,11 @@ msgstr ""
 #: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_wallet_key__message_has_error
 msgid "If checked, some messages have a delivery error."
 msgstr ""
+
+#. module: bitcoin_treasury
+#: model_terms:ir.ui.view,arch_db:bitcoin_treasury.form_wallet
+msgid "Import wallet"
+msgstr "Tuo lompakko"
 
 #. module: bitcoin_treasury
 #: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_address__index
@@ -938,6 +949,12 @@ msgstr ""
 #: code:addons/bitcoin_treasury/models/psbt.py:0
 msgid "OP_RETURN data exceeds maximum script size of 10,000 bytes."
 msgstr ""
+
+#. module: bitcoin_treasury
+#. odoo-python
+#: code:addons/bitcoin_treasury/models/wallet.py:0
+msgid "Only a wallet without extended public keys can be imported."
+msgstr "Vain lompakko, jossa ei ole laajennettuja julkisia avaimia, voidaan tuoda."
 
 #. module: bitcoin_treasury
 #: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_history__other_wallet_ids
@@ -1552,6 +1569,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_tx__wallet_history_ids
 msgid "Wallet History"
 msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet__is_wallet_import
+msgid "Wallet Import"
+msgstr "Lompakon tuonti"
 
 #. module: bitcoin_treasury
 #. odoo-python

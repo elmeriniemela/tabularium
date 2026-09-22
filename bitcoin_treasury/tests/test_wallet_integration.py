@@ -108,6 +108,18 @@ class TestBitcoinWalletIntegration(TransactionCase):
         self.Config.set_param("electrumx.port", str(port))
         self.Config.set_param("electrumx.use_ssl", "0")
 
+    @staticmethod
+    def _wallet_import():
+        return """Name: qr test
+Policy: 2 of 2
+Derivation: m/48'/0'/0'/2'
+Format: P2WSH
+
+00BC0E84: xpub6EuYR5RpGaLUpxLyJMv342fk7T4NRhBs6egBRmUk8FCp3dkDP5xkndr6mh7bFPdzqUu9tgQ6FqjzUgDYAzx7bQwfMzjo6ZXv16EdgeD8yox
+
+F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48s4BR3cZLxjN9FDbhTuYVGjYjMZQ3kjHjBy5YoLstT
+"""
+
     def _start_electrum_server(self, dispatch):
         server = _ElectrumRPCServer(("127.0.0.1", 0), dispatch)
         thread = threading.Thread(target=server.serve_forever, kwargs={"poll_interval": 0.01}, daemon=True)
@@ -163,6 +175,84 @@ class TestBitcoinWalletIntegration(TransactionCase):
             wallet.descriptor,
             "%s#%s" % (payload, descriptor_checksum(payload)),
         )
+
+    def test_wallet_import_is_detected_and_imported(self):
+        wallet = self.Wallet.create({'parsed_qr': self._wallet_import()})
+
+        self.assertTrue(wallet.is_wallet_import)
+        self.assertFalse(wallet.name)
+        self.assertFalse(wallet.key_ids)
+        wallet.action_import_wallet()
+
+        self.assertEqual(wallet.name, 'qr test')
+        self.assertEqual(wallet.sigs_required, 2)
+        self.assertEqual(wallet.key_ids.mapped('sequence'), [0, 1])
+        self.assertEqual(
+            wallet.key_ids.key_id.mapped('real_parent_fingerprint'),
+            ['00BC0E84', 'F9039C6D'],
+        )
+        self.assertEqual(
+            wallet.key_ids.key_id.mapped('real_derivation_path'),
+            ["m/48'/0'/0'/2'", "m/48'/0'/0'/2'"],
+        )
+        self.assertEqual(wallet.key_ids.key_id.mapped('witness_type'), ['segwit', 'segwit'])
+        self.assertEqual(wallet.key_ids.key_id.mapped('script_type'), ['p2wsh', 'p2wsh'])
+        self.assertTrue(all(wallet.key_ids.key_id.mapped('multisig')))
+        self.assertIn('#', wallet.descriptor)
+
+        imported_keys = wallet.key_ids.key_id
+        key_count = self.Key.search_count([])
+        second_wallet = self.Wallet.create({'parsed_qr': self._wallet_import()})
+        second_wallet.action_import_wallet()
+        self.assertEqual(second_wallet.key_ids.key_id, imported_keys)
+        self.assertEqual(self.Key.search_count([]), key_count)
+
+    def test_wallet_import_does_not_reuse_key_with_different_details(self):
+        setup = self.Wallet._parse_wallet_import(self._wallet_import())
+        fingerprint, public_key = setup['keys'][0]
+        different_key = self.Key.create({
+            'name': fingerprint,
+            'wif': public_key,
+            'multisig': True,
+            'witness_type': 'legacy',
+            'real_parent_fingerprint': fingerprint,
+            'real_derivation_path': setup['derivation'],
+        })
+
+        wallet = self.Wallet.create({'parsed_qr': self._wallet_import()})
+        wallet.action_import_wallet()
+        self.assertNotEqual(wallet.key_ids[0].key_id, different_key)
+
+    def test_wallet_import_is_not_imported_implicitly(self):
+        wallet = self.Wallet.create({'name': 'Empty'})
+        wallet.write({'parsed_qr': self._wallet_import()})
+        self.assertTrue(wallet.is_wallet_import)
+        self.assertEqual(wallet.name, 'Empty')
+        self.assertFalse(wallet.key_ids)
+
+        existing_wallet = self._new_wallet([self._new_key()], name='Existing')
+        existing_key = existing_wallet.key_ids.key_id
+        existing_wallet.write({'parsed_qr': self._wallet_import()})
+        self.assertEqual(existing_wallet.name, 'Existing')
+        self.assertEqual(existing_wallet.key_ids.key_id, existing_key)
+        with self.assertRaises(ValidationError):
+            existing_wallet.action_import_wallet()
+
+        wallet.parsed_qr = 'plain QR text'
+        self.assertFalse(wallet.is_wallet_import)
+
+    def test_wallet_import_rejects_invalid_file(self):
+        for original, replacement in (
+            ('Policy: 2 of 2', 'Policy: 3 of 2'),
+            ('Format: P2WSH', 'Format: unknown'),
+            ('00BC0E84:', 'not-a-fingerprint:'),
+        ):
+            wallet = self.Wallet.create({
+                'parsed_qr': self._wallet_import().replace(original, replacement),
+            })
+            self.assertFalse(wallet.is_wallet_import)
+            with self.assertRaises(ValidationError):
+                wallet.action_import_wallet()
 
     def test_descriptor_qr(self):
         wallet = self._new_wallet([self._new_key()])
