@@ -510,12 +510,26 @@ class BitcoinWalletKey(models.Model):
         ondelete='cascade',
     )
 
+    script_type = fields.Selection(related='wallet_id.script_type')
+    multisig = fields.Boolean(related='wallet_id.multisig')
+    transactions = fields.Integer(related='wallet_id.transactions')
+    balance = fields.Float(related='wallet_id.balance', digits='Bitcoin Decimal')
+
     sequence = fields.Integer()
 
     _wallet_key_uniq = models.Constraint(
         'unique(wallet_id, key_id)',
         'The wallet already has this extended public key!',
     )
+
+    def action_open_wallet(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'bitcoin.wallet',
+            'res_id': self.wallet_id.id,
+            'view_mode': 'form',
+        }
 
 
 class BitcoinWalletAddress(models.Model):

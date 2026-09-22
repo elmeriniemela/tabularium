@@ -100,9 +100,12 @@
                                 <field name="descriptor"/>
                                 <field name="descriptor_qr" widget="image" readonly="True" invisible="not descriptor_qr"/>
                                 <field name="is_wallet_import" invisible="True"/>
-                                <field name="parsed_qr" widget="qrcode_text"/>
-                                <button name="action_import_wallet" type="object" string="Import wallet"
-                                        class="btn-primary" invisible="not is_wallet_import or key_ids"/>
+                                <label for="parsed_qr"/>
+                                <div>
+                                    <field name="parsed_qr" widget="qrcode_text" nolabel="1"/>
+                                    <button name="action_import_wallet" type="object" string="Import wallet"
+                                            class="btn-primary" invisible="not is_wallet_import or key_ids"/>
+                                </div>
                                 <field name="birth_timestamp"/>
                             </group>
                         </page>

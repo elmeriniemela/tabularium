@@ -352,6 +352,16 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
         key.write({"witness_type": "legacy"})
         self.assertEqual(key.encoding, "base58")
 
+    def test_wallet_key_open_action(self):
+        key = self._new_key()
+        wallet = self._new_wallet([key])
+
+        action = wallet.key_ids.action_open_wallet()
+
+        self.assertEqual(action['res_model'], 'bitcoin.wallet')
+        self.assertEqual(action['res_id'], wallet.id)
+        self.assertEqual(action['view_mode'], 'form')
+
     def test_key_accepts_mainnet_extended_public_key_versions(self):
         versions = (0x0488B21E, 0x049D7CB2, 0x04B24746, 0x0295B43F, 0x02AA7ED3)
         for index, version in enumerate(versions):
