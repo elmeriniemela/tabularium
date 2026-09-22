@@ -31,7 +31,7 @@ class _ElectrumRPCHandler(socketserver.StreamRequestHandler):
             if isinstance(request, list):
                 self.server.requests.extend(request)
                 response = [self.server.dispatch(item) for item in request]
-            else:
+            else:  # pragma: no cover - the client only makes batch RPC calls
                 self.server.requests.append(request)
                 response = self.server.dispatch(request)
             self.wfile.write(json.dumps(response).encode("utf-8") + b"\n")
@@ -244,8 +244,11 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
     def test_wallet_import_rejects_invalid_file(self):
         for original, replacement in (
             ('Policy: 2 of 2', 'Policy: 3 of 2'),
+            ('Policy: 2 of 2', 'Policy: invalid'),
             ('Format: P2WSH', 'Format: unknown'),
             ('00BC0E84:', 'not-a-fingerprint:'),
+            ('Derivation: m/48\'/0\'/0\'/2\'\n', ''),
+            ('Name: qr test', 'Name: qr test\nName: duplicate'),
         ):
             wallet = self.Wallet.create({
                 'parsed_qr': self._wallet_import().replace(original, replacement),
@@ -400,6 +403,7 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
 
         wallet.refresh_addresses()
         self.assertEqual(len(wallet.address_ids), 4)
+        wallet.refresh_addresses()
 
         receiving_0 = self._address(wallet, 0, 0)
         old_address = receiving_0.address
@@ -431,6 +435,13 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
         self.assertEqual(len(wallet.address_ids), 2)
 
         key_a.write({"witness_type": "segwit"})
+        with self.assertRaises(ValidationError):
+            wallet.refresh_addresses()
+
+        wallet = self._new_wallet([
+            self._new_key(witness_type="taproot"),
+            self._new_key(witness_type="taproot"),
+        ], sigs_required=2)
         with self.assertRaises(ValidationError):
             wallet.refresh_addresses()
 

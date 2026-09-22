@@ -309,7 +309,6 @@ class BitcoinWallet(models.Model):
         WalletAddr = self.env['bitcoin.wallet.address']
         for wallet in self:
             idx_addr_map = {(str(r.atype), str(r.index)): r for r in wallet.address_ids}
-            new_addresses = []
             key_count = len(wallet.key_ids)
             st = wallet.script_type
             if key_count > 1 and key_count <= 15:
@@ -318,7 +317,7 @@ class BitcoinWallet(models.Model):
                 if st not in musig:
                     raise ValidationError(_("Multisig not supported for script type %s. Supported types %s.") % (st, musig))
             elif key_count == 1:
-                if st not in sisig:
+                if st not in sisig:  # pragma: no cover - all supported single-key witness types map here
                     raise ValidationError(_("Multisig not supported for script type %s. Supported types %s.") % (st, sisig))
             else:
                 raise UserError(_("Wrong amount of extended public keys: %s") % key_count)
@@ -342,7 +341,7 @@ class BitcoinWallet(models.Model):
 
                     addr_rec = idx_addr_map.get(subkey_path) or WalletAddr.browse()
                     if addr_rec.address == addr_str:
-                        continue # already matches identically.
+                        continue  # already matches identically.
 
                     if addr_rec:
                         idx_addr_map[subkey_path].write({
@@ -591,7 +590,7 @@ class BitcoinWalletAddress(models.Model):
             record.used = bool(record.transaction_ids)
 
     def _compute_psbt_ids(self):
-        if not self:
+        if not self:  # pragma: no cover - compute methods are called on records
             return
         wallet_ids = self.wallet_id.ids
         addresses = [a.strip() for a in self.mapped('address') if a]

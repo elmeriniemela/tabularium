@@ -1,7 +1,7 @@
 import base64
 from unittest.mock import patch
 
-from bitwalkit import ExtendedKey, InputSequence, derive_native_segwit
+from bitwalkit import base58check_decode, base58check_encode, ExtendedKey, InputSequence, derive_native_segwit
 
 from odoo import Command
 from odoo.exceptions import AccessError, ValidationError
@@ -127,6 +127,35 @@ class TestBitcoinPSBT(TransactionCase):
         wizard.output_ids.sats = wizard.input_ids.sats
         wizard.action_generate()
         self.assertEqual(wizard.fee, '0.00000000')
+
+        wizard.write({'input_ids': [Command.create({
+            'wallet_id': self.wallet.id, 'txid': 'cd' * 32,
+            'sats': 21_000_000 * 100_000_000,
+        })]})
+        self.assertTrue(wizard.amount_error)
+        with self.assertRaises(ValidationError):
+            wizard.action_generate()
+
+    def test_spend_rejects_missing_wallet_and_key_metadata(self):
+        with self.assertRaises(ValidationError):
+            self.env['bitcoin.psbt.input'].new({})._spend()
+
+        wizard = self._wizard()
+        self.env.cr.execute(
+            'UPDATE bitcoin_key SET real_parent_fingerprint = NULL WHERE id = %s', [self.key.id],
+        )
+        self.key.invalidate_recordset(['real_parent_fingerprint'])
+        with self.assertRaises(ValidationError):
+            wizard.input_ids._spend()
+
+        raw = base58check_decode(self.root.serialize())
+        self.env.cr.execute(
+            'UPDATE bitcoin_key SET wif = %s WHERE id = %s',
+            [base58check_encode(bytes.fromhex('043587cf') + raw[4:]), self.key.id],
+        )
+        self.key.invalidate_recordset(['wif'])
+        with self.assertRaises(ValidationError):
+            wizard.input_ids._spend()
 
     def test_missing_origin_and_unsupported_keys(self):
         wizard = self._wizard()
@@ -487,4 +516,3 @@ class TestBitcoinPSBT(TransactionCase):
             wizard.input_ids._spend()
         with self.assertRaises(ValidationError):
             wizard.action_generate()
-
