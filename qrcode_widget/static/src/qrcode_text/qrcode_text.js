@@ -2,14 +2,14 @@
 
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import * as BarcodeScanner from "@web/core/barcode/barcode_dialog";
 import { CharField, charField } from "@web/views/fields/char/char_field";
+import * as QRCodeScanner from "./qrcode_scanner";
 
 export class QRCodeTextField extends CharField {
     static template = "qrcode_widget.QRCodeTextField";
 
     async scanQRCode() {
-        const value = await BarcodeScanner.scanBarcode(this.env);
+        const value = await QRCodeScanner.scanQRCode(this.env);
         if (value) {
             await this.props.record.update({ [this.props.name]: value });
         }

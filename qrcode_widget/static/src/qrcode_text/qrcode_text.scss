@@ -1,0 +1,11 @@
+.modal .o_qrcode_scanner_modal .modal-body {
+    overflow: hidden;
+
+    @include media-breakpoint-down(md) {
+        padding: 0;
+    }
+
+    video {
+        object-fit: contain;
+    }
+}

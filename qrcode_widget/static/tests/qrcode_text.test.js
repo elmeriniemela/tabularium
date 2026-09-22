@@ -1,17 +1,20 @@
 /** @odoo-module **/
 
 import { expect, test } from "@odoo/hoot";
+import { animationFrame, manuallyDispatchProgrammaticEvent, queryOne } from "@odoo/hoot-dom";
 import {
     clickSave,
     contains,
     defineModels,
     fields,
+    mountWithCleanup,
     models,
     mountView,
     onRpc,
     patchWithCleanup,
 } from "@web/../tests/web_test_helpers";
-import * as BarcodeScanner from "@web/core/barcode/barcode_dialog";
+import { browser } from "@web/core/browser/browser";
+import * as QRCodeScanner from "@qrcode_widget/qrcode_text/qrcode_scanner";
 import "@qrcode_widget/qrcode_text/qrcode_text";
 
 class QRCodeTest extends models.Model {
@@ -42,8 +45,8 @@ test("allows manual input", async () => {
 
 test("scans into char and text fields", async () => {
     const values = ["Scanned char", "Scanned text"];
-    patchWithCleanup(BarcodeScanner, {
-        scanBarcode: async () => values.shift(),
+    patchWithCleanup(QRCodeScanner, {
+        scanQRCode: async () => values.shift(),
     });
     await mountView({
         type: "form",
@@ -63,8 +66,8 @@ test("scans into char and text fields", async () => {
 });
 
 test("keeps the current value when scanning returns no result", async () => {
-    patchWithCleanup(BarcodeScanner, {
-        scanBarcode: async () => false,
+    patchWithCleanup(QRCodeScanner, {
+        scanQRCode: async () => false,
     });
     await mountView({
         type: "form",
@@ -75,4 +78,45 @@ test("keeps the current value when scanning returns no result", async () => {
 
     await contains(".o_qrcode_text_scan").click();
     expect('[name="char_value"] input').toHaveValue("Initial");
+});
+
+test("requests a 1080p camera stream and scans QR codes", async () => {
+    patchWithCleanup(browser.navigator, {
+        mediaDevices: {
+            async getUserMedia(constraints) {
+                expect.step(JSON.stringify(constraints));
+                const stream = document.createElement("canvas").captureStream();
+                stream.getTracks()[0].stop = () => expect.step("camera stopped");
+                return stream;
+            },
+        },
+    });
+    patchWithCleanup(window, {
+        BarcodeDetector: class {
+            constructor(options) {
+                expect.step(JSON.stringify(options));
+            }
+
+            async detect() {
+                return [{ rawValue: "Scanned QR" }];
+            }
+        },
+    });
+    await mountWithCleanup(QRCodeScanner.QRCodeScanner, {
+        props: {
+            onResult: (result) => expect.step(result),
+            onError: (error) => expect.step(error.message),
+        },
+    });
+
+    await animationFrame();
+    await manuallyDispatchProgrammaticEvent(queryOne("video"), "loadeddata");
+    await animationFrame();
+
+    expect.verifySteps([
+        '{"formats":["qr_code"]}',
+        '{"audio":false,"video":{"facingMode":{"ideal":"environment"},"width":{"ideal":1920},"height":{"ideal":1080}}}',
+        "camera stopped",
+        "Scanned QR",
+    ]);
 });

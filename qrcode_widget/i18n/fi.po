@@ -6,14 +6,44 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-22 14:53+0000\n"
-"PO-Revision-Date: 2026-09-22 14:53+0000\n"
+"POT-Creation-Date: 2026-09-22 15:36+0000\n"
+"PO-Revision-Date: 2026-09-22 15:36+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
+
+#. module: qrcode_widget
+#. odoo-javascript
+#: code:addons/qrcode_widget/static/src/qrcode_text/qrcode_scanner.js:0
+msgid "Camera access was not allowed."
+msgstr "Kameran käyttöä ei sallittu."
+
+#. module: qrcode_widget
+#. odoo-javascript
+#: code:addons/qrcode_widget/static/src/qrcode_text/qrcode_scanner.js:0
+msgid "Camera scanning is not supported by this browser."
+msgstr "Tämä selain ei tue kameralla skannaamista."
+
+#. module: qrcode_widget
+#. odoo-javascript
+#: code:addons/qrcode_widget/static/src/qrcode_text/qrcode_scanner.js:0
+msgid "Could not start the camera: %(message)s"
+msgstr "Kameraa ei voitu käynnistää: %(message)s"
+
+#. module: qrcode_widget
+#. odoo-javascript
+#: code:addons/qrcode_widget/static/src/qrcode_text/qrcode_scanner.js:0
+msgid "No camera was found."
+msgstr "Kameraa ei löytynyt."
+
+#. module: qrcode_widget
+#. odoo-javascript
+#: code:addons/qrcode_widget/static/src/qrcode_text/qrcode_text.xml:0
+msgid "QR Code Scanner"
+msgstr "QR-koodinlukija"
 
 #. module: qrcode_widget
 #. odoo-javascript
@@ -26,3 +56,9 @@ msgstr "QR-kooditeksti"
 #: code:addons/qrcode_widget/static/src/qrcode_text/qrcode_text.xml:0
 msgid "Scan QR code"
 msgstr "Skannaa QR-koodi"
+
+#. module: qrcode_widget
+#. odoo-javascript
+#: code:addons/qrcode_widget/static/src/qrcode_text/qrcode_text.xml:0
+msgid "Unable to access camera"
+msgstr "Kameraa ei voida käyttää"

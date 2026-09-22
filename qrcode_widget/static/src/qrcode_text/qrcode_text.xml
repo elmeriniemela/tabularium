@@ -6,4 +6,21 @@
                     title="Scan QR code" aria-label="Scan QR code" t-on-click="scanQRCode"/>
         </xpath>
     </t>
+
+    <t t-name="qrcode_widget.QRCodeScanner">
+        <video t-ref="video" class="w-100 h-100" muted="true" autoplay="true" playsinline="true"
+               t-on-loadeddata="detect"/>
+    </t>
+
+    <t t-name="qrcode_widget.QRCodeDialog">
+        <Dialog title.translate="QR Code Scanner" fullscreen="true" footer="false"
+                contentClass="'o_qrcode_scanner_modal'">
+            <QRCodeScanner t-if="state.supported" onResult.bind="onResult" onError.bind="onError"/>
+            <div t-else="" class="h-100 d-flex flex-column justify-content-center align-items-center gap-1">
+                <i class="fa fa-2x fa-camera text-muted"/>
+                <strong>Unable to access camera</strong>
+                <span class="text-muted" t-out="state.error"/>
+            </div>
+        </Dialog>
+    </t>
 </templates>
