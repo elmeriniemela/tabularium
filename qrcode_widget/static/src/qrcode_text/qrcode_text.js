@@ -2,10 +2,10 @@
 
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { CharField, charField } from "@web/views/fields/char/char_field";
+import { TextField, textField } from "@web/views/fields/text/text_field";
 import * as QRCodeScanner from "./qrcode_scanner";
 
-export class QRCodeTextField extends CharField {
+export class QRCodeTextField extends TextField {
     static template = "qrcode_widget.QRCodeTextField";
 
     async scanQRCode() {
@@ -17,9 +17,10 @@ export class QRCodeTextField extends CharField {
 }
 
 export const qrcodeTextField = {
-    ...charField,
+    ...textField,
     component: QRCodeTextField,
     displayName: _t("QR Code Text"),
+    supportedTypes: ["char", "text"],
 };
 
 registry.category("fields").add("qrcode_text", qrcodeTextField);

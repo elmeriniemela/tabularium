@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
-    <t t-name="qrcode_widget.QRCodeTextField" t-inherit="web.CharField" t-inherit-mode="primary">
-        <xpath expr="//input" position="after">
+    <t t-name="qrcode_widget.QRCodeTextField" t-inherit="web.TextField" t-inherit-mode="primary">
+        <xpath expr="//textarea" position="after">
             <button type="button" class="btn m-0 py-0 px-2 fa fa-qrcode o_qrcode_text_scan"
                     title="Scan QR code" aria-label="Scan QR code" t-on-click="scanQRCode"/>
         </xpath>
     </t>
 
     <t t-name="qrcode_widget.QRCodeScanner">
-        <video t-ref="video" class="w-100 h-100" muted="true" autoplay="true" playsinline="true"
+        <video t-ref="video" class="w-100 h-100" style="transform: scaleX(-1)" muted="true" autoplay="true" playsinline="true"
                t-on-loadeddata="detect"/>
     </t>
 
