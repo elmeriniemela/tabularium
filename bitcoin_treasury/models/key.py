@@ -85,10 +85,6 @@ class BitcoinExtendedPublicKey(models.Model):
             raise ValidationError(_("A valid mainnet extended public key is required."))
         return key_data
 
-    def _derive_public_key(self, derivation_path):
-        self.ensure_one()
-        return ExtendedKey.parse(self.wif).derive_path(derivation_path).pubkey
-
     def _key_origin_error(self):
         self.ensure_one()
         fingerprint = self.real_parent_fingerprint

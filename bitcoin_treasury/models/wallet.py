@@ -7,6 +7,7 @@ import logging
 from bitwalkit import (
     BitwalkitError,
     ChainQuery,
+    ExtendedKey,
     address_from_pubkey,
     address_from_script,
     address_to_scripthash,
@@ -305,46 +306,56 @@ class BitcoinWallet(models.Model):
         }
         sisig = {'p2wpkh', 'p2sh_p2wpkh', 'p2tr', 'p2pkh'}
         musig = {'p2sh', 'p2wsh', 'p2sh_p2wsh'}
+        WalletAddr = self.env['bitcoin.wallet.address']
         for wallet in self:
-            existing = {(str(r.atype), str(r.index)): r for r in wallet.address_ids}
+            idx_addr_map = {(str(r.atype), str(r.index)): r for r in wallet.address_ids}
+            new_addresses = []
+            key_count = len(wallet.key_ids)
             st = wallet.script_type
+            if key_count > 1 and key_count <= 15:
+                if any(key.key_id.witness_type != wallet.first_key_id.witness_type for key in wallet.key_ids):
+                    raise ValidationError(_("Use the same witness type for every extended public key."))
+                if st not in musig:
+                    raise ValidationError(_("Multisig not supported for script type %s. Supported types %s.") % (st, musig))
+            elif key_count == 1:
+                if st not in sisig:
+                    raise ValidationError(_("Multisig not supported for script type %s. Supported types %s.") % (st, sisig))
+            else:
+                raise UserError(_("Wrong amount of extended public keys: %s") % key_count)
+
+            keys = [ExtendedKey.parse(key.key_id.wif) for key in wallet.key_ids]
             for atype in range(2):
+                branch_keys = [key.child(atype) for key in keys]
                 for index in range(wallet.address_amount):
                     subkey_path = (str(atype), str(index))
-                    if len(wallet.key_ids) > 1 and len(wallet.key_ids) <= 15:
-                        if any(key.key_id.witness_type != wallet.first_key_id.witness_type for key in wallet.key_ids):
-                            raise ValidationError(_("Use the same witness type for every extended public key."))
-                        if st not in musig:
-                            raise ValidationError(_("Multisig not supported for script type %s. Supported types %s.") % (st, musig))
-                        keys = [k.key_id._derive_public_key(subkey_path) for k in wallet.key_ids]
-                        keys.sort()
+                    if key_count > 1:
+                        pubkeys = [key.child(index).pubkey for key in branch_keys]
+                        pubkeys.sort()
                         addr_str = address_from_script(
-                            p2ms_script(wallet.sigs_required, keys), address_map[st]
+                            p2ms_script(wallet.sigs_required, pubkeys), address_map[st]
                         )
-                    elif len(wallet.key_ids) == 1:
-                        if st not in sisig:
-                            raise ValidationError(_("Multisig not supported for script type %s. Supported types %s.") % (st, sisig))
+                    else:
                         addr_str = address_from_pubkey(
-                            wallet.first_key_id._derive_public_key(subkey_path),
+                            branch_keys[0].child(index).pubkey,
                             address_map[st],
                         )
-                    else:
-                        raise UserError(_("Wrong amount of extended public keys: %s") % len(wallet.key_ids))
 
+                    addr_rec = idx_addr_map.get(subkey_path) or WalletAddr.browse()
+                    if addr_rec.address == addr_str:
+                        continue # already matches identically.
 
-                    if subkey_path in existing:
-                        if existing[subkey_path].address != addr_str:
-                            existing[subkey_path].write({
-                                'address': addr_str,
-                                'scripthash_status': False,
-                                'transaction_ids': [Command.clear()],
-                            })
+                    if addr_rec:
+                        idx_addr_map[subkey_path].write({
+                            'address': addr_str,
+                            'scripthash_status': False,
+                            'transaction_ids': [Command.clear()],
+                        })
                     else:
-                        existing[subkey_path] = self.env['bitcoin.wallet.address'].create({
+                        idx_addr_map[subkey_path] = WalletAddr.create({
                             'address': addr_str,
                             'index': index,
                             'atype': str(atype),
-                            'wallet_id': wallet.id
+                            'wallet_id': wallet.id,
                         })
 
     def _find_transactions_by_txid(self, txids):
