@@ -78,6 +78,7 @@ class BitcoinWallet(models.Model):
         help="Bitcoin Core descriptor, or instructions for completing the wallet configuration.",
     )
     descriptor_qr = fields.Binary(string="Descriptor QR Code", compute='_compute_descriptor_qr')
+    parsed_qr = fields.Text(string="Parsed QR")
     birth_timestamp = fields.Char(
         string="Birth Timestamp",
         compute='_compute_descriptor_timestamp',

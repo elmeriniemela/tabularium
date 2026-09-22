@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="qrcode_widget.QRCodeTextField" t-inherit="web.CharField" t-inherit-mode="primary">
+        <xpath expr="//input" position="after">
+            <button type="button" class="btn m-0 py-0 px-2 fa fa-qrcode o_qrcode_text_scan"
+                    title="Scan QR code" aria-label="Scan QR code" t-on-click="scanQRCode"/>
+        </xpath>
+    </t>
+</templates>

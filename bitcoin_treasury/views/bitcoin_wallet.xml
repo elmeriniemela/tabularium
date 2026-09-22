@@ -98,14 +98,12 @@
                                     <field name="active" optional="hide" readonly="True"/>
                                 </list>
                             </field>
-                            <label for="descriptor"/>
-                            <field name="descriptor"/>
-                            <label for="descriptor_qr"/>
-                            <div class="text-center">
+                            <group>
+                                <field name="descriptor"/>
                                 <field name="descriptor_qr" widget="image" readonly="True" invisible="not descriptor_qr"/>
-                            </div>
-                            <label for="birth_timestamp"/>
-                            <field name="birth_timestamp"/>
+                                <field name="parsed_qr" widget="qrcode_text"/>
+                                <field name="birth_timestamp"/>
+                            </group>
                         </page>
                     </notebook>
                 </sheet>

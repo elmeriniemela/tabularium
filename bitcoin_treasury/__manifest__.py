@@ -10,6 +10,7 @@
     'depends': [
         'mail',
         'bitcoin_explorer',
+        'qrcode_widget',
     ],
     'external_dependencies': {'python': ['bitwalkit']},
     'installable': True,
