@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-23 15:07+0000\n"
-"PO-Revision-Date: 2026-09-23 15:07+0000\n"
+"POT-Creation-Date: 2026-09-23 15:15+0000\n"
+"PO-Revision-Date: 2026-09-23 15:15+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -386,6 +386,18 @@ msgstr ""
 
 #. module: bitcoin_treasury
 #. odoo-python
+#: code:addons/bitcoin_treasury/models/key.py:0
+msgid "Derivation path step '%s' index must be less than 2^31."
+msgstr ""
+
+#. module: bitcoin_treasury
+#. odoo-python
+#: code:addons/bitcoin_treasury/models/key.py:0
+msgid "Derivation path step '%s' must be an integer index."
+msgstr ""
+
+#. module: bitcoin_treasury
+#. odoo-python
 #: code:addons/bitcoin_treasury/models/psbt.py:0
 msgid ""
 "Derived address %(derived)s does not match wallet address %(wallet)s for "
@@ -479,12 +491,6 @@ msgstr ""
 "raakatavuiksi. Esimerkki: 'hello' tekstitilassa tuottaa tavut 68656c6c6f, "
 "kun taas '68656c6c6f' heksatilassa tuottaa samat 5 tavua. Keskeneräiset tai "
 "virheelliset heksamerkkijonot hylätään luonnin yhteydessä."
-
-#. module: bitcoin_treasury
-#. odoo-python
-#: code:addons/bitcoin_treasury/models/key.py:0
-msgid "Enter a valid BIP32 derivation path."
-msgstr ""
 
 #. module: bitcoin_treasury
 #. odoo-python
@@ -1398,9 +1404,26 @@ msgstr ""
 #. module: bitcoin_treasury
 #. odoo-python
 #: code:addons/bitcoin_treasury/models/key.py:0
+msgid "The derivation path contains an empty step."
+msgstr ""
+
+#. module: bitcoin_treasury
+#. odoo-python
+#: code:addons/bitcoin_treasury/models/key.py:0
+msgid "The derivation path must start with 'm/'."
+msgstr ""
+
+#. module: bitcoin_treasury
+#. odoo-python
+#: code:addons/bitcoin_treasury/models/key.py:0
+msgid "The master key fingerprint contains invalid character '%s'."
+msgstr ""
+
+#. module: bitcoin_treasury
+#. odoo-python
+#: code:addons/bitcoin_treasury/models/key.py:0
 msgid ""
-"The master key fingerprint must contain exactly eight hexadecimal "
-"characters."
+"The master key fingerprint must be exactly eight characters long (got %s)."
 msgstr ""
 
 #. module: bitcoin_treasury

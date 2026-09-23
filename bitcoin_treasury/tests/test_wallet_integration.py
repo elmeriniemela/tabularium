@@ -320,23 +320,32 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
             {"master_fingerprint": "deadbee"},
             {"master_fingerprint": "deadbeef", "derivation": "m/84'/0'/*"},
             {"master_fingerprint": "deadbeef", "derivation": "invalid"},
+            {"master_fingerprint": "deadbeef", "derivation": "m//0h"},
+            {"master_fingerprint": "deadbeef", "derivation": "m/2147483648h"},
         ]
         for origin in invalid_origins:
             with self.assertRaises(ValidationError):
                 self._new_key(**origin)
 
-        invalid_key = self.Key.new({
-            "xpub": self._new_key().xpub,
-            "master_fingerprint": "deadbee",
-            "derivation": "m/84h/0h/0h",
-        })
-        self.assertTrue(invalid_key._key_origin_error())
-        invalid_der = self.Key.new({
-            "xpub": self._new_key().xpub,
+        xpub = self._new_key().xpub
+        invalid_keys = [
+            self.Key.new({"xpub": xpub, "master_fingerprint": False, "derivation": "m/84h/0h/0h"}),
+            self.Key.new({"xpub": xpub, "master_fingerprint": "deadbee", "derivation": "m/84h/0h/0h"}),
+            self.Key.new({"xpub": xpub, "master_fingerprint": "deadbeeg", "derivation": "m/84h/0h/0h"}),
+            self.Key.new({"xpub": xpub, "master_fingerprint": "deadbeef", "derivation": False}),
+            self.Key.new({"xpub": xpub, "master_fingerprint": "deadbeef", "derivation": "invalid"}),
+            self.Key.new({"xpub": xpub, "master_fingerprint": "deadbeef", "derivation": "m//0h"}),
+            self.Key.new({"xpub": xpub, "master_fingerprint": "deadbeef", "derivation": "m/2147483648h"}),
+        ]
+        for key in invalid_keys:
+            self.assertTrue(key._key_origin_error())
+
+        valid_m_key = self.Key.new({
+            "xpub": xpub,
             "master_fingerprint": "deadbeef",
-            "derivation": "invalid",
+            "derivation": "m",
         })
-        self.assertTrue(invalid_der._key_origin_error())
+        self.assertFalse(valid_m_key._key_origin_error())
 
     def test_key_origin_normalization(self):
         vals = {

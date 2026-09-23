@@ -145,17 +145,24 @@ class BitcoinExtendedPublicKey(models.Model):
     def _key_origin_error(self):
         self.ensure_one()
         fingerprint = self.master_fingerprint or ''
-        if len(fingerprint) != 8 or any(character not in '0123456789abcdef' for character in fingerprint):
-            return _("The master key fingerprint must contain exactly eight hexadecimal characters.")
+        if len(fingerprint) != 8:
+            return _("The master key fingerprint must be exactly eight characters long (got %s).") % len(fingerprint)
+        for character in fingerprint:
+            if character not in '0123456789abcdef':
+                return _("The master key fingerprint contains invalid character '%s'.") % character
 
         path = self.derivation or ''
         if path != 'm':
-            if path.startswith('m/'):
-                path = path[2:]
-            for step in path.split('/'):
+            if not path.startswith('m/'):
+                return _("The derivation path must start with 'm/'.")
+            for step in path[2:].split('/'):
+                if not step:
+                    return _("The derivation path contains an empty step.")
                 number = step[:-1] if step.endswith('h') else step
-                if not number.isdigit() or int(number) >= 2**31:
-                    return _("Enter a valid BIP32 derivation path.")
+                if not number.isdigit():
+                    return _("Derivation path step '%s' must be an integer index.") % step
+                if int(number) >= 2**31:
+                    return _("Derivation path step '%s' index must be less than 2^31.") % step
         return False
 
     def _descriptor_key(self):
