@@ -75,11 +75,13 @@ class BitcoinExtendedPublicKey(models.Model):
     master_fingerprint = fields.Char(
         string="Master Key Fingerprint",
         help="Eight-character fingerprint of the master key, used in the descriptor key origin.",
+        required=True,
         tracking=True,
     )
     derivation = fields.Char(
         string="Derivation Path",
         help="Path from the master key to this extended public key, used in the descriptor key origin.",
+        required=True,
         tracking=True,
     )
 
@@ -142,17 +144,12 @@ class BitcoinExtendedPublicKey(models.Model):
 
     def _key_origin_error(self):
         self.ensure_one()
-        fingerprint = self.master_fingerprint
-        if self.derivation and not fingerprint:
-            return _("Add the master key fingerprint or remove the derivation path.")
-        if fingerprint and (
-            len(fingerprint) != 8
-            or any(character not in '0123456789abcdefABCDEF' for character in fingerprint)
-        ):
+        fingerprint = self.master_fingerprint or ''
+        if len(fingerprint) != 8 or any(character not in '0123456789abcdefABCDEF' for character in fingerprint):
             return _("The master key fingerprint must contain exactly eight hexadecimal characters.")
 
-        path = self.derivation
-        if path and path != 'm':
+        path = self.derivation or ''
+        if path != 'm':
             if path.startswith('m/'):
                 path = path[2:]
             for step in path.split('/'):
@@ -164,20 +161,17 @@ class BitcoinExtendedPublicKey(models.Model):
     def _descriptor_key(self):
         self.ensure_one()
         key_data = self._decode_extended_public_key(self.xpub)
-        xpub = key_data.to_xpub()
-        origin = ''
-        if self.master_fingerprint:
-            path = self.derivation or ''
-            if path == 'm':
-                path = ''
-            elif path.startswith('m/'):
-                path = path[2:]
-            path = path.replace("'", 'h')
-            origin = '[%s%s]' % (
-                self.master_fingerprint.lower(),
-                '/%s' % path if path else '',
-            )
-        return '%s%s/<0;1>/*' % (origin, xpub)
+        path = self.derivation or ''
+        if path == 'm':
+            path = ''
+        elif path.startswith('m/'):
+            path = path[2:]
+        path = path.replace("'", 'h')
+        origin = '[%s%s]' % (
+            self.master_fingerprint.lower(),
+            '/%s' % path if path else '',
+        )
+        return '%s%s/<0;1>/*' % (origin, key_data.to_xpub())
 
     @api.constrains('master_fingerprint', 'derivation')
     def _check_key_origin(self):

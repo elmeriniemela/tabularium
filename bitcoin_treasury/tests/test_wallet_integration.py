@@ -77,6 +77,8 @@ class TestBitcoinWalletIntegration(TransactionCase):
             "name": "Key %s" % self._seed,
             "xpub": ExtendedKey.parse(self._root_xpub).child(index).serialize(),
             "witness_type": "segwit",
+            "master_fingerprint": "deadbeef",
+            "derivation": "m/84h/0h/0h",
         }
         values.update(overrides)
         return self.Key.create(values)
@@ -158,12 +160,10 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
             "%s#%s" % (payload, descriptor_checksum(payload)),
         )
 
-        key.write({"master_fingerprint": False, "derivation": False})
-        payload = "wpkh(%s/<0;1>/*)" % key.xpub
-        self.assertEqual(
-            wallet.descriptor,
-            "%s#%s" % (payload, descriptor_checksum(payload)),
-        )
+        with self.assertRaises(ValidationError):
+            key.write({"master_fingerprint": False})
+        with self.assertRaises(ValidationError):
+            key.write({"derivation": False})
 
     def test_multisig_descriptor(self):
         key_a = self._new_key()
@@ -171,7 +171,8 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
         self.assertEqual(self._new_wallet([key_a]).script_type, 'p2wpkh')
         wallet = self._new_wallet([key_a, key_b], sigs_required=2)
         self.assertEqual(wallet.script_type, 'p2wsh')
-        payload = "wsh(sortedmulti(2,%s/<0;1>/*,%s/<0;1>/*))" % (key_a.xpub, key_b.xpub)
+        keys = sorted([key_a._descriptor_key(), key_b._descriptor_key()])
+        payload = "wsh(sortedmulti(2,%s,%s))" % (keys[0], keys[1])
         self.assertEqual(
             wallet.descriptor,
             "%s#%s" % (payload, descriptor_checksum(payload)),
@@ -317,8 +318,8 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
     def test_key_origin_validation(self):
         invalid_origins = [
             {"master_fingerprint": "deadbee"},
-            {"derivation": "m/84'/0'/0'"},
             {"master_fingerprint": "deadbeef", "derivation": "m/84'/0'/*"},
+            {"master_fingerprint": "deadbeef", "derivation": "invalid"},
         ]
         for origin in invalid_origins:
             with self.assertRaises(ValidationError):
@@ -327,8 +328,15 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
         invalid_key = self.Key.new({
             "xpub": self._new_key().xpub,
             "master_fingerprint": "deadbee",
+            "derivation": "m/84h/0h/0h",
         })
         self.assertTrue(invalid_key._key_origin_error())
+        invalid_der = self.Key.new({
+            "xpub": self._new_key().xpub,
+            "master_fingerprint": "deadbeef",
+            "derivation": "invalid",
+        })
+        self.assertTrue(invalid_der._key_origin_error())
 
     def test_key_origin_normalization(self):
         key = self._new_key(
@@ -370,7 +378,8 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
             key = self._new_key(
                 xpub=base58check_encode(version.to_bytes(4, "big") + raw[4:])
             )
-            self.assertTrue(key._descriptor_key().startswith("xpub"))
+            self.assertTrue(key.xpub.startswith("xpub"))
+            self.assertIn("]xpub", key._descriptor_key())
 
     def test_key_rejects_non_mainnet_public_material(self):
         private_key = (
@@ -1128,7 +1137,11 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
         v2_zpub = "zpub6jftahH18ngZxLmXaKw3GSZzZsszmt9WqedkyZdezFtWRFBZqsQH5hyUmb4pCEeZGmVfQuP5bedXTB8is6fTv19U1GQRyQUKQGUTzyHACMF"
         v2_Zpub = "Zpub6vZyhw1ShkEwNuvuWzQ26WuoHfvFzEq79vHRtpuCN2iv3RkUcGnZApqQaJ2HkfsTWEZeHVPCUs22aLkVAKpR4VG8qjWqNowKHzkLavKB4Ep"
 
-        key1 = self.Key.create({"xpub": v1_xpub})
+        key1 = self.Key.create({
+            "xpub": v1_xpub,
+            "master_fingerprint": "deadbeef",
+            "derivation": "m/84h/0h/0h",
+        })
         self.assertEqual(key1.zpub, v1_zpub)
         self.assertEqual(key1.Zpub, v1_Zpub)
         self.assertEqual(key1.xpub, v1_xpub)
@@ -1139,7 +1152,11 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
         self.assertEqual(key1.Zpub, v1_Zpub)
         self.assertEqual(key1.xpub, v1_xpub)
 
-        key2 = self.Key.create({"zpub": v2_zpub})
+        key2 = self.Key.create({
+            "zpub": v2_zpub,
+            "master_fingerprint": "deadbeef",
+            "derivation": "m/84h/0h/0h",
+        })
         self.assertEqual(key2.xpub, v2_xpub)
         self.assertEqual(key2.zpub, v2_zpub)
         self.assertEqual(key2.Zpub, v2_Zpub)
@@ -1149,7 +1166,11 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
         self.assertEqual(key2.zpub, v2_zpub)
         self.assertEqual(key2.Zpub, v2_Zpub)
 
-        key3 = self.Key.create({"Zpub": v1_Zpub})
+        key3 = self.Key.create({
+            "Zpub": v1_Zpub,
+            "master_fingerprint": "deadbeef",
+            "derivation": "m/48h/0h/0h/2h",
+        })
         self.assertEqual(key3.xpub, v1_xpub)
         self.assertEqual(key3.zpub, v1_zpub)
         self.assertEqual(key3.Zpub, v1_Zpub)
@@ -1202,9 +1223,9 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
         self.assertFalse(key1._to_xpub(False))
 
         with self.assertRaises(ValidationError):
-            self.Key.create({"zpub": "invalid-zpub"})
+            self.Key.create({"zpub": "invalid-zpub", "master_fingerprint": "deadbeef", "derivation": "m/84h/0h/0h"})
         with self.assertRaises(ValidationError):
-            self.Key.create({"Zpub": "invalid-Zpub"})
+            self.Key.create({"Zpub": "invalid-Zpub", "master_fingerprint": "deadbeef", "derivation": "m/48h/0h/0h/2h"})
         with self.assertRaises(ValidationError):
             key1.write({"zpub": "invalid-zpub"})
         with self.assertRaises(ValidationError):

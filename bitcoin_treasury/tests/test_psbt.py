@@ -141,13 +141,6 @@ class TestBitcoinPSBT(TransactionCase):
             self.env['bitcoin.psbt.input'].new({})._spend()
 
         wizard = self._wizard()
-        self.env.cr.execute(
-            'UPDATE bitcoin_key SET master_fingerprint = NULL WHERE id = %s', [self.key.id],
-        )
-        self.key.invalidate_recordset(['master_fingerprint'])
-        with self.assertRaises(ValidationError):
-            wizard.input_ids._spend()
-
         raw = base58check_decode(self.root.serialize())
         self.env.cr.execute(
             'UPDATE bitcoin_key SET xpub = %s WHERE id = %s',
@@ -482,14 +475,11 @@ class TestBitcoinPSBT(TransactionCase):
         self.assertFalse(wizard.psbt_binary)
         self.assertFalse(wizard.psbt_base64)
 
-    def test_spend_missing_key_derivation_path_or_fingerprint_raises(self):
-        wizard = self._wizard()
-        self.key.write({'derivation': False, 'master_fingerprint': self.root.fingerprint.hex()})
+    def test_key_missing_derivation_path_or_fingerprint_raises(self):
         with self.assertRaises(ValidationError):
-            wizard.input_ids._spend()
-        self.key.write({'derivation': False, 'master_fingerprint': False})
+            self.key.write({'derivation': False})
         with self.assertRaises(ValidationError):
-            wizard.input_ids._spend()
+            self.key.write({'master_fingerprint': False})
 
     def test_spend_address_matches_wallet_address_record(self):
         wizard = self._wizard(input_ids=[Command.create({

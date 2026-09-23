@@ -444,15 +444,7 @@ class BitcoinPSBTWalletLine(models.AbstractModel):
             if parsed.network != 'mainnet':
                 raise ValidationError(_("Use mainnet extended public keys."))
 
-            key_label = key.display_name or key.name or key.xpub[:16]
-            if not key.derivation:
-                raise ValidationError(_("Add derivation path for %s.") % key_label)
-
-            if not key.master_fingerprint:
-                raise ValidationError(_("Add parent fingerprint for %s.") % key_label)
-
-            origin = KeyOrigin.parse(key.master_fingerprint, key.derivation)
-            origins.append((parsed, origin))
+            origins.append((parsed, KeyOrigin.parse(key.master_fingerprint, key.derivation)))
         spend = derive_native_segwit(
             origins, int(self.branch), self.address_index,
             threshold=wallet.sigs_required if len(keys) > 1 else 1,
