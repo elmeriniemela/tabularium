@@ -5,7 +5,7 @@
         <field name="arch" type="xml">
             <list multi_edit="1">
                 <field name="sequence" widget="handle"/>
-                <field name="ticker"/>
+                <field name="ticker" optional="show"/>
                 <field name="last_price" optional="show"/>
                 <field name="last_update" optional="show" widget="timeago"/>
                 <field name="daily_price" widget="percentage" decoration-danger="daily_price &lt; 0" decoration-success="daily_price &gt; 0" optional="show"/>
@@ -18,12 +18,34 @@
                 <field name="three_year_price" widget="percentage" decoration-danger="three_year_price &lt; 0" decoration-success="three_year_price &gt; 0" optional="show"/>
                 <field name="five_year_price" widget="percentage" decoration-danger="five_year_price &lt; 0" decoration-success="five_year_price &gt; 0" optional="show"/>
                 <field name="ten_year_price" widget="percentage" decoration-danger="ten_year_price &lt; 0" decoration-success="ten_year_price &gt; 0" optional="hide"/>
+                <field name="category_id" optional="hide"/>
                 <field name="currency_id" optional="hide"/>
                 <field name="exchange_id" optional="hide"/>
                 <field name="endpoint_id" optional="hide"/>
                 <field name="company_ids" widget="many2many_tags" optional="hide"/>
                 <field name="position_count" optional="show"/>
                 <field name="expected_yearly_appreciation" widget="percentage" optional="hide"/>
+                <field name="plausible_ath_drawdown" widget="percentage" optional="hide"/>
+                <field name="ath_price" optional="hide"/>
+                <field name="current_ath_drawdown" widget="percentage" optional="hide"/>
+                <field name="drawdown_price" optional="hide"/>
+                <field name="liquid" optional="hide"/>
+                <field name="active" optional="hide"/>
+                <field name="last_price_id" optional="hide"/>
+                <field name="daily_price_id" optional="hide"/>
+                <field name="weekly_price_id" optional="hide"/>
+                <field name="monthly_price_id" optional="hide"/>
+                <field name="three_month_price_id" optional="hide"/>
+                <field name="six_month_price_id" optional="hide"/>
+                <field name="ytd_price_id" optional="hide"/>
+                <field name="one_year_price_id" optional="hide"/>
+                <field name="three_year_price_id" optional="hide"/>
+                <field name="five_year_price_id" optional="hide"/>
+                <field name="ten_year_price_id" optional="hide"/>
+                <field name="create_date" optional="hide"/>
+                <field name="create_uid" widget="many2one_avatar_user" optional="hide"/>
+                <field name="write_date" optional="hide"/>
+                <field name="write_uid" widget="many2one_avatar_user" optional="hide"/>
             </list>
         </field>
     </record>
@@ -88,6 +110,10 @@
                                     <field name="price_id" optional="show"/>
                                     <field name="time" optional="show"/>
                                     <field name="factor" optional="show"/>
+                                    <field name="create_date" optional="hide"/>
+                                    <field name="create_uid" widget="many2one_avatar_user" optional="hide"/>
+                                    <field name="write_date" optional="hide"/>
+                                    <field name="write_uid" widget="many2one_avatar_user" optional="hide"/>
                                 </list>
                             </field>
 
@@ -126,13 +152,27 @@
             <search>
                 <field name="ticker"/>
                 <field name="category_id"/>
+                <field name="currency_id"/>
+                <field name="exchange_id"/>
+                <field name="endpoint_id"/>
                 <field name="company_ids"/>
+                <filter name="filter_last_update" date="last_update"/>
+                <filter name="filter_create_date" date="create_date"/>
+                <separator/>
+                <filter name="filter_active" string="Active" domain="[('active', '=', True)]"/>
+                <filter name="filter_archived" string="Archived" domain="[('active', '=', False)]"/>
+                <separator/>
+                <filter name="filter_liquid" string="Liquid" domain="[('liquid', '=', True)]"/>
+                <filter name="filter_illiquid" string="Illiquid" domain="[('liquid', '=', False)]"/>
                 <separator/>
                 <filter name="all" string="All" domain="['|', ('active', '=', False), ('active', '=', True)]"/>
-                <separator/>
                 <group>
                     <filter string="Category" name="group_category_id" context="{'group_by': 'category_id'}"/>
                     <filter string="Ticker" name="group_ticker" context="{'group_by': 'ticker'}"/>
+                    <filter string="Currency" name="group_currency_id" context="{'group_by': 'currency_id'}"/>
+                    <filter string="Exchange" name="group_exchange_id" context="{'group_by': 'exchange_id'}"/>
+                    <filter string="Endpoint" name="group_endpoint_id" context="{'group_by': 'endpoint_id'}"/>
+                    <filter string="Creation Date" name="group_create_date" context="{'group_by': 'create_date:month'}"/>
                 </group>
             </search>
         </field>

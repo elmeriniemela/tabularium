@@ -5,16 +5,18 @@
         <field name="arch" type="xml">
             <list>
                 <field name="wallet_id" optional="show"/>
-                <field name="index"/>
-                <field name="atype"/>
-                <field name="address"/>
+                <field name="index" optional="show"/>
+                <field name="atype" optional="show"/>
+                <field name="address" optional="show"/>
                 <field name="scripthash" optional="hide"/>
                 <field name="scripthash_status" optional="hide"/>
-                <field name="balance"/>
-                <field name="used" widget="boolean_toggle"/>
-                <field name="transaction_ids"/>
+                <field name="balance" optional="show"/>
+                <field name="used" widget="boolean_toggle" optional="show"/>
+                <field name="transaction_ids" optional="show"/>
                 <field name="psbt_ids" widget="many2many_tags" optional="show"/>
                 <field name="write_date" optional="hide"/>
+                <field name="write_uid" widget="many2one_avatar_user" optional="hide"/>
+                <field name="create_date" optional="hide"/>
             </list>
         </field>
     </record>
@@ -61,6 +63,8 @@
         <field name="arch" type="xml">
             <search>
                 <field name="address"/>
+                <field name="wallet_id"/>
+                <field name="scripthash"/>
                 <separator/>
                 <filter string="Used" name="used" domain="[('used', '=', True)]"/>
                 <filter string="Unused" name="unused" domain="[('used', '=', False)]"/>
@@ -68,6 +72,12 @@
                 <filter string="Has transactions" name="has_transactions" domain="[('transaction_ids', '!=', False)]"/>
                 <filter string="No transactions" name="no_transactions" domain="[('transaction_ids', '=', False)]"/>
                 <separator/>
+                <filter string="Last Updated" name="write_date_filter" date="write_date"/>
+                <filter string="Created Date" name="create_date_filter" date="create_date"/>
+                <group>
+                    <filter string="Wallet" name="group_wallet_id" context="{'group_by': 'wallet_id'}"/>
+                    <filter string="Address Type" name="group_atype" context="{'group_by': 'atype'}"/>
+                </group>
             </search>
         </field>
     </record>

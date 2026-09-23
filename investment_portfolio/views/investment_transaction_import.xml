@@ -4,12 +4,16 @@
         <field name="model">investment.transaction.import</field>
         <field name="arch" type="xml">
             <list>
-                <field name="name"/>
-                <field name="source"/>
-                <field name="company_id" optional="hide"/>
-                <field name="portfolio_id"/>
-                <field name="validate_balances" widget="boolean_toggle"/>
+                <field name="name" optional="show"/>
+                <field name="source" optional="show"/>
+                <field name="portfolio_id" optional="show"/>
+                <field name="validate_balances" widget="boolean_toggle" optional="show"/>
                 <field name="transaction_ids" optional="show"/>
+                <field name="company_id" optional="hide"/>
+                <field name="create_date" optional="hide"/>
+                <field name="create_uid" widget="many2one_avatar_user" optional="hide"/>
+                <field name="write_date" optional="hide"/>
+                <field name="write_uid" widget="many2one_avatar_user" optional="hide"/>
             </list>
         </field>
     </record>
@@ -48,8 +52,19 @@
         <field name="arch" type="xml">
             <search>
                 <field name="name"/>
+                <field name="source"/>
                 <field name="portfolio_id"/>
                 <field name="company_id"/>
+                <filter name="filter_create_date" date="create_date"/>
+                <separator/>
+                <filter string="Validate Balances" name="filter_validate_balances" domain="[('validate_balances', '=', True)]"/>
+                <filter string="Do Not Validate Balances" name="filter_not_validate_balances" domain="[('validate_balances', '=', False)]"/>
+                <group>
+                    <filter string="Source" name="group_source" context="{'group_by': 'source'}"/>
+                    <filter string="Portfolio" name="group_portfolio_id" context="{'group_by': 'portfolio_id'}"/>
+                    <filter string="Company" name="group_company_id" context="{'group_by': 'company_id'}"/>
+                    <filter string="Creation Date" name="group_create_date" context="{'group_by': 'create_date:month'}"/>
+                </group>
             </search>
         </field>
     </record>

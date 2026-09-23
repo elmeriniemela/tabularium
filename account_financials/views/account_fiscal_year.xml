@@ -29,6 +29,13 @@
         <field name="arch" type="xml">
             <search>
                 <field name="name"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <filter name="date_from_filter" string="Start Date" date="date_from"/>
+                <filter name="date_to_filter" string="End Date" date="date_to"/>
+                <group>
+                    <filter string="Company" name="group_company_id" context="{'group_by': 'company_id'}"/>
+                    <filter string="Start Date" name="group_date_from" context="{'group_by': 'date_from:year'}"/>
+                </group>
             </search>
         </field>
     </record>
@@ -37,10 +44,16 @@
         <field name="model">account.fiscal.year</field>
         <field name="arch" type="xml">
             <list>
-                <field name="name"/>
-                <field name="date_from"/>
-                <field name="date_to"/>
-                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="name" optional="show"/>
+                <field name="date_from" optional="show"/>
+                <field name="date_to" optional="show"/>
+                <field name="company_id" groups="base.group_multi_company" optional="show"/>
+                <field name="financials_template_id" optional="hide"/>
+                <field name="place_and_date" optional="hide"/>
+                <field name="format_date_from" optional="hide"/>
+                <field name="format_date_to" optional="hide"/>
+                <field name="format_date_expire" optional="hide"/>
+                <field name="create_date" optional="hide"/>
             </list>
         </field>
     </record>

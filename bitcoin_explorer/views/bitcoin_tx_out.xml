@@ -5,13 +5,13 @@
         <field name="arch" type="xml">
             <list create="false">
                 <field name="tx_id" optional="hide"/>
-                <field name="n"/>
-                <field name="type"/>
-                <field name="address"/>
+                <field name="n" optional="show"/>
+                <field name="type" optional="show"/>
+                <field name="address" optional="show"/>
                 <field name="asm" optional="show"/>
                 <field name="script_pub_key_hex" optional="hide"/>
-                <field name="value"/>
-                <field name="spent_input_id"/>
+                <field name="value" optional="show"/>
+                <field name="spent_input_id" optional="show"/>
             </list>
         </field>
     </record>
@@ -46,6 +46,12 @@
             <search>
                 <field name="address"/>
                 <field name="tx_id"/>
+                <field name="type"/>
+                <field name="spent_input_id"/>
+                <group>
+                    <filter string="Transaction" name="group_tx_id" context="{'group_by': 'tx_id'}"/>
+                    <filter string="Type" name="group_type" context="{'group_by': 'type'}"/>
+                </group>
             </search>
         </field>
     </record>

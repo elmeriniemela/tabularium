@@ -5,16 +5,20 @@
         <field name="arch" type="xml">
             <list decoration-info="state == 'ahead'" decoration-muted="state == 'behind'" decoration-danger="state == 'missed'" decoration-success="state == 'reached'">
                 <button name="copy_button" class="oe_edit_only" title="Copy" type="object" icon="fa-files-o" help="Copy"/>
-                <field name="name"/>
-                <field name="date"/>
-                <field name="position"/>
-                <field name="predicted_position"/>
-                <field name="difference"/>
-                <field name="inflation_rate" widget="percentage"/>
-                <field name="real_position"/>
-                <field name="state"/>
+                <field name="name" optional="show"/>
+                <field name="date" optional="show"/>
+                <field name="position" optional="show"/>
+                <field name="predicted_position" optional="show"/>
+                <field name="difference" optional="show"/>
+                <field name="inflation_rate" widget="percentage" optional="show"/>
+                <field name="real_position" optional="show"/>
+                <field name="state" optional="show"/>
                 <field name="company_id" optional="hide"/>
                 <field name="company_currency_id" optional="hide"/>
+                <field name="create_date" optional="hide"/>
+                <field name="create_uid" widget="many2one_avatar_user" optional="hide"/>
+                <field name="write_date" optional="hide"/>
+                <field name="write_uid" widget="many2one_avatar_user" optional="hide"/>
             </list>
         </field>
     </record>
@@ -58,7 +62,16 @@
                 <field name="name"/>
                 <field name="date"/>
                 <field name="position"/>
+                <field name="state"/>
                 <field name="company_id"/>
+                <filter name="date" date="date"/>
+                <filter name="filter_create_date" date="create_date"/>
+                <group>
+                    <filter string="Date" name="group_date" context="{'group_by': 'date:year'}"/>
+                    <filter string="State" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Company" name="group_company_id" context="{'group_by': 'company_id'}"/>
+                    <filter string="Creation Date" name="group_create_date" context="{'group_by': 'create_date:month'}"/>
+                </group>
             </search>
         </field>
     </record>

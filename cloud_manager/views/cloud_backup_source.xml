@@ -4,8 +4,12 @@
         <field name="model">cloud.backup.source</field>
         <field name="arch" type="xml">
             <list>
-                <field name="name"/>
-                <field name="backup_ids" widget="many2many_tags"/>
+                <field name="name" optional="show"/>
+                <field name="backup_ids" widget="many2many_tags" optional="show"/>
+                <field name="create_date" optional="hide"/>
+                <field name="create_uid" widget="many2one_avatar_user" optional="hide"/>
+                <field name="write_date" optional="hide"/>
+                <field name="write_uid" widget="many2one_avatar_user" optional="hide"/>
             </list>
         </field>
     </record>
@@ -34,6 +38,10 @@
             <search>
                 <field name="name"/>
                 <field name="backup_ids"/>
+                <filter name="create_date_filter" date="create_date"/>
+                <group>
+                    <filter string="Creation Date" name="group_create_date" context="{'group_by': 'create_date:month'}"/>
+                </group>
             </search>
         </field>
     </record>

@@ -21,8 +21,12 @@
         <field name="arch" type="xml">
             <list string="Stages of Notes" editable="bottom">
                 <field name="sequence" widget="handle"/>
-                <field name="name"/>
-                <field name="fold"/>
+                <field name="name" optional="show"/>
+                <field name="fold" optional="show"/>
+                <field name="create_uid" optional="hide"/>
+                <field name="create_date" optional="hide"/>
+                <field name="write_uid" optional="hide"/>
+                <field name="write_date" optional="hide"/>
             </list>
         </field>
     </record>
@@ -32,6 +36,24 @@
         <field name="name">Stages</field>
         <field name="res_model">note.stage</field>
         <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- note Stage Search View -->
+    <record id="view_note_stage_search" model="ir.ui.view">
+        <field name="name">note.stage.search</field>
+        <field name="model">note.stage</field>
+        <field name="arch" type="xml">
+            <search string="Stages of Notes">
+                <field name="name"/>
+                <filter name="filter_fold" string="Folded" domain="[('fold', '=', True)]"/>
+                <filter name="filter_not_fold" string="Not Folded" domain="[('fold', '=', False)]"/>
+                <filter name="create_date_filter" string="Created On" date="create_date"/>
+                <group>
+                    <filter string="Folded" name="group_fold" context="{'group_by': 'fold'}"/>
+                    <filter string="Created On" name="group_create_date" context="{'group_by': 'create_date:month'}"/>
+                </group>
+            </search>
+        </field>
     </record>
 
     <!-- note Tag Form View -->
@@ -53,8 +75,28 @@
         <field name="model">note.tag</field>
         <field name="arch" type="xml">
             <list string="Tags" editable="bottom">
-                <field name="name"/>
+                <field name="name" optional="show"/>
+                <field name="color" optional="hide"/>
+                <field name="create_uid" optional="hide"/>
+                <field name="create_date" optional="hide"/>
+                <field name="write_uid" optional="hide"/>
+                <field name="write_date" optional="hide"/>
             </list>
+        </field>
+    </record>
+
+    <!-- note Tag Search View -->
+    <record id="note_tag_view_search" model="ir.ui.view">
+        <field name="name">note.tag.search</field>
+        <field name="model">note.tag</field>
+        <field name="arch" type="xml">
+            <search string="Tags">
+                <field name="name"/>
+                <filter name="create_date_filter" string="Created On" date="create_date"/>
+                <group>
+                    <filter string="Created On" name="group_create_date" context="{'group_by': 'create_date:month'}"/>
+                </group>
+            </search>
         </field>
     </record>
 
@@ -116,10 +158,22 @@
         <field name="model">note.note</field>
         <field name="arch" type="xml">
             <list string="Stages">
-                <field name="name"/>
-                <field name="stage_id"/>
-                <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                <field name="name" optional="show"/>
+                <field name="stage_id" optional="show"/>
+                <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}" optional="show"/>
                 <field name="activity_ids" widget="list_activity" optional="show"/>
+                <field name="user_id" optional="hide"/>
+                <field name="priority" optional="hide" widget="priority"/>
+                <field name="company_id" optional="hide"/>
+                <field name="memo" optional="hide"/>
+                <field name="sequence" optional="hide"/>
+                <field name="active" optional="hide"/>
+                <field name="color" optional="hide"/>
+                <field name="displayed_image_id" optional="hide"/>
+                <field name="create_uid" optional="hide"/>
+                <field name="create_date" optional="hide"/>
+                <field name="write_uid" optional="hide"/>
+                <field name="write_date" optional="hide"/>
             </list>
         </field>
     </record>
@@ -164,11 +218,22 @@
         <field name="model">note.note</field>
         <field name="arch" type="xml">
             <search string="Notes">
+                <field name="name"/>
                 <field name="memo" string="Note"/>
+                <field name="user_id"/>
+                <field name="stage_id"/>
                 <field name="tag_ids"/>
+                <field name="company_id"/>
                 <filter name="all" string="All" domain="['|', ('active', '=', False), ('active', '=', True)]"/>
                 <filter name="active" string="Active" domain="[('active', '=', True)]"/>
                 <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <separator/>
+                <filter name="filter_priority_high" string="High Priority" domain="[('priority', '=', '1')]"/>
+                <filter name="filter_priority_low" string="Low Priority" domain="[('priority', '=', '0')]"/>
+                <separator/>
+                <filter name="create_date_filter" string="Created On" date="create_date"/>
+                <filter name="write_date_filter" string="Updated On" date="write_date"/>
+                <separator/>
                 <filter invisible="1" string="Late Activities" name="activities_overdue"
                     domain="[('my_activity_date_deadline', '&lt;', 'today')]"
                     help="Show all records whose next activity date is past"/>
@@ -178,6 +243,10 @@
                     domain="[('my_activity_date_deadline', '&gt;', 'today')]"/>
                 <group>
                     <filter string="Stage" name="stage" help="By sticky note category" context="{'group_by': 'stage_id'}"/>
+                    <filter string="Owner" name="group_user_id" context="{'group_by': 'user_id'}"/>
+                    <filter string="Priority" name="group_priority" context="{'group_by': 'priority'}"/>
+                    <filter string="Company" name="group_company_id" context="{'group_by': 'company_id'}"/>
+                    <filter string="Created On" name="group_create_date" context="{'group_by': 'create_date:month'}"/>
                 </group>
             </search>
         </field>

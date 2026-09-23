@@ -5,12 +5,17 @@
         <field name="arch" type="xml">
             <list decoration-muted="not active">
                 <field name="sequence" widget="handle"/>
-                <field name="name"/>
-                <field name="script_type"/>
-                <field name="multisig"/>
-                <field name="transactions"/>
-                <field name="balance"/>
+                <field name="name" optional="show"/>
+                <field name="script_type" optional="show"/>
+                <field name="multisig" optional="show"/>
+                <field name="transactions" optional="show"/>
+                <field name="balance" optional="show"/>
                 <field name="active" optional="hide"/>
+                <field name="address_amount" optional="hide"/>
+                <field name="gap_limit" optional="hide"/>
+                <field name="sigs_required" optional="hide"/>
+                <field name="descriptor" optional="hide"/>
+                <field name="birth_timestamp" optional="hide"/>
             </list>
         </field>
     </record>
@@ -123,12 +128,20 @@
         <field name="arch" type="xml">
             <search>
                 <field name="name"/>
+                <field name="script_type"/>
+                <field name="descriptor"/>
                 <separator/>
+                <filter name="active" string="Active" domain="[('active', '=', True)]"/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
                 <filter name="all" string="All" domain="['|', ('active', '=', False), ('active', '=', True)]"/>
                 <separator/>
                 <filter string="Has Balance" name="has_balance" domain="[('balance', '!=', 0)]"/>
                 <filter string="No Balance" name="no_balance" domain="[('balance', '=', 0)]"/>
                 <separator/>
+                <filter string="Birth Timestamp" name="birth_timestamp_filter" date="birth_timestamp"/>
+                <group>
+                    <filter string="Script Type" name="group_script_type" context="{'group_by': 'script_type'}"/>
+                </group>
             </search>
         </field>
     </record>

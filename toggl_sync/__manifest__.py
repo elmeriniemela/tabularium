@@ -6,7 +6,7 @@
     'website': "https://eniemela.fi",
     'license': 'LGPL-3',
     'category': 'Toggl',
-    'version': '1.0.5',
+    'version': '1.0.6',
     'depends': [
         'base', 'mail',
         'timeago_widget',

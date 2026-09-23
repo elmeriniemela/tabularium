@@ -4,7 +4,7 @@
         <field name="inherit_id" ref="bitcoin_explorer.tree_tx_in"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='spent_output_id']" position="after">
-                <field name="wallet_ids" widget="many2many_tags"/>
+                <field name="wallet_ids" widget="many2many_tags" optional="show"/>
             </xpath>
         </field>
     </record>

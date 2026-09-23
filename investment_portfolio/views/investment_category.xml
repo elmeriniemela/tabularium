@@ -7,6 +7,10 @@
                 <field name="sequence" widget="handle"/>
                 <field name="name" optional="show"/>
                 <field name="liquid" optional="show" widget="boolean_toggle"/>
+                <field name="create_date" optional="hide"/>
+                <field name="create_uid" widget="many2one_avatar_user" optional="hide"/>
+                <field name="write_date" optional="hide"/>
+                <field name="write_uid" widget="many2one_avatar_user" optional="hide"/>
             </list>
         </field>
     </record>
@@ -36,6 +40,14 @@
         <field name="arch" type="xml">
             <search>
                 <field name="name"/>
+                <filter name="filter_create_date" date="create_date"/>
+                <separator/>
+                <filter string="Liquid" name="filter_liquid" domain="[('liquid', '=', True)]"/>
+                <filter string="Illiquid" name="filter_illiquid" domain="[('liquid', '=', False)]"/>
+                <group>
+                    <filter string="Liquid" name="group_liquid" context="{'group_by': 'liquid'}"/>
+                    <filter string="Creation Date" name="group_create_date" context="{'group_by': 'create_date:month'}"/>
+                </group>
             </search>
         </field>
     </record>

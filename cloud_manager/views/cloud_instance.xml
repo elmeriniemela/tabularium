@@ -5,15 +5,27 @@
         <field name="arch" type="xml">
             <list decoration-warning="restart_requested != False" decoration-muted="state == 'removed'" decoration-info="state in ('draft', 'created')" decoration-danger="state in ('exited', 'dead') or latest_backup_missing">
                 <field name="name" optional="show"/>
-                <field name="server_id" optional="hide"/>
-                <field name="module_ids" widget="many2many_tags" optional="hide"/>
-                <field name="dns_record_ids" widget="many2many_tags" optional="hide"/>
                 <field name="uid" optional="show"/>
                 <field name="http_port" optional="show"/>
                 <field name="gevent_port" optional="show"/>
                 <field name="restart_requested" optional="show"/>
                 <field name="latest_backup_missing" optional="show"/>
                 <field name="state" optional="show"/>
+                <field name="server_id" optional="hide"/>
+                <field name="cname" optional="hide"/>
+                <field name="module_ids" widget="many2many_tags" optional="hide"/>
+                <field name="dns_record_ids" widget="many2many_tags" optional="hide"/>
+                <field name="backup_ids" widget="many2many_tags" optional="hide"/>
+                <field name="restarted" optional="hide"/>
+                <field name="protected" optional="hide"/>
+                <field name="is_self" optional="hide"/>
+                <field name="config" optional="hide"/>
+                <field name="upgrade" optional="hide"/>
+                <field name="fshealth" optional="hide"/>
+                <field name="create_date" optional="hide"/>
+                <field name="create_uid" widget="many2one_avatar_user" optional="hide"/>
+                <field name="write_date" optional="hide"/>
+                <field name="write_uid" widget="many2one_avatar_user" optional="hide"/>
             </list>
         </field>
     </record>
@@ -84,9 +96,30 @@
         <field name="arch" type="xml">
             <search>
                 <field name="name"/>
+                <field name="uid"/>
+                <field name="cname"/>
                 <field name="server_id"/>
+                <field name="state"/>
+                <field name="module_ids"/>
+                <field name="dns_record_ids"/>
+                <filter name="filter_restart_requested" date="restart_requested"/>
+                <filter name="filter_restarted" date="restarted"/>
+                <filter name="filter_create_date" date="create_date"/>
+                <separator/>
+                <filter name="filter_protected" string="Protected" domain="[('protected', '=', True)]"/>
+                <filter name="filter_not_protected" string="Not Protected" domain="[('protected', '=', False)]"/>
+                <separator/>
+                <filter name="filter_is_self" string="Is Self" domain="[('is_self', '=', True)]"/>
+                <filter name="filter_not_is_self" string="Not Is Self" domain="[('is_self', '=', False)]"/>
+                <separator/>
+                <filter name="filter_latest_backup_missing" string="Latest Backup Missing" domain="[('latest_backup_missing', '=', True)]"/>
+                <filter name="filter_backup_ok" string="Backup OK" domain="[('latest_backup_missing', '=', False)]"/>
                 <group>
-                    <filter string="Create Date" name="group_create_date" context="{'group_by': 'create_date:year'}"/>
+                    <filter string="Server" name="group_server_id" context="{'group_by': 'server_id'}"/>
+                    <filter string="State" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Restart Requested" name="group_restart_requested" context="{'group_by': 'restart_requested:month'}"/>
+                    <filter string="Restarted" name="group_restarted" context="{'group_by': 'restarted:month'}"/>
+                    <filter string="Creation Date" name="group_create_date" context="{'group_by': 'create_date:month'}"/>
                 </group>
             </search>
         </field>

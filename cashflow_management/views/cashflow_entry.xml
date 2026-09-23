@@ -11,6 +11,11 @@
                 <field name="company_currency_id"  optional="show"/>
                 <field name="category_id" optional="show"/>
                 <field name="parser_id"  optional="show"/>
+                <field name="account_id" optional="hide"/>
+                <field name="raw" optional="hide"/>
+                <field name="identifier" optional="hide"/>
+                <field name="attachment_id" optional="hide"/>
+                <field name="active" optional="hide"/>
             </list>
         </field>
     </record>
@@ -89,12 +94,15 @@
                 <filter string="Last Month" name="last_month" domain="[('date', '&gt;=', '-1m =1d'), ('date', '&lt;', '=1d')]"/>
                 <filter string="This Month" name="this_month" domain="[('date', '&gt;=', '=1d')]"/>
                 <separator />
+                <filter string="Active" name="active" domain="[('active', '=', True)]"/>
+                <filter string="Archived" name="archived" domain="[('active', '=', False)]"/>
                 <filter name="all" string="All" domain="['|', ('active', '=', False), ('active', '=', True)]"/>
                 <separator />
                 <group>
                     <filter string="Account" name="group_account" context="{'group_by': 'account_id'}"/>
                     <filter string="Category" name="group_category" context="{'group_by': 'category_id'}"/>
                     <filter string="Parser" name="group_parser" context="{'group_by': 'parser_id'}"/>
+                    <filter string="Company" name="group_company" groups="base.group_multi_company" context="{'group_by': 'company_id'}"/>
                     <filter string="Date" name="group_date" context="{'group_by': 'date:month'}"/>
                 </group>
             </search>

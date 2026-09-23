@@ -5,15 +5,23 @@
         <field name="arch" type="xml">
             <list>
                 <field name="priority" widget="priority"  nolabel="1" width="20px" optional="show"/>
-                <field name="name"/>
+                <field name="name" optional="show"/>
                 <field name="start_position" optional="show"/>
                 <field name="end_position" optional="show"/>
-                <field name="profit" widget="monetary" decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0"/>
-                <field name="annualized_irr" widget="percentage" decoration-danger="annualized_irr &lt; 0" decoration-success="annualized_irr &gt; 0"/>
+                <field name="profit" widget="monetary" decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0" optional="show"/>
+                <field name="annualized_irr" widget="percentage" decoration-danger="annualized_irr &lt; 0" decoration-success="annualized_irr &gt; 0" optional="show"/>
                 <field name="start_date" optional="hide"/>
                 <field name="end_date" optional="hide"/>
+                <field name="count_positions" optional="hide"/>
+                <field name="count_timeseries" optional="hide"/>
+                <field name="count_transactions" optional="hide"/>
+                <field name="debug_xirr" optional="hide"/>
                 <field name="company_id" optional="hide"/>
                 <field name="company_currency_id" optional="hide"/>
+                <field name="create_date" optional="hide"/>
+                <field name="create_uid" widget="many2one_avatar_user" optional="hide"/>
+                <field name="write_date" optional="hide"/>
+                <field name="write_uid" widget="many2one_avatar_user" optional="hide"/>
                 <button title="Update" icon="fa-refresh" name="action_compute" type="object"/>
             </list>
         </field>
@@ -84,6 +92,15 @@
                 <field name="start_date"/>
                 <field name="end_date"/>
                 <field name="company_id"/>
+                <filter name="filter_start_date" date="start_date"/>
+                <filter name="filter_end_date" date="end_date"/>
+                <filter name="filter_create_date" date="create_date"/>
+                <group>
+                    <filter string="Start Date" name="group_start_date" context="{'group_by': 'start_date:month'}"/>
+                    <filter string="End Date" name="group_end_date" context="{'group_by': 'end_date:month'}"/>
+                    <filter string="Company" name="group_company_id" context="{'group_by': 'company_id'}"/>
+                    <filter string="Creation Date" name="group_create_date" context="{'group_by': 'create_date:month'}"/>
+                </group>
             </search>
         </field>
     </record>

@@ -4,10 +4,13 @@
         <field name="model">cashflow.plan</field>
         <field name="arch" type="xml">
             <list>
-                <field name="name"/>
-                <field name="create_date"  optional="show"/>
+                <field name="name" optional="show"/>
+                <field name="create_date" optional="show"/>
+                <field name="create_uid" widget="many2one_avatar_user" optional="hide"/>
                 <field name="company_id" optional="hide"/>
-                <field name="company_currency_id"  optional="hide"/>
+                <field name="company_currency_id" optional="hide"/>
+                <field name="write_date" optional="hide"/>
+                <field name="write_uid" widget="many2one_avatar_user" optional="hide"/>
             </list>
         </field>
     </record>
@@ -37,12 +40,16 @@
                     <field name="line_ids">
                         <list editable="bottom">
                             <field name="sequence" widget="handle"/>
+                            <field name="name" optional="show"/>
+                            <field name="amount" sum="Total" optional="show"/>
+                            <field name="balance" optional="show"/>
                             <field name="date" optional="hide"/>
-                            <field name="name"/>
-                            <field name="amount" sum="Total"/>
-                            <field name="balance"/>
                             <field name="company_id" optional="hide"/>
-                            <field name="company_currency_id"  optional="hide"/>
+                            <field name="company_currency_id" optional="hide"/>
+                            <field name="create_date" optional="hide"/>
+                            <field name="create_uid" widget="many2one_avatar_user" optional="hide"/>
+                            <field name="write_date" optional="hide"/>
+                            <field name="write_uid" widget="many2one_avatar_user" optional="hide"/>
                         </list>
                     </field>
                 </sheet>
@@ -56,9 +63,11 @@
         <field name="arch" type="xml">
             <search>
                 <field name="name"/>
+                <field name="company_id"/>
                 <field name="create_date"/>
                 <filter name="create_date_filter" date="create_date"/>
                 <group>
+                    <filter string="Company" name="group_company_id" context="{'group_by': 'company_id'}"/>
                     <filter string="Creation Date" name="group_create_date" context="{'group_by': 'create_date:month'}"/>
                 </group>
             </search>

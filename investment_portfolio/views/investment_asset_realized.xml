@@ -7,20 +7,31 @@
                 <field name="position_id" optional="hide"/>
                 <field name="currency_id" optional="hide"/>
                 <field name="company_currency_id" optional="hide"/>
-                <field name="quantity" sum="Total Volume"/>
-                <field name="profit" sum="Total Profit"/>
+                <field name="company_id" optional="hide"/>
+                <field name="category_id" optional="hide"/>
+                <field name="portfolio_id" optional="hide"/>
+                <field name="quantity" sum="Total Volume" optional="show"/>
+                <field name="profit" sum="Total Profit" optional="show"/>
                 <field name="realized_date" optional="hide"/>
                 <field name="sell_batch_id" optional="hide"/>
-                <field name="sell_date"/>
-                <field name="sell_price" sum="Total Sell Price"/>
-                <field name="sell_fee" sum="Total Sell Fee"/>
+                <field name="sell_date" optional="show"/>
+                <field name="sell_price" sum="Total Sell Price" optional="show"/>
+                <field name="sell_payment" optional="hide"/>
+                <field name="sell_payment_currency" optional="hide"/>
+                <field name="sell_fee" sum="Total Sell Fee" optional="show"/>
                 <field name="buy_batch_id" optional="hide"/>
-                <field name="buy_date"/>
-                <field name="buy_price" sum="Total Buy Price"/>
-                <field name="buy_fee" sum="Total Buy Fee"/>
+                <field name="buy_date" optional="show"/>
+                <field name="buy_price" sum="Total Buy Price" optional="show"/>
+                <field name="buy_payment" optional="hide"/>
+                <field name="buy_payment_currency" optional="hide"/>
+                <field name="buy_fee" sum="Total Buy Fee" optional="show"/>
                 <field name="is_profit" optional="hide"/>
                 <field name="is_locked" optional="hide"/>
                 <field name="simulated" optional="hide"/>
+                <field name="create_date" optional="hide"/>
+                <field name="create_uid" widget="many2one_avatar_user" optional="hide"/>
+                <field name="write_date" optional="hide"/>
+                <field name="write_uid" widget="many2one_avatar_user" optional="hide"/>
             </list>
         </field>
     </record>
@@ -63,21 +74,34 @@
         <field name="arch" type="xml">
             <search>
                 <field name="position_id"/>
-                <separator/>
+                <field name="category_id"/>
+                <field name="portfolio_id"/>
+                <field name="company_id"/>
+                <field name="currency_id"/>
                 <filter name="realized_date" date="realized_date"/>
+                <filter name="filter_sell_date" date="sell_date"/>
+                <filter name="filter_buy_date" date="buy_date"/>
+                <filter name="filter_create_date" date="create_date"/>
                 <separator/>
                 <filter string="Profit" name="profit" domain="[('profit', '&gt;', 0)]"/>
                 <filter string="Loss" name="loss" domain="[('profit', '&lt;', 0)]"/>
                 <separator/>
+                <filter string="Is Profit" name="filter_is_profit" domain="[('is_profit', '=', True)]"/>
+                <filter string="Is Not Profit" name="filter_not_is_profit" domain="[('is_profit', '=', False)]"/>
+                <separator/>
                 <filter string="Not Simulated" name="not_simulated" domain="[('simulated', '=', False)]"/>
                 <filter string="Simulated" name="simulated" domain="[('simulated', '=', True)]"/>
-                <separator/>
                 <group>
                     <filter string="Realized Date" name="group_realized_date" context="{'group_by': 'realized_date:year'}"/>
+                    <filter string="Sell Date" name="group_sell_date" context="{'group_by': 'sell_date:month'}"/>
+                    <filter string="Buy Date" name="group_buy_date" context="{'group_by': 'buy_date:month'}"/>
                     <filter string="Category" name="group_category_id" context="{'group_by': 'category_id'}"/>
                     <filter string="Portfolio" name="group_portfolio_id" context="{'group_by': 'portfolio_id'}"/>
                     <filter string="Position" name="group_position_id" context="{'group_by': 'position_id'}"/>
+                    <filter string="Company" name="group_company_id" context="{'group_by': 'company_id'}"/>
+                    <filter string="Currency" name="group_currency_id" context="{'group_by': 'currency_id'}"/>
                     <filter string="Is profit" name="group_is_profit" context="{'group_by': 'is_profit'}"/>
+                    <filter string="Creation Date" name="group_create_date" context="{'group_by': 'create_date:month'}"/>
                 </group>
             </search>
         </field>

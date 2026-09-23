@@ -5,10 +5,15 @@
         <field name="arch" type="xml">
             <list editable="top">
                 <field name="sequence" widget="handle"/>
-                <field name="name"/>
-                <field name="date"/>
-                <field name="closing_time" options="{'type': 'time'}" widget="float_time"/>
+                <field name="name" optional="show"/>
+                <field name="date" optional="show"/>
+                <field name="closing_time" options="{'type': 'time'}" widget="float_time" optional="show"/>
                 <field name="closing_datetime" optional="hide"/>
+                <field name="exchange_id" optional="hide"/>
+                <field name="create_date" optional="hide"/>
+                <field name="create_uid" widget="many2one_avatar_user" optional="hide"/>
+                <field name="write_date" optional="hide"/>
+                <field name="write_uid" widget="many2one_avatar_user" optional="hide"/>
             </list>
         </field>
     </record>
@@ -45,6 +50,15 @@
         <field name="arch" type="xml">
             <search>
                 <field name="name"/>
+                <field name="exchange_id"/>
+                <filter name="date" date="date"/>
+                <filter name="filter_closing_datetime" date="closing_datetime"/>
+                <filter name="filter_create_date" date="create_date"/>
+                <group>
+                    <filter string="Exchange" name="group_exchange_id" context="{'group_by': 'exchange_id'}"/>
+                    <filter string="Date" name="group_date" context="{'group_by': 'date:month'}"/>
+                    <filter string="Creation Date" name="group_create_date" context="{'group_by': 'create_date:month'}"/>
+                </group>
             </search>
         </field>
     </record>

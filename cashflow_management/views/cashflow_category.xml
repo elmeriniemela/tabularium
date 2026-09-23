@@ -7,6 +7,10 @@
                 <field name="name" optional="show"/>
                 <field name="entry_count" optional="show"/>
                 <field name="entry_ids" widget="many2many_tags" optional="hide"/>
+                <field name="create_uid" optional="hide"/>
+                <field name="create_date" optional="hide"/>
+                <field name="write_uid" optional="hide"/>
+                <field name="write_date" optional="hide"/>
             </list>
         </field>
     </record>
@@ -37,8 +41,14 @@
         <field name="name">cashflow.category.search</field>
         <field name="model">cashflow.category</field>
         <field name="arch" type="xml">
-            <search>
+            <search string="Cashflow Category">
                 <field name="name"/>
+                <separator/>
+                <filter name="create_date_filter" string="Created On" date="create_date"/>
+                <filter name="write_date_filter" string="Updated On" date="write_date"/>
+                <group>
+                    <filter string="Created On" name="group_create_date" context="{'group_by': 'create_date:month'}"/>
+                </group>
             </search>
         </field>
     </record>

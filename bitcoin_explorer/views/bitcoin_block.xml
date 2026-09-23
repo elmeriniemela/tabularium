@@ -5,10 +5,23 @@
         <field name="arch" type="xml">
             <list create="false">
                 <field name="hash" optional="show"/>
-                <field name="height"/>
-                <field name="time"/>
-                <field name="mediantime"/>
-                <field name="n_tx"/>
+                <field name="height" optional="show"/>
+                <field name="time" optional="show"/>
+                <field name="mediantime" optional="show"/>
+                <field name="n_tx" optional="show"/>
+                <field name="confirmations" optional="hide"/>
+                <field name="version" optional="hide"/>
+                <field name="merkleroot" optional="hide"/>
+                <field name="nonce" optional="hide"/>
+                <field name="bits" optional="hide"/>
+                <field name="difficulty" optional="hide"/>
+                <field name="chainwork" optional="hide"/>
+                <field name="computed_n_tx" optional="hide"/>
+                <field name="all_tx_fetched" widget="boolean_toggle" optional="hide"/>
+                <field name="previousblockhash" optional="hide"/>
+                <field name="size" optional="hide"/>
+                <field name="strippedsize" optional="hide"/>
+                <field name="weight" optional="hide"/>
             </list>
         </field>
     </record>
@@ -58,6 +71,19 @@
         <field name="arch" type="xml">
             <search>
                 <field name="hash" filter_domain="[('hash', '=', self)]"/>
+                <field name="height"/>
+                <field name="merkleroot"/>
+                <field name="previousblockhash"/>
+                <separator/>
+                <filter string="All TX Fetched" name="all_tx_fetched" domain="[('all_tx_fetched', '=', True)]"/>
+                <filter string="Not All TX Fetched" name="not_all_tx_fetched" domain="[('all_tx_fetched', '=', False)]"/>
+                <separator/>
+                <filter string="Time" name="time_filter" date="time"/>
+                <filter string="Median Time" name="mediantime_filter" date="mediantime"/>
+                <group>
+                    <filter string="Time" name="group_time" context="{'group_by': 'time:day'}"/>
+                    <filter string="Version" name="group_version" context="{'group_by': 'version'}"/>
+                </group>
             </search>
         </field>
     </record>

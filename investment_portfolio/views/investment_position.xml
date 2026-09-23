@@ -51,6 +51,30 @@
                 <field name="portfolio_id" optional="hide"/>
                 <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}" optional="hide"/>
                 <field name="follow" widget="boolean_toggle" optional="hide"/>
+                <field name="asset_id" optional="hide"/>
+                <field name="liquid" optional="hide"/>
+                <field name="active" optional="hide"/>
+                <field name="expected_yearly_appreciation" optional="hide"/>
+                <field name="plausible_ath_drawdown" optional="hide"/>
+                <field name="company_id" optional="hide"/>
+                <field name="is_company_currency" optional="hide"/>
+                <field name="is_cash" optional="hide"/>
+                <field name="thesis_id" optional="hide"/>
+                <field name="compute_realized" optional="hide"/>
+                <field name="position_abs" optional="hide"/>
+                <field name="cost_basis_currency" optional="hide"/>
+                <field name="last_price_own_currency" optional="hide"/>
+                <field name="drawdown_price_own_currency" optional="hide"/>
+                <field name="daily_profit" optional="hide"/>
+                <field name="weekly_profit" optional="hide"/>
+                <field name="monthly_profit" optional="hide"/>
+                <field name="three_month_profit" optional="hide"/>
+                <field name="six_month_profit" optional="hide"/>
+                <field name="ytd_profit" optional="hide"/>
+                <field name="one_year_profit" optional="hide"/>
+                <field name="three_year_profit" optional="hide"/>
+                <field name="five_year_profit" optional="hide"/>
+                <field name="ten_year_profit" optional="hide"/>
                 <field name="plan_type" optional="hide"/>
                 <field name="plan_start_date" optional="hide"/>
                 <field name="plan_months" optional="hide"/>
@@ -58,8 +82,15 @@
                 <field name="plan_yield" optional="hide"/>
                 <field name="plan_cost" optional="hide"/>
                 <field name="plan_fee" optional="hide"/>
+                <field name="plan_yearly_appreciation" optional="hide"/>
                 <field name="plan_yearly_interest" widget="percentage" optional="hide"/>
                 <field name="plan_total_cash_flow" optional="hide"/>
+                <field name="plan_auto_realize" optional="hide"/>
+                <field name="plan_allow_past" optional="hide"/>
+                <field name="create_date" optional="hide"/>
+                <field name="create_uid" widget="many2one_avatar_user" optional="hide"/>
+                <field name="write_date" optional="hide"/>
+                <field name="write_uid" widget="many2one_avatar_user" optional="hide"/>
 
                 <button title="Update price" icon="fa-refresh" name="run_integration" type="object" invisible="not endpoint_id" context="{'force_fetch': True}"/>
             </list>
@@ -204,9 +235,19 @@
         <field name="arch" type="xml">
             <search>
                 <field name="name" string="Name/Tags" filter_domain="['|', ('name', 'ilike', self), ('tag_ids', 'ilike', self)]"/>
+                <field name="ticker"/>
                 <field name="category_id"/>
                 <field name="portfolio_id"/>
                 <field name="asset_id"/>
+                <field name="currency_id"/>
+                <field name="endpoint_id"/>
+                <field name="company_id"/>
+                <filter name="filter_last_update" date="last_update"/>
+                <filter name="filter_plan_start_date" date="plan_start_date"/>
+                <filter name="filter_create_date" date="create_date"/>
+                <separator/>
+                <filter string="Active" name="filter_active" domain="[('active', '=', True)]"/>
+                <filter string="Archived" name="filter_archived" domain="[('active', '=', False)]"/>
                 <separator/>
                 <filter name="all" string="All" domain="['|', ('active', '=', False), ('active', '=', True)]"/>
                 <separator/>
@@ -223,11 +264,15 @@
                 <separator/>
                 <filter string="Liquid" name="liquid" domain="[('liquid', '=', True)]"/>
                 <filter string="Illiquid" name="illiquid" domain="[('liquid', '=', False)]"/>
-                <separator/>
                 <group>
                     <filter string="Portfolio" name="group_portfolio_id" context="{'group_by': 'portfolio_id'}"/>
                     <filter string="Category" name="group_category_id" context="{'group_by': 'category_id'}"/>
+                    <filter string="Asset" name="group_asset_id" context="{'group_by': 'asset_id'}"/>
                     <filter string="Name" name="group_name" context="{'group_by': 'name'}"/>
+                    <filter string="Currency" name="group_currency_id" context="{'group_by': 'currency_id'}"/>
+                    <filter string="Plan Type" name="group_plan_type" context="{'group_by': 'plan_type'}"/>
+                    <filter string="Company" name="group_company_id" context="{'group_by': 'company_id'}"/>
+                    <filter string="Creation Date" name="group_create_date" context="{'group_by': 'create_date:month'}"/>
                 </group>
             </search>
         </field>

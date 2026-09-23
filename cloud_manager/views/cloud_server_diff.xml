@@ -4,9 +4,16 @@
         <field name="model">cloud.server.diff</field>
         <field name="arch" type="xml">
             <list>
-                <field name="name"/>
-                <field name="create_date" optional="show"/>
+                <field name="name" optional="show"/>
                 <field name="server_id" optional="show"/>
+                <field name="create_date" optional="show"/>
+                <field name="module_id" optional="hide"/>
+                <field name="allow_update" optional="hide"/>
+                <field name="update_done" optional="hide"/>
+                <field name="diff" optional="hide"/>
+                <field name="create_uid" widget="many2one_avatar_user" optional="hide"/>
+                <field name="write_date" optional="hide"/>
+                <field name="write_uid" widget="many2one_avatar_user" optional="hide"/>
             </list>
         </field>
     </record>
@@ -42,10 +49,16 @@
             <search>
                 <field name="name"/>
                 <field name="server_id"/>
-                <field name="module_id" optional="hide"/>
+                <field name="module_id"/>
                 <field name="diff"/>
+                <filter name="create_date_filter" date="create_date"/>
+                <separator/>
+                <filter name="filter_update_done" string="Updated" domain="[('update_done', '=', True)]"/>
+                <filter name="filter_update_not_done" string="Not Updated" domain="[('update_done', '=', False)]"/>
                 <group>
                     <filter string="Server" name="group_server_id" context="{'group_by': 'server_id'}"/>
+                    <filter string="Module" name="group_module_id" context="{'group_by': 'module_id'}"/>
+                    <filter string="Creation Date" name="group_create_date" context="{'group_by': 'create_date:day'}"/>
                 </group>
             </search>
         </field>

@@ -8,6 +8,8 @@
                 <field name="sequence" widget="handle"/>
                 <field name="name" optional="show"/>
                 <field name="account_ids" widget="many2many_tags" optional="show"/>
+                <field name="entry_ids" widget="many2many_tags" optional="hide"/>
+                <field name="attachment_ids" widget="many2many_tags" optional="hide"/>
             </list>
         </field>
     </record>
@@ -52,6 +54,7 @@
         <field name="arch" type="xml">
             <search>
                 <field name="name"/>
+                <field name="account_ids"/>
             </search>
         </field>
     </record>

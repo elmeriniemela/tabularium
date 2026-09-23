@@ -4,12 +4,20 @@
         <field name="model">investment.asset.price</field>
         <field name="arch" type="xml">
             <list editable="top" default_order="time desc" expand="1">
-                <field name="time"/>
-                <field name="price"/>
+                <field name="time" optional="show"/>
+                <field name="price" optional="show"/>
+                <field name="currency_id" optional="show"/>
                 <field name="price_adjusted" optional="hide"/>
                 <field name="prediction" optional="hide"/>
-                <field name="currency_id" optional="show"/>
                 <field name="asset_id" optional="hide"/>
+                <field name="date" optional="hide"/>
+                <field name="interpolated" optional="hide"/>
+                <field name="transaction_id" optional="hide"/>
+                <field name="display_name" optional="hide"/>
+                <field name="create_date" optional="hide"/>
+                <field name="create_uid" widget="many2one_avatar_user" optional="hide"/>
+                <field name="write_date" optional="hide"/>
+                <field name="write_uid" widget="many2one_avatar_user" optional="hide"/>
             </list>
         </field>
     </record>
@@ -54,16 +62,24 @@
         <field name="arch" type="xml">
             <search>
                 <field name="asset_id"/>
+                <field name="currency_id"/>
                 <field name="time"/>
                 <field name="price"/>
                 <filter name="time" date="time"/>
+                <filter name="date_filter" date="date"/>
+                <filter name="create_date_filter" date="create_date"/>
                 <separator/>
                 <filter string="Realized" name="realized" domain="[('prediction', '=', False)]"/>
                 <filter string="Prediction" name="prediction" domain="[('prediction', '=', True)]"/>
                 <separator/>
+                <filter string="Interpolated" name="filter_interpolated" domain="[('interpolated', '=', True)]"/>
+                <filter string="Not Interpolated" name="filter_not_interpolated" domain="[('interpolated', '=', False)]"/>
                 <group>
                     <filter string="Time" name="group_time" context="{'group_by': 'time:week'}"/>
                     <filter string="Asset" name="group_asset_id" context="{'group_by': 'asset_id'}"/>
+                    <filter string="Currency" name="group_currency_id" context="{'group_by': 'currency_id'}"/>
+                    <filter string="Date" name="group_date" context="{'group_by': 'date:month'}"/>
+                    <filter string="Creation Date" name="group_create_date" context="{'group_by': 'create_date:month'}"/>
                 </group>
             </search>
         </field>

@@ -14,6 +14,27 @@
                 <field name="company_currency_id" invisible="1"/>
 
                 <field name="last_price_own_currency" optional="hide"/>
+                <field name="quantity" optional="hide"/>
+                <field name="open_position" optional="hide"/>
+                <field name="open_profit" optional="hide"/>
+                <field name="high_position" optional="hide"/>
+                <field name="high_profit" optional="hide"/>
+                <field name="low_position" optional="hide"/>
+                <field name="low_profit" optional="hide"/>
+                <field name="price_id" optional="hide"/>
+                <field name="open_price_id" optional="hide"/>
+                <field name="high_price_id" optional="hide"/>
+                <field name="low_price_id" optional="hide"/>
+                <field name="company_id" optional="hide"/>
+                <field name="category_id" optional="hide"/>
+                <field name="portfolio_id" optional="hide"/>
+                <field name="liquid" optional="hide"/>
+                <field name="granularity" optional="hide"/>
+                <field name="is_sunday" optional="hide"/>
+                <field name="create_date" optional="hide"/>
+                <field name="create_uid" widget="many2one_avatar_user" optional="hide"/>
+                <field name="write_date" optional="hide"/>
+                <field name="write_uid" widget="many2one_avatar_user" optional="hide"/>
             </list>
         </field>
     </record>
@@ -102,18 +123,29 @@
         <field name="arch" type="xml">
             <search>
                 <field name="position_id"/>
+                <field name="category_id"/>
+                <field name="portfolio_id"/>
+                <field name="company_id"/>
+                <field name="price_id"/>
                 <separator/>
                 <filter string="Long" name="long" domain="[('quantity', '>', 0.0)]"/>
                 <filter string="Short" name="short" domain="[('quantity', '&lt;', 0.0)]"/>
                 <filter string="Closed" name="closed" domain="[('quantity', '=', 0.0)]"/>
                 <separator/>
                 <filter name="date_filter" date="date"/>
+                <filter name="filter_create_date" date="create_date"/>
                 <separator/>
                 <filter string="Liquid Assets" name="liquid" domain="[('liquid', '=', True)]"/>
                 <filter string="Illiquid Assets" name="illiquid" domain="[('liquid', '=', False)]"/>
                 <separator/>
                 <filter string="Realized" name="realized" domain="[('prediction', '=', False)]"/>
                 <filter string="Prediction" name="prediction" domain="[('prediction', '=', True)]"/>
+                <separator/>
+                <filter string="Interpolated" name="filter_interpolated" domain="[('interpolated', '=', True)]"/>
+                <filter string="Not Interpolated" name="filter_not_interpolated" domain="[('interpolated', '=', False)]"/>
+                <separator/>
+                <filter string="Sunday" name="filter_is_sunday" domain="[('is_sunday', '=', True)]"/>
+                <filter string="Not Sunday" name="filter_not_sunday" domain="[('is_sunday', '=', False)]"/>
                 <separator/>
                 <filter string="Until Today" name="until_today" domain="[('date', '&lt;=', 'now')]"/>
                 <separator/>
@@ -128,12 +160,16 @@
                 <filter string="9 Years" name="9_years" domain="[('date','&gt;',(context_today() + relativedelta(days=-9*365)).strftime('%Y-%m-%d')),('date','&lt;',(context_today() + relativedelta(days=9*365)).strftime('%Y-%m-%d'))]"/>
                 <filter string="10 Years" name="10_years" domain="[('date','&gt;',(context_today() + relativedelta(days=-10*365)).strftime('%Y-%m-%d')),('date','&lt;',(context_today() + relativedelta(days=10*365)).strftime('%Y-%m-%d'))]"/>
                 <group>
-                    <filter string="Date" name="group_day" context="{'group_by': 'date:day'}" invisible="not context.get('search_default_group_day')"/>
-                    <filter string="Date" name="group_week" context="{'group_by': 'date:week'}" invisible="not context.get('search_default_group_week')"/>
-                    <filter string="Date" name="group_year" context="{'group_by': 'date:year'}" invisible="not context.get('search_default_group_year')"/>
+                    <filter string="Date (Day)" name="group_day" context="{'group_by': 'date:day'}"/>
+                    <filter string="Date (Week)" name="group_week" context="{'group_by': 'date:week'}"/>
+                    <filter string="Date (Month)" name="group_month" context="{'group_by': 'date:month'}"/>
+                    <filter string="Date (Year)" name="group_year" context="{'group_by': 'date:year'}"/>
                     <filter string="Category" name="group_category_id" context="{'group_by': 'category_id'}"/>
                     <filter string="Portfolio" name="group_portfolio_id" context="{'group_by': 'portfolio_id'}"/>
                     <filter string="Position" name="group_position_id" context="{'group_by': 'position_id'}"/>
+                    <filter string="Company" name="group_company_id" context="{'group_by': 'company_id'}"/>
+                    <filter string="Granularity" name="group_granularity" context="{'group_by': 'granularity'}"/>
+                    <filter string="Creation Date" name="group_create_date" context="{'group_by': 'create_date:month'}"/>
                 </group>
             </search>
         </field>

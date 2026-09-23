@@ -4,11 +4,18 @@
         <field name="model">toggl.task</field>
         <field name="arch" type="xml">
             <list>
-                <field name="name"/>
-                <field name="project_name"/>
-                <field name="sale_line_name"/>
-                <field name="last_entry" widget="timeago"/>
-                <field name="entry_ids"/>
+                <field name="name" optional="show"/>
+                <field name="project_name" optional="show"/>
+                <field name="sale_line_name" optional="show"/>
+                <field name="last_entry" widget="timeago" optional="show"/>
+                <field name="entry_ids" optional="show"/>
+                <field name="task_id" optional="hide"/>
+                <field name="project_id" optional="hide"/>
+                <field name="sale_line_id" optional="hide"/>
+                <field name="create_uid" optional="hide"/>
+                <field name="create_date" optional="hide"/>
+                <field name="write_uid" optional="hide"/>
+                <field name="write_date" optional="hide"/>
             </list>
         </field>
     </record>
@@ -49,10 +56,24 @@
         <field name="arch" type="xml">
             <search string="Toggl Task">
                 <field name="name"/>
+                <field name="task_id"/>
                 <field name="sale_line_name"/>
+                <field name="sale_line_id"/>
                 <field name="project_name"/>
+                <field name="project_id"/>
                 <separator/>
-                <filter string="Entries" name="entries" domain="[('last_entry', '!=', False)]"/>
+                <filter string="Has Entries" name="entries" domain="[('last_entry', '!=', False)]"/>
+                <filter string="No Entries" name="no_entries" domain="[('last_entry', '=', False)]"/>
+                <separator/>
+                <filter name="last_entry_filter" string="Latest Entry" date="last_entry"/>
+                <filter name="create_date_filter" string="Created On" date="create_date"/>
+                <filter name="write_date_filter" string="Updated On" date="write_date"/>
+                <group>
+                    <filter string="Project" name="group_project_name" context="{'group_by': 'project_name'}"/>
+                    <filter string="Sale Order Line" name="group_sale_line_name" context="{'group_by': 'sale_line_name'}"/>
+                    <filter string="Latest Entry" name="group_last_entry" context="{'group_by': 'last_entry:month'}"/>
+                    <filter string="Created On" name="group_create_date" context="{'group_by': 'create_date:month'}"/>
+                </group>
             </search>
         </field>
     </record>

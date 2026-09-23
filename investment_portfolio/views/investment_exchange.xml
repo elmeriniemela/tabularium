@@ -6,14 +6,18 @@
             <list>
                 <field name="sequence" widget="handle"/>
                 <field name="name" optional="show"/>
-                <field name="is_open"/>
-                <field name="is_recently_open"/>
-                <field name="opening_time" options="{'type': 'time'}" widget="float_time"/>
-                <field name="closing_time" options="{'type': 'time'}" widget="float_time"/>
-                <field name="tz"/>
-                <field name="weekend_trading"/>
-                <field name="next_open"/>
-                <field name="next_close"/>
+                <field name="is_open" optional="show"/>
+                <field name="is_recently_open" optional="show"/>
+                <field name="opening_time" options="{'type': 'time'}" widget="float_time" optional="show"/>
+                <field name="closing_time" options="{'type': 'time'}" widget="float_time" optional="show"/>
+                <field name="tz" optional="show"/>
+                <field name="weekend_trading" optional="show"/>
+                <field name="next_open" optional="show"/>
+                <field name="next_close" optional="show"/>
+                <field name="create_date" optional="hide"/>
+                <field name="create_uid" widget="many2one_avatar_user" optional="hide"/>
+                <field name="write_date" optional="hide"/>
+                <field name="write_uid" widget="many2one_avatar_user" optional="hide"/>
             </list>
         </field>
     </record>
@@ -65,6 +69,14 @@
         <field name="arch" type="xml">
             <search>
                 <field name="name"/>
+                <field name="tz"/>
+                <separator/>
+                <filter string="Weekend Trading" name="filter_weekend_trading" domain="[('weekend_trading', '=', True)]"/>
+                <filter string="No Weekend Trading" name="filter_no_weekend_trading" domain="[('weekend_trading', '=', False)]"/>
+                <group>
+                    <filter string="Timezone" name="group_tz" context="{'group_by': 'tz'}"/>
+                    <filter string="Creation Date" name="group_create_date" context="{'group_by': 'create_date:month'}"/>
+                </group>
             </search>
         </field>
     </record>

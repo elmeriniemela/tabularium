@@ -21,9 +21,24 @@
                 <field name="profit" decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0" optional="show"  digits="[2,2]"/>
                 <field name="liquid" optional="hide"/>
                 <field name="category_id" optional="hide"/>
+                <field name="portfolio_id" optional="hide"/>
+                <field name="asset_id" optional="hide"/>
+                <field name="move_id" optional="hide"/>
+                <field name="external_ref" optional="hide"/>
+                <field name="inverse_company_rate" optional="hide"/>
+                <field name="fee_currency" optional="hide"/>
+                <field name="quantity_adjusted" optional="hide"/>
+                <field name="bypass_lock" optional="hide"/>
                 <field name="is_locked" optional="hide"/>
                 <field name="prediction" optional="hide" widget="boolean_toggle"/>
+                <field name="usage" optional="hide"/>
+                <field name="active" optional="hide"/>
+                <field name="company_id" optional="hide"/>
                 <field name="company_currency_id" optional="hide"/>
+                <field name="create_date" optional="hide"/>
+                <field name="create_uid" widget="many2one_avatar_user" optional="hide"/>
+                <field name="write_date" optional="hide"/>
+                <field name="write_uid" widget="many2one_avatar_user" optional="hide"/>
                 <button title="Details" icon="fa-info-circle" name="open_form" type="object"/>
             </list>
         </field>
@@ -151,11 +166,21 @@
                 <field name="description"/>
                 <field name="portfolio_id"/>
                 <field name="category_id"/>
+                <field name="asset_id"/>
+                <field name="move_id"/>
+                <field name="import_id"/>
+                <field name="currency_id"/>
+                <field name="company_id"/>
+                <field name="ttype"/>
                 <field name="external_ref"/>
+                <separator/>
+                <filter string="Active" name="filter_active" domain="[('active', '=', True)]"/>
+                <filter string="Archived" name="filter_archived" domain="[('active', '=', False)]"/>
                 <separator/>
                 <filter name="all" string="All" domain="['|', ('active', '=', False), ('active', '=', True)]"/>
                 <separator/>
                 <filter name="date_filter" date="time"/>
+                <filter name="filter_create_date" date="create_date"/>
                 <separator/>
                 <filter string="Long" name="long" domain="[('quantity', '>', 0.0)]"/>
                 <filter string="Short" name="short" domain="[('quantity', '&lt;', 0.0)]"/>
@@ -175,6 +200,12 @@
                 <separator/>
                 <filter string="Move is set" name="move_set" domain="[('move_id', '!=', False)]" />
                 <filter string="Move is not set" name="move_not_set" domain="[('move_id', '=', False)]" />
+                <separator/>
+                <filter string="Split" name="filter_is_split" domain="[('is_split', '=', True)]"/>
+                <filter string="Not Split" name="filter_not_is_split" domain="[('is_split', '=', False)]"/>
+                <separator/>
+                <filter string="Bypass Lock" name="filter_bypass_lock" domain="[('bypass_lock', '=', True)]"/>
+                <filter string="No Bypass Lock" name="filter_not_bypass_lock" domain="[('bypass_lock', '=', False)]"/>
                 <separator />
                 <filter string="1 Year" name="1_year" domain="[('time', '&gt;', 'today -365d'), ('time', '&lt;', 'today +365d')]" />
                 <filter string="2 Years" name="2_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-2*365)).strftime('%Y-%m-%d')),('time','&lt;',(context_today() + relativedelta(days=2*365)).strftime('%Y-%m-%d'))]" />
@@ -187,13 +218,18 @@
                 <filter string="9 Years" name="9_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-9*365)).strftime('%Y-%m-%d')),('time','&lt;',(context_today() + relativedelta(days=9*365)).strftime('%Y-%m-%d'))]" />
                 <filter string="10 Years" name="10_years" domain="[('time','&gt;',(context_today() + relativedelta(days=-10*365)).strftime('%Y-%m-%d')),('time','&lt;',(context_today() + relativedelta(days=10*365)).strftime('%Y-%m-%d'))]" />
                 <group>
-                    <filter string="Date" name="group_month" context="{'group_by': 'time:month'}" invisible="not context.get('search_default_group_month')"/>
-                    <filter string="Date" name="group_year" context="{'group_by': 'time:year'}" invisible="not context.get('search_default_group_year')"/>
+                    <filter string="Date (Month)" name="group_month" context="{'group_by': 'time:month'}"/>
+                    <filter string="Date (Year)" name="group_year" context="{'group_by': 'time:year'}"/>
                     <filter string="Portfolio" name="group_portfolio_id" context="{'group_by': 'portfolio_id'}"/>
                     <filter string="Category" name="group_category_id" context="{'group_by': 'category_id'}"/>
                     <filter string="Type" name="group_ttype" context="{'group_by': 'ttype'}"/>
                     <filter string="Position" name="group_position_id" context="{'group_by': 'position_id'}"/>
+                    <filter string="Asset" name="group_asset_id" context="{'group_by': 'asset_id'}"/>
+                    <filter string="Move" name="group_move_id" context="{'group_by': 'move_id'}"/>
+                    <filter string="Company" name="group_company_id" context="{'group_by': 'company_id'}"/>
+                    <filter string="Currency" name="group_currency_id" context="{'group_by': 'currency_id'}"/>
                     <filter string="Time" name="group_time" context="{'group_by': 'time:day'}"/>
+                    <filter string="Creation Date" name="group_create_date" context="{'group_by': 'create_date:month'}"/>
                 </group>
             </search>
         </field>

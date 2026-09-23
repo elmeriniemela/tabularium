@@ -49,11 +49,11 @@
                     </group>
                     <field name="wallet_ids" nolabel="1">
                         <list create="0" delete="0" edit="0">
-                            <field name="wallet_id"/>
-                            <field name="script_type"/>
-                            <field name="multisig"/>
-                            <field name="transactions"/>
-                            <field name="balance"/>
+                            <field name="wallet_id" optional="show"/>
+                            <field name="script_type" optional="show"/>
+                            <field name="multisig" optional="show"/>
+                            <field name="transactions" optional="show"/>
+                            <field name="balance" optional="show"/>
                             <button name="action_open_wallet" type="object" string="Open"/>
                         </list>
                     </field>
@@ -72,11 +72,19 @@
                 <field name="name"/>
                 <field name="xpub" string="xpub/zpub/Zpub" filter_domain="['|', '|', ('xpub', 'ilike', self), ('zpub', 'ilike', self), ('Zpub', 'ilike', self)]"/>
                 <field name="wallet_ids"/>
+                <field name="master_fingerprint"/>
+                <field name="derivation"/>
                 <separator/>
-                <filter name="compromised" string="Compromised" domain="[('compromised', '=', True)]"/>
-                <separator/>
+                <filter name="active" string="Active" domain="[('active', '=', True)]"/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
                 <filter name="all" string="All" domain="['|', ('active', '=', False), ('active', '=', True)]"/>
                 <separator/>
+                <filter name="compromised" string="Compromised" domain="[('compromised', '=', True)]"/>
+                <filter name="not_compromised" string="Not Compromised" domain="[('compromised', '=', False)]"/>
+                <group>
+                    <filter string="Witness Type" name="group_witness_type" context="{'group_by': 'witness_type'}"/>
+                    <filter string="Encoding" name="group_encoding" context="{'group_by': 'encoding'}"/>
+                </group>
             </search>
         </field>
     </record>

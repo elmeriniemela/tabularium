@@ -7,6 +7,11 @@
             <list>
                 <field name="sequence" widget="handle"/>
                 <field name="name" optional="show"/>
+                <field name="company_id" optional="hide"/>
+                <field name="create_date" optional="hide"/>
+                <field name="create_uid" widget="many2one_avatar_user" optional="hide"/>
+                <field name="write_date" optional="hide"/>
+                <field name="write_uid" widget="many2one_avatar_user" optional="hide"/>
             </list>
         </field>
     </record>
@@ -33,11 +38,26 @@
 
 
 
+    <record id="airport_search" model="ir.ui.view">
+        <field name="name">flight.airport.search</field>
+        <field name="model">flight.airport</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="company_id"/>
+                <filter name="create_date_filter" date="create_date"/>
+                <group>
+                    <filter string="Company" name="group_company_id" context="{'group_by': 'company_id'}"/>
+                    <filter string="Creation Date" name="group_create_date" context="{'group_by': 'create_date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
     <record id="airport_action" model="ir.actions.act_window">
         <field name="name">Airports</field>
         <field name="res_model">flight.airport</field>
         <field name="view_mode">list,kanban,form</field>
     </record>
-
 
 </odoo>

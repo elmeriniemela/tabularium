@@ -76,7 +76,7 @@
         <field name="model">bitcoin.psbt</field>
         <field name="arch" type="xml">
             <list string="PSBTs">
-                <field name="name"/>
+                <field name="name" optional="show"/>
                 <field name="rbf" optional="show"/>
                 <field name="create_uid" optional="show"/>
                 <field name="create_date" optional="show"/>
@@ -84,7 +84,30 @@
                 <field name="output_total" optional="show"/>
                 <field name="fee" optional="show"/>
                 <field name="review_warnings" optional="hide"/>
+                <field name="psbt_binary" optional="hide"/>
+                <field name="psbt_base64" optional="hide"/>
+                <field name="amount_error" optional="hide"/>
             </list>
+        </field>
+    </record>
+
+    <record id="search_psbt" model="ir.ui.view">
+        <field name="name">bitcoin.psbt.search</field>
+        <field name="model">bitcoin.psbt</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="create_uid"/>
+                <separator/>
+                <filter string="RBF Enabled" name="rbf" domain="[('rbf', '=', True)]"/>
+                <filter string="RBF Disabled" name="no_rbf" domain="[('rbf', '=', False)]"/>
+                <separator/>
+                <filter string="Created Date" name="create_date_filter" date="create_date"/>
+                <group>
+                    <filter string="User" name="group_create_uid" context="{'group_by': 'create_uid'}"/>
+                    <filter string="Created Date" name="group_create_date" context="{'group_by': 'create_date:year'}"/>
+                </group>
+            </search>
         </field>
     </record>
 

@@ -5,10 +5,17 @@
         <field name="arch" type="xml">
             <list create="false">
                 <field name="txid" optional="show"/>
-                <field name="locktime"/>
-                <field name="size"/>
-                <field name="vsize"/>
-                <field name="fee"/>
+                <field name="locktime" optional="show"/>
+                <field name="size" optional="show"/>
+                <field name="vsize" optional="show"/>
+                <field name="fee" optional="show"/>
+                <field name="block_id" optional="hide"/>
+                <field name="blocktime" optional="hide"/>
+                <field name="hash" optional="hide"/>
+                <field name="version" optional="hide"/>
+                <field name="weight" optional="hide"/>
+                <field name="in_active_chain" widget="boolean_toggle" optional="hide"/>
+                <field name="is_visualized" widget="boolean_toggle" optional="hide"/>
             </list>
         </field>
     </record>
@@ -62,6 +69,17 @@
         <field name="arch" type="xml">
             <search>
                 <field name="txid" filter_domain="[('txid', '=', self)]"/>
+                <field name="hash"/>
+                <field name="block_id"/>
+                <separator/>
+                <filter string="In Active Chain" name="in_active_chain" domain="[('in_active_chain', '=', True)]"/>
+                <filter string="Not In Active Chain" name="not_in_active_chain" domain="[('in_active_chain', '=', False)]"/>
+                <separator/>
+                <filter string="Block Time" name="blocktime_filter" date="blocktime"/>
+                <group>
+                    <filter string="Block" name="group_block_id" context="{'group_by': 'block_id'}"/>
+                    <filter string="Block Time" name="group_blocktime" context="{'group_by': 'blocktime:day'}"/>
+                </group>
             </search>
         </field>
     </record>

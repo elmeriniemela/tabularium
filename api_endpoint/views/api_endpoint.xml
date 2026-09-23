@@ -24,6 +24,19 @@
                 <field name="sequence_id" optional="hide"/>
                 <field name="state" optional="show"/>
                 <field name="msg_count" optional="show"/>
+                <field name="http_method" optional="hide"/>
+                <field name="response_format" optional="hide"/>
+                <field name="url" optional="hide"/>
+                <field name="active" optional="hide"/>
+                <field name="auto_code" widget="boolean_toggle" optional="hide"/>
+                <field name="allow_backoff" widget="boolean_toggle" optional="hide"/>
+                <field name="backoff" optional="hide"/>
+                <field name="to_skip" optional="hide"/>
+                <field name="usage_count" optional="hide"/>
+                <field name="cron_interval_number" optional="hide"/>
+                <field name="cron_interval_type" optional="hide"/>
+                <field name="create_date" optional="hide"/>
+                <field name="write_date" optional="hide"/>
             </list>
         </field>
     </record>
@@ -113,9 +126,43 @@
         <field name="arch" type="xml">
             <search>
                 <field name="name"/>
+                <field name="location"/>
+                <field name="usage_field_id"/>
+                <field name="user_id"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="comm_method"/>
+                <field name="cron_id"/>
+                <separator/>
+                <filter string="Active" name="active" domain="[('active', '=', True)]"/>
+                <filter string="Archived" name="archived" domain="[('active', '=', False)]"/>
                 <filter name="all" string="All" domain="['|', ('active', '=', False), ('active', '=', True)]"/>
+                <separator/>
+                <filter string="Multi Record" name="multi_record" domain="[('multi_record', '=', True)]"/>
+                <filter string="Single Record" name="single_record" domain="[('multi_record', '=', False)]"/>
+                <separator/>
+                <filter string="Auto Consume" name="auto_consume" domain="[('auto_consume', '=', True)]"/>
+                <filter string="No Auto Consume" name="no_auto_consume" domain="[('auto_consume', '=', False)]"/>
+                <separator/>
+                <filter string="Auto Commit" name="auto_commit" domain="[('auto_commit', '=', True)]"/>
+                <filter string="No Auto Commit" name="no_auto_commit" domain="[('auto_commit', '=', False)]"/>
+                <separator/>
+                <filter string="Auto Code" name="auto_code" domain="[('auto_code', '=', True)]"/>
+                <filter string="No Auto Code" name="no_auto_code" domain="[('auto_code', '=', False)]"/>
+                <separator/>
+                <filter string="Allow Backoff" name="allow_backoff" domain="[('allow_backoff', '=', True)]"/>
+                <filter string="No Backoff" name="no_allow_backoff" domain="[('allow_backoff', '=', False)]"/>
+                <separator/>
+                <filter string="Created Date" name="create_date_filter" date="create_date"/>
+                <filter string="Last Modified Date" name="write_date_filter" date="write_date"/>
                 <group>
                     <filter string="Used in" name="group_usage_field_id" context="{'group_by': 'usage_field_id'}"/>
+                    <filter string="Direction" name="group_direction" context="{'group_by': 'direction'}"/>
+                    <filter string="Role" name="group_role" context="{'group_by': 'role'}"/>
+                    <filter string="State" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Communication Method" name="group_comm_method" context="{'group_by': 'comm_method'}"/>
+                    <filter string="File Format" name="group_file_format" context="{'group_by': 'file_format'}"/>
+                    <filter string="User" name="group_user_id" context="{'group_by': 'user_id'}"/>
+                    <filter string="Company" name="group_company_id" groups="base.group_multi_company" context="{'group_by': 'company_id'}"/>
                     <filter string="Create Date" name="group_create_date" context="{'group_by': 'create_date:year'}"/>
                 </group>
             </search>

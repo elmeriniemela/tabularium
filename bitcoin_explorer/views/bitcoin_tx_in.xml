@@ -5,13 +5,13 @@
         <field name="arch" type="xml">
             <list create="false">
                 <field name="tx_id" optional="hide"/>
-                <field name="n"/>
-                <field name="sequence"/>
-                <field name="vout_tx_id"/>
-                <field name="vout"/>
-                <field name="coinbase"/>
-                <field name="coinbase_ascii"/>
-                <field name="spent_output_id"/>
+                <field name="n" optional="show"/>
+                <field name="sequence" optional="show"/>
+                <field name="vout_tx_id" optional="show"/>
+                <field name="vout" optional="show"/>
+                <field name="coinbase" optional="show"/>
+                <field name="coinbase_ascii" optional="show"/>
+                <field name="spent_output_id" optional="show"/>
             </list>
         </field>
     </record>
@@ -46,6 +46,12 @@
             <search>
                 <field name="tx_id"/>
                 <field name="vout_tx_id"/>
+                <field name="spent_output_id"/>
+                <field name="coinbase"/>
+                <group>
+                    <filter string="Transaction" name="group_tx_id" context="{'group_by': 'tx_id'}"/>
+                    <filter string="Previous Transaction" name="group_vout_tx_id" context="{'group_by': 'vout_tx_id'}"/>
+                </group>
             </search>
         </field>
     </record>

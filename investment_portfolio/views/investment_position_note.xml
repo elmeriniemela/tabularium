@@ -5,10 +5,15 @@
         <field name="arch" type="xml">
             <list>
                 <field name="sequence" widget="handle"/>
-                <field name="name"/>
-                <field name="position_ids" widget="many2many_tags"/>
-                <field name="move_ids" widget="many2many_tags"/>
+                <field name="name" optional="show"/>
+                <field name="position_ids" widget="many2many_tags" optional="show"/>
+                <field name="move_ids" widget="many2many_tags" optional="show"/>
                 <field name="company_id" optional="hide"/>
+                <field name="content" optional="hide"/>
+                <field name="create_date" optional="hide"/>
+                <field name="create_uid" widget="many2one_avatar_user" optional="hide"/>
+                <field name="write_date" optional="hide"/>
+                <field name="write_uid" widget="many2one_avatar_user" optional="hide"/>
             </list>
         </field>
     </record>
@@ -50,8 +55,16 @@
         <field name="arch" type="xml">
             <search>
                 <field name="name"/>
-                <field name="position_ids" widget="many2many_tags"/>
-                <field name="move_ids" widget="many2many_tags"/>
+                <field name="content"/>
+                <field name="position_ids"/>
+                <field name="move_ids"/>
+                <field name="company_id"/>
+                <filter name="filter_create_date" date="create_date"/>
+                <filter name="filter_write_date" date="write_date"/>
+                <group>
+                    <filter string="Company" name="group_company_id" context="{'group_by': 'company_id'}"/>
+                    <filter string="Creation Date" name="group_create_date" context="{'group_by': 'create_date:month'}"/>
+                </group>
             </search>
         </field>
     </record>

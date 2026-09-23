@@ -4,12 +4,19 @@
         <field name="model">investment.position.move</field>
         <field name="arch" type="xml">
             <list>
-                <field name="name"/>
-                <field name="time"/>
-                <field name="position_ids" widget="many2many_tags"/>
-                <field name="portfolio_ids" widget="many2many_tags"/>
-                <field name="profit" decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0"/>
-                <field name="cash_flow" decoration-danger="cash_flow &lt; 0" decoration-success="cash_flow &gt; 0"/>
+                <field name="name" optional="show"/>
+                <field name="time" optional="show"/>
+                <field name="position_ids" widget="many2many_tags" optional="show"/>
+                <field name="portfolio_ids" widget="many2many_tags" optional="show"/>
+                <field name="profit" decoration-danger="profit &lt; 0" decoration-success="profit &gt; 0" optional="show"/>
+                <field name="cash_flow" decoration-danger="cash_flow &lt; 0" decoration-success="cash_flow &gt; 0" optional="show"/>
+                <field name="company_id" optional="hide"/>
+                <field name="company_currency_id" optional="hide"/>
+                <field name="note_id" optional="hide"/>
+                <field name="create_date" optional="hide"/>
+                <field name="create_uid" widget="many2one_avatar_user" optional="hide"/>
+                <field name="write_date" optional="hide"/>
+                <field name="write_uid" widget="many2one_avatar_user" optional="hide"/>
             </list>
         </field>
     </record>
@@ -61,11 +68,15 @@
                 <field name="position_ids"/>
                 <field name="portfolio_ids"/>
                 <field name="name"/>
-                <separator/>
+                <field name="company_id"/>
+                <field name="note_id"/>
                 <filter name="date_filter" date="time"/>
-                <separator/>
+                <filter name="filter_create_date" date="create_date"/>
                 <group>
-                    <filter string="Date" name="group_month" context="{'group_by': 'time:month'}" invisible="not context.get('search_default_group_month')"/>
+                    <filter string="Date" name="group_month" context="{'group_by': 'time:month'}"/>
+                    <filter string="Company" name="group_company_id" context="{'group_by': 'company_id'}"/>
+                    <filter string="Note" name="group_note_id" context="{'group_by': 'note_id'}"/>
+                    <filter string="Creation Date" name="group_create_date" context="{'group_by': 'create_date:month'}"/>
                 </group>
             </search>
         </field>

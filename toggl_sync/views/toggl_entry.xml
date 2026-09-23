@@ -6,7 +6,7 @@
         <field name="arch" type="xml">
             <list expand="1" default_order="date desc, id asc" editable="top" multi_edit="1" decoration-muted="not active">
                 <field name="description" width="450px" optional="show"/>
-                <field name="checked" widget="boolean_toggle"/>
+                <field name="checked" widget="boolean_toggle" optional="show"/>
                 <field name="project_name" optional="show"/>
                 <field name="task_id" optional="show"/>
                 <field name="rounded_duration" widget="float_time" sum="Rounded" optional="show"/>
@@ -22,6 +22,19 @@
                 <field name="export_id" optional="hide"/>
                 <field name="parent_id" optional="hide"/>
                 <field name="locked" optional="hide"/>
+                <field name="name" optional="hide"/>
+                <field name="export_task_url" optional="hide" widget="url"/>
+                <field name="extra_duration" optional="hide" widget="float_time"/>
+                <field name="duration" optional="hide" widget="float_time"/>
+                <field name="price_initialized" optional="hide"/>
+                <field name="date_start" optional="hide"/>
+                <field name="date_stop" optional="hide"/>
+                <field name="price_changed" optional="hide"/>
+                <field name="color" optional="hide"/>
+                <field name="create_uid" optional="hide"/>
+                <field name="create_date" optional="hide"/>
+                <field name="write_uid" optional="hide"/>
+                <field name="write_date" optional="hide"/>
                 <button title="Round Up" icon="fa-arrow-up" name="action_round_up" type="object" invisible="parent_id"/>
                 <button title="Reset Rounding" icon="fa-bullseye" name="action_reset_rounding" type="object" invisible="parent_id"/>
                 <button title="Round Down" icon="fa-arrow-down" name="action_round_down" type="object" invisible="parent_id"/>
@@ -175,20 +188,36 @@
                 <field name="name"/>
                 <field name="description"/>
                 <field name="project_name"/>
+                <field name="task_id"/>
                 <field name="date"/>
                 <field name="date_start"/>
                 <field name="date_stop"/>
                 <field name="duration"/>
                 <field name="toggl_id"/>
                 <field name="export_id"/>
+                <field name="parent_id"/>
                 <separator/>
                 <filter string="Active" name="active" domain="[('active', '=', True)]"/>
                 <filter string="Archived" name="not_active" domain="[('active', '=', False)]"/>
                 <filter name="all" string="All" domain="['|', ('active', '=', False), ('active', '=', True)]"/>
                 <separator/>
+                <filter string="Checked" name="filter_checked" domain="[('checked', '=', True)]"/>
+                <filter string="Unchecked" name="filter_unchecked" domain="[('checked', '=', False)]"/>
+                <separator/>
+                <filter string="Price Initialized" name="filter_price_init" domain="[('price_initialized', '=', True)]"/>
+                <filter string="Price Not Initialized" name="filter_price_not_init" domain="[('price_initialized', '=', False)]"/>
+                <separator/>
+                <filter string="Price Changed" name="price_changed" domain="[('price_changed', '=', True)]"/>
+                <filter string="Price Not Changed" name="filter_price_not_changed" domain="[('price_changed', '=', False)]"/>
+                <separator/>
                 <filter name="date_filter" date="date"/>
-                <filter string="Today" name="not_today" domain="[('date', '=', 'today')]"/>
-                <filter string="Before Today" name="not_today" domain="[('date', '&lt;', 'today')]"/>
+                <filter name="date_start_filter" string="Start Date" date="date_start"/>
+                <filter name="date_stop_filter" string="Stop Date" date="date_stop"/>
+                <filter name="locked_filter" string="Locked Date" date="locked"/>
+                <filter name="create_date_filter" string="Created On" date="create_date"/>
+                <separator/>
+                <filter string="Today" name="today" domain="[('date', '=', 'today')]"/>
+                <filter string="Before Today" name="before_today" domain="[('date', '&lt;', 'today')]"/>
                 <filter string="1 Month" name="one_month" domain="[('date', '&gt;=', 'today -1m')]"/>
                 <filter string="Last Month" name="last_month" domain="[('date', '&gt;=', '-1m =1d')]"/>
                 <filter string="This Month" name="this_month" domain="[('date', '&gt;=', '=1d')]"/>
@@ -202,14 +231,15 @@
                 <filter string="Zero" name="zero" domain="[('rounded_duration', '=', 0.0)]"/>
                 <filter string="Hide Zero" name="not_zero" domain="[('rounded_duration', '!=', 0.0)]"/>
                 <separator/>
-                <filter string="Description" name="not_description" domain="[('description', '!=', False)]"/>
+                <filter string="Description" name="has_description" domain="[('description', '!=', False)]"/>
                 <filter string="No description" name="not_description" domain="[('description', '=', False)]"/>
-                <separator/>
-                <filter string="Price Changed" name="price_changed" domain="[('price_changed', '=', True)]"/>
-                <separator/>
                 <group>
                     <filter string="Date" name="group_date" context="{'group_by': 'date:day'}"/>
                     <filter string="Task" name="group_task_id" context="{'group_by': 'task_id'}"/>
+                    <filter string="Project" name="group_project_name" context="{'group_by': 'project_name'}"/>
+                    <filter string="Checked" name="group_checked" context="{'group_by': 'checked'}"/>
+                    <filter string="Parent Entry" name="group_parent_id" context="{'group_by': 'parent_id'}"/>
+                    <filter string="Created On" name="group_create_date" context="{'group_by': 'create_date:month'}"/>
                 </group>
             </search>
         </field>
