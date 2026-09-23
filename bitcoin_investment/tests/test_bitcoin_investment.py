@@ -21,7 +21,7 @@ class _ElectrumRPCHandler(socketserver.StreamRequestHandler):
             request = json.loads(line.decode('utf-8'))
             if isinstance(request, list):
                 response = [self.server.dispatch(item) for item in request]
-            else:
+            else: # pragma: no cover
                 response = self.server.dispatch(request)
             self.wfile.write(json.dumps(response).encode('utf-8') + b'\n')
             self.wfile.flush()
@@ -54,7 +54,7 @@ class TestBitcoinInvestmentIntegration(TransactionCase):
             'time': fields.Datetime.now(),
         })
         cls.config = cls.env['ir.config_parameter'].sudo()
-        cls._root_xpub = (
+        cls.root = ExtendedKey.parse(
             'xpub661MyMwAqRbcGFeMhhkrJL6Yj3YKQFNZQSM2BAvoMmhdjNKBh43n5v3c4YT5dFtjkirfhqQH'
             'Md22br7cHAQXAV8cZdicedZJkNweja4WWBK'
         )
@@ -75,9 +75,9 @@ class TestBitcoinInvestmentIntegration(TransactionCase):
         index = self._next_seed()
         values = {
             'name': f'Key {self._seed}',
-            'xpub': ExtendedKey.parse(self._root_xpub).child(index).serialize(),
-            'witness_type': 'segwit',
-            'multisig': False,
+            'xpub': self.root.child(index).serialize(),
+            'master_fingerprint': self.root.fingerprint.hex(),
+            'derivation': 'm/84h/0h/0h',
         }
         values.update(overrides)
         return self.env['bitcoin.key'].create(values)
