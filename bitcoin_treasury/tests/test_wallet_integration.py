@@ -339,6 +339,14 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
         self.assertTrue(invalid_der._key_origin_error())
 
     def test_key_origin_normalization(self):
+        vals = {
+            'master_fingerprint': 'F00DCAFE',
+            'derivation': "M/84'/0'/0'",
+        }
+        self.Key._normalize_key_origin(vals)
+        self.assertEqual(vals['master_fingerprint'], 'f00dcafe')
+        self.assertEqual(vals['derivation'], 'm/84h/0h/0h')
+
         key = self._new_key(
             master_fingerprint='DEADBEEF',
             derivation="M/84'/0H/0h",

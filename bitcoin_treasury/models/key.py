@@ -145,7 +145,7 @@ class BitcoinExtendedPublicKey(models.Model):
     def _key_origin_error(self):
         self.ensure_one()
         fingerprint = self.master_fingerprint or ''
-        if len(fingerprint) != 8 or any(character not in '0123456789abcdefABCDEF' for character in fingerprint):
+        if len(fingerprint) != 8 or any(character not in '0123456789abcdef' for character in fingerprint):
             return _("The master key fingerprint must contain exactly eight hexadecimal characters.")
 
         path = self.derivation or ''
@@ -153,7 +153,7 @@ class BitcoinExtendedPublicKey(models.Model):
             if path.startswith('m/'):
                 path = path[2:]
             for step in path.split('/'):
-                number = step[:-1] if step.endswith(("'", 'h')) else step
+                number = step[:-1] if step.endswith('h') else step
                 if not number.isdigit() or int(number) >= 2**31:
                     return _("Enter a valid BIP32 derivation path.")
         return False
@@ -161,14 +161,9 @@ class BitcoinExtendedPublicKey(models.Model):
     def _descriptor_key(self):
         self.ensure_one()
         key_data = self._decode_extended_public_key(self.xpub)
-        path = self.derivation or ''
-        if path == 'm':
-            path = ''
-        elif path.startswith('m/'):
-            path = path[2:]
-        path = path.replace("'", 'h')
+        path = self.derivation[2:] if self.derivation and self.derivation.startswith('m/') else ''
         origin = '[%s%s]' % (
-            self.master_fingerprint.lower(),
+            self.master_fingerprint,
             '/%s' % path if path else '',
         )
         return '%s%s/<0;1>/*' % (origin, key_data.to_xpub())
@@ -179,6 +174,14 @@ class BitcoinExtendedPublicKey(models.Model):
             error = key._key_origin_error()
             if error:
                 raise ValidationError(error)
+
+    @staticmethod
+    def _normalize_key_origin(vals):
+        if vals.get('master_fingerprint'):
+            vals['master_fingerprint'] = vals['master_fingerprint'].lower()
+        if vals.get('derivation'):
+            vals['derivation'] = vals['derivation'].lower().replace("'", 'h')
+        return vals
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -191,20 +194,14 @@ class BitcoinExtendedPublicKey(models.Model):
                     vals['zpub'] = self._to_zpub(source)
                 if not vals.get('Zpub'):
                     vals['Zpub'] = self._to_Zpub(source)
-            if vals.get('master_fingerprint'):
-                vals['master_fingerprint'] = vals['master_fingerprint'].lower()
-            if vals.get('derivation'):
-                vals['derivation'] = vals['derivation'].lower().replace("'", 'h')
+            self._normalize_key_origin(vals)
             for field in ('xpub', 'zpub', 'Zpub'):
                 if vals.get(field):
                     self._decode_extended_public_key(vals[field])
         return super().create(vals_list)
 
     def write(self, vals):
-        if vals.get('master_fingerprint'):
-            vals['master_fingerprint'] = vals['master_fingerprint'].lower()
-        if vals.get('derivation'):
-            vals['derivation'] = vals['derivation'].lower().replace("'", 'h')
+        self._normalize_key_origin(vals)
         for field in ('xpub', 'zpub', 'Zpub'):
             if vals.get(field):
                 self._decode_extended_public_key(vals[field])
