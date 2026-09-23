@@ -6,6 +6,8 @@
             <list decoration-muted="not active">
                 <field name="sequence" widget="handle"/>
                 <field name="xpub" optional="hide"/>
+                <field name="zpub" optional="hide"/>
+                <field name="Zpub" optional="hide"/>
                 <field name="name" optional="show"/>
                 <field name="witness_type" optional="show"/>
                 <field name="derivation" optional="show"/>
@@ -31,6 +33,8 @@
                     </div>
                     <group>
                         <field name="xpub"/>
+                        <field name="zpub"/>
+                        <field name="Zpub"/>
                     </group>
                     <group>
                         <group>
@@ -66,9 +70,8 @@
         <field name="arch" type="xml">
             <search>
                 <field name="name"/>
-                <field name="xpub"/>
+                <field name="xpub" string="xpub/zpub/Zpub" filter_domain="['|', '|', ('xpub', 'ilike', self), ('zpub', 'ilike', self), ('Zpub', 'ilike', self)]"/>
                 <field name="wallet_ids"/>
-                <field name="compromised"/>
                 <separator/>
                 <filter name="compromised" string="Compromised" domain="[('compromised', '=', True)]"/>
                 <separator/>

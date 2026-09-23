@@ -18,9 +18,27 @@ class BitcoinExtendedPublicKey(models.Model):
 
     xpub = fields.Char(
         string="xpub",
-        help="Mainnet extended public key used for watch-only address derivation.",
+        help="Canonical BIP32 extended public key with version prefix 0x0488B21E. Used for watch-only derivation "
+        "across any script type (Legacy, SegWit, Taproot) and in modern output script descriptors.",
         required=True,
         tracking=True,
+        inverse='_inverse_xpub',
+    )
+    zpub = fields.Char(
+        string="zpub",
+        help="SLIP-0132 extended public key with version prefix 0x04B24746 for BIP84 single-key Native SegWit "
+        "(P2WPKH, bc1q... addresses). Used by single-signature wallets (e.g. Electrum, Sparrow). The version "
+        "prefix is the only difference to xpub.",
+        tracking=True,
+        inverse='_inverse_zpub',
+    )
+    Zpub = fields.Char(
+        string="Zpub",
+        help="SLIP-0132 extended public key with version prefix 0x02AA7ED3 for BIP48 multisig Native SegWit "
+        "(P2WSH, bc1q... addresses). Used by multisignature coordinators and hardware wallets (e.g. Coldcard, Sparrow). "
+        "The version prefix is the only difference to xpub.",
+        tracking=True,
+        inverse='_inverse_Zpub',
     )
 
     wallet_ids = fields.One2many(
@@ -76,6 +94,42 @@ class BitcoinExtendedPublicKey(models.Model):
     def _compute_encoding(self):
         for rec in self:
             rec.encoding = self._witness_encoding_map[rec.witness_type]
+
+    def _inverse_xpub(self):
+        for key in self:
+            target_zpub = self._to_zpub(key.xpub) if key.xpub else False
+            if key.zpub != target_zpub:
+                key.zpub = target_zpub
+            target_Zpub = self._to_Zpub(key.xpub) if key.xpub else False
+            if key.Zpub != target_Zpub:
+                key.Zpub = target_Zpub
+
+    def _inverse_zpub(self):
+        for key in self:
+            target_xpub = self._to_xpub(key.zpub) if key.zpub else False
+            if key.xpub != target_xpub:
+                key.xpub = target_xpub
+
+    def _inverse_Zpub(self):
+        for key in self:
+            target_xpub = self._to_xpub(key.Zpub) if key.Zpub else False
+            if key.xpub != target_xpub:
+                key.xpub = target_xpub
+
+    def _to_Zpub(self, key_str):
+        if not key_str:
+            return False
+        return self._decode_extended_public_key(key_str).to_Zpub()
+
+    def _to_zpub(self, key_str):
+        if not key_str:
+            return False
+        return self._decode_extended_public_key(key_str).to_zpub()
+
+    def _to_xpub(self, key_str):
+        if not key_str:
+            return False
+        return self._decode_extended_public_key(key_str).to_xpub()
 
     def _decode_extended_public_key(self, value):
         try:
@@ -135,12 +189,21 @@ class BitcoinExtendedPublicKey(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
+            source = vals.get('xpub') or vals.get('zpub') or vals.get('Zpub')
+            if source:
+                if not vals.get('xpub'):
+                    vals['xpub'] = self._to_xpub(source)
+                if not vals.get('zpub'):
+                    vals['zpub'] = self._to_zpub(source)
+                if not vals.get('Zpub'):
+                    vals['Zpub'] = self._to_Zpub(source)
             if vals.get('master_fingerprint'):
                 vals['master_fingerprint'] = vals['master_fingerprint'].lower()
             if vals.get('derivation'):
                 vals['derivation'] = vals['derivation'].lower().replace("'", 'h')
-            if 'xpub' in vals:
-                self._decode_extended_public_key(vals['xpub'])
+            for field in ('xpub', 'zpub', 'Zpub'):
+                if vals.get(field):
+                    self._decode_extended_public_key(vals[field])
         return super().create(vals_list)
 
     def write(self, vals):
@@ -148,6 +211,7 @@ class BitcoinExtendedPublicKey(models.Model):
             vals['master_fingerprint'] = vals['master_fingerprint'].lower()
         if vals.get('derivation'):
             vals['derivation'] = vals['derivation'].lower().replace("'", 'h')
-        if 'xpub' in vals:
-            self._decode_extended_public_key(vals['xpub'])
+        for field in ('xpub', 'zpub', 'Zpub'):
+            if vals.get(field):
+                self._decode_extended_public_key(vals[field])
         return super().write(vals)

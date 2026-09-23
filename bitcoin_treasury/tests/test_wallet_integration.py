@@ -1118,3 +1118,94 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
         self.assertEqual(addr_a_recv.psbt_ids, psbt_1 | psbt_4)
         self.assertEqual(addr_a_change.psbt_ids, psbt_2)
         self.assertEqual(addr_b_recv.psbt_ids, psbt_3)
+
+    def test_zpub_and_xpub_conversions(self):
+        v1_xpub = "xpub6CatWdiZiodmUeTDp8LT5or8nmbKNcuyvz7WyksVFkKB4RHwCD3XyuvPEbvqAQY3rAPshWcMLoP2fMFMKHPJ4ZeZXYVUhLv1VMrjPC7PW6V"
+        v1_zpub = "zpub6rFR7y4Q2AijBEqTUquhVz398htDFrtymD9xYYfG1m4wAcvPhXNfE3EfH1r1ADqtfSdVCToUG868RvUUkgDKf31mGDtKsAYz2oz2AGutZYs"
+        v1_Zpub = "Zpub739WFCnqb8H6bozqRWNgL4NwrVvUUDaa5UodTovoPXuLnoVJTvkwKA6b5ioUif4ntuhU53ob9LUdZ66F3uNGoX8S6gzjGa1yvYFtkDRknR2"
+
+        v2_xpub = "xpub661MyMwAqRbcFkPHucMnrGNzDwb6teAX1RbKQmqtEF8kK3Z7LZ59qafCjB9eCRLiTVG3uxBxgKvRgbubRhqSKXnGGb1aoaqLrpMBDrVxga8"
+        v2_zpub = "zpub6jftahH18ngZxLmXaKw3GSZzZsszmt9WqedkyZdezFtWRFBZqsQH5hyUmb4pCEeZGmVfQuP5bedXTB8is6fTv19U1GQRyQUKQGUTzyHACMF"
+        v2_Zpub = "Zpub6vZyhw1ShkEwNuvuWzQ26WuoHfvFzEq79vHRtpuCN2iv3RkUcGnZApqQaJ2HkfsTWEZeHVPCUs22aLkVAKpR4VG8qjWqNowKHzkLavKB4Ep"
+
+        key1 = self.Key.create({"xpub": v1_xpub})
+        self.assertEqual(key1.zpub, v1_zpub)
+        self.assertEqual(key1.Zpub, v1_Zpub)
+        self.assertEqual(key1.xpub, v1_xpub)
+
+        # Stored in database, verified after cache invalidation
+        key1.invalidate_recordset(["xpub", "zpub", "Zpub"])
+        self.assertEqual(key1.zpub, v1_zpub)
+        self.assertEqual(key1.Zpub, v1_Zpub)
+        self.assertEqual(key1.xpub, v1_xpub)
+
+        key2 = self.Key.create({"zpub": v2_zpub})
+        self.assertEqual(key2.xpub, v2_xpub)
+        self.assertEqual(key2.zpub, v2_zpub)
+        self.assertEqual(key2.Zpub, v2_Zpub)
+
+        key2.invalidate_recordset(["xpub", "zpub", "Zpub"])
+        self.assertEqual(key2.xpub, v2_xpub)
+        self.assertEqual(key2.zpub, v2_zpub)
+        self.assertEqual(key2.Zpub, v2_Zpub)
+
+        key3 = self.Key.create({"Zpub": v1_Zpub})
+        self.assertEqual(key3.xpub, v1_xpub)
+        self.assertEqual(key3.zpub, v1_zpub)
+        self.assertEqual(key3.Zpub, v1_Zpub)
+
+        # Updating via write()
+        key1.write({"Zpub": v2_Zpub})
+        self.assertEqual(key1.xpub, v2_xpub)
+        self.assertEqual(key1.zpub, v2_zpub)
+        self.assertEqual(key1.Zpub, v2_Zpub)
+
+        key1.write({"zpub": v1_zpub})
+        self.assertEqual(key1.xpub, v1_xpub)
+        self.assertEqual(key1.zpub, v1_zpub)
+        self.assertEqual(key1.Zpub, v1_Zpub)
+
+        key1.write({"xpub": v2_xpub})
+        self.assertEqual(key1.xpub, v2_xpub)
+        self.assertEqual(key1.zpub, v2_zpub)
+        self.assertEqual(key1.Zpub, v2_Zpub)
+
+        # Updating via direct assignment
+        key1.Zpub = v1_Zpub
+        self.assertEqual(key1.xpub, v1_xpub)
+        self.assertEqual(key1.zpub, v1_zpub)
+        self.assertEqual(key1.Zpub, v1_Zpub)
+
+        key1.zpub = v2_zpub
+        self.assertEqual(key1.xpub, v2_xpub)
+        self.assertEqual(key1.zpub, v2_zpub)
+        self.assertEqual(key1.Zpub, v2_Zpub)
+
+        key1.xpub = v1_xpub
+        self.assertEqual(key1.xpub, v1_xpub)
+        self.assertEqual(key1.zpub, v1_zpub)
+        self.assertEqual(key1.Zpub, v1_Zpub)
+
+        # Same value assignment (no-op)
+        key1.xpub = v1_xpub
+        self.assertEqual(key1.zpub, v1_zpub)
+        self.assertEqual(key1.Zpub, v1_Zpub)
+        key1.zpub = v1_zpub
+        self.assertEqual(key1.xpub, v1_xpub)
+        self.assertEqual(key1.Zpub, v1_Zpub)
+        key1.Zpub = v1_Zpub
+        self.assertEqual(key1.xpub, v1_xpub)
+        self.assertEqual(key1.zpub, v1_zpub)
+
+        self.assertFalse(key1._to_zpub(False))
+        self.assertFalse(key1._to_Zpub(False))
+        self.assertFalse(key1._to_xpub(False))
+
+        with self.assertRaises(ValidationError):
+            self.Key.create({"zpub": "invalid-zpub"})
+        with self.assertRaises(ValidationError):
+            self.Key.create({"Zpub": "invalid-Zpub"})
+        with self.assertRaises(ValidationError):
+            key1.write({"zpub": "invalid-zpub"})
+        with self.assertRaises(ValidationError):
+            key1.write({"Zpub": "invalid-Zpub"})

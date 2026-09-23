@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-22 18:41+0000\n"
-"PO-Revision-Date: 2026-09-22 18:41+0000\n"
+"POT-Creation-Date: 2026-09-23 05:07+0000\n"
+"PO-Revision-Date: 2026-09-23 05:07+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -257,6 +257,15 @@ msgstr ""
 #: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_output__branch
 #: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt_wallet_line__branch
 msgid "Branch"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_key__xpub
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_wallet_key__xpub
+msgid ""
+"Canonical BIP32 extended public key with version prefix 0x0488B21E. Used for"
+" watch-only derivation across any script type (Legacy, SegWit, Taproot) and "
+"in modern output script descriptors."
 msgstr ""
 
 #. module: bitcoin_treasury
@@ -800,12 +809,6 @@ msgid ""
 msgstr ""
 
 #. module: bitcoin_treasury
-#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_key__xpub
-#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_wallet_key__xpub
-msgid "Mainnet extended public key used for watch-only address derivation."
-msgstr ""
-
-#. module: bitcoin_treasury
 #: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_key__master_fingerprint
 #: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__master_fingerprint
 msgid "Master Key Fingerprint"
@@ -1223,6 +1226,26 @@ msgstr ""
 #. module: bitcoin_treasury
 #: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_psbt__review_warnings
 msgid "Review Before Signing"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_key__Zpub
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_wallet_key__Zpub
+msgid ""
+"SLIP-0132 extended public key with version prefix 0x02AA7ED3 for BIP48 "
+"multisig Native SegWit (P2WSH, bc1q... addresses). Used by multisignature "
+"coordinators and hardware wallets (e.g. Coldcard, Sparrow). The version "
+"prefix is the only difference to xpub."
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_key__zpub
+#: model:ir.model.fields,help:bitcoin_treasury.field_bitcoin_wallet_key__zpub
+msgid ""
+"SLIP-0132 extended public key with version prefix 0x04B24746 for BIP84 "
+"single-key Native SegWit (P2WPKH, bc1q... addresses). Used by single-"
+"signature wallets (e.g. Electrum, Sparrow). The version prefix is the only "
+"difference to xpub."
 msgstr ""
 
 #. module: bitcoin_treasury
@@ -1669,6 +1692,12 @@ msgid ""
 msgstr ""
 
 #. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_key__Zpub
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__Zpub
+msgid "Zpub"
+msgstr ""
+
+#. module: bitcoin_treasury
 #: model:ir.model.fields.selection,name:bitcoin_treasury.selection__bitcoin_key__encoding__base58
 msgid "base58"
 msgstr ""
@@ -1692,5 +1721,16 @@ msgstr ""
 #: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_key__xpub
 #: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__xpub
 msgid "xpub"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model_terms:ir.ui.view,arch_db:bitcoin_treasury.search_key
+msgid "xpub/zpub/Zpub"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_key__zpub
+#: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__zpub
+msgid "zpub"
 msgstr ""
 
