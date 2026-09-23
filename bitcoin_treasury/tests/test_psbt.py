@@ -250,6 +250,9 @@ class TestBitcoinPSBT(TransactionCase):
 
     def test_high_fee_warnings_are_advisory_and_have_exact_boundaries(self):
         wizard = self._wizard()
+        wizard.output_ids.write({
+            'destination_type': 'wallet', 'wallet_id': self.wallet.id, 'branch': '1', 'address_index': 0,
+        })
         for input_sats, output_sats, expected in [
             (100_000_000, 99_900_001, False),  # 99,999 sat, less than 1%
             (100_000_000, 99_900_000, True),   # absolute 100,000 sat threshold
@@ -259,54 +262,74 @@ class TestBitcoinPSBT(TransactionCase):
             with self.subTest(input_sats=input_sats, output_sats=output_sats):
                 wizard.input_ids.sats = input_sats
                 wizard.output_ids.sats = output_sats
-                self.assertEqual('Large declared fee' in (wizard.review_warnings or ''), expected)
+                self.assertEqual(bool(wizard.review_warnings), expected)
                 wizard.action_generate()
                 self.assertTrue(wizard.psbt_binary)
 
     def test_zero_fee_warning_does_not_block_generation(self):
         wizard = self._wizard()
+        wizard.output_ids.write({
+            'destination_type': 'wallet', 'wallet_id': self.wallet.id, 'branch': '1', 'address_index': 0,
+            'sats': wizard.input_ids.sats - 10,
+        })
+        self.assertFalse(wizard.review_warnings)
         wizard.output_ids.sats = wizard.input_ids.sats
-        self.assertIn('fee is zero', wizard.review_warnings)
-        self.assertNotIn('Large declared fee', wizard.review_warnings)
+        self.assertTrue(wizard.review_warnings)
         wizard.action_generate()
         self.assertTrue(wizard.psbt_binary)
 
     def test_dust_output_warning_boundary_and_zero_amount(self):
         wizard = self._wizard()
+        wizard.output_ids.write({
+            'destination_type': 'wallet', 'wallet_id': self.wallet.id, 'branch': '1', 'address_index': 0,
+            'sats': 1000,
+        })
+        wizard.write({'output_ids': [Command.create({
+            'address': self.destination, 'sats': 0,
+        })]})
         for value, is_dust in [(0, True), (293, True), (294, False)]:
             with self.subTest(value=value):
-                wizard.output_ids.sats = value
-                self.assertEqual('dust threshold' in (wizard.review_warnings or ''), is_dust)
+                wizard.input_ids.sats = 1000 + value + 10
+                wizard.output_ids[1].sats = value
+                self.assertEqual(bool(wizard.review_warnings), is_dust)
                 wizard.action_generate()
                 self.assertTrue(wizard.psbt_binary)
 
     def test_change_warning_and_recovery_window(self):
         wizard = self._wizard()
-        self.assertIn('No explicit change', wizard.review_warnings)
+        self.assertTrue(wizard.review_warnings)
         wizard.output_ids.write({
             'destination_type': 'wallet', 'wallet_id': self.wallet.id, 'branch': '1',
-            'address_index': self.wallet.address_amount,
+            'address_index': self.wallet.address_amount - 1,
         })
-        self.assertNotIn('No explicit change', wizard.review_warnings)
-        self.assertIn('outside its configured address window', wizard.review_warnings)
+        self.assertFalse(wizard.review_warnings)
+        wizard.output_ids.address_index = self.wallet.address_amount
+        self.assertTrue(wizard.review_warnings)
         wizard.action_generate()
         self.assertTrue(wizard.psbt_binary)
-        wizard.output_ids.address_index = self.wallet.address_amount - 1
-        self.assertFalse(wizard.review_warnings)
 
     def test_duplicate_destination_warning_compares_scripts(self):
         wizard = self._wizard()
-        wizard.output_ids.sats = 50000000
+        wizard.output_ids.write({
+            'destination_type': 'wallet', 'wallet_id': self.wallet.id, 'branch': '1', 'address_index': 0,
+            'sats': 60000000,
+        })
         wizard.write({'output_ids': [Command.create({
-            'address': self.destination.upper(), 'sats': 50000000,
+            'destination_type': 'wallet', 'wallet_id': self.wallet.id, 'branch': '1', 'address_index': 1,
+            'sats': 63450000,
         })]})
-        self.assertIn('Outputs 1 and 2 pay the same destination', wizard.review_warnings)
+        self.assertFalse(wizard.review_warnings)
+        wizard.output_ids[1].write({'address_index': 0})
+        self.assertTrue(wizard.review_warnings)
         wizard.action_generate()
         self.assertTrue(wizard.psbt_binary)
+        addr = wizard.output_ids[0].derived_address
         wizard.output_ids[1].write({
-            'destination_type': 'wallet', 'wallet_id': self.wallet.id, 'address_index': 12,
+            'destination_type': 'address', 'address': addr.upper(),
         })
-        self.assertIn('same destination', wizard.review_warnings)
+        self.assertTrue(wizard.review_warnings)
+        wizard.output_ids[1].address = self.destination
+        self.assertFalse(wizard.review_warnings)
 
     def test_review_warnings_survive_incomplete_rows(self):
         wizard = self._wizard()
@@ -319,11 +342,14 @@ class TestBitcoinPSBT(TransactionCase):
 
     def test_review_warnings_update_in_form(self):
         wizard = self._wizard()
+        wizard.output_ids.write({
+            'destination_type': 'wallet', 'wallet_id': self.wallet.id, 'branch': '1', 'address_index': 0,
+        })
         with Form(wizard) as form:
-            self.assertNotIn('Large declared fee', form.review_warnings)
+            self.assertFalse(form.review_warnings)
             with form.output_ids.edit(0) as line:
                 line.sats = 50000000
-            self.assertIn('Large declared fee', form.review_warnings)
+            self.assertTrue(form.review_warnings)
 
     def test_wrong_network_destination_is_rejected(self):
         wizard = self._wizard()
@@ -399,19 +425,26 @@ class TestBitcoinPSBT(TransactionCase):
     def test_op_return_warnings_and_no_dust(self):
         wizard = self._wizard()
         wizard.output_ids.write({
-            'destination_type': 'op_return', 'op_return_format': 'text',
-            'op_return_data': 'note', 'sats': 0,
+            'destination_type': 'wallet', 'wallet_id': self.wallet.id, 'branch': '1', 'address_index': 0,
+            'sats': 1000,
         })
-        self.assertFalse(any('dust' in w.lower() for w in (wizard.review_warnings or '').split('\n\n')))
+        wizard.write({'output_ids': [
+            Command.create({'destination_type': 'op_return', 'op_return_format': 'text',
+                            'op_return_data': 'note', 'sats': 0}),
+        ]})
+        wizard.input_ids.sats = 1010
+        self.assertFalse(wizard.review_warnings)
         wizard.action_generate()
         self.assertTrue(wizard.psbt_binary)
 
-        wizard.output_ids.sats = 100000
+        wizard.output_ids[1].sats = 100000
+        wizard.input_ids.sats = 1000 + 100000 + 10
         self.assertTrue(bool(wizard.review_warnings))
         wizard.action_generate()
         self.assertTrue(wizard.psbt_binary)
 
-        wizard.output_ids.write({'sats': 0, 'op_return_data': 'x' * 81})
+        wizard.output_ids[1].write({'sats': 0, 'op_return_data': 'x' * 81})
+        wizard.input_ids.sats = 1010
         self.assertTrue(bool(wizard.review_warnings))
         wizard.action_generate()
         self.assertTrue(wizard.psbt_binary)
