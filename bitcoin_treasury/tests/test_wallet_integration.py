@@ -76,7 +76,6 @@ class TestBitcoinWalletIntegration(TransactionCase):
         values = {
             "name": "Key %s" % self._seed,
             "xpub": ExtendedKey.parse(self._root_xpub).child(index).serialize(),
-            "witness_type": "segwit",
             "master_fingerprint": "deadbeef",
             "derivation": "m/84h/0h/0h",
         }
@@ -153,12 +152,8 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
             "%s#%s" % (payload, descriptor_checksum(payload)),
         )
 
-        key.write({"derivation": "m"})
-        payload = "wpkh([deadbeef]%s/<0;1>/*)" % key.xpub
-        self.assertEqual(
-            wallet.descriptor,
-            "%s#%s" % (payload, descriptor_checksum(payload)),
-        )
+        with self.assertRaises(ValidationError):
+            key.write({"derivation": "m"})
 
         with self.assertRaises(ValidationError):
             key.write({"master_fingerprint": False})
@@ -215,9 +210,8 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
         different_key = self.Key.create({
             'name': fingerprint,
             'xpub': public_key,
-            'witness_type': 'legacy',
             'master_fingerprint': fingerprint,
-            'derivation': setup['derivation'],
+            'derivation': 'm/48h/0h/0h/1h',
         })
 
         wallet = self.Wallet.create({'parsed_qr': self._wallet_import()})
@@ -288,8 +282,8 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
     def test_descriptor_unsupported_wallets(self):
         invalid_wallets = [
             self._new_wallet([]),
-            self._new_wallet([self._new_key(witness_type="legacy")]),
-            self._new_wallet([self._new_key(), self._new_key(witness_type="legacy")]),
+            self._new_wallet([self._new_key(derivation="m/44h/0h/0h")]),
+            self._new_wallet([self._new_key(), self._new_key(derivation="m/44h/0h/0h")]),
         ]
 
         keys = [self._new_key(), self._new_key()]
@@ -322,6 +316,11 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
             {"master_fingerprint": "deadbeef", "derivation": "invalid"},
             {"master_fingerprint": "deadbeef", "derivation": "m//0h"},
             {"master_fingerprint": "deadbeef", "derivation": "m/2147483648h"},
+            {"master_fingerprint": "deadbeef", "derivation": "m"},
+            {"master_fingerprint": "deadbeef", "derivation": "m/0"},
+            {"master_fingerprint": "deadbeef", "derivation": "m/1"},
+            {"master_fingerprint": "deadbeef", "derivation": "m/48h/0h/0h"},
+            {"master_fingerprint": "deadbeef", "derivation": "m/48h/0h/0h/3h"},
         ]
         for origin in invalid_origins:
             with self.assertRaises(ValidationError):
@@ -336,16 +335,11 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
             self.Key.new({"xpub": xpub, "master_fingerprint": "deadbeef", "derivation": "invalid"}),
             self.Key.new({"xpub": xpub, "master_fingerprint": "deadbeef", "derivation": "m//0h"}),
             self.Key.new({"xpub": xpub, "master_fingerprint": "deadbeef", "derivation": "m/2147483648h"}),
+            self.Key.new({"xpub": xpub, "master_fingerprint": "deadbeef", "derivation": "m"}),
+            self.Key.new({"xpub": xpub, "master_fingerprint": "deadbeef", "derivation": "m/1"}),
         ]
         for key in invalid_keys:
             self.assertTrue(key._key_origin_error())
-
-        valid_m_key = self.Key.new({
-            "xpub": xpub,
-            "master_fingerprint": "deadbeef",
-            "derivation": "m",
-        })
-        self.assertFalse(valid_m_key._key_origin_error())
 
     def test_key_origin_normalization(self):
         vals = {
@@ -374,7 +368,7 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
         key = self._new_key()
         self.assertEqual(key.encoding, "bech32")
 
-        key.write({"witness_type": "legacy"})
+        key.write({"derivation": "m/44h/0h/0h"})
         self.assertEqual(key.encoding, "base58")
 
     def test_wallet_key_open_action(self):
@@ -449,7 +443,7 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
             "scripthash_status": "stale-status",
         })
 
-        key.write({"witness_type": "legacy"})
+        key.write({"derivation": "m/44h/0h/0h"})
         wallet.refresh_addresses()
         receiving_0.invalidate_recordset(["address", "transaction_ids", "scripthash_status"])
         self.assertNotEqual(receiving_0.address, old_address)
@@ -462,21 +456,21 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
             empty_wallet.refresh_addresses()
 
     def test_refresh_addresses_multisig_paths(self):
-        key_a = self._new_key(witness_type="legacy")
-        key_b = self._new_key(witness_type="legacy")
+        key_a = self._new_key(derivation="m/44h/0h/0h")
+        key_b = self._new_key(derivation="m/44h/0h/0h")
         wallet = self._new_wallet([key_a, key_b], sigs_required=2)
         self.assertTrue(wallet.multisig)
 
         wallet.refresh_addresses()
         self.assertEqual(len(wallet.address_ids), 2)
 
-        key_a.write({"witness_type": "segwit"})
+        key_a.write({"derivation": "m/84h/0h/0h"})
         with self.assertRaises(ValidationError):
             wallet.refresh_addresses()
 
         wallet = self._new_wallet([
-            self._new_key(witness_type="taproot"),
-            self._new_key(witness_type="taproot"),
+            self._new_key(derivation="m/86h/0h/0h"),
+            self._new_key(derivation="m/86h/0h/0h"),
         ], sigs_required=2)
         with self.assertRaises(ValidationError):
             wallet.refresh_addresses()
@@ -498,7 +492,7 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
         account_a = ExtendedKey.parse(self._root_xpub).child(1).serialize()
         account_b = ExtendedKey.parse(self._root_xpub).child(2).serialize()
 
-        single_key = self._new_key(xpub=account_a, witness_type="p2sh-segwit")
+        single_key = self._new_key(xpub=account_a, derivation="m/49h/0h/0h")
         single_wallet = self._new_wallet([single_key])
         single_wallet.refresh_addresses()
         self.assertEqual(
@@ -507,8 +501,8 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
         )
 
         keys = [
-            self._new_key(xpub=account_a, witness_type="p2sh-segwit"),
-            self._new_key(xpub=account_b, witness_type="p2sh-segwit"),
+            self._new_key(xpub=account_a, derivation="m/48h/0h/0h/1h"),
+            self._new_key(xpub=account_b, derivation="m/48h/0h/0h/1h"),
         ]
         multisig_wallet = self._new_wallet(keys, sigs_required=2)
         multisig_wallet.refresh_addresses()
@@ -1247,3 +1241,21 @@ F9039C6D: xpub6DchXv2PsDEpsMjvoBtg2tPK4nKkCkQdPfrFvyddVgjWe18TU7jEtRSXXrA6Bwxx48
             key1.write({"zpub": "invalid-zpub"})
         with self.assertRaises(ValidationError):
             key1.write({"Zpub": "invalid-Zpub"})
+
+    def test_witness_type_computation(self):
+        cases = [
+            ("m/84h/0h/0h", "segwit", "bech32"),
+            ("m/86h/0h/0h", "taproot", "bech32"),
+            ("m/49h/0h/0h", "p2sh-segwit", "base58"),
+            ("m/44h/0h/0h", "legacy", "base58"),
+            ("m/45h/0h", "legacy", "base58"),
+            ("m/48h/0h/0h/2h", "segwit", "bech32"),
+            ("m/48h/0h/0h/1h", "p2sh-segwit", "base58"),
+        ]
+        self.assertFalse(self.Key.new({}).witness_type)
+        self.assertFalse(self.Key.new({"derivation": "m"}).witness_type)
+        for path, expected_witness, expected_encoding in cases:
+            with self.subTest(path=path):
+                key = self._new_key(derivation=path)
+                self.assertEqual(key.witness_type, expected_witness)
+                self.assertEqual(key.encoding, expected_encoding)

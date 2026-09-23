@@ -177,7 +177,6 @@ class BitcoinWallet(models.Model):
             key_values = {
                 'name': fingerprint,
                 'xpub': public_key,
-                'witness_type': setup['witness_type'],
                 'master_fingerprint': fingerprint,
                 'derivation': setup['derivation'],
             }
@@ -185,7 +184,6 @@ class BitcoinWallet(models.Model):
             key = (
                 self.env['bitcoin.key'].search([
                     ('xpub', '=', key_values['xpub']),
-                    ('witness_type', '=', key_values['witness_type']),
                     ('master_fingerprint', '=', key_values['master_fingerprint']),
                     ('derivation', '=', key_values['derivation']),
                 ], limit=1)

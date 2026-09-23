@@ -89,9 +89,9 @@
                                     <field name="sequence" widget="handle"/>
                                     <field name="key_id" optional="show"/>
                                     <field name="xpub" optional="hide"/>
-                                    <field name="witness_type" optional="show" readonly="True"/>
                                     <field name="derivation" optional="show"/>
                                     <field name="master_fingerprint" optional="show"/>
+                                    <field name="witness_type" optional="hide" readonly="True"/>
                                     <field name="encoding" optional="hide" readonly="True"/>
                                     <field name="active" optional="hide" readonly="True"/>
                                 </list>

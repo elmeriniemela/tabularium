@@ -56,20 +56,20 @@ class BitcoinExtendedPublicKey(models.Model):
             ('p2sh-segwit', 'P2SH Segwit'),
             ('legacy', 'Legacy'),
         ],
-        default='segwit',
+        compute='_compute_witness_type',
+        store=True,
         tracking=True,
-        required=True,
+        readonly=True,
     )
     encoding = fields.Selection(
         selection=[
             ('bech32', 'bech32'),
             ('base58', 'base58'),
         ],
-        default='bech32',
         compute='_compute_encoding',
-        tracking=True,
-        required=True,
         store=True,
+        tracking=True,
+        readonly=True,
     )
 
     master_fingerprint = fields.Char(
@@ -92,10 +92,32 @@ class BitcoinExtendedPublicKey(models.Model):
         'legacy': 'base58',
     }
 
+    @api.depends('derivation')
+    def _compute_witness_type(self):
+        for key in self:
+            path = key.derivation or ''
+            if not path.startswith('m/'):
+                key.witness_type = False
+                continue
+            steps = path[2:].split('/')
+            purpose = steps[0]
+            if purpose in ('84h', '84'):
+                key.witness_type = 'segwit'
+            elif purpose in ('86h', '86'):
+                key.witness_type = 'taproot'
+            elif purpose in ('49h', '49'):
+                key.witness_type = 'p2sh-segwit'
+            elif purpose in ('44h', '44', '45h', '45'):
+                key.witness_type = 'legacy'
+            elif purpose in ('48h', '48') and len(steps) >= 4:
+                key.witness_type = 'p2sh-segwit' if steps[3] in ('1h', '1') else ('segwit' if steps[3] in ('2h', '2') else False)
+            else:
+                key.witness_type = False
+
     @api.depends('witness_type')
     def _compute_encoding(self):
         for rec in self:
-            rec.encoding = self._witness_encoding_map[rec.witness_type]
+            rec.encoding = self._witness_encoding_map[rec.witness_type] if rec.witness_type else False
 
     def _inverse_xpub(self):
         for key in self:
@@ -152,17 +174,18 @@ class BitcoinExtendedPublicKey(models.Model):
                 return _("The master key fingerprint contains invalid character '%s'.") % character
 
         path = self.derivation or ''
-        if path != 'm':
-            if not path.startswith('m/'):
-                return _("The derivation path must start with 'm/'.")
-            for step in path[2:].split('/'):
-                if not step:
-                    return _("The derivation path contains an empty step.")
-                number = step[:-1] if step.endswith('h') else step
-                if not number.isdigit():
-                    return _("Derivation path step '%s' must be an integer index.") % step
-                if int(number) >= 2**31:
-                    return _("Derivation path step '%s' index must be less than 2^31.") % step
+        if not path.startswith('m/'):
+            return _("The derivation path must start with 'm/'.")
+        for step in path[2:].split('/'):
+            if not step:
+                return _("The derivation path contains an empty step.")
+            number = step[:-1] if step.endswith('h') else step
+            if not number.isdigit():
+                return _("Derivation path step '%s' must be an integer index.") % step
+            if int(number) >= 2**31:
+                return _("Derivation path step '%s' index must be less than 2^31.") % step
+        if not self.witness_type:
+            return _("Unsupported derivation path '%s'.") % path
         return False
 
     def _descriptor_key(self):

@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-23 15:23+0000\n"
-"PO-Revision-Date: 2026-09-23 15:23+0000\n"
+"POT-Creation-Date: 2026-09-23 15:46+0000\n"
+"PO-Revision-Date: 2026-09-23 15:46+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -1717,6 +1717,12 @@ msgid ""
 msgstr ""
 "Unix-aikaleima Bitcoin Core -deskriptorin tuontia varten, perustuen lompakon"
 " varhaisimpaan tapahtumaan tai luontiaikaan."
+
+#. module: bitcoin_treasury
+#. odoo-python
+#: code:addons/bitcoin_treasury/models/key.py:0
+msgid "Unsupported derivation path '%s'."
+msgstr "Ei-tuettu johtamispolku '%s'."
 
 #. module: bitcoin_treasury
 #: model_terms:ir.ui.view,arch_db:bitcoin_treasury.search_wallet_address

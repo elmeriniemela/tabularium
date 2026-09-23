@@ -9,12 +9,12 @@
                 <field name="zpub" optional="hide"/>
                 <field name="Zpub" optional="hide"/>
                 <field name="name" optional="show"/>
-                <field name="witness_type" optional="show"/>
                 <field name="derivation" optional="show"/>
                 <field name="master_fingerprint" optional="show"/>
+                <field name="compromised" optional="show"/>
+                <field name="witness_type" optional="show"/>
                 <field name="encoding" optional="show"/>
                 <field name="wallet_ids" widget="many2many_tags" optional="show"/>
-                <field name="compromised" optional="show"/>
                 <field name="active" optional="hide"/>
             </list>
         </field>
@@ -38,13 +38,13 @@
                     </group>
                     <group>
                         <group>
-                            <field name="witness_type"/>
-                            <field name="encoding"/>
+                            <field name="derivation"/>
+                            <field name="master_fingerprint"/>
                             <field name="compromised"/>
                         </group>
                         <group>
-                            <field name="derivation"/>
-                            <field name="master_fingerprint"/>
+                            <field name="witness_type"/>
+                            <field name="encoding"/>
                         </group>
                     </group>
                     <field name="wallet_ids" nolabel="1">

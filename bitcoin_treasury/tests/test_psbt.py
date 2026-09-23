@@ -1,7 +1,7 @@
 import base64
 from unittest.mock import patch
 
-from bitwalkit import base58check_decode, base58check_encode, ExtendedKey, InputSequence, derive_native_segwit
+from bitwalkit import base58check_decode, base58check_encode, ExtendedKey, InputSequence, KeyOrigin, derive_native_segwit
 
 from odoo import Command
 from odoo.exceptions import AccessError, ValidationError
@@ -17,16 +17,21 @@ class TestBitcoinPSBT(TransactionCase):
             'xpub661MyMwAqRbcGFeMhhkrJL6Yj3YKQFNZQSM2BAvoMmhdjNKBh43n5v3c4YT5dFtjkirfhqQH'
             'Md22br7cHAQXAV8cZdicedZJkNweja4WWBK'
         )
+        cls.account_key = ExtendedKey(
+            cls.root.version, 3, bytes.fromhex('12345678'), 0x80000000,
+            cls.root.chain_code, cls.root.key, 'mainnet', 'p2wpkh',
+        )
         cls.key = cls.env['bitcoin.key'].create({
-            'xpub': cls.root.serialize(),
-            'witness_type': 'segwit',
+            'xpub': cls.account_key.to_xpub(),
             'master_fingerprint': cls.root.fingerprint.hex(),
-            'derivation': 'm',
+            'derivation': 'm/84h/0h/0h',
         })
         cls.wallet = cls.env['bitcoin.wallet'].create({
             'name': 'Empty PSBT wallet', 'key_ids': [Command.create({'key_id': cls.key.id})],
         })
-        cls.destination = derive_native_segwit([(cls.root, None)], 0, 12).address
+        cls.destination = derive_native_segwit(
+            [(cls.account_key, KeyOrigin.parse(cls.root.fingerprint.hex(), 'm/84h/0h/0h'))], 0, 12,
+        ).address
 
     def _wizard(self, **overrides):
         values = {
@@ -82,9 +87,15 @@ class TestBitcoinPSBT(TransactionCase):
     def test_multisig_multiple_wallets_and_explicit_change(self):
         keys = self.env['bitcoin.key']
         for index in range(3):
+            account_k = ExtendedKey(
+                self.root.version, 4, bytes.fromhex('12345678'), 0x80000002,
+                self.root.child(index).chain_code, self.root.child(index).key,
+                'mainnet', 'p2wsh',
+            )
             keys |= keys.create({
-                'xpub': self.root.child(index).serialize(), 'witness_type': 'segwit',
-                'master_fingerprint': self.root.fingerprint.hex(), 'derivation': 'm/%s' % index,
+                'xpub': account_k.to_xpub(),
+                'master_fingerprint': self.root.fingerprint.hex(),
+                'derivation': 'm/48h/0h/%sh/2h' % index,
             })
         multisig = self.env['bitcoin.wallet'].create({
             'name': 'Multisig', 'sigs_required': 2,
@@ -141,7 +152,7 @@ class TestBitcoinPSBT(TransactionCase):
             self.env['bitcoin.psbt.input'].new({})._spend()
 
         wizard = self._wizard()
-        raw = base58check_decode(self.root.serialize())
+        raw = base58check_decode(self.account_key.to_xpub())
         self.env.cr.execute(
             'UPDATE bitcoin_key SET xpub = %s WHERE id = %s',
             [base58check_encode(bytes.fromhex('043587cf') + raw[4:]), self.key.id],
@@ -149,18 +160,24 @@ class TestBitcoinPSBT(TransactionCase):
         self.key.invalidate_recordset(['xpub'])
         with self.assertRaises(ValidationError):
             wizard.input_ids._spend()
+        self.key.xpub = self.account_key.to_xpub()
 
     def test_missing_origin_and_unsupported_keys(self):
         wizard = self._wizard()
-        self.key.xpub = self.root.child(1).serialize()
+        bad_key = ExtendedKey(
+            self.root.version, 2, bytes.fromhex('12345678'), 0x80000000,
+            self.root.chain_code, self.root.key, 'mainnet', 'p2wpkh',
+        )
+        self.key.xpub = bad_key.to_xpub()
         self.assertTrue(wizard.input_ids.derivation_error)
         with self.assertRaises(Exception):
             wizard.action_generate()
-        self.key.write({'master_fingerprint': self.root.fingerprint.hex(), 'derivation': 'm/1'})
+        self.key.xpub = self.account_key.to_xpub()
         wizard.action_generate()
-        self.key.witness_type = 'legacy'
+        self.key.write({'derivation': 'm/44h/0h/0h'})
         with self.assertRaises(Exception):
             wizard.action_generate()
+        self.key.write({'derivation': 'm/84h/0h/0h'})
 
     def test_invalid_transaction_details(self):
         wizard = self._wizard()
