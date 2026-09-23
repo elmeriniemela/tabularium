@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-23 15:15+0000\n"
-"PO-Revision-Date: 2026-09-23 15:15+0000\n"
+"POT-Creation-Date: 2026-09-23 15:19+0000\n"
+"PO-Revision-Date: 2026-09-23 15:19+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -528,13 +528,6 @@ msgid ""
 "settings before generating an input or wallet output. Example: an account "
 "key exported at m/84'/0'/0' needs that full origin path and its master key "
 "fingerprint; omitting them produces a derivation error."
-msgstr ""
-
-#. module: bitcoin_treasury
-#: model:ir.actions.act_window,name:bitcoin_treasury.action_key
-#: model:ir.ui.menu,name:bitcoin_treasury.menu_key
-#: model_terms:ir.ui.view,arch_db:bitcoin_treasury.form_wallet
-msgid "Extended Public Keys"
 msgstr ""
 
 #. module: bitcoin_treasury
@@ -1628,16 +1621,16 @@ msgid ""
 msgstr ""
 
 #. module: bitcoin_treasury
-#: model_terms:ir.ui.view,arch_db:bitcoin_treasury.form_tx
-msgid "Watch-only Wallet Addresses"
-msgstr ""
-
-#. module: bitcoin_treasury
 #: model:ir.actions.act_window,name:bitcoin_treasury.action_wallet
 #: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_key__wallet_ids
 #: model:ir.model.fields,field_description:bitcoin_treasury.field_bitcoin_wallet_key__wallet_ids
 #: model:ir.ui.menu,name:bitcoin_treasury.menu_wallet
-msgid "Watch-only Wallets"
+msgid "Wallets"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model_terms:ir.ui.view,arch_db:bitcoin_treasury.form_tx
+msgid "Watch-only Wallet Addresses"
 msgstr ""
 
 #. module: bitcoin_treasury
@@ -1661,6 +1654,13 @@ msgstr ""
 #. odoo-python
 #: code:addons/bitcoin_treasury/models/wallet.py:0
 msgid "Wrong amount of extended public keys: %s"
+msgstr ""
+
+#. module: bitcoin_treasury
+#: model:ir.actions.act_window,name:bitcoin_treasury.action_key
+#: model:ir.ui.menu,name:bitcoin_treasury.menu_key
+#: model_terms:ir.ui.view,arch_db:bitcoin_treasury.form_wallet
+msgid "XPUBs"
 msgstr ""
 
 #. module: bitcoin_treasury

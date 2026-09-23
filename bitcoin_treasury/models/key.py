@@ -42,7 +42,7 @@ class BitcoinExtendedPublicKey(models.Model):
     )
 
     wallet_ids = fields.One2many(
-        string="Watch-only Wallets",
+        string="Wallets",
         comodel_name='bitcoin.wallet.key',
         inverse_name='key_id',
         readonly=True,
