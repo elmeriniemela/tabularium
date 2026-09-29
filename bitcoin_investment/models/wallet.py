@@ -59,7 +59,7 @@ class BitcoinWallet(models.Model):
                     hist.position_transaction_id.write({
                         'quantity': qty,
                         'payment': 0,
-                        'description': 'Transfer between wallets',
+                        'description': f'{wallet.name}: Transfer between wallets',
                     })
                 else:
                     hist.position_transaction_id = hist.env['investment.position.transaction'].create({
@@ -68,7 +68,7 @@ class BitcoinWallet(models.Model):
                         'payment': abs(hist.amount * price.price),
                         'quantity': hist.amount,
                         'exchange_rate': price.price,
-                        'description': 'Automatically generated',
+                        'description': f'{wallet.name}: Automatically generated',
                     })
 
 
