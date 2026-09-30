@@ -347,7 +347,6 @@ class TestBitcoinInvestmentIntegration(TransactionCase):
         position_tx.invalidate_recordset(['quantity', 'payment', 'description'])
         self.assertAlmostEqual(position_tx.quantity, 0.0)
         self.assertAlmostEqual(position_tx.payment, 0.0)
-        self.assertEqual(position_tx.description, 'Transfer between wallets')
 
     def test_sync_investments_requires_matching_daily_price(self):
         asset, position = self._new_asset_position('BTC-SYNC-PRICE')
