@@ -1,4 +1,5 @@
 import base64
+from dataclasses import replace
 from decimal import Decimal
 import hashlib
 import json
@@ -334,7 +335,8 @@ class BitcoinPSBT(models.Model):
         ) for line in self.input_ids.sorted('sequence')]
         outputs = []
         for line in self.output_ids.sorted('sequence'):
-            spend = line._spend() if line.destination_type == 'wallet' else None
+            # Only sending wallets belong in global xpubs.
+            spend = replace(line._spend(), xpubs=()) if line.destination_type == 'wallet' else None
             outputs.append(PSBTOutput(line.sats, line._script(), spend))
         encoded = base64.b64encode(create_psbt(inputs, outputs))
         self.write({'generated_psbt': encoded, 'generated_fingerprint': self._transaction_fingerprint()})

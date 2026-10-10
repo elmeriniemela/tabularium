@@ -118,6 +118,36 @@ class TestBitcoinPSBT(TransactionCase):
             self.assertIn(b'\x02' + pubkey, raw)
             self.assertIn(origin.serialize(), raw)
 
+    def test_recipient_wallet_xpub_is_excluded(self):
+        child = self.root.child(1)
+        recipient_key = ExtendedKey(
+            self.root.version, 3, bytes.fromhex('12345678'), 0x80000000,
+            child.chain_code, child.key, 'mainnet', 'p2wpkh',
+        )
+        key = self.key.copy({'xpub': recipient_key.to_xpub()})
+        recipient = self.env['bitcoin.wallet'].create({
+            'name': 'Recipient', 'key_ids': [Command.create({'key_id': key.id})],
+        })
+        wizard = self._wizard(output_ids=[
+            Command.create({'destination_type': 'wallet', 'wallet_id': recipient.id,
+                            'sats': 100000000}),
+            Command.create({'destination_type': 'wallet', 'wallet_id': self.wallet.id,
+                            'branch': '1', 'sats': 23450000}),
+        ])
+        for branch in ['0', '1']:
+            with self.subTest(recipient_branch=branch):
+                wizard.output_ids[0].branch = branch
+                wizard.action_generate()
+                raw = base64.b64decode(wizard.psbt_binary)
+                self.assertIn(base58check_decode(self.account_key.to_xpub()), raw)
+                self.assertNotIn(base58check_decode(recipient_key.to_xpub()), raw)
+                for line in wizard.output_ids:
+                    spend = line._spend()
+                    self.assertIn(spend.script_pubkey, raw)
+                    for pubkey, origin in spend.derivations:
+                        self.assertIn(b'\x02' + pubkey, raw)
+                        self.assertIn(origin.serialize(), raw)
+
     def test_invalid_amounts_and_totals(self):
         wizard = self._wizard()
         wizard.output_ids.sats = -1
