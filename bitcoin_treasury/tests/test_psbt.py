@@ -1,7 +1,8 @@
 import base64
 from unittest.mock import patch
 
-from bitwalkit import base58check_decode, base58check_encode, ExtendedKey, InputSequence, KeyOrigin, derive_native_segwit
+from bitwalkit import base58check_decode, base58check_encode, ExtendedKey, InputSequence, KeyOrigin, derive_native_segwit, parse_transaction
+from bitoplens.primitives import Cursor, encode_compact_size
 
 from odoo import Command
 from odoo.exceptions import AccessError, ValidationError
@@ -83,6 +84,77 @@ class TestBitcoinPSBT(TransactionCase):
         wizard.action_generate()
         self.assertTrue(wizard.psbt_binary)
         self.assertEqual(wizard.input_total, '1.23456789')
+
+    def _funding_transaction(self, line, witness=False, outputs=1):
+        script = line._spend().script_pubkey
+        # Large script/witness exercises CompactSize lengths above 252 bytes.
+        signature = b'\x51' * 260
+        raw = b'\x02\x00\x00\x00' + (b'\x00\x01' if witness else b'')
+        raw += b'\x01' + bytes.fromhex(line.txid) + b'\x00' * 4
+        raw += encode_compact_size(len(signature)) + signature + b'\xff' * 4
+        output = line.sats.to_bytes(8, 'little') + encode_compact_size(len(script)) + script
+        raw += encode_compact_size(outputs) + output * outputs
+        if witness:
+            raw += b'\x01' + encode_compact_size(len(signature)) + signature
+        return (raw + b'\x00' * 4).hex()
+
+    def _psbt_maps(self, wizard):
+        cursor = Cursor(base64.b64decode(wizard.psbt_binary), 5)
+        maps = []
+        while not cursor.eof():
+            entries = {}
+            while key := cursor.read_var_bytes():
+                self.assertNotIn(key, entries)
+                entries[key] = cursor.read_var_bytes()
+            maps.append(entries)
+        return maps
+
+    def test_funding_transactions_preserve_existing_psbt_metadata(self):
+        for witness in [False, True]:
+            with self.subTest(witness=witness):
+                wizard = self._wizard()
+                line = wizard.input_ids
+                funding_hex = self._funding_transaction(line, witness)
+                funding = parse_transaction(funding_hex)
+                if witness:
+                    self.assertNotEqual(funding.txid, funding.wtxid)
+                line.write({'txid': funding.txid.upper(), 'output_index': 0})
+                wizard.action_generate()
+                original = self._psbt_maps(wizard)
+                line.funding_tx_hex = '\n' + funding_hex + '\n'
+                self.assertFalse(wizard.psbt_binary)
+                wizard.action_generate()
+                enriched = self._psbt_maps(wizard)
+                self.assertEqual(enriched[1].pop(b'\x00'), bytes.fromhex(funding_hex))
+                self.assertIn(b'\x01', enriched[1])  # witness_utxo remains present
+                self.assertEqual(enriched, original)
+                line.funding_tx_hex = False
+                self.assertFalse(wizard.psbt_binary)
+
+    def test_invalid_funding_transactions_are_rejected(self):
+        wizard = self._wizard()
+        line = wizard.input_ids
+        funding_hex = self._funding_transaction(line)
+        line.write({'funding_tx_hex': funding_hex, 'output_index': 0})
+        with self.assertRaises(ValidationError):
+            wizard.action_generate()  # previous TXID differs
+        line.txid = parse_transaction(funding_hex).txid
+        wizard.action_generate()
+        for values in [
+            {'funding_tx_hex': 'zz'},
+            {'funding_tx_hex': funding_hex[:-2]},
+            {'output_index': 1},
+            {'sats': line.sats + 1},
+            {'address_index': line.address_index + 1},
+        ]:
+            with self.subTest(values=values):
+                before = {field: line[field] for field in values}
+                line.write(values)
+                with self.assertRaises(ValidationError):
+                    wizard.action_generate()
+                self.assertFalse(wizard.psbt_binary)
+                line.write(before)
+        self.assertTrue(wizard.psbt_binary)
 
     def test_multisig_multiple_wallets_and_explicit_change(self):
         keys = self.env['bitcoin.key']

@@ -11,6 +11,11 @@
                 <p>Enter previous outputs and their amounts manually. Balances and spent status are not checked.</p>
                 <p>Amounts are in satoshis (1 BTC = 100,000,000 sat). Totals and fee are displayed in BTC.</p>
                 <separator string="Inputs"/>
+                <p>For each input, replace &lt;previous_txid&gt; with its Previous Transaction ID and run:</p>
+                <pre><code>bitcoin-cli getrawtransaction "&lt;previous_txid&gt;" 0</code></pre>
+                <p>No Bitcoin Core wallet is needed. The command above finds mempool transactions and, with txindex=1, confirmed transactions. Without a transaction index, provide the hash of the block containing the funding transaction:</p>
+                <pre><code>bitcoin-cli getrawtransaction "&lt;previous_txid&gt;" 0 "&lt;blockhash&gt;"</code></pre>
+                <p>The block must be available on your node. Paste the complete hex output into that input's Funding Transaction Hex field, then click Generate PSBT. Generation checks its TXID, output index, amount, and script.</p>
                 <field name="input_ids">
                     <list editable="bottom">
                         <field name="sequence" widget="handle"/>
@@ -21,6 +26,7 @@
                         <field name="txid"  optional="show"/>
                         <field name="output_index" optional="show"/>
                         <field name="sats" optional="show"/>
+                        <field name="funding_tx_hex" optional="show" placeholder="Paste raw transaction hex from bitcoin-cli"/>
                         <field name="derivation_error" optional="show"/>
                     </list>
                 </field>
@@ -55,10 +61,10 @@
                 <details class="mb-3">
                     <summary>Double-check before signing</summary>
                     <ul>
-                        <li>Check each input's txid, zero-based output index, actual amount, and source address against trusted transaction data. Generation does not verify these claims or whether an output is spendable.</li>
+                        <li>Check each input's txid, zero-based output index, actual amount, and source address against trusted transaction data. When funding transaction hex is supplied, generation verifies these against that transaction. Spent status is not checked.</li>
                         <li>Verify every destination, change address, amount, and the total fee on your signing device. Change is never added automatically.</li>
                         <li>This PSBT includes extended public keys and derivation paths that can reveal other wallet addresses. Share it only with intended signers.</li>
-                        <li>Some signers require full previous transactions; this export provides witness UTXOs. When RBF is enabled, inputs signal BIP 125 replaceability (sequence 0xFFFFFFFD). When disabled, final sequences (0xFFFFFFFF) are used.</li>
+                        <li>Some signers require full previous transactions. Paste Funding Transaction Hex on each input to include them alongside witness UTXOs. When RBF is enabled, inputs signal BIP 125 replaceability (sequence 0xFFFFFFFD). When disabled, final sequences (0xFFFFFFFF) are used.</li>
                     </ul>
                     <button name="action_generate" type="object" string="Generate PSBT" class="btn-primary"/>
                 </details>

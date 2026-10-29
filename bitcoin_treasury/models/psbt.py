@@ -8,8 +8,9 @@ import re
 from bitwalkit import (
     BitwalkitError, ExtendedKey, InputSequence, KeyOrigin, PSBTInput, PSBTOutput,
     SegwitSpend, address_to_script, create_psbt, derive_native_segwit,
-    dust_threshold, op_return_script,
+    dust_threshold, op_return_script, parse_transaction,
 )
+from bitoplens.primitives import Cursor, encode_compact_size
 
 from odoo import api, fields, models, Command, _
 from odoo.exceptions import ValidationError
@@ -283,6 +284,7 @@ class BitcoinPSBT(models.Model):
         'generated_psbt', 'generated_fingerprint', 'rbf',
         'input_ids', 'output_ids',
         'input_ids.sequence', 'input_ids.txid', 'input_ids.output_index', 'input_ids.sats',
+        'input_ids.funding_tx_hex',
         'input_ids.wallet_id', 'input_ids.branch', 'input_ids.address_index',
         'output_ids.sequence', 'output_ids.sats', 'output_ids.destination_type', 'output_ids.address',
         'output_ids.wallet_id', 'output_ids.branch', 'output_ids.address_index',
@@ -316,7 +318,7 @@ class BitcoinPSBT(models.Model):
                 for key in wallet.key_ids.key_id
             ]]
 
-        inputs = [[line.txid, line.output_index, line.sats, wallet_spec(line)]
+        inputs = [[line.txid, line.output_index, line.sats, line.funding_tx_hex, wallet_spec(line)]
                   for line in self.input_ids.sorted('sequence')]
         outputs = [[line.destination_type, line.address, line.sats,
                     line.op_return_format, line.op_return_data,
@@ -338,7 +340,33 @@ class BitcoinPSBT(models.Model):
             # Only sending wallets belong in global xpubs.
             spend = replace(line._spend(), xpubs=()) if line.destination_type == 'wallet' else None
             outputs.append(PSBTOutput(line.sats, line._script(), spend))
-        encoded = base64.b64encode(create_psbt(inputs, outputs))
+        raw = create_psbt(inputs, outputs)
+        # Preserve every existing map entry, including witness_utxo.
+        reader = Cursor(raw, 5)
+        while reader.read_var_bytes():
+            reader.read_var_bytes()
+        parts = [raw[:reader.pos]]
+        for line, item in zip(self.input_ids.sorted('sequence'), inputs):
+            start = reader.pos
+            while reader.read_var_bytes():
+                reader.read_var_bytes()
+            if line.funding_tx_hex:
+                try:
+                    funding = parse_transaction(line.funding_tx_hex.strip())
+                except BitwalkitError as error:
+                    raise ValidationError(_("Invalid funding transaction: %s", str(error))) from error
+                if funding.txid != item.txid.lower():
+                    raise ValidationError(_("Funding transaction TXID does not match the input's previous TXID."))
+                if item.output_index >= len(funding.outputs):
+                    raise ValidationError(_("Funding transaction does not contain the referenced output index."))
+                previous = funding.outputs[item.output_index]
+                if previous.amount != item.amount or previous.script_pubkey != item.spend.script_pubkey:
+                    raise ValidationError(_("Funding output amount or script does not match the declared input."))
+                transaction = bytes.fromhex(funding.hex)
+                parts.append(b'\x01\x00' + encode_compact_size(len(transaction)) + transaction)
+            parts.append(raw[start:reader.pos])
+        parts.append(raw[reader.pos:])
+        encoded = base64.b64encode(b''.join(parts))
         self.write({'generated_psbt': encoded, 'generated_fingerprint': self._transaction_fingerprint()})
         return {
             'type': 'ir.actions.act_window', 'res_model': self._name,
@@ -487,6 +515,15 @@ class BitcoinPSBTInput(models.Model):
     _inherit = 'bitcoin.psbt.wallet.line'
     _description = 'PSBT Input'
     _order = 'sequence, id'
+
+    funding_tx_hex = fields.Text(
+        string="Funding Transaction Hex",
+        help=(
+            "Paste the full raw previous transaction hex returned by bitcoin-cli or your backend. "
+            "Generation verifies its TXID and the referenced output's amount and script, then includes "
+            "it as non_witness_utxo alongside witness_utxo for signers requiring full transactions."
+        ),
+    )
 
     psbt_id = fields.Many2one(
         'bitcoin.psbt', required=True, ondelete='cascade',
