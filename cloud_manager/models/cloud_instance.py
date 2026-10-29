@@ -173,6 +173,7 @@ class CloudInstance(models.Model):
             'upgrade',
             'fshealth',
             'self_upgrade',
+            'self_rebuild',
             'sync_urls',
         ]
         if self.is_self and method not in is_self_allowed:
@@ -215,9 +216,15 @@ class CloudInstance(models.Model):
 
     def action_rebuild(self):
         self.ensure_one()
-        self._irpc(method='rebuild', args=(self.uid, self.http_port, self.gevent_port))
-        self.state = 'running'
-        self.message_post(body="Rebuilt.", subtype_xmlid="cloud_manager.mt_cloud_action")
+        if self.is_self:
+            callback_url = self.env.ref('cloud_manager.endpoint_agent_callback').url
+            assert callback_url
+            self._irpc(method='self_rebuild', args=(self.uid, self.http_port, self.gevent_port, callback_url), commit_before=True)
+            # Message will be posted by agent call back.
+        else:
+            self._irpc(method='rebuild', args=(self.uid, self.http_port, self.gevent_port))
+            self.state = 'running'
+            self.message_post(body="Rebuilt.", subtype_xmlid="cloud_manager.mt_cloud_action")
 
     def action_remove(self):
         self.ensure_one()
@@ -312,6 +319,8 @@ class CloudInstance(models.Model):
             self.restart_requested = False
         if vals.get('method') == 'restart':
             self.message_post(body="Restarted.", subtype_xmlid="cloud_manager.mt_cloud_action")
+        if vals.get('method') == 'rebuild':
+            self.message_post(body="Rebuilt.", subtype_xmlid="cloud_manager.mt_cloud_action")
 
 
     def parse_backups(self, backup_list):

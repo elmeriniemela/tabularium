@@ -26,6 +26,8 @@ elif method == 'restart':
     obj = True
 elif method == 'self_upgrade':
     obj = True
+elif method == 'self_rebuild':
+    obj = True
 elif method == 'upgrade':
     obj = 'upgrade-log'
 elif method == 'fshealth':
@@ -351,6 +353,7 @@ class TestCloudManagerIntegration(TransactionCase):
         self.assertEqual(instance.upgrade, 'callback logs')
         self.assertFalse(instance.restart_requested)
         instance.parse_callback({'method': 'restart'})
+        instance.parse_callback({'method': 'rebuild'})
 
         instance.parse_backups([])
         self.assertTrue(instance.latest_backup_missing)
@@ -400,6 +403,13 @@ class TestCloudManagerIntegration(TransactionCase):
         last_msg = endpoint.msg_ids.sorted('id')[-1]
         variables = safe_eval(last_msg.variables, endpoint._get_globals())
         self.assertEqual(variables['method'], 'self_upgrade')
+        self.assertTrue(variables['commit_before'])
+
+        instance.action_rebuild()
+        last_msg = endpoint.msg_ids.sorted('id')[-1]
+        variables = safe_eval(last_msg.variables, endpoint._get_globals())
+        self.assertEqual(variables['method'], 'self_rebuild')
+        self.assertEqual(variables['args'][3], self.env.ref('cloud_manager.endpoint_agent_callback').url)
         self.assertTrue(variables['commit_before'])
 
     @mute_logger('odoo.addons.cloud_manager.models.cloud_instance')

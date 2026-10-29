@@ -1,0 +1,1272 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* cloud_manager
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-29 17:09+0000\n"
+"PO-Revision-Date: 2026-10-29 17:09+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_backup__message_needaction
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_instance__message_needaction
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_module__message_needaction
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__message_needaction
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_module__message_needaction
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone__message_needaction
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone_record__message_needaction
+msgid "Action Needed"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_module__active
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_server_module_search
+msgid "Active"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__activity_ids
+msgid "Activities"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__activity_exception_decoration
+msgid "Activity Exception Decoration"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__activity_state
+msgid "Activity State"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__activity_type_icon
+msgid "Activity Type Icon"
+msgstr ""
+
+#. module: cloud_manager
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_server_module_search
+msgid "All"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_diff__allow_update
+msgid "Allow Update"
+msgstr ""
+
+#. module: cloud_manager
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_server_form
+msgid "Apply Needed Restarts"
+msgstr ""
+
+#. module: cloud_manager
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_server_module_search
+msgid "Archived"
+msgstr ""
+
+#. module: cloud_manager
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_instance_form
+msgid ""
+"Are you sure you want to REMOVE this instance? This will delete everything "
+"related to the instance from the server including the database and all the "
+"configurations."
+msgstr ""
+
+#. module: cloud_manager
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_instance_form
+msgid ""
+"Are you sure you want to RESET this instance? The database will be dropped "
+"and an empty one will created."
+msgstr ""
+
+#. module: cloud_manager
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_instance_form
+msgid "Are you sure you want to overwrite the config on this instance?"
+msgstr ""
+
+#. module: cloud_manager
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_instance_form
+msgid ""
+"Are you sure you want to rebuild this instance? The container will be "
+"stopped and recreated from the latest image."
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_backup__message_attachment_count
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_instance__message_attachment_count
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_module__message_attachment_count
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__message_attachment_count
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_module__message_attachment_count
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone__message_attachment_count
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone_record__message_attachment_count
+msgid "Attachment Count"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_backup_source__backup_ids
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_instance__backup_ids
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_restore__backup_id
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_instance_form
+msgid "Backup"
+msgstr ""
+
+#. module: cloud_manager
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_instance_search
+msgid "Backup OK"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.actions.act_window,name:cloud_manager.cloud_backup_source_action
+#: model:ir.ui.menu,name:cloud_manager.cloud_backup_source_menu
+msgid "Backup Sources"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.constraint,message:cloud_manager.constraint_cloud_backup_uniq_name
+msgid "Backup name should be unique within an instance!"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.actions.act_window,name:cloud_manager.cloud_backup_action
+#: model:ir.ui.menu,name:cloud_manager.cloud_backup_menu
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_instance_form
+msgid "Backups"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__branch
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_module__branch
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_server_module_search
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_server_search
+msgid "Branch"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_instance__cname
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__cname
+msgid "CNAME"
+msgstr ""
+
+#. module: cloud_manager
+#. odoo-python
+#: code:addons/cloud_manager/models/cloud_server.py:0
+msgid "CPU %(usage).1f%%"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__cpu_usage_percent
+msgid "CPU Usage (%)"
+msgstr ""
+
+#. module: cloud_manager
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_restore_form
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_server_diff_form
+msgid "Cancel"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.ui.menu,name:cloud_manager.cloud_base_menu
+msgid "Cloud"
+msgstr ""
+
+#. module: cloud_manager
+#: model:mail.message.subtype,name:cloud_manager.mt_cloud_action
+msgid "Cloud Action"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model,name:cloud_manager.model_cloud_backup
+msgid "Cloud Backup"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model,name:cloud_manager.model_cloud_backup_source
+msgid "Cloud Backup Source"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model,name:cloud_manager.model_cloud_instance
+msgid "Cloud Instance"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model,name:cloud_manager.model_cloud_module
+msgid "Cloud Module"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model,name:cloud_manager.model_cloud_restore
+msgid "Cloud Restore"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model,name:cloud_manager.model_cloud_server
+msgid "Cloud Server"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model,name:cloud_manager.model_cloud_server_diff
+msgid "Cloud Server Diff"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model,name:cloud_manager.model_cloud_server_disk
+msgid "Cloud Server Disk"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model,name:cloud_manager.model_cloud_server_module
+msgid "Cloud Server Module"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__commit
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_module__commit
+msgid "Commit"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__commit_date
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_module__commit_date
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_server_module_search
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_server_search
+msgid "Commit Date"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_instance__config
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_instance_form
+msgid "Config"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone_record__content
+msgid "Content"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_backup__create_uid
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_backup_source__create_uid
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_instance__create_uid
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_module__create_uid
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_restore__create_uid
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__create_uid
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_diff__create_uid
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_disk__create_uid
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_module__create_uid
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone__create_uid
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone_record__create_uid
+msgid "Created by"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_backup__create_date
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_backup_source__create_date
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_instance__create_date
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_module__create_date
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_restore__create_date
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__create_date
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_diff__create_date
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_disk__create_date
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_module__create_date
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone__create_date
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone_record__create_date
+msgid "Created on"
+msgstr ""
+
+#. module: cloud_manager
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_backup_search
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_backup_source_search
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_instance_search
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_module_search
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_server_diff_search
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_server_module_search
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_server_search
+#: model_terms:ir.ui.view,arch_db:cloud_manager.dns_zone_record_search
+#: model_terms:ir.ui.view,arch_db:cloud_manager.dns_zone_search
+msgid "Creation Date"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_instance__dns_record_ids
+msgid "DNS Records"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model,name:cloud_manager.model_dns_zone
+msgid "DNS Zone"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model,name:cloud_manager.model_dns_zone_record
+msgid "DNS Zone Record"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.actions.act_window,name:cloud_manager.dns_zone_record_action
+#: model:ir.ui.menu,name:cloud_manager.dns_zone_record_menu
+msgid "DNS Zone Records"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.actions.act_window,name:cloud_manager.dns_zone_action
+#: model:ir.ui.menu,name:cloud_manager.dns_zone_menu
+msgid "DNS Zones"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields.selection,name:cloud_manager.selection__cloud_instance__state__dead
+msgid "Dead"
+msgstr ""
+
+#. module: cloud_manager
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_instance_form
+msgid "Deploy"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields.selection,name:cloud_manager.selection__cloud_instance__state__created
+msgid "Deployed"
+msgstr ""
+
+#. module: cloud_manager
+#. odoo-python
+#: code:addons/cloud_manager/models/cloud_backup.py:0
+msgid ""
+"Destination server should have higher branch than src: %s is not greater "
+"than %s."
+msgstr ""
+
+#. module: cloud_manager
+#. odoo-python
+#: code:addons/cloud_manager/models/cloud_server_diff.py:0
+#: model:ir.actions.act_window,name:cloud_manager.cloud_server_diff_form_action
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__diff_ids
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_diff__diff
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_module__diff_ids
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_server_form
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_server_module_form
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_server_module_list
+msgid "Diff"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__diff_count
+msgid "Diff Count"
+msgstr ""
+
+#. module: cloud_manager
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_server_form
+msgid "Diffs"
+msgstr ""
+
+#. module: cloud_manager
+#. odoo-python
+#: code:addons/cloud_manager/models/cloud_server.py:0
+msgid "Disk %(mount)s %(usage).1f%%"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__disk_ids
+msgid "Disks"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_backup__display_name
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_backup_source__display_name
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_instance__display_name
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_module__display_name
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_restore__display_name
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__display_name
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_diff__display_name
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_disk__display_name
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_module__display_name
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone__display_name
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone_record__display_name
+msgid "Display Name"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields.selection,name:cloud_manager.selection__cloud_instance__state__draft
+msgid "Draft"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__endpoint_id
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_server_search
+msgid "Endpoint"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields.selection,name:cloud_manager.selection__cloud_instance__state__exited
+msgid "Exited"
+msgstr ""
+
+#. module: cloud_manager
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_server_diff_form
+#: model_terms:ir.ui.view,arch_db:cloud_manager.dns_zone_form
+msgid "Fetch"
+msgstr ""
+
+#. module: cloud_manager
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_instance_form
+msgid "Fetch Filestore Health"
+msgstr ""
+
+#. module: cloud_manager
+#: model:mail.message.subtype,name:cloud_manager.mt_field_changed
+msgid "Field Changed"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_instance__fshealth
+msgid "Filestore Health"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_backup__message_follower_ids
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_instance__message_follower_ids
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_module__message_follower_ids
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__message_follower_ids
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_module__message_follower_ids
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone__message_follower_ids
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone_record__message_follower_ids
+msgid "Followers"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_backup__message_partner_ids
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_instance__message_partner_ids
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_module__message_partner_ids
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__message_partner_ids
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_module__message_partner_ids
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone__message_partner_ids
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone_record__message_partner_ids
+msgid "Followers (Partners)"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,help:cloud_manager.field_cloud_server__activity_type_icon
+msgid "Font awesome icon e.g. fa-tasks"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_disk__free_gb
+msgid "Free GB"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_instance__gevent_port
+msgid "Gevent Port"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_instance__http_port
+msgid "HTTP Port"
+msgstr ""
+
+#. module: cloud_manager
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_server_form
+msgid "Hardware"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__hardware_warning
+msgid "Hardware Warning"
+msgstr ""
+
+#. module: cloud_manager
+#. odoo-python
+#: code:addons/cloud_manager/models/cloud_server.py:0
+msgid "Hardware status has not been updated for more than %(days)s days."
+msgstr ""
+
+#. module: cloud_manager
+#. odoo-python
+#: code:addons/cloud_manager/models/cloud_server.py:0
+msgid "Hardware usage is above %(threshold).1f%%: %(metrics)s"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_backup__has_message
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_instance__has_message
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_module__has_message
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__has_message
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_module__has_message
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone__has_message
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone_record__has_message
+msgid "Has Message"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_backup__id
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_backup_source__id
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_instance__id
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_module__id
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_restore__id
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__id
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_diff__id
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_disk__id
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_module__id
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone__id
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone_record__id
+msgid "ID"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__activity_exception_icon
+msgid "Icon"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,help:cloud_manager.field_cloud_server__activity_exception_icon
+msgid "Icon to indicate an exception activity."
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone__identifier
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone_record__identifier
+msgid "Identifier"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,help:cloud_manager.field_cloud_backup__message_needaction
+#: model:ir.model.fields,help:cloud_manager.field_cloud_instance__message_needaction
+#: model:ir.model.fields,help:cloud_manager.field_cloud_module__message_needaction
+#: model:ir.model.fields,help:cloud_manager.field_cloud_server__message_needaction
+#: model:ir.model.fields,help:cloud_manager.field_cloud_server_module__message_needaction
+#: model:ir.model.fields,help:cloud_manager.field_dns_zone__message_needaction
+#: model:ir.model.fields,help:cloud_manager.field_dns_zone_record__message_needaction
+msgid "If checked, new messages require your attention."
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,help:cloud_manager.field_cloud_backup__message_has_error
+#: model:ir.model.fields,help:cloud_manager.field_cloud_instance__message_has_error
+#: model:ir.model.fields,help:cloud_manager.field_cloud_module__message_has_error
+#: model:ir.model.fields,help:cloud_manager.field_cloud_server__message_has_error
+#: model:ir.model.fields,help:cloud_manager.field_cloud_server_module__message_has_error
+#: model:ir.model.fields,help:cloud_manager.field_dns_zone__message_has_error
+#: model:ir.model.fields,help:cloud_manager.field_dns_zone_record__message_has_error
+msgid "If checked, some messages have a delivery error."
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_backup__instance_id
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_restore__instance_id
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone_record__instance_id
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_backup_search
+#: model_terms:ir.ui.view,arch_db:cloud_manager.dns_zone_record_search
+msgid "Instance"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.actions.act_window,name:cloud_manager.cloud_instance_action
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__instance_ids
+#: model:ir.ui.menu,name:cloud_manager.cloud_instance_menu
+msgid "Instances"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__ipv4_address
+msgid "Ipv4 Address"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__ipv6_address
+msgid "Ipv6 Address"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_backup__message_is_follower
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_instance__message_is_follower
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_module__message_is_follower
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__message_is_follower
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_module__message_is_follower
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone__message_is_follower
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone_record__message_is_follower
+msgid "Is Follower"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_instance__is_self
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_instance_search
+msgid "Is Self"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_backup__write_uid
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_backup_source__write_uid
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_instance__write_uid
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_module__write_uid
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_restore__write_uid
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__write_uid
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_diff__write_uid
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_disk__write_uid
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_module__write_uid
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone__write_uid
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone_record__write_uid
+msgid "Last Updated by"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_backup__write_date
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_backup_source__write_date
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_instance__write_date
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_module__write_date
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_restore__write_date
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__write_date
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_diff__write_date
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_disk__write_date
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_module__write_date
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone__write_date
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone_record__write_date
+msgid "Last Updated on"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_instance__latest_backup_missing
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_instance_search
+msgid "Latest Backup Missing"
+msgstr ""
+
+#. module: cloud_manager
+#. odoo-python
+#: code:addons/cloud_manager/models/cloud_server.py:0
+msgid "Memory %(usage).1f%%"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__memory_available_gb
+msgid "Memory Available GB"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__memory_total_gb
+msgid "Memory Total GB"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__memory_usage_percent
+msgid "Memory Usage (%)"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__memory_used_gb
+msgid "Memory Used GB"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_backup__message_has_error
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_instance__message_has_error
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_module__message_has_error
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__message_has_error
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_module__message_has_error
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone__message_has_error
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone_record__message_has_error
+msgid "Message Delivery error"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_backup__message_ids
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_instance__message_ids
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_module__message_ids
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__message_ids
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_module__message_ids
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone__message_ids
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone_record__message_ids
+msgid "Messages"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_restore__method
+msgid "Method"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_diff__module_id
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_module__module_id
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_server_diff_search
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_server_module_search
+msgid "Module"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.actions.act_window,name:cloud_manager.cloud_server_module_action
+#: model:ir.ui.menu,name:cloud_manager.cloud_server_module_menu
+msgid "Module installations"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.constraint,message:cloud_manager.constraint_cloud_module_uniq_name
+msgid "Module name should be unique!"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.actions.act_window,name:cloud_manager.cloud_module_action
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_instance__module_ids
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__module_ids
+#: model:ir.ui.menu,name:cloud_manager.cloud_module_menu
+msgid "Modules"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_disk__mount
+msgid "Mount"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__my_activity_date_deadline
+msgid "My Activity Deadline"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_backup__name
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_backup_source__name
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_instance__name
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_module__name
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__name
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_diff__name
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_module__name
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone__name
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone_record__name
+msgid "Name"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone__ns_endpoint_id
+#: model_terms:ir.ui.view,arch_db:cloud_manager.dns_zone_search
+msgid "Nameservers"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__activity_date_deadline
+msgid "Next Activity Deadline"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__activity_summary
+msgid "Next Activity Summary"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__activity_type_id
+msgid "Next Activity Type"
+msgstr ""
+
+#. module: cloud_manager
+#. odoo-python
+#: code:addons/cloud_manager/models/cloud_server_diff.py:0
+msgid "No changes."
+msgstr ""
+
+#. module: cloud_manager
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_instance_search
+msgid "Not Is Self"
+msgstr ""
+
+#. module: cloud_manager
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_instance_search
+msgid "Not Protected"
+msgstr ""
+
+#. module: cloud_manager
+#: model_terms:ir.ui.view,arch_db:cloud_manager.dns_zone_record_search
+msgid "Not Proxied"
+msgstr ""
+
+#. module: cloud_manager
+#: model_terms:ir.ui.view,arch_db:cloud_manager.dns_zone_record_search
+msgid "Not Readonly"
+msgstr ""
+
+#. module: cloud_manager
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_server_diff_search
+msgid "Not Updated"
+msgstr ""
+
+#. module: cloud_manager
+#. odoo-python
+#: code:addons/cloud_manager/models/cloud_server_diff.py:0
+msgid "Not allowed to update from this diff."
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_backup__message_needaction_counter
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_instance__message_needaction_counter
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_module__message_needaction_counter
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__message_needaction_counter
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_module__message_needaction_counter
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone__message_needaction_counter
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone_record__message_needaction_counter
+msgid "Number of Actions"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_backup__message_has_error_counter
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_instance__message_has_error_counter
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_module__message_has_error_counter
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__message_has_error_counter
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_module__message_has_error_counter
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone__message_has_error_counter
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone_record__message_has_error_counter
+msgid "Number of errors"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,help:cloud_manager.field_cloud_backup__message_needaction_counter
+#: model:ir.model.fields,help:cloud_manager.field_cloud_instance__message_needaction_counter
+#: model:ir.model.fields,help:cloud_manager.field_cloud_module__message_needaction_counter
+#: model:ir.model.fields,help:cloud_manager.field_cloud_server__message_needaction_counter
+#: model:ir.model.fields,help:cloud_manager.field_cloud_server_module__message_needaction_counter
+#: model:ir.model.fields,help:cloud_manager.field_dns_zone__message_needaction_counter
+#: model:ir.model.fields,help:cloud_manager.field_dns_zone_record__message_needaction_counter
+msgid "Number of messages requiring action"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,help:cloud_manager.field_cloud_backup__message_has_error_counter
+#: model:ir.model.fields,help:cloud_manager.field_cloud_instance__message_has_error_counter
+#: model:ir.model.fields,help:cloud_manager.field_cloud_module__message_has_error_counter
+#: model:ir.model.fields,help:cloud_manager.field_cloud_server__message_has_error_counter
+#: model:ir.model.fields,help:cloud_manager.field_cloud_server_module__message_has_error_counter
+#: model:ir.model.fields,help:cloud_manager.field_dns_zone__message_has_error_counter
+#: model:ir.model.fields,help:cloud_manager.field_dns_zone_record__message_has_error_counter
+msgid "Number of messages with delivery error"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields.selection,name:cloud_manager.selection__cloud_restore__method__oca_migrate
+msgid "OCA Migrate"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields.selection,name:cloud_manager.selection__cloud_instance__state__paused
+msgid "Paused"
+msgstr ""
+
+#. module: cloud_manager
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_server_form
+msgid "Ping SSL renewal"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_instance__protected
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_instance_search
+msgid "Protected"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone_record__proxied
+#: model_terms:ir.ui.view,arch_db:cloud_manager.dns_zone_record_search
+msgid "Proxied"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone_record__readonly
+#: model_terms:ir.ui.view,arch_db:cloud_manager.dns_zone_record_search
+msgid "Readonly"
+msgstr ""
+
+#. module: cloud_manager
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_instance_form
+msgid "Rebuild"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone__record_ids
+msgid "Record"
+msgstr ""
+
+#. module: cloud_manager
+#: model_terms:ir.ui.view,arch_db:cloud_manager.dns_zone_form
+msgid "Records"
+msgstr ""
+
+#. module: cloud_manager
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_instance_form
+msgid "Remove"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields.selection,name:cloud_manager.selection__cloud_instance__state__removed
+msgid "Removed"
+msgstr ""
+
+#. module: cloud_manager
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_instance_form
+msgid "Reset"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__activity_user_id
+msgid "Responsible User"
+msgstr ""
+
+#. module: cloud_manager
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_instance_form
+msgid "Restart"
+msgstr ""
+
+#. module: cloud_manager
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_server_form
+msgid "Restart Agent"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_instance__restart_requested
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_instance_search
+msgid "Restart Requested"
+msgstr ""
+
+#. module: cloud_manager
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_instance_form
+msgid "Restart the Odoo process."
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_instance__restarted
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__restarted
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_instance_search
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_server_search
+msgid "Restarted"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields.selection,name:cloud_manager.selection__cloud_instance__state__restarting
+msgid "Restarting"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.actions.act_window,name:cloud_manager.cloud_restore_action
+#: model:ir.model.fields.selection,name:cloud_manager.selection__cloud_restore__method__restore
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_backup_form
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_backup_list
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_instance_form
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_restore_form
+msgid "Restore"
+msgstr ""
+
+#. module: cloud_manager
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_restore_form
+msgid "Restore backup to instance"
+msgstr ""
+
+#. module: cloud_manager
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_instance_form
+msgid "Restore from backup file"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields.selection,name:cloud_manager.selection__cloud_instance__state__running
+msgid "Running"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__ssl_renewal_ping_now
+msgid "SSL Renewal Ping Now"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__ssl_renewal_pinged
+msgid "SSL Renewal Pinged"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__ssl_renewal_response
+msgid "SSL Renewal Response"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_module__sequence
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_module__sequence
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone_record__sequence
+msgid "Sequence"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_instance__server_id
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_diff__server_id
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_disk__server_id
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_module__server_id
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_instance_search
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_server_diff_search
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_server_module_search
+msgid "Server"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.actions.act_window,name:cloud_manager.cloud_server_diff_action
+msgid "Server Diffs"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.constraint,message:cloud_manager.constraint_cloud_server_uniq_name
+msgid "Server name should be unique."
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.actions.act_window,name:cloud_manager.cloud_server_action
+#: model:ir.ui.menu,name:cloud_manager.cloud_server_menu
+msgid "Servers"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_backup__source_ids
+msgid "Sources"
+msgstr ""
+
+#. module: cloud_manager
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_instance_form
+msgid "Start"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_instance__state
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_instance_search
+msgid "State"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__status_updated
+msgid "Status Updated"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,help:cloud_manager.field_cloud_server__activity_state
+msgid ""
+"Status based on activities\n"
+"Overdue: Due date is already passed\n"
+"Today: Activity date is today\n"
+"Planned: Future activities."
+msgstr ""
+
+#. module: cloud_manager
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_instance_form
+msgid "Stop"
+msgstr ""
+
+#. module: cloud_manager
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_instance_form
+msgid "Sync URLs"
+msgstr ""
+
+#. module: cloud_manager
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_instance_form
+msgid "Sync server and DNS config with the selected URL's"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone_record__ttl
+msgid "TTL"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.constraint,message:cloud_manager.constraint_cloud_instance_odd_gevent_port
+msgid "The Gevent port must be odd!"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.constraint,message:cloud_manager.constraint_cloud_instance_uniq_gevent_port
+msgid "The Gevent port must be unique within the same server!"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.constraint,message:cloud_manager.constraint_cloud_instance_even_http_port
+msgid "The HTTP port must be even!"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.constraint,message:cloud_manager.constraint_cloud_instance_uniq_http_port
+msgid "The HTTP port must be unique within the same server!"
+msgstr ""
+
+#. module: cloud_manager
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_instance_form
+msgid "The database will be dropped and an empty one will created."
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.constraint,message:cloud_manager.constraint_cloud_server_disk_uniq_mount
+msgid "The disk mount must be unique within the same server."
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.constraint,message:cloud_manager.constraint_cloud_instance_uniq_uid
+msgid "The instance uid must be unique!"
+msgstr ""
+
+#. module: cloud_manager
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_instance_form
+msgid ""
+"The runtime environment will be dropped and recreated from the latest image,"
+" but the database will stay intact."
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.constraint,message:cloud_manager.constraint_cloud_server_module_uniq_mod
+msgid "The server already has this module!"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.constraint,message:cloud_manager.constraint_cloud_backup_source_uniq_name
+msgid "The source name should be unique!"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.constraint,message:cloud_manager.constraint_dns_zone_uniq_identifier
+msgid "The zone identifier must be unique!"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.constraint,message:cloud_manager.constraint_dns_zone_uniq_name
+msgid "The zone name must be unique!"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.constraint,message:cloud_manager.constraint_dns_zone_record_uniq_identifier
+msgid "The zone record identifier must be unique!"
+msgstr ""
+
+#. module: cloud_manager
+#. odoo-python
+#: code:addons/cloud_manager/models/cloud_instance.py:0
+msgid "This action can't be performed on self."
+msgstr ""
+
+#. module: cloud_manager
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_instance_form
+msgid "This will overwrite the Odoo config on the server"
+msgstr ""
+
+#. module: cloud_manager
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_instance_form
+msgid ""
+"This will upgrade all the modules where the manifest version number has "
+"increased compared to the database."
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_backup__timestamp
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_backup_search
+msgid "Timestamp"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_disk__total_gb
+msgid "Total GB"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_backup__trigger
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_backup_search
+msgid "Trigger"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone_record__rtype
+#: model_terms:ir.ui.view,arch_db:cloud_manager.dns_zone_record_search
+msgid "Type"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,help:cloud_manager.field_cloud_server__activity_exception_decoration
+msgid "Type of the exception activity on record."
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_instance__uid
+msgid "UID"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_module__url
+msgid "URL"
+msgstr ""
+
+#. module: cloud_manager
+#. odoo-python
+#: code:addons/cloud_manager/models/cloud_instance.py:0
+msgid "Unable to proceed with the action. This server is protected."
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_diff__update_done
+msgid "Update Done"
+msgstr ""
+
+#. module: cloud_manager
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_server_diff_form
+msgid "Update Server"
+msgstr ""
+
+#. module: cloud_manager
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_server_diff_search
+msgid "Updated"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_instance__upgrade
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_instance_form
+msgid "Upgrade"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_disk__usage_percent
+msgid "Usage Percent"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_disk__used_gb
+msgid "Used GB"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_backup__version_control_ids
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_instance__version_control_ids
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_module__version_control_ids
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__version_control_ids
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_module__version_control_ids
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone__version_control_ids
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone_record__version_control_ids
+msgid "Version Control"
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_backup__version_control_count
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_instance__version_control_count
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_module__version_control_count
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server__version_control_count
+#: model:ir.model.fields,field_description:cloud_manager.field_cloud_server_module__version_control_count
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone__version_control_count
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone_record__version_control_count
+msgid "Versions"
+msgstr ""
+
+#. module: cloud_manager
+#. odoo-python
+#: code:addons/cloud_manager/models/cloud_backup.py:0
+msgid "You can only use OCA Migrate method with OpenUpgrade installed."
+msgstr ""
+
+#. module: cloud_manager
+#: model:ir.model.fields,field_description:cloud_manager.field_dns_zone_record__zone_id
+#: model_terms:ir.ui.view,arch_db:cloud_manager.dns_zone_record_search
+msgid "Zone"
+msgstr ""
+
+#. module: cloud_manager
+#: model_terms:ir.ui.view,arch_db:cloud_manager.cloud_instance_form
+msgid ""
+"his will delete everything related to the instance from the server including"
+" the database and all the configurations."
+msgstr ""
+
